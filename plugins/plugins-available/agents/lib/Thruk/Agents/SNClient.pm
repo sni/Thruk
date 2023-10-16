@@ -68,7 +68,7 @@ returns list of Monitoring::Objects for the host / services along with list of o
 
 =cut
 sub get_config_objects {
-    my($self, $c, $data, $checks_config) = @_;
+    my($self, $c, $data, $checks_config, $fresh) = @_;
 
     my $backend  = $data->{'backend'}  || die("missing backend");
     my $hostname = $data->{'hostname'} || die("missing hostname");
@@ -105,7 +105,7 @@ sub get_config_objects {
     my $services = Thruk::Utils::Agents::get_host_agent_services($c, $hostobj);
 
     # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password);
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh);
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
     confess("missing host config") unless $checks_hash->{'_host'};
@@ -165,18 +165,18 @@ sub get_config_objects {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $hostname, $hostobj, $password)
+    get_services_checks($c, $hostname, $hostobj, $password, $fresh)
 
 returns list of Monitoring::Objects for the host / services
 
 =cut
 sub get_services_checks {
-    my($self, $c, $hostname, $hostobj, $password) = @_;
+    my($self, $c, $hostname, $hostobj, $password, $fresh) = @_;
     my $datafile = $c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json';
     my $checks = [];
     if(-r $datafile) {
         my $data = Thruk::Utils::IO::json_lock_retrieve($datafile);
-        $checks = _extract_checks($c, $data->{'inventory'}, $hostname, $password) if $data->{'inventory'};
+        $checks = _extract_checks($c, $data->{'inventory'}, $hostname, $password, $fresh) if $data->{'inventory'};
     }
     return($checks);
 }
@@ -229,7 +229,7 @@ sub get_inventory {
 
 ##########################################################
 sub _extract_checks {
-    my($c, $inventory, $hostname, $password) = @_;
+    my($c, $inventory, $hostname, $password, $fresh) = @_;
     my $checks = [];
 
     # get available modules
@@ -292,6 +292,14 @@ sub _extract_checks {
             '_AGENT_AUTO_CHECK'   => $chk->{'id'},
         };
         $chk->{'svc_conf'}->{'parents'} = $chk->{'parent'} if $chk->{'parent'};
+
+        for my $attr (qw/contacts contactgroups/) {
+            my $data = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'default_'.$attr});
+            $data    = Thruk::Base::comma_separated_list(join(",", @{$data}));
+            if(scalar @{$data} > 0) {
+                $chk->{'svc_conf'}->{$attr} = join(",", @{$data});
+            }
+        }
     }
 
     return $checks;
@@ -336,48 +344,6 @@ sub make_name {
 
 ##########################################################
 
-=head2 check_disable
-
-    check_disable($data, $config)
-
-returns if checks disabled for given config
-
-=cut
-sub check_disable {
-    my($data, $conf) = @_;
-    for my $attr (sort keys %{$conf}) {
-        my $val = $data->{$attr} // '';
-        for my $f (@{Thruk::Base::list($conf->{$attr})}) {
-            my $op = '=';
-            if($f =~ m/^([\!=~]+)\s+(.*)$/mx) {
-                $op = $1;
-                $f  = $2;
-            }
-            if($op eq '=' || $op eq '==') {
-                return 1 if $val eq $f;
-            }
-            elsif($op eq '!=' || $op eq '!==') {
-                return 1 if $val ne $f;
-            }
-            elsif($op eq '~' || $op eq '~~') {
-                ## no critic
-                return 1 if $val =~ m/$f/;
-                ## use critic
-            }
-            elsif($op eq '!~' || $op eq '!~~') {
-                ## no critic
-                return 1 if $val !~ m/$f/;
-                ## use critic
-            } else {
-                die("unknown operator: $op");
-            }
-        }
-    }
-    return(0);
-}
-
-##########################################################
-
 =head2 check_host_match
 
     check_host_match($config)
@@ -387,31 +353,7 @@ returns true if checks is enabled on this host
 =cut
 sub check_host_match {
     my($hosts) = @_;
-    return(check_pattern_match($Thruk::Globals::HOSTNAME, $hosts));
-}
-
-##########################################################
-
-=head2 check_pattern_match
-
-    check_pattern_match($string, $config)
-
-returns true if attribute matches given config
-
-=cut
-sub check_pattern_match {
-    my($str, $pattern) = @_;
-    $pattern = Thruk::Base::list($pattern);
-    return "ANY" if scalar @{$pattern} == 0;
-    for my $p (@{$pattern}) {
-        return "ANY" if $p eq 'ANY';
-        return "ANY" if $p eq '*';
-        return "ANY" if $p eq '.*';
-        ## no critic
-        return $p if $str =~ m/$p/i;
-        ## use critic
-    }
-    return(undef);
+    return(Thruk::Utils::Agents::check_wildcard_match($Thruk::Globals::HOSTNAME, $hosts));
 }
 
 ##########################################################

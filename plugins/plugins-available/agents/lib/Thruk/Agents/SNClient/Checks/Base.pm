@@ -73,7 +73,7 @@ sub get_checks {
                 'args'     => { "filter" => "name=".$net->{'name'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($net),
-                'disabled' => Thruk::Agents::SNClient::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{network}),
+                'disabled' => Thruk::Utils::Agents::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{network}),
             };
         }
     }
@@ -87,7 +87,7 @@ sub get_checks {
                 'args'     => { "drive" => $drive->{'drive'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($drive),
-                'disabled' => Thruk::Agents::SNClient::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{drivesize}),
+                'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{drivesize}),
             };
         }
     }
@@ -138,7 +138,7 @@ sub get_checks {
                 ## use critic
 
                 for my $cf (@{$wanted->{$m}}) {
-                    $user = Thruk::Agents::SNClient::check_pattern_match($p->{'username'}, $cf->{'user'});
+                    $user = Thruk::Utils::Agents::check_wildcard_match($p->{'username'}, $cf->{'user'});
                     next unless $user;
                     $cfg = $cf;
                     last;

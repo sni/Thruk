@@ -24,15 +24,15 @@ Thruk::Utils::Agents - Utils for agents
 
 =head2 get_agent_checks_for_host
 
-    get_agent_checks_for_host($c, $backend, $hostname, $hostobj, [$agenttype])
+    get_agent_checks_for_host($c, $backend, $hostname, $hostobj, [$agenttype], [$fresh])
 
 returns list of checks for this host grouped by type (new, exists, obsolete, disabled) along with the total number of checks.
 
 =cut
 sub get_agent_checks_for_host {
-    my($c, $backend, $hostname, $hostobj, $agenttype) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $fresh) = @_;
     # extract checks and group by type
-    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype);
+    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $fresh);
     my $checks = Thruk::Base::array_group_by($flat, "exists");
     for my $key (qw/new exists obsolete disabled/) {
         $checks->{$key} = [] unless defined $checks->{$key};
@@ -96,13 +96,13 @@ sub update_inventory {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password)
+    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh)
 
 returns list of checks as flat list.
 
 =cut
 sub get_services_checks {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $password) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh) = @_;
     my $checks   = [];
     return($checks) unless $hostname;
 
@@ -114,7 +114,7 @@ sub get_services_checks {
         confess("no peer found by name: ".$backend) unless $peer;
         confess("no remotekey") unless $peer->remotekey();
         confess("need agenttype") unless $agenttype;
-        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password]);
+        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $fresh]);
         return($res[0]);
     }
 
@@ -133,8 +133,8 @@ sub get_services_checks {
     $password = $password || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
 
     my $agent = build_agent($agenttype // $hostobj);
-    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password);
-    set_checks_category($c, $hostobj, $checks);
+    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $fresh);
+    _set_checks_category($c, $hostname, $hostobj, $checks, $type, $fresh);
 
     return($checks);
 }
@@ -316,24 +316,18 @@ sub set_object_model {
 }
 
 ##########################################################
-
-=head2 set_checks_category
-
-    set_checks_category($c, $hostobj, $checks)
-
-sets exists attribute for checks, can be:
- - exists: already exists as services
- - new: does not yet exist as services
- - obsolete: exists as services but not in inventory anymore
- - disabled: exists in inventory but is disabled by user config
-
-=cut
-sub set_checks_category {
-    my($c, $hostobj, $checks) = @_;
+#sets exists attribute for checks, can be:
+# - exists: already exists as services
+# - new: does not yet exist as services
+# - obsolete: exists as services but not in inventory anymore
+# - disabled: exists in inventory but is disabled by user config
+sub _set_checks_category {
+    my($c, $hostname, $hostobj, $checks, $agenttype, $fresh) = @_;
 
     my $services = $hostobj ? get_host_agent_services($c, $hostobj) : {};
-
     my $settings = $hostobj->{'conf'}->{'_AGENT_CONFIG'} ? decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'}) : {};
+
+    my $excludes = $c->config->{'Thruk::Agents'}->{lc($agenttype)}->{'exclude'};
 
     my $existing = {};
     for my $chk (@{$checks}) {
@@ -345,14 +339,19 @@ sub set_checks_category {
             $chk->{'exists'} = 'exists';
             $chk->{'_svc'}   = $svc;
         } else {
-            if($settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {
+            # disabled manually from previous inventory run
+            if(!$fresh && $settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {
+                $chk->{'exists'} = 'disabled';
+            }
+            elsif($chk->{'disabled'}) {
+                # disabled by 'disable' configuration
+                $chk->{'exists'} = 'disabled';
+            }
+            elsif(_is_excluded($hostname, $chk, $excludes)) {
+                # disabled by 'exclude' configuration
                 $chk->{'exists'} = 'disabled';
             } else {
-                if($chk->{'disabled'}) {
-                    $chk->{'exists'} = 'disabled';
-                } else {
-                    $chk->{'exists'} = 'new';
-                }
+                $chk->{'exists'} = 'new';
             }
         }
     }
@@ -539,6 +538,83 @@ sub scan_agent {
 }
 
 ##########################################################
+
+=head2 check_wildcard_match
+
+    check_wildcard_match($string, $config)
+
+returns true if attribute matches given config
+
+=cut
+sub check_wildcard_match {
+    my($str, $pattern) = @_;
+    $pattern = Thruk::Base::list($pattern);
+    return "ANY" if scalar @{$pattern} == 0;
+    for my $raw (@{$pattern}) {
+        my $p = $raw;
+        $p =~ s/\.\*/*/gmx;
+        $p =~ s/\*/.*/gmx;
+        return "ANY" if $p eq 'ANY';
+        return "ANY" if $p eq '.*';
+        ## no critic
+        return $p if $str =~ m/$p/i;
+        ## use critic
+    }
+    return(undef);
+}
+
+##########################################################
+
+=head2 check_disable
+
+    check_disable($data, $config)
+
+returns if checks disabled for given config
+
+=cut
+sub check_disable {
+    my($data, $conf) = @_;
+    for my $attr (sort keys %{$conf}) {
+        my $val = $data->{$attr} // '';
+        return 1 if _check_pattern($val, $conf->{$attr});
+    }
+    return(0);
+}
+
+##########################################################
+sub _check_pattern {
+    my($val, $pattern) = @_;
+    for my $f (@{Thruk::Base::list($pattern)}) {
+        my $op = '=';
+        if($f =~ m/^([\!=~]+)\s+(.*)$/mx) {
+            $op = $1;
+            $f  = $2;
+        }
+        if($op eq '=' || $op eq '==') {
+            return 1 if $val eq $f;
+            return 1 if $f eq 'ANY';
+            return 1 if $f eq '*';
+        }
+        elsif($op eq '!=' || $op eq '!==') {
+            return 1 if $val ne $f;
+        }
+        elsif($op eq '~' || $op eq '~~') {
+            ## no critic
+            return 1 if $val =~ m/$f/;
+            ## use critic
+        }
+        elsif($op eq '!~' || $op eq '!~~') {
+            ## no critic
+            return 1 if $val !~ m/$f/;
+            ## use critic
+        } else {
+            die("unknown operator: $op");
+        }
+    }
+    return(0);
+}
+
+##########################################################
 sub _ensure_command_exists {
     my($c, $name, $data) = @_;
 
@@ -571,6 +647,23 @@ sub _find_agent_modules {
         $mod->import;
     }
     return $modules;
+}
+
+##########################################################
+# returns true if check matches any of the given excludes
+sub _is_excluded {
+    my($hostname, $chk, $excludes) = @_;
+    return unless $excludes;
+    $excludes = Thruk::Base::list($excludes);
+    for my $ex (@{$excludes}) {
+        $ex->{'host'} = "ANY" unless defined $ex->{'host'};
+        if(!_check_pattern($hostname, $ex->{'host'})) {
+            next;
+        }
+        return 1 if _check_pattern($chk->{'name'}, $ex->{'name'});
+        return 1 if _check_pattern($chk->{'id'},   $ex->{'type'});
+    }
+    return(0);
 }
 
 ##########################################################

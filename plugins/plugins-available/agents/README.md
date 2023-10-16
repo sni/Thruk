@@ -35,18 +35,34 @@ For example:
         # override inventory interval
         inventory_interval = 60
 
-        # settings for check_network
+        # set default contact(s)
+        default_contacts = admin, other
+
+        # set default contactgroups(s)
+        default_contactgroups = group, ...
+
+        # disable network checks matching these attributes
         <disable network>
           enabled != true
           name    !~ ^(en|br)
         </disable>
 
-        # settings for check_drivesize
+        # disable check_drivesize checks matching these attributes
         <disable drivesize>
-          fstype  !~ ^(|tracefs|securityfs|debugfs|configfs|pstorefs|fusectl|cgroup2fs|bpf|efivarfs|sysfs|fuseblk|rpc_pipefs|nsfs|ramfs|binfmt_misc|proc|nfs|devpts|mqueue|hugetlbfs)$
-          drive   !~ ^(/run/|/dev|/boot/efi)
-          mounted = 1
+          fstype  ~ ^(tracefs|securityfs|debugfs|configfs|pstorefs|fusectl|cgroup2fs|bpf|efivarfs|sysfs|fuseblk|rpc_pipefs|nsfs|ramfs|binfmt_misc|proc|nfs|devpts|mqueue|hugetlbfs)$
+          drive   ~ ^(/run/|/dev|/boot/efi|/proc|/sys)
+          mounted = 0
         </disable>
+
+        # disable services by name or type
+        <exclude>
+          #name = check_users   # name string match
+          #name ~ net lo        # name regex match
+          #type = df./proc      # type string match
+          #type ~ ^extscript\.  # type regex, disable all external scripts by default
+          #host !~ \.win\.      # apply this exclude only to specific hosts, only hosts not matching ".win."
+          #host ~ ^l            # apply this exclude only hosts starting with an "l"
+        </exclude>
 
         # include services in discovery
         <service>

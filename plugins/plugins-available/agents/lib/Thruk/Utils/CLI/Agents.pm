@@ -21,7 +21,8 @@ Available commands are:
   - help                    print help and exit
   - check  | -C   <host>    run checks, ex. inventory
   - show   | -S   <host>    show checks for host
-  - add    | -I   <host>    add/inventory new host
+  - add    | -I   <host>    add/inventory new/existing host
+  - update | -II  <host>    add/inventory new/existing host and freshly apply excludes
   - rm     | -D   <host>    delete existing host
   - reload | -R             reload monitoring core
 
@@ -78,7 +79,9 @@ sub cmd {
         'show'        => undef,
         'edit'        => undef,
         'remove'      => undef,
+        'fresh'       => undef,
     };
+    $opt->{'fresh'} = 1 if Thruk::Base::array_contains('-II', $commandoptions);
     Getopt::Long::Configure('no_ignore_case');
     Getopt::Long::Configure('bundling');
     Getopt::Long::Configure('pass_through');
@@ -92,6 +95,7 @@ sub cmd {
        "C|check"      => \$opt->{'check'},
        "R|reload"     => \$opt->{'reload'},
        "I|add"        => \$opt->{'add'},
+       "II|update"    => \$opt->{'fresh'},
        "E|edit"       => \$opt->{'edit'},
        "D|remove"     => \$opt->{'remove'},
        "ip=s"         => \$opt->{'address'},
@@ -102,6 +106,7 @@ sub cmd {
     my $action;
     if($opt->{'add'})    { $action = "add"; }
     if($opt->{'edit'})   { $action = "edit"; }
+    if($opt->{'fresh'})  { $action = "add"; }
     if($opt->{'show'})   { $action = "show"; }
     if($opt->{'remove'}) { $action = "rm"; }
     if($opt->{'check'})  { $action = "check"; if($commandoptions->[0] ne 'inventory') { unshift(@{$commandoptions}, 'inventory') } }
@@ -287,7 +292,7 @@ sub _run_add {
 
     my $class   = Thruk::Utils::Agents::get_agent_class($data->{'type'});
     my $agent   = $class->new();
-    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config);
+    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, $opt->{'fresh'});
     my @result;
     for my $obj (@{$objects}) {
         my $file = $obj->{'file'};
@@ -477,7 +482,7 @@ sub _get_checks {
         }
     }
 
-    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type);
+    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, $opt->{'fresh'});
     return($checks, $checks_num, $hst->{'peer_key'} ? $hst : undef, $hostobj, $data);
 }
 
