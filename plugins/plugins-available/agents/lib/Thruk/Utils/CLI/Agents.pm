@@ -179,7 +179,7 @@ sub _run_show {
     return("something went wrong\n", 3) unless $checks;
 
     if(!$hst && !$hostobj) {
-        return(sprintf("no host %s (with agent checks) found\n", $hostname), 3)
+        return(sprintf("no host %s (with agent checks) found\n", $hostname), 3);
     }
     if(!$hst && $hostobj) {
         _info("host %s has not yet been activated (reload core with -R)\n", $hostname);
@@ -235,9 +235,7 @@ sub _run_add {
     my $orig_checks   = _build_checks_config($checks);
     my $checks_config = _build_checks_config($checks);
     if($opt->{'interactive'}) {
-        my @lines = (
-            "# set checks into desired states (legend is at the end of the file):", ""
-        );
+        my @lines = ("# set checks into desired states (legend is at the end of the file):", "");
         for my $t (qw/new exists obsolete disabled/) {
             for my $chk (@{$checks->{$t}}) {
                 $chk->{'type'} = "n" if $t eq 'new';

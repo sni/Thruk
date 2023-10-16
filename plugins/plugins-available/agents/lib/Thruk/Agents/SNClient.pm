@@ -239,7 +239,7 @@ sub _extract_checks {
         $mod =~ s/\//::/gmx;
         $mod =~ s/\.pm$//gmx;
         $mod->import;
-        push @{$checks}, @{$mod->get_checks($c, $inventory, $hostname, $password)}
+        push @{$checks}, @{$mod->get_checks($c, $inventory, $hostname, $password)};
     }
 
     # compute host configuration
@@ -298,12 +298,28 @@ sub _extract_checks {
 }
 
 ##########################################################
+
+=head2 make_info
+
+    make_info($data)
+
+returns check info as string
+
+=cut
 sub make_info {
     my($data) = @_;
-    return(Thruk::Utils::dump_params($data, 5000, 0))
+    return(Thruk::Utils::dump_params($data, 5000, 0));
 }
 
 ##########################################################
+
+=head2 make_name
+
+    make_name($template, $macros)
+
+returns check name based on tempalte
+
+=cut
 sub make_name {
     my($tmpl, $macros) = @_;
     my $name = $tmpl;

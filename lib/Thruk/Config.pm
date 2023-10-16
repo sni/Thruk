@@ -9,9 +9,9 @@ use Cwd ();
 use POSIX ();
 
 use Thruk::Base ();
+use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Timer qw/timing_breakpoint/;
 
 =head1 NAME
 
