@@ -2150,7 +2150,8 @@ t/scenarios/agents-plugin/omd/playbook.yml
 t/scenarios/agents-plugin/omd/thruk_local.conf
 t/scenarios/agents-plugin/README
 t/scenarios/agents-plugin/t/controller_agents.t
-t/scenarios/agents-plugin/t/local/livestatus-backend/ls.t
+t/scenarios/agents-plugin/t/local/livestatus-backend/01-controller-agents.t
+t/scenarios/agents-plugin/t/local/livestatus-backend/02-cli-agents.t
 t/scenarios/agents-plugin/t/local/omd/omd.t
 t/scenarios/agents-plugin/t/local_test.sh
 t/scenarios/auth/docker-compose.yml

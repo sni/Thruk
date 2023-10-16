@@ -29,6 +29,7 @@ Available commands are:
   --all             show all items   (available in show mode)
   -P | --password   set password     (available in add mode)
   -p | --port       set tcp port     (available in add mode)
+       --ip         set ip address   (available in add mode)
 
 
 =back
@@ -70,6 +71,7 @@ sub cmd {
         'interactive' => undef,
         'port'        => undef,
         'password'    => undef,
+        'address'     => undef,
         'type'        => undef,
         'reload'      => undef,
         'check'       => undef,
@@ -92,6 +94,7 @@ sub cmd {
        "I|add"        => \$opt->{'add'},
        "E|edit"       => \$opt->{'edit'},
        "D|remove"     => \$opt->{'remove'},
+       "ip=s"         => \$opt->{'address'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -461,7 +464,7 @@ sub _get_checks {
         'section'  => $opt->{'section'},
         'password' => $opt->{'password'},
         'port'     => $port,
-        'ip'       => $hst->{'address'},
+        'ip'       => $opt->{'address'} || $hst->{'address'},
     };
 
     if($update) {
