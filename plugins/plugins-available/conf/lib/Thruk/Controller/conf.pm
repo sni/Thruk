@@ -1285,7 +1285,7 @@ sub _apply_config_changes {
         return unless Thruk::Utils::check_csrf($c);
         if(defined $c->stash->{'peer_conftool'}->{'obj_check_cmd'}) {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
-            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_check($c)',
+            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::config_check($c, "'.$c->stash->{'param_backend'}.'")',
                                                message => 'please stand by while configuration is being checked...',
                                         });
             return;
@@ -1304,7 +1304,7 @@ sub _apply_config_changes {
         }
         if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
-            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Controller::conf::_config_reload($c)',
+            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::config_reload($c, "'.$c->stash->{'param_backend'}.'")',
                                                message => 'please stand by while configuration is being reloaded...',
                                         });
             return;
@@ -2709,57 +2709,13 @@ sub _list_references {
 ##########################################################
 sub _config_check {
     my($c) = @_;
-    $c->stats->profile(begin => "conf::_config_check");
-    my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
-    $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
-    my $rc = 0;
-    if($c->{'obj_db'}->is_remote()) {
-        if($c->{'obj_db'}->remote_config_check($c)) {
-            Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
-            $rc = 1;
-        } else {
-            Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
-        }
-    } else {
-        if(_cmd($c, $obj_check_cmd)) {
-            Thruk::Utils::set_message( $c, 'success_message', 'config check successfull' );
-            $rc = 1;
-        } else {
-            Thruk::Utils::set_message( $c, 'fail_message', 'config check failed!' );
-        }
-    }
-    _nice_check_output($c);
-
-    $c->stash->{'needs_commit'}      = $c->{'obj_db'}->{'needs_commit'};
-    $c->stash->{'last_changed'}      = $c->{'obj_db'}->{'last_changed'};
-    $c->stats->profile(end => "conf::_config_check");
-    return($rc, $c->stash->{'original_output'});
+    return(Thruk::Utils::Conf::config_check($c, $c->stash->{'param_backend'}));
 }
 
 ##########################################################
 sub _config_reload {
     my($c) = @_;
     return(Thruk::Utils::Conf::config_reload($c, $c->stash->{'param_backend'}));
-}
-
-##########################################################
-sub _nice_check_output {
-    my($c) = @_;
-    $c->stash->{'original_output'} = $c->stash->{'output'};
-    $c->stash->{'output'} =~ s/^Website:.*?\n//gmx;
-    $c->stash->{'output'} =~ s/^Copyright.*?\n//gmx;
-    $c->stash->{'output'} =~ s/^License.*?\n\n//gmx;
-    $c->stash->{'output'} =~ s/(Warning\s*:.*)$/<span class="textHINT font-bold">$1<\/span>/gmx;
-    $c->stash->{'output'} =~ s/(Error\s*:.*)$/<span class="textALERT font-bold">$1<\/span>/gmx;
-    $c->stash->{'output'} =~ s/(CONFIG\s+ERROR.*)$/<span class="textALERT font-bold">$1<\/span>/gmx;
-    $c->stash->{'output'} =~ s/(\(config\s+file\s+'(.*?)',\s+starting\s+(?:on|at)\s+line\s+(\d+)\))/<a class="link dotted" href="conf.cgi?sub=objects&amp;file=$2&amp;line=$3">$1<\/a>/gmx;
-    $c->stash->{'output'} =~ s/\s+in\s+file\s+'(.*?)'\s+on\s+line\s+(\d+)/ in file <a class="link dotted" href="conf.cgi?sub=objects&amp;type=file&amp;file=$1&amp;line=$2">'$1' on line $2<\/a>/gmx;
-    $c->stash->{'output'} =~ s/\s+in\s+(\w+)\s+'(.*?)'/ in $1 '<a class="link dotted" href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>'/gmx;
-    $c->stash->{'output'} =~ s/Warning:\s+(\w+)\s+'(.*?)'\s+/Warning: $1 '<a class="link dotted textHINT" href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
-    $c->stash->{'output'} =~ s/Error:\s+(\w+)\s+'(.*?)'\s+/Error: $1 '<a class="link dotted textALERT" href="conf.cgi?sub=objects&amp;type=$1&amp;data.name=$2">$2<\/a>' /gmx;
-    $c->stash->{'output'} =~ s/Error\s*:\s*the\s+service\s+([^\s]+)\s+on\s+host\s+'([^']+)'/Error: the service <a class="link dotted textALERT" href="conf.cgi?sub=objects&amp;type=service&amp;data.name=$1&amp;data.name2=$2">$1<\/a> on host '$2'/gmx;
-    $c->stash->{'output'} = "<pre>".$c->stash->{'output'}."</pre>";
-    return;
 }
 
 ##########################################################
