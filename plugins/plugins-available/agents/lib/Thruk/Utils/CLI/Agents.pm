@@ -460,7 +460,7 @@ sub _check_inventory {
         }
         return(sprintf("WARNING - %s new check%s found|%s\n%s\n",
             scalar @{$checks->{'new'}},
-            (scalar @{$checks->{'new'}} != 1 's' : ''),
+            (scalar @{$checks->{'new'}} != 1 ? 's' : ''),
             $perfdata,
             join("\n", @details),
         ), 2);

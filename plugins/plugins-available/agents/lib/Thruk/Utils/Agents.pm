@@ -209,7 +209,7 @@ sub build_agent {
     my($host) = @_;
     my $c = $Thruk::Globals::c;
 
-    my($agenttype, $hostdata);
+    my($agenttype, $hostdata, $section);
     if(!ref $host) {
         $agenttype = $host;
         $hostdata  = {};
@@ -217,10 +217,12 @@ sub build_agent {
     elsif($host->{'conf'}) {
         # host config object
         $agenttype = $host->{'conf'}->{'_AGENT'};
+        $section   = $host->{'conf'}->{'_AGENT_SECTION'};
         $hostdata  = $host->{'conf'};
     } else {
         my $vars  = Thruk::Utils::get_custom_vars($c, $host);
         $agenttype = $vars->{'AGENT'};
+        $section   = $vars->{'AGENT_SECTION'};
         $hostdata  = $host;
     }
     my $class = get_agent_class($agenttype);
@@ -228,9 +230,10 @@ sub build_agent {
 
     my $settings = $agent->settings();
     # merge some attributes to top level
-    for my $key (qw/type section/) {
+    for my $key (qw/type/) {
         $agent->{$key} = $settings->{$key} // '';
     }
+    $agent->{'section'} = $section || $settings->{'section'} // '';
 
     if($c->stash->{'theme'} =~ m/dark/mxi) {
         $agent->{'icon'} = $settings->{'icon_dark'};
