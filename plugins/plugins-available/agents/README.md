@@ -44,7 +44,8 @@ For example:
         # disable network checks matching these attributes
         <disable network>
           enabled != true
-          name    !~ ^(en|br)
+          name    ~ ^(lo|.*Loopback)
+          flags   ~ loopback
         </disable>
 
         # disable check_drivesize checks matching these attributes
@@ -52,6 +53,7 @@ For example:
           fstype  ~ ^(tracefs|securityfs|debugfs|configfs|pstorefs|fusectl|cgroup2fs|bpf|efivarfs|sysfs|fuseblk|rpc_pipefs|nsfs|ramfs|binfmt_misc|proc|nfs|devpts|mqueue|hugetlbfs)$
           drive   ~ ^(/run/|/dev|/boot/efi|/proc|/sys)
           mounted = 0
+          drive   =
         </disable>
 
         # disable services by name or type

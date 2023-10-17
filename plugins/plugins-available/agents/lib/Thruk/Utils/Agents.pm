@@ -209,7 +209,7 @@ sub build_agent {
     my($host) = @_;
     my $c = $Thruk::Globals::c;
 
-    my($agenttype, $hostdata, $section);
+    my($agenttype, $hostdata, $section, $port);
     if(!ref $host) {
         $agenttype = $host;
         $hostdata  = {};
@@ -218,11 +218,13 @@ sub build_agent {
         # host config object
         $agenttype = $host->{'conf'}->{'_AGENT'};
         $section   = $host->{'conf'}->{'_AGENT_SECTION'};
+        $port      = $host->{'conf'}->{'_AGENT_PORT'};
         $hostdata  = $host->{'conf'};
     } else {
         my $vars  = Thruk::Utils::get_custom_vars($c, $host);
         $agenttype = $vars->{'AGENT'};
         $section   = $vars->{'AGENT_SECTION'};
+        $port      = $vars->{'AGENT_PORT'};
         $hostdata  = $host;
     }
     my $class = get_agent_class($agenttype);
@@ -234,6 +236,7 @@ sub build_agent {
         $agent->{$key} = $settings->{$key} // '';
     }
     $agent->{'section'} = $section || $settings->{'section'} // '';
+    $agent->{'port'}    = $port    || $settings->{'default_port'} // '';
 
     if($c->stash->{'theme'} =~ m/dark/mxi) {
         $agent->{'icon'} = $settings->{'icon_dark'};
@@ -471,7 +474,7 @@ returns name with special characters replaced
 =cut
 sub to_id {
     my($name) = @_;
-    $name =~ s/[^a-zA-Z0-9._\-\/]/_/gmx;
+    $name =~ s/[^a-zA-Z0-9:._\-\/]/_/gmx;
     return($name);
 }
 

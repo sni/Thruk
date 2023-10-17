@@ -200,11 +200,16 @@ sub _run_list {
     for my $hst (@{$hosts}) {
         next if($filter && $hst->{'name'} !~ m/$filter/mx);
         my $agent = Thruk::Utils::Agents::build_agent($hst);
+        my $address = $hst->{'address'};
+        if($agent->{'port'} ne $agent->settings()->{'default_port'}) {
+            $address .= ':'.$agent->{'port'};
+        }
         my $row = {
             'host_name' => $hst->{'name'},
             'site'      => Thruk::Utils::Filter::peer_name($hst),
             'section'   => $agent->{'section'},
             'agent'     => $agent->{'type'},
+            'address'   => $address,
         };
         if($versions->{$hst->{'name'}}) {
             my $v = $versions->{$hst->{'name'}}->{'plugin_output'};
@@ -226,6 +231,7 @@ sub _run_list {
         keys => [
                     ['Section',  'section'],
                     ['Hostname', 'host_name'],
+                    ['Address',  'address'],
                     ['Site',     'site'],
                     ['Agent',    'agent'],
                     ['Version',  'version'],
@@ -537,6 +543,10 @@ sub _get_checks {
         'port'     => $port,
         'ip'       => $opt->{'address'} || $hst->{'address'},
     };
+    if($hostobj) {
+        $data->{'ip'}       = $hostobj->{'conf'}->{'address'}         unless $data->{'ip'};
+        $data->{'password'} = $hostobj->{'conf'}->{'_AGENT_PASSWORD'} unless $data->{'password'};
+    }
 
     if($update) {
         if($hostobj) {

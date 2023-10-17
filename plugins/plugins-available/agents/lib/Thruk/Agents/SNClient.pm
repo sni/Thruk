@@ -210,6 +210,7 @@ sub get_inventory {
     };
     Thruk::Utils::Agents::check_for_check_commands($c, [$cmd]);
 
+    _debug("scan command: %s!%s", $command, $args);
     my $output = $c->{'obj_db'}->get_plugin_preview($c,
                                         $command,
                                         $args,
@@ -285,6 +286,8 @@ sub _extract_checks {
                 }
             }
         }
+
+        $chk->{'name'} =~ s|\\$||gmx; # remove trailing slashes from service names, in windows drives
 
         $chk->{'svc_conf'} = {
             'host_name'           => $hostname,
