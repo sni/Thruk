@@ -458,8 +458,9 @@ sub _check_inventory {
         for my $chk (@{$checks->{'new'}}) {
             push @details, " - ".$chk->{'name'};
         }
-        return(sprintf("WARNING - %s new checks found|%s\n%s\n",
+        return(sprintf("WARNING - %s new check%s found|%s\n%s\n",
             scalar @{$checks->{'new'}},
+            (scalar @{$checks->{'new'}} != 1 's' : ''),
             $perfdata,
             join("\n", @details),
         ), 2);
