@@ -77,14 +77,14 @@ sub get_config_objects {
     my $password = $data->{'password'} // '';
     my $port     = $data->{'port'}     || $settings->{'default_port'};
 
-    my $objects = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
+    my $filename = $section ? sprintf('agents/%s/%s.cfg', $section, $hostname) : sprintf('agents/%s.cfg', $hostname);
+    my $objects  = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
     my $hostobj;
     if(!$objects || scalar @{$objects} == 0) {
         # create new one
         $hostobj = Monitoring::Config::Object->new( type    => 'host',
                                                    coretype => $c->{'obj_db'}->{'coretype'},
                                                 );
-        my $filename = $section ? sprintf('agents/%s/%s.cfg', $section, $hostname) : sprintf('agents/%s.cfg', $hostname);
         my $file = Thruk::Controller::conf::get_context_file($c, $hostobj, $filename);
         die("creating file failed") unless $file;
         $hostobj->set_file($file);
@@ -127,7 +127,6 @@ sub get_config_objects {
             $svc = Monitoring::Config::Object->new( type     => 'service',
                                                     coretype => $c->{'obj_db'}->{'coretype'},
                                                     );
-            my $filename = $section ? sprintf('agents/%s/%s.cfg', $section, $hostname) : sprintf('agents/%s.cfg', $hostname);
             my $file = Thruk::Controller::conf::get_context_file($c, $svc, $filename);
             die("creating file failed") unless $file;
             $svc->set_file($file);
@@ -145,6 +144,10 @@ sub get_config_objects {
         }
         next unless $type eq 'on';
 
+        # always set right file name
+        my $file = Thruk::Controller::conf::get_context_file($c, $svc, $filename);
+        die("creating file failed") unless $file;
+        $svc->set_file($file);
         $svc->{'conf'} = $chk->{'svc_conf'};
 
         push @list, $svc;
