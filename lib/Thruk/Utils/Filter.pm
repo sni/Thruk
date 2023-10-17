@@ -1894,8 +1894,8 @@ returns number as used in human performance data table
 =cut
 sub format_perf_number {
     my($number, $unit, $always_show_unit) = @_;
-    return $number unless($number && $number =~ m/^[\d\.]+/mx);
-    if($number != 0 && $unit eq "B") {
+    return $number unless($number && $number =~ m/^\-?[\d\.]+$/mx);
+    if($number ne "0" && $unit eq "B") {
         my($reduced_number, $reduced_unit) = Thruk::Utils::reduce_number($number, $unit);
         if($always_show_unit || $reduced_unit ne $unit) {
             return(CORE::sprintf("%.1f%s", $reduced_number, $reduced_unit));
