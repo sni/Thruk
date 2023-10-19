@@ -493,7 +493,7 @@ sub _get_backend {
 
     my($backends) = $c->db->select_backends();
     if(@{$backends} == 1) {
-        return($backends);
+        return($backends->[0]);
     }
 
     die("must specify backend (-b) if there are more than one.");
