@@ -196,6 +196,7 @@ returns json structure from inventory api call.
 sub get_inventory {
     my($self, $c, $address, $hostname, $password, $port) = @_;
 
+    die("no password supplied") unless $password;
     my $command  = "check_snclient";
     my $args     = sprintf("%s -p '%s' -r -u 'https://%s:%d/api/v1/inventory'",
         _check_nsc_web_extra_options($c),
