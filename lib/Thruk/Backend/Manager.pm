@@ -2825,7 +2825,7 @@ returns remote call result
 =cut
 
 sub rpc {
-    my($self, $backend, $function, $args) = @_;
+    my($self, $backend, $function, $args, $keep_su) = @_;
     my $c = $Thruk::Globals::c;
     if(ref $backend eq '') {
         $backend = $self->get_peer_by_key($backend);
@@ -2839,7 +2839,7 @@ sub rpc {
     _debug(sprintf("[%s] rpc: %s", $backend->{'name'}, $function));
     my @res;
     eval {
-        @res = $backend->{'class'}->rpc($c, $function, $args);
+        @res = $backend->{'class'}->rpc($c, $function, $args, $keep_su);
     };
     my $err = $@;
     if($err) {

@@ -23,6 +23,9 @@ For example:
 
     <Component Thruk::Agents>
       <snclient>
+        # use a default backend if there are multiple
+        default_backend = LOCAL
+
         # set a default password macro, ex.: $USER5$
         default_password = $USER5$
 

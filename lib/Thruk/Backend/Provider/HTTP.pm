@@ -818,10 +818,10 @@ run remote call
 
 =cut
 sub rpc {
-    my($self, $c, $function, $args) = @_;
+    my($self, $c, $function, $args, $keep_su) = @_;
     if(ref $args ne 'ARRAY') { confess("arguments must be an array"); }
     $args = Thruk::Utils::encode_arg_refs($args);
-    my @res = @{$self->_req($function, $args, { auth => $c->stash->{'remote_user'} })};
+    my @res = @{$self->_req($function, $args, { auth => $c->stash->{'remote_user'}, keep_su  => $keep_su })};
     return($res[0]);
 }
 

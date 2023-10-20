@@ -45,13 +45,13 @@ sub get_agent_checks_for_host {
 
 =head2 update_inventory
 
-    update_inventory($c, $hostname, [$hostobj])
+    update_inventory($c, $hostname, [$hostobj], [$opt])
 
 returns $data and $err
 
 =cut
 sub update_inventory {
-    my($c, $hostname, $hostobj) = @_;
+    my($c, $hostname, $hostobj, $opt) = @_;
 
     if(!$hostobj) {
         my $objects = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
@@ -69,8 +69,8 @@ sub update_inventory {
 
     my $address   = $hostobj->{'conf'}->{'address'};
     my $type      = $hostobj->{'conf'}->{'_AGENT'}          // default_agent_type($c);
-    my $password  = $hostobj->{'conf'}->{'_AGENT_PASSWORD'} || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
-    my $port      = $hostobj->{'conf'}->{'_AGENT_PORT'}     // default_port($type);
+    my $password  = $opt->{'password'} || $hostobj->{'conf'}->{'_AGENT_PASSWORD'} || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
+    my $port      = $opt->{'port'}     || $hostobj->{'conf'}->{'_AGENT_PORT'}     // default_port($type);
 
     my $class = Thruk::Utils::Agents::get_agent_class($type);
     my $agent = $class->new({});
@@ -114,7 +114,7 @@ sub get_services_checks {
         confess("no peer found by name: ".$backend) unless $peer;
         confess("no remotekey") unless $peer->remotekey();
         confess("need agenttype") unless $agenttype;
-        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $fresh]);
+        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $fresh], 1);
         return($res[0]);
     }
 
@@ -506,7 +506,7 @@ sub scan_agent {
         confess("no peer found by name: ".$backend) unless $peer;
         confess("no remotekey") unless $peer->remotekey();
         $params->{'backend'} = $peer->remotekey();
-        my @res = $c->db->rpc($backend, __PACKAGE__."::scan_agent", [$c, $params]);
+        my @res = $c->db->rpc($backend, __PACKAGE__."::scan_agent", [$c, $params], 1);
         return($res[0]);
     }
 

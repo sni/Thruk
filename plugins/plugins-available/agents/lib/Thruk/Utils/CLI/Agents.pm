@@ -496,6 +496,22 @@ sub _get_backend {
         return($backends->[0]);
     }
 
+    my $type            = Thruk::Utils::Agents::default_agent_type($c);
+    my $default_backend = $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_backend'};
+    if($default_backend) {
+        if($default_backend eq 'LOCAL') {
+            $peers = $c->db->get_local_peers();
+            if(@{$peers} == 1) {
+                return($peers->[0]->peer_key());
+            }
+        } else {
+            my $peer = $c->db->get_peer_by_key($default_backend);
+            if($peer) {
+                return($peer->peer_key());
+            }
+        }
+    }
+
     die("must specify backend (-b) if there are more than one.");
 }
 
@@ -550,7 +566,7 @@ sub _get_checks {
 
     if($update) {
         if($hostobj) {
-            my($inv, $err) = Thruk::Utils::Agents::update_inventory($c, $hostname, $hostobj);
+            my($inv, $err) = Thruk::Utils::Agents::update_inventory($c, $hostname, $hostobj, $data);
             die($err) if $err;
         } else {
             my $err     = Thruk::Utils::Agents::scan_agent($c, $data);
