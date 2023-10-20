@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 74;
+plan tests => 82;
 
 ###########################################################
 # test thruks script path
@@ -24,7 +24,7 @@ TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -I host-ls --ip=127.
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -I host-ls', like => ['/no\ new\ checks\ found\ for\ host\ host-ls/'] });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -S host-ls', like => ['/agent inventory/'], errlike => ['/host\ host-ls\ has\ not\ yet\ been\ activated/'] });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -R', like => ['/Reloading\ naemon\ configuration/'] });
-TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/host-ls/', '/testsection/'] });
+TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/host-ls/', '/testsection/'], waitfor => 'testsection' });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -I host-ls', like => ['/no\ new\ checks\ found\ for\ host\ host-ls/'] });
 TestUtils::test_page( url => '/thruk/cgi-bin/status.cgi', like => ['agent inventory', 'agent version', 'net eth0'] );
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['host-ls'] );
@@ -34,6 +34,7 @@ TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/host
 # clean up again
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -yD host-ls', like => ['/host\ host-ls\ removed\ successsfully/'] });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -R', like => ['/Reloading\ naemon\ configuration/'] });
+TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/no agents found/'], waitfor => 'no\ agents\ found' });
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', unlike => ['host-ls'] );
 
 ###########################################################
