@@ -70,7 +70,7 @@ sub update_inventory {
     my $address   = $hostobj->{'conf'}->{'address'};
     my $type      = $hostobj->{'conf'}->{'_AGENT'}          // default_agent_type($c);
     my $password  = $hostobj->{'conf'}->{'_AGENT_PASSWORD'} || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
-    my $port      = $hostobj->{'conf'}->{'_AGENT_PORT'};
+    my $port      = $hostobj->{'conf'}->{'_AGENT_PORT'}     // default_port($type);
 
     my $class = Thruk::Utils::Agents::get_agent_class($type);
     my $agent = $class->new({});
