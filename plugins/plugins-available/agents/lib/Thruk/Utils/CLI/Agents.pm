@@ -546,9 +546,10 @@ sub _get_checks {
         }
     }
     my $backend = $hst->{'peer_key'} // _get_backend($c);
+    my $vars    = Thruk::Utils::get_custom_vars($c, $hst);
 
-    my $type    = $opt->{'type'} // $hst->{'_AGENT'} // Thruk::Utils::Agents::default_agent_type($c);
-    $port       = $port // $opt->{'port'} // Thruk::Utils::Agents::default_port($type);
+    my $type    = $opt->{'type'} // $vars->{'AGENT'} // Thruk::Utils::Agents::default_agent_type($c);
+    $port       = $port // $opt->{'port'} // $vars->{'AGENT_PORT'} // Thruk::Utils::Agents::default_port($type);
 
     my $data = {
         'type'     => $type,
