@@ -7,7 +7,14 @@
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
       - diffutils
+      - expect  # contains unbuffer
 - lineinfile:
     path: /etc/locale.conf
     regexp: '^LANG='
     line: 'LANG=C.utf8'
+- name: install local_test.sh
+  copy:
+    src: "{{ role_path }}/files/local_test.sh"
+    dest: "/usr/local/bin/local_test.sh"
+    mode: "755"
+

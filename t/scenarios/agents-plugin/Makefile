@@ -17,9 +17,9 @@ wait_start_failed_extra:
 	-curl -kv http://127.0.0.3:60080/demo/thruk/cgi-bin/login.cgi
 
 extra_test:
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /test/t/local_test.sh 0 /test/t/local/omd/*.t
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root livestatus-backend sudo -iu demo /test/t/local_test.sh 0 /test/t/local/livestatus-backend/*.t
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /usr/local/bin/local_test.sh 0 /test/t/local/omd/*.t
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root livestatus-backend sudo -iu demo /usr/local/bin/local_test.sh 0 /test/t/local/livestatus-backend/*.t
 
 extra_test_verbose:
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /test/t/local_test.sh 1 /test/t/local/omd/*.t
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root livestatus-backend sudo -iu demo /test/t/local_test.sh 1 /test/t/local/livestatus-backend/*.t
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /usr/local/bin/local_test.sh 1 /test/t/local/omd/*.t
+	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root livestatus-backend sudo -iu demo /usr/local/bin/local_test.sh 1 /test/t/local/livestatus-backend/*.t
