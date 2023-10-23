@@ -149,9 +149,9 @@ sub get_checks {
             my $id       = 'proc.'.Thruk::Utils::Agents::to_id($match.'_'.($username || 'ANY'));
             next if $already_checked->{$id};
             $already_checked->{$id} = 1;
-            my $filter = [ "filter='command_line ~~ ".$match."'" ];
+            my $filter = [ "filter='command_line ~~ /".$match."/'" ];
             if($user ne 'ANY') {
-                push @{$filter}, "filter='username ~~ ".$user."'";
+                push @{$filter}, "filter='username ~~ /".$user."/'";
             }
             push @{$checks}, {
                 'id'       => $id,
