@@ -323,6 +323,7 @@ sub test_page {
 
         if(!$found) {
             fail("content did not match $waitfor within $waitmax seconds") or diag($opts->{'url'});
+            bail_out_req("waitfor failed, bailing out", $request, 1);
         } else {
             # text that should appear
             if(defined $opts->{'like'}) {
@@ -782,6 +783,7 @@ sub test_command {
         if(!$found) {
             fail("content ".$expr." did not occur within 120 seconds");
             diag("command waitfor failed:\n".$stdout."\n"._caller_info());
+            BAIL_OUT("waitfor failed, bailing out");
         }
     }
 
