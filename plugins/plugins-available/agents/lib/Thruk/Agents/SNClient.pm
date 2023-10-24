@@ -119,6 +119,7 @@ sub get_config_objects {
     for my $id (sort keys %{$checks_hash}) {
         next if $id eq '_host';
         my $type = $checks_config->{'check.'.$id} // 'off';
+        my $args = $checks_config->{'args.'.$id}  // '';
         my $chk  = $checks_hash->{$id};
         confess("no name") unless $chk->{'name'};
         my $svc = $services->{$chk->{'name'}};
@@ -142,13 +143,15 @@ sub get_config_objects {
             push @remove, $svc if $svc;
             push @{$settings->{'disabled'}}, $id;
         }
-        next unless $type eq 'on';
+        next unless($type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//''));
 
         # always set right file name
         my $file = Thruk::Controller::conf::get_context_file($c, $svc, $filename);
         die("creating file failed") unless $file;
         $svc->set_file($file);
         $svc->{'conf'} = $chk->{'svc_conf'};
+        $chk->{'svc_conf'}->{'_AGENT_ARGS'} = $args;
+        $chk->{'svc_conf'}->{'check_command'} .= " ".$args if $args;
 
         push @list, $svc;
     }
@@ -288,6 +291,7 @@ sub _extract_checks {
             }
         }
 
+        $chk->{'name'} =~ s|`~!$%^&*\|'"<>?,()=||gmx; # remove nasty chars from object name
         $chk->{'name'} =~ s|\\$||gmx; # remove trailing slashes from service names, in windows drives
 
         $chk->{'svc_conf'} = {
@@ -299,6 +303,7 @@ sub _extract_checks {
             '_AGENT_AUTO_CHECK'   => $chk->{'id'},
         };
         $chk->{'svc_conf'}->{'parents'} = $chk->{'parent'} if $chk->{'parent'};
+        $chk->{'args'} = "";
 
         for my $attr (qw/contacts contactgroups/) {
             my $data = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'default_'.$attr});
@@ -332,7 +337,7 @@ sub make_info {
 
     make_name($template, $macros)
 
-returns check name based on tempalte
+returns check name based on template
 
 =cut
 sub make_name {

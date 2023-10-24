@@ -314,14 +314,17 @@ sub _run_add {
     my $orig_checks   = _build_checks_config($checks);
     my $checks_config = _build_checks_config($checks);
     if($opt->{'interactive'}) {
-        my @lines = ("# set checks into desired states (legend is at the end of the file):", "");
+        my @lines = (
+            "# set checks into desired states (legend is at the end of the file):",
+            "# state  id                        args             name",
+        );
         for my $t (qw/new exists obsolete disabled/) {
             for my $chk (@{$checks->{$t}}) {
                 $chk->{'type'} = "n" if $t eq 'new';
                 $chk->{'type'} = "o" if $t eq 'obsolete';
                 $chk->{'type'} = "k" if $t eq 'exists';
                 $chk->{'type'} = "d" if $t eq 'disabled';
-                push @lines, sprintf("%-4s %-25s %s", $chk->{'type'}, $chk->{'id'}, $chk->{'name'});
+                push @lines, sprintf("%-8s %-25s %-15s  # %s", $chk->{'type'}, $chk->{'id'}, ($chk->{'args'}//''), $chk->{'name'});
             }
         }
         push @lines, "\n";
@@ -341,8 +344,11 @@ sub _run_add {
         $checks_config = _build_checks_config($checks);
         for my $line (Thruk::Utils::IO::read_as_list($filename)) {
             next if $line =~ m/^\#/mx;
+            $line =~ s/\#.*$//gmx;
+            $line =~ s/\s*$//gmx;
+            $line =~ s/^\s*//gmx;
             next if $line =~ m/^\s*$/mx;
-            my($m, $id, $name) = split(/\s+/mx, $line, 3);
+            my($m, $id, $args) = split(/\s+/mx, $line, 3);
             next unless defined $m;
             if($m eq 'k')    { $checks_config->{'check.'.$id} = "keep"; }
             elsif($m eq 'e') { $checks_config->{'check.'.$id} = "on"; }
@@ -350,6 +356,8 @@ sub _run_add {
             elsif($m eq 'n') { $checks_config->{'check.'.$id} = "new"; }
             elsif($m eq 'o') { $checks_config->{'check.'.$id} = "keep"; }
             elsif($m eq 'u') { $checks_config->{'check.'.$id} = "on"; }
+
+            $checks_config->{'args.'.$id} = $args = $args;
         }
     } else {
         # none-interactive - set all new to enabled automatically

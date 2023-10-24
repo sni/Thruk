@@ -344,6 +344,7 @@ sub _set_checks_category {
         if($svc && $svc->{'conf'}->{'_AGENT_AUTO_CHECK'}) {
             $chk->{'exists'} = 'exists';
             $chk->{'_svc'}   = $svc;
+            $chk->{'args'}   = $chk->{'args'} || $svc->{'conf'}->{'_AGENT_ARGS'} || '';
         } else {
             # disabled manually from previous inventory run
             if(!$fresh && $settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {

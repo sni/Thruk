@@ -35,6 +35,7 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m%\Q`log`\E%mx;
     next if $line =~ m/Defaults\ to/mx;
     next if $line =~ m/Thruk\/Config.pm/mx;
+    next if $line =~ m/nasty\ chars/mx;
     next unless $line =~ m/`/gmx;
     fail($line);
   }

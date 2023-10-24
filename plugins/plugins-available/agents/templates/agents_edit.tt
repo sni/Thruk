@@ -18,8 +18,7 @@
           </td>
         </tr>
       </thead>
-    [% END %]
-    [% IF type == "obsolete" %]
+    [% ELSIF type == "obsolete" %]
       <thead>
         <tr>
           <td align="center" colspan="5">
@@ -40,7 +39,7 @@
             [% END %]
           </div>
         </th>
-        <td>
+        <td class="max-w-min">
           [% state = 'PENDING' %]
           [% IF type == "exists" || type == "obsolete" %]
             [% IF services.exists(name) %]
@@ -55,6 +54,21 @@
             <div class='text-center badge PENDING'>disabled</div>
           [% END %]
         </td>
+        [% IF type == "new" || type == "exists" || type == "obsolete" %]
+        <td class="truncate max-w-xs text-left">
+          [% IF type == "new" %]
+            <input type="text" name="args.[% check.id %]" placeholder="additional arguments">
+          [% ELSE %]
+            <span class="textHINTsoft">[% check.args %]</span>
+          [% END %]
+        </td>
+        [% END %]
+        <td class="[% IF type != "exists" %]w-full[% END %]">
+          [% IF check.defined("info") %]
+            <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'bodyEl': 'info_[% check.id %]', 'caption': 'details for [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
+            <div id="info_[% check.id %]" class="hidden whitespace-pre text-left">[% check.info | nl2br %]</div>
+          [% END %]
+        </td>
         [% IF type == "exists" || type == "obsolete" %]
         <td class='truncate w-1/2 max-w-xs'>
           [% IF services.exists(name) %]
@@ -62,14 +76,6 @@
           [% END %]
         </td>
         [% END %]
-        <td class="w-full">
-          [% IF type != "exists" %]
-            [% IF check.defined("info") %]
-              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'bodyEl': 'info_[% check.id %]', 'caption': 'details for [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
-              <div id="info_[% check.id %]" class="hidden whitespace-pre text-left">[% check.info | nl2br %]</div>
-            [% END %]
-          [% END %]
-        </td>
         <td class="pt-px pb-px">
           <div class="flexrow flex-nowrap gap-x-2">
             <div class="radiogroup" style="width: 135px; height: 24px;">
@@ -95,7 +101,7 @@
 [% END %]
 
 
-<div class="flexrow 2xl:justify-between h-full w-[800px]">
+<div class="flexrow 2xl:justify-between h-full w-full max-w-[1200px]">
   <div class="card w-full flexcol gap-0 flex-nowrap h-full min-h-[500px]">
     <div class="head justify-between" style="flex: 0 0 40px;">
       <div class="w-[100px]">
