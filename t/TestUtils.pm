@@ -744,15 +744,16 @@ sub test_command {
 
     # wait for something?
     if(defined $test->{'waitfor'}) {
-        my $start   = time();
-        my $now     = time();
-        my $waitfor = $test->{'waitfor'};
-        my $found   = 0;
+        my $duration = 30;
+        my $start    = time();
+        my $now      = time();
+        my $waitfor  = $test->{'waitfor'};
+        my $found    = 0;
         local $test->{'exit'}    = undef;
         local $test->{'like'}    = '/.*/';
         local $test->{'errlike'} = '/.*/';
         my $expr = '';
-        my $end  = $start + 30;
+        my $end  = $start + $duration;
         ok(1, "waiting for $waitfor to appear till ".(scalar localtime $end));
         while($now <= $end) {
             alarm(15);
@@ -781,8 +782,9 @@ sub test_command {
             $now = time();
         }
         if(!$found) {
-            fail("content ".$expr." did not occur within 120 seconds");
+            fail("content ".$expr." did not occur within ".$duration." seconds");
             diag("command waitfor failed:\n".$stdout."\n"._caller_info());
+            &{$test->{'diag'}}($test) if $test->{'diag'};
             BAIL_OUT("waitfor failed, bailing out");
         }
     }

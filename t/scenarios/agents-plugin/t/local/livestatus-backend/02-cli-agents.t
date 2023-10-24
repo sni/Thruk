@@ -23,8 +23,8 @@ TestUtils::test_command({
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -I host-ls --ip=127.0.0.1 --section=testsection', like => ['/agent inventory/', '/new\ \->\ on\ |\ agent\ version/'] });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -I host-ls', like => ['/no\ new\ checks\ found\ for\ host\ host-ls/'] });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -S host-ls', like => ['/agent inventory/'], errlike => ['/host\ host-ls\ has\ not\ yet\ been\ activated/'] });
-TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -R', like => ['/Reloading\ naemon\ configuration/'] });
-TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/host-ls/', '/testsection/'], waitfor => 'testsection' });
+TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -v -R', like => ['/Reloading\ naemon\ configuration/'] });
+TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/host-ls/', '/testsection/'], waitfor => 'testsectionXXX', diag => \&_diag });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -I host-ls', like => ['/no\ new\ checks\ found\ for\ host\ host-ls/'] });
 TestUtils::test_page( url => '/thruk/cgi-bin/status.cgi', like => ['agent inventory', 'agent version', 'net eth0'] );
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['host-ls'] );
@@ -34,7 +34,18 @@ TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/host
 # clean up again
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -yD host-ls', like => ['/host\ host-ls\ removed\ successsfully/'] });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -R', like => ['/Reloading\ naemon\ configuration/'] });
-TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/no agents found/'], waitfor => 'no\ agents\ found' });
+TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/no agents found/'], waitfor => 'no\ agents\ found', diag => \&_diag });
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', unlike => ['host-ls'] );
 
 ###########################################################
+
+sub _diag {
+    my($test) = @_;
+    select(STDERR); $| = 1; select(STDOUT); $| = 1; use Data::Dumper; print STDERR Dumper($test);
+    diag(`ls -la etc/naemon/conf.d/`);
+    diag(`ls -la etc/naemon/conf.d/agents`);
+    diag(`cat etc/naemon/conf.d/agents/testsection/*.cfg`);
+    diag(`/usr/bin/env omd status`);
+    diag(`ps -efl`);
+    diag(`tail -200 var/log/naemon.log`);
+}
