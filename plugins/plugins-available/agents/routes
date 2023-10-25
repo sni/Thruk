@@ -15,3 +15,6 @@ Thruk::Utils::Menu::insert_item('System', {
                                 'name'  => 'Agents',
                                 'roles' => 'admin',
 });
+
+$app->config->{'has_feature_agents'} = 1;
+

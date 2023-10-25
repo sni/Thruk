@@ -129,6 +129,25 @@
         [% IF type != "apply"|| show_object %]
         <hr class="mt-0.5 pt-0.5">
         [% END %]
+        [% IF c.config.exists("has_feature_agents") && c.config.has_feature_agents %]
+          [% IF type == "host" && object.conf.exists("_AGENT") %]
+          <div>
+            <a href="agents.cgi?action=edit&hostname=[% object.get_name() | uri %]&backend=[% param_backend | uri %]">
+              <i class="fa-solid fa-cube"></i>
+              Agent Configuration
+            </a>
+          </div>
+          [% END %]
+          [% IF type == "service" && object.conf.exists("_AGENT_AUTO_CHECK") %]
+          <div>
+            <a href="agents.cgi?action=edit&hostname=[% object.conf.host_name.0 | uri %]&backend=[% param_backend | uri %]">
+              <i class="fa-solid fa-cube"></i>
+              Agent Configuration
+            </a>
+          </div>
+          [% END %]
+
+        [% END %]
         <div>
           <a href="conf.cgi?sub=objects&amp;action=browser[% IF file_link %]#[% file_link | uri %][% END %]">
             <i class="fa-solid fa-folder-open"></i>

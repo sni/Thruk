@@ -225,6 +225,9 @@
     <div class="head justify-between">
       <h3>Configuration Information</h3>
       <div class="flex gap-x-1">
+        [% IF c.config.exists("has_feature_agents") && c.config.has_feature_agents && cust_vars.exists('AGENT_AUTO_CHECK') %]
+          <a class="button" href="agents.cgi?action=edit&hostname=[% service.host_name | uri %]&backend=[% service.peer_key | uri %]"><i class="fa-solid fa-cube small"></i>Agent Configuration</a>
+        [% END %]
         [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
           <a class="button" href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure service</a>
         [% ELSE %]
