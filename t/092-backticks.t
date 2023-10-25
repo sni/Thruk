@@ -20,6 +20,7 @@ for my $cmd (@{$cmds}) {
   while(my $line = <$ph>) {
     chomp($line);
     $line =~ s/'.*?'//gmx;
+    next if $line =~ m/nasty\ chars/mx;
     $line =~ s/\#.*$//gmx;
     next if($filter && $line !~ m%$filter%mx);
     next if $line =~ m%\QThruk/Utils/IO.pm:\E%mx;
@@ -35,7 +36,6 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m%\Q`log`\E%mx;
     next if $line =~ m/Defaults\ to/mx;
     next if $line =~ m/Thruk\/Config.pm/mx;
-    next if $line =~ m/nasty\ chars/mx;
     next unless $line =~ m/`/gmx;
     fail($line);
   }
