@@ -1,41 +1,41 @@
-﻿[% BLOCK site_btn %]
-  [% b = initial_backends.$id %]
-  [% IF b.exists('cls') && b.cls != "" %]
+﻿[%- BLOCK site_btn -%]
+  [%- b = initial_backends.$id -%]
+  [%- IF b.exists('cls') && b.cls != "" -%]
     <button data-id="[% id %]" class="button_peer button_peer[% b.cls %]" title="[% b.last_error | html %]" onclick="toggleBackend('[% id %]')">[% b.name | html %]</button>
-  [% END %]
-[% END %]
+  [%- END -%]
+[%- END -%]
 
 <div id="reload-timer" class="hidden absolute top-[-11px] left-0 h-2 w-48   bg-[color:var(--button-green-bg)] opacity-50 rounded-r-lg transform transition-all ease-linear scale-x-100 origin-left"></div>
 <div id="unload-timer-parent" class="hidden absolute top-[-11px] left-0 h-2 w-full opacity-50 flexrow flex-nowrap gap-0">
   <div class="h-full w-32 bg-[color:var(--button-green-bg)] flex-none"></div>
   <div id="unload-timer" class="hidden h-2 w-full  bg-[color:var(--button-green-bg)] transform transition-all ease-linear scale-x-0 origin-left"></div>
 </div>
-[% IF !hide_backends_chooser && sites != "" && show_sitepanel != "off" %]
-  [% IF show_sitepanel == 'list' %]
+[%- IF !hide_backends_chooser && sites != "" && show_sitepanel != "off" -%]
+  [%- IF show_sitepanel == 'list' -%]
     <div class="buttongroup backends [% IF param_backend.list.size > 3 %]hidden lg:flex[% END %]">
-      [% FOREACH b = backends %]
-        [% PROCESS site_btn id=b %]
-      [% END %]
+      [%- FOREACH b = backends -%]
+        [%- PROCESS site_btn id=b -%]
+      [%- END -%]
     </div>
-  [% END %]
-  [% IF backend_chooser == "switch" %]
-    [% IF param_backend.list.size > 0 && param_backend.list.0 != "" %]
+  [%- END -%]
+  [%- IF backend_chooser == "switch" -%]
+    [%- IF param_backend.list.size > 0 && param_backend.list.0 != "" -%]
       <div class="buttongroup backends [% IF show_sitepanel == 'list' %][% IF param_backend.list.size > 3 %]lg:hidden[% ELSE %]hidden[% END %][% END %]" onClick='toggleSitePanel()'>
-        [% b = param_backend.list.0 %]
+        [%- b = param_backend.list.0 -%]
         <button class='button_peerUP'>[% initial_backends.$b.name | html %]</button>
-        [% IF sites.disabled > 0 %]
+        [%- IF sites.disabled > 0 -%]
           <button class='button_peerDIS'>[% sites.disabled %] more</button>
-        [% END %]
+        [%- END -%]
       </div>
-    [% END %]
-  [% ELSE %]
+    [%- END -%]
+  [%- ELSE -%]
     <div class="buttongroup backends [% IF show_sitepanel == 'list' %][% IF param_backend.list.size > 3 %]lg:hidden[% ELSE %]hidden[% END %][% END %]" onClick='toggleSitePanel()'>
       <button class='[% IF sites.up > 0 %]button_peerUP[% ELSE %]button_peerDIS[% END %]'>[% sites.up %] Up</button>
       <button class='button_peerDIS'>[% sites.disabled %] Disabled</button>
       [% broken = []; FOREACH down = initial_backends.values; IF down && down.defined("cls") && down.defined("name") && down.cls == 'DOWN'; broken.push(down.name); END; END %]
       <button class='[% IF sites.down > 0 %]button_peerDOWN[% ELSE %]button_peerDIS[% END %]' title="[% broken.join(', ') | html %]">[% sites.down %] Down</button>
     </div>
-  [% END %]
+  [%- END -%]
 
   <div id="site_panel" class="card shadow-float fixed left-0 lg:left-auto w-full lg:w-fit min-w-[400px] site_panel_[% show_sitepanel %] hidden">
     <div class="head justify-between gap-5">

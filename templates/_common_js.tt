@@ -1,17 +1,17 @@
 ﻿<script>
 <!--
   jQuery.noConflict();
-  [% PROCESS _header_initial_states.tt %]
+  [%- PROCESS _header_initial_states.tt -%]
   var thruk_static_export = false;
   var refresh_rate        = [% IF refresh_rate %][% refresh_rate %][% ELSE %]null[% END %];
-  [% IF auto_reload_fn +%]
+  [%- IF auto_reload_fn +%]
   var auto_reload_fn      = function(cb) { return([% auto_reload_fn %](cb)) };
   var datetime_format_long = '[% datetime_format_long %]';
-  [% END +%]
+  [%- END +%]
   var enable_shinken_features = [% enable_shinken_features %];
-  [% IF enable_shinken_features +%]
+  [%- IF enable_shinken_features +%]
   var priorities          = new Array('[% FOREACH prio = priorities.keys.sort.reverse %][% priorities.$prio %][% UNLESS loop.last %]', '[% END %][% END %]');
-  [% END +%]
+  [%- END +%]
   var url_prefix          = '[% url_prefix %]';
   var product_prefix      = '[% product_prefix %]';
   var cookie_path         = '[% cookie_path %]';
@@ -25,11 +25,11 @@
   var thruk_debug_js      = [% IF thruk_author %]true[% ELSE %]false[% END %];
   var minimal             = [% IF minimal %]true[% ELSE %]false[% END %];
   var CSRFtoken           = '[% get_user_token(c) %]';
-[% IF c.user_exists %]
+[%- IF c.user_exists %]
   var remote_user         = '[% remote_user %]';
   var remote_groups       = [% json_encode(c.user.groups) %];
   var thruk_user          = [% json_encode(c.user.js_data) %];
-[% END %]
+[%- END %]
   var omd_site            = '[% omd_site %]';
   var referer             = '[% escape_js(uri_with(c, '_' => 'undef' )) %]';
   var full_uri            = '[% escape_html(full_uri(c)).replace('&amp;', '&').replace('&amp;', '&') %]';
@@ -44,41 +44,41 @@
   var is_executing_timeout = [% 1000 * c.config.is_executing_timeout %];
   var sort_options        = [% json_encode(data_sorted) %];
   var menuState           = [% json_encode(menu_states) %];
-  [% PROCESS _common_js_bugs.tt %]
+  [%- PROCESS _common_js_bugs.tt -%]
 
-  [% IF disable_backspace %]
+  [%- IF disable_backspace -%]
   jQuery(document).on("keydown", function (e) {
     if(e.which === 8 && !jQuery(e.target).is("input, textarea")) {
       e.preventDefault();
     }
   });
-  [% END %]
+  [%- END -%]
 
-  [% IF original_url %]
+  [%- IF original_url -%]
   var history_url = '[% original_url %]';
   history_url     = history_url.replace(/&amp;/g, '&');
   if(history.replaceState) {
     history.replaceState({}, "", history_url);
   }
-  [% END %]
+  [%- END -%]
 
   jQuery(document).ready(function() {
     init_page();
   });
 
-  [%+ IF fav_counter +%]
+  [%- IF fav_counter -%]
   /* favicon counter */
-  [% totals = set_favicon_counter(c) %]
-    [%+ IF totals.red > 0 && totals.yellow == 0 && totals.orange == 0 +%]
+  [%- totals = set_favicon_counter(c) -%]
+    [%- IF totals.red > 0 && totals.yellow == 0 && totals.orange == 0 -%]
       updateFaviconCounter([% totals.red %], '#FF5B33');
-    [%+ ELSIF totals.red == 0 && totals.yellow > 0 && totals.orange == 0 +%]
+    [%- ELSIF totals.red == 0 && totals.yellow > 0 && totals.orange == 0 -%]
       updateFaviconCounter([% totals.yellow %], '#FFDE00');
-    [%+ ELSIF totals.red == 0 && totals.yellow == 0 && totals.orange > 0 +%]
+    [%- ELSIF totals.red == 0 && totals.yellow == 0 && totals.orange > 0 -%]
       updateFaviconCounter([% totals.orange %], '#FF9E00');
-    [%+ ELSE +%]
+    [%- ELSE -%]
       updateFaviconCounter([% totals.red + totals.yellow + totals.orange %], '#FF9E00');
-    [%+ END +%]
-  [%+ END +%]
+    [%- END -%]
+  [%- END -%]
 
 -->
 </script>

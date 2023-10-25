@@ -1,6 +1,6 @@
-﻿[% broadcasts = get_broadcasts(c) %]
-[% IF c.stash.defined("broadcast"); broadcasts = [broadcast]; END %]
-[% IF broadcasts.size > 0 %]
+﻿[%- broadcasts = get_broadcasts(c) -%]
+[%- IF c.stash.defined("broadcast"); broadcasts = [broadcast]; END -%]
+[%- IF broadcasts.size > 0 -%]
   <div class="card mt-1 min-w-[200px] shadow-float rounded-t-none fixed -top-1 right-96 z-10 js-broadcast-panel noprint">
     [% IF broadcasts.size > 1 %]
     <div class="flexrow gap-0 flex-nowrap justify-between">
@@ -31,4 +31,4 @@
       </div>
     </div>
   </div>
-[% END %]
+[%- END -%]

@@ -1,17 +1,17 @@
-﻿[%+ UNLESS thruk_author %]
+﻿[%- UNLESS thruk_author -%]
 <script src="[% url_prefix %]cache/thruk-[% fileversion %].js"></script>
 [%- ELSE -%]
-[% FOREACH jsfiles = c.config.all_in_one_javascript -%]
+[%- FOREACH jsfiles = c.config.all_in_one_javascript +%]
 <script src="[% url_prefix %][% jsfiles %]"></script>
-[%+ END %]
-[%- END +%]
-[%- IF has_jquery_ui -%]
+[%- END -%]
+[%- END -%]
+[%- IF has_jquery_ui +%]
 <script src="[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/js/jquery-ui-[% c.config.jquery_ui %].custom.min.js"></script>
-[% END +%]
-[%- FOREACH j = js.list -%]
+[%- END -%]
+[%- FOREACH j = js.list +%]
 <script src="[% url_prefix %][% j %]"></script>
-[%+ END %]
-[% IF show_sitepanel == 'tree' %]
+[%- END -%]
+[%- IF show_sitepanel == 'tree' +%]
 <script src="[% url_prefix %]vendor/jstree-3.3.8/jstree.min.js"></script>
 <script src="[% url_prefix %]vendor/fancytree-2.36.1/jquery.fancytree-all-deps.min.js"></script>
-[% END %]
+[%- END +%]

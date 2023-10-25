@@ -9,8 +9,8 @@
 
   <div class="navsectionlinks sticky scrollauto overflow-x-hidden grow">
     <ul class="p-1 pt-0">
-      [% FOREACH section = navigation %]
-      [% cookie_section_name = section.name.replace(' ', '_') | lower %]
+      [%- FOREACH section = navigation -%]
+      [%- cookie_section_name = section.name.replace(' ', '_') | lower -%]
         <li>
           <a class="navsectiontitle navitem">
             <i class="uil [% IF section.defined('icon') && section.icon != "" %][% section.icon | html %][% ELSE %]uil-folder[% END %] text-base h-fit"></i>
@@ -19,36 +19,36 @@
           </a>
 
           <ul class="navsectionlinks" [% IF !menu_states.exists(cookie_section_name) || menu_states.$cookie_section_name == 0 %] style="display:none;"[% END %]>
-            [% FOREACH link = section.links %]
-              [% IF link.href %]
+            [%- FOREACH link = section.links -%]
+              [%- IF link.href -%]
                 <li class="relative">
                   <a class="navsectionsubtitle navitem" href="[% escape_html(link.href) %]" target="[% link.target %]">
                     [% link.name | html %]
                   </a>
-                  [% IF link.defined("html") %][% link.html %][% END %]
-                  [% IF link.links.size > 0 %]
+                  [%- IF link.defined("html") %][% link.html %][% END -%]
+                  [%- IF link.links.size > 0 -%]
                     <i class="uil uil-angle-down w-fit h-fit absolute right-0 top-0 mr-[-2px] px-1 rounded text-lg clickable hoverable navsectionsubtoggle"></i>
                     [% cookie_section_sub_name = cookie_section_name _ '.' _ link.name.replace(' ', '_') | lower %]
                     <ul class="navsectionsublinks" [% IF !menu_states.exists(cookie_section_sub_name) || menu_states.$cookie_section_sub_name == 0 %] style="display:none;"[% END %]>
-                      [% FOREACH sublink = link.links %]
-                        [% IF sublink.defined("href") && sublink.href %]
+                      [%- FOREACH sublink = link.links -%]
+                        [%- IF sublink.defined("href") && sublink.href -%]
                           <li>
                             <a class="sublink navitem" href="[% escape_html(sublink.href) %]" target="[% sublink.target %]">[% sublink.name | html %]</a>
-                            [% IF sublink.defined("html") %][% sublink.html %][% END %]
+                            [%- IF sublink.defined("html") %][% sublink.html %][% END -%]
                           </li>
-                          [% FOREACH addlink = sublink.links %]
+                          [%- FOREACH addlink = sublink.links -%]
                           <li>
                               <a class="sublink navitem" href="[% escape_html(addlink.href) %]" target="[% addlink.target %]">[% addlink.name | html %]</a>
                           </li>
-                          [% END %]
-                        [% ELSIF sublink.defined("html") %]
+                          [%- END -%]
+                        [%- ELSIF sublink.defined("html") -%]
                           <li>[% sublink.html %]</li>
-                        [% END %]
-                      [% END %]
+                        [%- END -%]
+                      [%- END -%]
                     </ul>
-                  [% END %]
+                  [%- END -%]
                 </li>
-              [% ELSIF link.defined("search") && link.search %]
+              [%- ELSIF link.defined("search") && link.search -%]
                 <li>
                   <div class="js-advanced-toggle">
                     <form method="GET" action="[% url_prefix %]cgi-bin/status.cgi" target="[% link.target %]" class="pl-6 pr-[10px]">
@@ -66,13 +66,13 @@
                     </form>
                   </div>
                 </li>
-              [% ELSIF link.defined("html") %]
+              [%- ELSIF link.defined("html") -%]
                 <li>[% link.html %]</li>
-              [% END %]
-            [% END %]
+              [%- END -%]
+            [%- END -%]
           </ul>
         </li>
-      [% END %]
+      [%- END -%]
     </ul>
   </div>
 
@@ -88,4 +88,4 @@
   </div>
 </div>
 
-[% PROCESS _ajax_search.tt %]
+[%- PROCESS _ajax_search.tt -%]
