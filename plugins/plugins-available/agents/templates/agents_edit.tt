@@ -59,8 +59,7 @@
           [% IF type == "new" %]
             <input type="text" name="args.[% check.id %]" placeholder="additional arguments" class="ml-1" onkeydown="jQuery('INPUT[name=\'check.[% check.id %]\'][value=\'on\']').attr('checked', true); checkSaveButtonColor();">
           [% ELSE %]
-            <input type="text" name="args.[% check.id %]" placeholder="additional arguments" value="[% check.args %]" class="hidden ml-1">
-            <span class="textHINTsoft">[% check.args %]</span>
+            <input type="text" name="args.[% check.id %]" value="[% check.args %]" class="ml-1">
           [% END %]
         </td>
         [% END %]
