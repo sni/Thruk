@@ -291,7 +291,7 @@ sub _extract_checks {
             }
         }
 
-        $chk->{'name'} =~ s|`~!$%^&*\|'"<>?,()=||gmx; # remove nasty chars from object name
+        $chk->{'name'} =~ s|[`~!$%^&*\|'"<>?,()=]*||gmx; # remove nasty chars from object name
         $chk->{'name'} =~ s|\\$||gmx; # remove trailing slashes from service names, in windows drives
 
         $chk->{'svc_conf'} = {
