@@ -36,7 +36,7 @@
         [% IF host.childs.size > 0 %]<div><a href="status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]">View Child Hosts For This Host</a></div>[% END %]
         [% IF show_impacts_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]">View Impacts For This Problem</a></div>[% END %]
         [% IF show_rootproblems_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]">View Root Problem For This Impact</a></div>[% END %]
-        <div class="flex flex-nowrap gap-x-1"><a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1&amp;backend=[% host.peer_key %]">View Alert History For This Host</a> (<a href="showlog.cgi?host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">Outages</a>)</div>
+        <div class="flex flex-nowrap gap-x-1"><a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1&amp;backend=[% peer_key %]">View Alert History For This Host</a> (<a href="showlog.cgi?host=[% host.name | uri %]&amp;backend=[% peer_key %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% host.name | uri %]&amp;backend=[% peer_key %]">Outages</a>)</div>
         [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host.name | uri %]">View Trends For This Host</a></div>[% END %]
         <div><a href="avail.cgi?host=[% host.name | uri %]&amp;show_log_entries">View Availability Report For This Host</a></div>
         <div><a href="notifications.cgi?host=[% host.name | uri %]">View Notifications For This Host</a></div>
@@ -44,7 +44,7 @@
           <div class="flex flex-nowrap gap-x-1">
             <a href="config.cgi?type=hosts&amp;jump2=[% host.name | uri %]">View Configuration For This Host</a>
             [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-              <a href="conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]"> (Edit This Host)</a>
+              <a href="conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% peer_key %]"> (Edit This Host)</a>
             [% END %]
           </div>
         [% END %]
@@ -72,9 +72,9 @@
                   [% menu.data %]
                   [% action_menus_inserted.item(menu.data) = 1 %]
                   [% END %]
-                  print_action_menu([% menu.function %], [% json_encode({"backend" => host.peer_key, "host" => host.name }) %]);
+                  print_action_menu([% menu.function %], [% json_encode({"backend" => peer_key, "host" => host.name }) %]);
                 [% ELSE %]
-                  print_action_menu([% menu.data %], [% json_encode({"backend" => host.peer_key, "host" => host.name }) %]);
+                  print_action_menu([% menu.data %], [% json_encode({"backend" => peer_key, "host" => host.name }) %]);
                 [% END %]
                 </script>
               [% END %]
@@ -152,7 +152,7 @@
       <div class="flex gap-1">
         [% UNLESS command_disabled(c, '1') %]
           <div>
-            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=1&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
+            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=1&amp;host=[% host.name | uri %]&amp;backend=[% peer_key %]">
               <i class="fa-solid fa-comment mr-1"></i>Add comment
             </a>
           </div>
@@ -160,7 +160,7 @@
         [% IF comments.size > 0 %]
           [% UNLESS command_disabled(c, '20') %]
             <div>
-              <a class="button hover-red js-modal-command-link" href="cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
+              <a class="button hover-red js-modal-command-link" href="cmd.cgi?cmd_typ=20&amp;host=[% host.name | uri %]&amp;backend=[% peer_key %]">
                 <i class="fa-solid fa-trash mr-1"></i>Delete all
               </a>
             </div>
@@ -185,13 +185,13 @@
       <div class="flex gap-1">
         [% UNLESS command_disabled(c, '55') %]
           <div>
-            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]">
+            <a class="button js-modal-command-link" href="cmd.cgi?cmd_typ=55&amp;host=[% host.name | uri %]&amp;backend=[% peer_key %]">
               <i class="fa-solid fa-comment mr-1"></i>Add downtime
             </a>
           </div>
           [% IF use_feature_recurring_downtime %]
             <div>
-              <a href="extinfo.cgi?type=6&amp;recurring=add&amp;target=host&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]" class="button js-modal-command-link">
+              <a href="extinfo.cgi?type=6&amp;recurring=add&amp;target=host&amp;host=[% host.name | uri %]&amp;backend=[% peer_key %]" class="button js-modal-command-link">
                 <i class="fa-solid fa-comment mr-1"></i>Add recurring downtime</a>
             </div>
           [% END %]
@@ -199,14 +199,14 @@
         [% IF downtimes %]
           [% UNLESS command_disabled(c, '5') %]
             <div>
-              <a class="button hover-red js-modal-command-link" href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]">
+              <a class="button hover-red js-modal-command-link" href="cmd.cgi?quick_command=5&amp;confirm=no&amp;host=[% host.name | uri %]&amp;backend=[% peer_key %]&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]">
                 <i class="fa-solid fa-trash mr-1"></i>Delete all
               </a>
             </div>
           [% END %]
         [% END %]
         <div>
-          <a class="button" href="showlog.cgi?host=[% host.name | uri %]&amp;backend=[% host.peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]">
+          <a class="button" href="showlog.cgi?host=[% host.name | uri %]&amp;backend=[% peer_key %]&amp;pattern=DOWNTIME&amp;start=[% date.now - 86400 * 7 %]&amp;end=[% date.now %]">
             <i class="fa-solid fa-bars mr-1"></i>List recent downtimes
           </a>
         </div>
@@ -233,10 +233,10 @@
       <h3>Configuration Information</h3>
       <div class="flex gap-x-1">
         [% IF c.config.exists("has_feature_agents") && c.config.has_feature_agents && cust_vars.exists('AGENT') %]
-          <a class="button" href="agents.cgi?action=edit&hostname=[% host.name | uri %]&backend=[% host.peer_key | uri %]"><i class="fa-solid fa-cube small"></i>Agent Configuration</a>
+          <a class="button" href="agents.cgi?action=edit&hostname=[% host.name | uri %]&backend=[% peer_key %]"><i class="fa-solid fa-cube small"></i>Agent Configuration</a>
         [% END %]
         [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-          <a class="button" href="conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% host.peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure host</a>
+          <a class="button" href="conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% peer_key %]"><i class="fa-solid fa-wrench small"></i>Configure host</a>
         [% ELSE %]
           <a class="button" href="config.cgi?type=hosts&amp;jump2=[% host.name | uri %]"><i class="fa-solid fa-eye small"></i>View Configuration</a>
         [% END %]
