@@ -173,6 +173,7 @@ sub _process_json_page {
         if(defined $c->req->parameters->{'host'} and $c->req->parameters->{'host'} ne '') {
             my @addresses = gethostbyname($c->req->parameters->{'host'});
             @addresses = map { inet_ntoa($_) } @addresses[4 .. $#addresses];
+            @addresses = @{Thruk::Base::array_uniq(\@addresses)};
             if(scalar @addresses > 0) {
                 $resolved = join(' ', @addresses);
             }
