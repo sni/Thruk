@@ -93,7 +93,8 @@ return peer key the backend uses on the remote side
 
 sub remotekey {
     my($self) = @_;
-    return($self->{'remotekey'} // $self->peer_key());
+    die("remotekey not set") unless $self->{'remotekey'};
+    return($self->{'remotekey'});
 }
 
 ##########################################################

@@ -32,7 +32,7 @@ sub index {
     &timing_breakpoint('index start');
 
     # Safe Defaults required for changing backends
-    return unless Thruk::Action::AddDefaults::add_cached_defaults($c);
+    return unless Thruk::Action::AddDefaults::add_defaults($c);
 
     return $c->detach('/error/index/8') unless $c->check_user_roles("admin");
 
