@@ -123,6 +123,10 @@ sub get_config_objects {
         my $chk  = $checks_hash->{$id};
         confess("no name") unless $chk->{'name'};
         my $svc = $services->{$chk->{'name'}};
+        if(!$svc && $type eq 'keep') {
+            $type = 'on';
+            $checks_config->{'check.'.$id} = 'on';
+        }
         if(!$svc && $type eq 'on') {
             # create new one
             $svc = Monitoring::Config::Object->new( type     => 'service',
@@ -150,7 +154,8 @@ sub get_config_objects {
         die("creating file failed") unless $file;
         $svc->set_file($file);
         $svc->{'conf'} = $chk->{'svc_conf'};
-        $chk->{'svc_conf'}->{'_AGENT_ARGS'} = $args;
+        delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
+        $chk->{'svc_conf'}->{'_AGENT_ARGS'} = $args if $args;
         $chk->{'svc_conf'}->{'check_command'} .= " ".$args if $args;
 
         push @list, $svc;
