@@ -177,6 +177,7 @@ sub get_checks {
     }
 
     if($inventory->{'omd'}) {
+        my $disabled_config = $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'omd'} // { 'autostart' => '!= 1'};
         for my $omd (@{$inventory->{'omd'}}) {
             push @{$checks}, {
                 'id'       => 'omd.'.Thruk::Utils::Agents::to_id($omd->{'site'}),
@@ -185,7 +186,7 @@ sub get_checks {
                 'args'     => { "site" => $omd->{'site'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($omd),
-                'disabled' => Thruk::Utils::Agents::check_disable($omd, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{omd}),
+                'disabled' => Thruk::Utils::Agents::check_disable($omd, $disabled_config),
             };
         }
     }
