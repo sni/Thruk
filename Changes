@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+3.10     Sun Nov  5 16:24:33 CET 2023
           - add explore mode to advanced status filter
           - add option to set link target based on url rules (link_target)
           - show action/notes urls with original link and open new tab by javascript

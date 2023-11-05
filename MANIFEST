@@ -198,8 +198,8 @@ plugins/plugins-available/business_process/lib/Thruk/Controller/bp.pm
 plugins/plugins-available/business_process/lib/Thruk/Controller/Rest/V1/bp.pm
 plugins/plugins-available/business_process/lib/Thruk/Utils/CLI/Bp.pm
 plugins/plugins-available/business_process/preview.png
-plugins/plugins-available/business_process/root/bp-3.08.3.css
-plugins/plugins-available/business_process/root/bp-3.08.3.js
+plugins/plugins-available/business_process/root/bp-3.10.css
+plugins/plugins-available/business_process/root/bp-3.10.js
 plugins/plugins-available/business_process/root/images/lock.png
 plugins/plugins-available/business_process/root/images/testmode_critical.png
 plugins/plugins-available/business_process/root/images/testmode_ok.png
@@ -540,7 +540,7 @@ plugins/plugins-available/panorama/root/js/panorama_js_tabbar.js
 plugins/plugins-available/panorama/root/js/panorama_js_tabbar_search.js
 plugins/plugins-available/panorama/root/js/panorama_js_track_timers.js
 plugins/plugins-available/panorama/root/js/panorama_js_utils_base64.js
-plugins/plugins-available/panorama/root/panorama-3.08.3.css
+plugins/plugins-available/panorama/root/panorama-3.10.css
 plugins/plugins-available/panorama/routes
 plugins/plugins-available/panorama/scripts/disable_debug.sh
 plugins/plugins-available/panorama/scripts/enable_debug.sh
@@ -642,11 +642,11 @@ README.md
 root/favicon.ico
 root/index.html
 root/robots.txt
-root/thruk/cache/thruk-3.08.3.js
-root/thruk/cache/thruk-panorama-3.08.3.js
+root/thruk/cache/thruk-3.10.js
+root/thruk/cache/thruk-panorama-3.10.js
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
-root/thruk/javascript/thruk-3.08.3.js
+root/thruk/javascript/thruk-3.10.js
 root/thruk/media/critical.wav
 root/thruk/media/ok.wav
 root/thruk/media/unknown.wav
