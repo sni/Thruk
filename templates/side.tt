@@ -36,12 +36,8 @@
                             <a class="sublink navitem" href="[% escape_html(sublink.href) %]" target="[% sublink.target %]">[% sublink.name | html %]</a>
                             [%- IF sublink.defined("html") %][% sublink.html %][% END -%]
                           </li>
-                          [%- FOREACH addlink = sublink.links -%]
-                          <li>
-                              <a class="sublink navitem" href="[% escape_html(addlink.href) %]" target="[% addlink.target %]">[% addlink.name | html %]</a>
-                          </li>
-                          [%- END -%]
-                        [%- ELSIF sublink.defined("html") -%]
+                        [%- END -%]
+                        [%- IF sublink.defined("html") -%]
                           <li>[% sublink.html %]</li>
                         [%- END -%]
                       [%- END -%]

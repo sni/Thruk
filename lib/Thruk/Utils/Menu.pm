@@ -131,18 +131,12 @@ sub add_sub_link {
 
   add_sub_sub_link()
 
-add a new additional link to last sub link
+add a new additional link to last sub link.
+DEPRECATED: will be displayed as sub_link anyway
 
 =cut
 sub add_sub_sub_link {
-    my %link = @_;
-    my $last_section  = $Thruk::Utils::Menu::navigation->[scalar @{$Thruk::Utils::Menu::navigation} - 1];
-    my $last_link     = $last_section->{'links'}->[scalar @{$last_section->{'links'}} - 1];
-    my $last_sub_link = $last_link->{'links'}->[scalar @{$last_link->{'links'}} - 1];
-    _set_menu_link(\%link);
-    $link{'name'}     = "" unless defined $link{'name'};
-    push(@{$last_sub_link->{'links'}}, \%link);
-    return;
+    return add_sub_link(@_);
 }
 
 
