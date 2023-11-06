@@ -74,6 +74,14 @@ sub index {
     }
     $c->stash->{'reload_required'} = ($c->{'obj_db'} && $c->{'obj_db'}->{'last_changed'}) ? 1 : 0;
 
+    if($action eq 'show') {
+        $c->stash->{'backend_chooser'} = 'select';
+        $c->stash->{'param_backend'} = '';
+        $c->req->parameters->{'backend'} = $backend;
+        my($selected) = $c->db->select_backends('get_status');
+        Thruk::Action::AddDefaults::update_site_panel_hashes($c, $selected);
+    }
+
     return;
 }
 
@@ -101,9 +109,8 @@ sub _process_show {
             $c->req->parameters->{'backend'} = (sort keys %{$config_backends})[0];
         }
     }
-    Thruk::Utils::Agents::set_object_model($c, $c->stash->{'param_backend'} || $c->req->parameters->{'backend'}) unless $c->{'obj_db'};
 
-    $c->stash->{'backend_chooser'} = 'select';
+    Thruk::Utils::Agents::set_object_model($c, $c->stash->{'param_backend'} || $c->req->parameters->{'backend'}) unless $c->{'obj_db'};
 
     return;
 }
@@ -179,6 +186,13 @@ sub _process_edit {
 sub _process_save {
     my($c) = @_;
 
+    return unless Thruk::Utils::check_csrf($c);
+    # don't store in demo mode
+    if($c->config->{'demo_mode'}) {
+        Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
+        return $c->redirect_to('agents.cgi');
+    }
+
     my $type      = lc($c->req->parameters->{'type'});
     my $hostname  = $c->req->parameters->{'hostname'};
     my $backend   = $c->req->parameters->{'backend'};
@@ -249,6 +263,13 @@ sub _process_save {
 sub _process_remove {
     my($c) = @_;
 
+    return unless Thruk::Utils::check_csrf($c);
+    # don't store in demo mode
+    if($c->config->{'demo_mode'}) {
+        Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
+        return $c->redirect_to('agents.cgi');
+    }
+
     my $hostname  = $c->req->parameters->{'hostname'};
     my $backend   = $c->req->parameters->{'backend'};
 
@@ -305,7 +326,7 @@ sub _process_json {
         push @{$json}, { 'name' => "sections", 'data' => [sort keys %{$sections} ] };
     }
     elsif($type eq 'site') {
-        my $config_backends = Thruk::Utils::Conf::set_backends_with_obj_config($c);
+        my $config_backends = Thruk::Utils::Conf::get_backends_with_obj_config($c);
         my $data = [];
         for my $key (sort keys %{$config_backends}) {
             my $peer = $c->db->get_peer_by_key($key);
