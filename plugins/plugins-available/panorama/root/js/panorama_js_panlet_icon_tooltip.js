@@ -176,6 +176,7 @@ Ext.onReady(function() {
         },
         cancelPopup: function() {
             window.clearTimeout(TP.popupReqTimer);
+            delete TP.popupReqTimer;
             TP.iconTip.delayHide();
             if(TP.popupReq && TP.popupReq.xhr) {
                 // cancel current request
@@ -216,6 +217,11 @@ Ext.onReady(function() {
         evt.stopEvent();
         TP.iconTipTarget = img;
 
+        // reset previously canceled popup
+        if(!TP.popupReqTimer && TP.iconTip.detailsTarget && TP.iconTip.detailsTarget.body.$cache && TP.iconTip.detailsTarget.body.$cache.data.maskEl) {
+            TP.iconTip.last_id = "";
+            TP.iconTip.lastUrl = "";
+        }
         if(!force && ( TP.iconTip.last_id && TP.iconTip.last_id == el.id)) { TP.suppressIconTipForce = false; return; }
         TP.iconTip.panel   = img;
         /* hide when in edit mode */
@@ -369,6 +375,7 @@ Ext.onReady(function() {
                 // delay requesting details a bit, otherwise we would trigger tons of requests when moving the mouse over different icons
                 window.clearTimeout(TP.popupReqTimer);
                 TP.popupReqTimer =  window.setTimeout(function() {
+                    delete TP.popupReqTimer;
                     if(TP.popupReq && TP.popupReq.xhr) {
                         // cancel previous request
                         TP.popupReq.aborted = true;
