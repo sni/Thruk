@@ -200,7 +200,7 @@ sub insert_sub_item {
   remove_item($category)
   remove_item($category, $item_name)
   remove_item($category, $subcategory, $item_name)
-  remove_item($category, $subcategory, $item_name, $hintname)
+  # remove_item($category, $subcategory, $item_name, $hintname) (DEPRECATED)
 
 removes an existing item from an existing category
 
@@ -211,6 +211,7 @@ sub remove_item {
 
     if($hintname) {
         $Thruk::Utils::Menu::removed_items->{$category}->{$subcategory}->{$item_name}->{$hintname} = 1;
+        $Thruk::Utils::Menu::removed_items->{$category}->{$subcategory}->{$hintname}->{'_ALL_'} = 1;
     } elsif($subcategory) {
         $Thruk::Utils::Menu::removed_items->{$category}->{$subcategory}->{$item_name}->{'_ALL_'} = 1;
     } elsif($item_name) {
