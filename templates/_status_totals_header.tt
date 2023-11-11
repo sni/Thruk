@@ -9,7 +9,7 @@
         <div class="flexcol">
           [% PROCESS _host_status_details_box.tt %]
           [% IF show_top_pane %]
-            <button class="2xl:block hidden mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;" id="btn_toggle_top_pane_up">
+            <button class="block mx-auto big iconOnly noprint hoverable rounded-full js-btn_toggle_top_pane_up" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;">
               <i class="uil uil-angle-up" title="Hide top row"></i>
             </button>
           [% END %]
@@ -22,10 +22,7 @@
   </div>
 
   [% IF show_top_pane %]
-    <button class="2xl:hidden mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop == 1 %]style="display: none;"[% END %] onclick="toggleTopPane(); return false;" id="btn_toggle_top_pane_up">
-      <i class="uil uil-angle-up" title="Hide top row"></i>
-    </button>
-    <button class="mx-auto big iconOnly noprint hoverable rounded-full" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;" id="btn_toggle_top_pane_down">
+    <button class="absolute left-1/2 top-1 big iconOnly noprint hoverable rounded-full js-btn_toggle_top_pane_down" [% IF hidetop != 1 %]style="display: none;"[% END %] onClick="toggleTopPane(); return false;">
       <i class="uil uil-angle-down" title="Show top row"></i>
     </button>
   [% END %]

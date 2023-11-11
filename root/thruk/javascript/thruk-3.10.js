@@ -441,6 +441,15 @@ function hideElement(id, icon) {
     pane = document.getElementById(id);
   }
   if(!pane) {
+    var els = jQuery(id);
+    if(els.length >= 0) {
+        jQuery(els).each(function(i, el) {
+            hideElement(el);
+        });
+        return;
+    }
+  }
+  if(!pane) {
     if(thruk_debug_js) { alert("ERROR: got no element for id in hideElement(): " + id); }
     return;
   }
@@ -466,6 +475,15 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
   }
   else {
     pane = document.getElementById(id);
+  }
+  if(!pane) {
+    var els = jQuery(id);
+    if(els.length >= 0) {
+        jQuery(els).each(function(i, el) {
+            showElement(el);
+        });
+        return;
+    }
   }
   if(!pane) {
     if(thruk_debug_js) { alert("ERROR: got no element for id in showElement(): " + id); }
@@ -8089,15 +8107,15 @@ function toggleTopPane() {
     if(formInput) {
         formInput.value = 0;
     }
-    hideElement("btn_toggle_top_pane_down");
-    showElement("btn_toggle_top_pane_up");
+    hideElement(".js-btn_toggle_top_pane_down");
+    showElement(".js-btn_toggle_top_pane_up");
   } else {
     additionalParams['hidetop'] = 1;
     if(formInput) {
         formInput.value = 1;
     }
-    showElement("btn_toggle_top_pane_down");
-    hideElement("btn_toggle_top_pane_up");
+    showElement(".js-btn_toggle_top_pane_down");
+    hideElement(".js-btn_toggle_top_pane_up");
   }
   updateUrl();
 }
