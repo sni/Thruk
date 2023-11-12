@@ -609,10 +609,12 @@ sub validate_params {
         return("this hostname is not allowed");
     }
 
-    my @sections = split/\//mx, $section;
-    for my $sect (@sections) {
-        if(Thruk::Base::check_for_nasty_filename($sect)) {
-            return("this section is not allowed");
+    if($section) {
+        my @sections = split/\//mx, $section;
+        for my $sect (@sections) {
+            if(Thruk::Base::check_for_nasty_filename($sect)) {
+                return("this section is not allowed");
+            }
         }
     }
 

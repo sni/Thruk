@@ -63,7 +63,7 @@ sub settings {
 
     get_config_objects($c, $data, $checks_config)
 
-returns list of Monitoring::Objects for the host / services along with list of objexts to remove
+returns list of Monitoring::Objects for the host / services along with list of objects to remove
 
 =cut
 sub get_config_objects {
@@ -89,12 +89,13 @@ sub get_config_objects {
                                                 );
         $hostobj->{'conf'}->{'host_name'} = $hostname;
         $hostobj->{'conf'}->{'alias'}     = $hostname;
-        $hostobj->{'conf'}->{'use'}       = ['generic-thruk-agent-host'];
         $hostobj->{'conf'}->{'address'}   = $ip || $hostname;
     } else {
         $hostobj = $objects->[0];
     }
     $hostobj->{'_filename'} = $filename;
+
+    $hostobj->{'conf'}->{'use'} = $section ? [_make_section_template("host", $section)] : ['generic-thruk-agent-host'];
 
     my @list = ($hostobj);
     my @remove;
@@ -114,6 +115,8 @@ sub get_config_objects {
     $hostdata->{'_AGENT_SECTION'}  = $section;
     $hostdata->{'_AGENT_PORT'}     = $port;
     my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
+
+    my $template = $section ? [_make_section_template("service", $section)] : ['generic-thruk-agent-service'];
 
     for my $id (sort keys %{$checks_hash}) {
         next if $id eq '_host';
@@ -149,6 +152,7 @@ sub get_config_objects {
         delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
         $chk->{'svc_conf'}->{'_AGENT_ARGS'} = $args if $args;
         $chk->{'svc_conf'}->{'check_command'} .= " ".$args if $args;
+        $chk->{'svc_conf'}->{'use'} = $template;
 
         push @list, $svc;
     }
@@ -160,6 +164,49 @@ sub get_config_objects {
         $hostdata->{'_AGENT_CONFIG'} = $settings;
     }
     $hostobj->{'conf'} = $hostdata;
+
+    # add templates
+    if($section) {
+        my @paths = split(/\//mx, $section);
+        my $cur = "";
+        my $parent_svc = "generic-thruk-agent-service";
+        my $parent_hst = "generic-thruk-agent-host";
+        while(scalar @paths > 0) {
+            my $p = shift @paths;
+            $cur = ($cur ? $cur."/" : "").$p;
+            my $svc = Monitoring::Config::Object->new( type  => 'service',
+                                                    coretype => $c->{'obj_db'}->{'coretype'},
+                                                    );
+            $svc->{'_filename'} = sprintf('agents/%s/templates.cfg', $cur);
+            my $name = _make_section_template("service", $cur);
+            $svc->{'conf'} = {
+                "name"      => $name,
+                "use"       => [$parent_svc],
+                "register"  => 0,
+            };
+            my $objects = $c->{'obj_db'}->get_objects_by_name("service", $name);
+            if(!$objects || scalar @{$objects} == 0) {
+                push @list, $svc;
+            }
+            $parent_svc = $name;
+
+            $name = _make_section_template("host", $cur);
+            my $hst = Monitoring::Config::Object->new( type  => 'host',
+                                                    coretype => $c->{'obj_db'}->{'coretype'},
+                                                    );
+            $hst->{'_filename'} = sprintf('agents/%s/templates.cfg', $cur);
+            $hst->{'conf'} = {
+                "name"      => $name,
+                "use"       => [$parent_hst],
+                "register"  => 0,
+            };
+            $objects = $c->{'obj_db'}->get_objects_by_name("host", $name);
+            if(!$objects || scalar @{$objects} == 0) {
+                push @list, $hst;
+            }
+            $parent_hst = $name;
+        }
+    }
 
     return(\@list, \@remove);
 }
@@ -315,7 +362,6 @@ sub _extract_checks {
         $chk->{'svc_conf'} = {
             'host_name'           => $hostname,
             'service_description' => $chk->{'name'},
-            'use'                 => ['generic-thruk-agent-service'],
             'check_interval'      => $interval,
             'check_command'       => $command,
             '_AGENT_AUTO_CHECK'   => $chk->{'id'},
@@ -392,6 +438,12 @@ sub _check_nsc_web_extra_options {
     return(    $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_nsc_web_extra_options'}
             // $settings->{'check_nsc_web_extra_options'}
     );
+}
+
+##########################################################
+sub _make_section_template {
+    my($type, $section) = @_;
+    return("agent-".$type."-".$section);
 }
 
 ##########################################################
