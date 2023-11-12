@@ -2543,6 +2543,8 @@ sub remote_file_sync {
             _debug('deleting file: '.$f->{'display'});
             $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
             unlink($f->{'path'});
+            # try removing folder as well to not keep empty folders
+            rmdir(Thruk::Base::dirname($f->{'path'}));
         } else {
             _debug('keeping file: '.$f->{'display'});
         }

@@ -454,6 +454,8 @@ sub save {
             push @{$self->{'errors'}}, "cannot delete ".$self->{'path'}.": ".$!;
             return;
         };
+        # try removing folder as well to not keep empty folders
+        rmdir(Thruk::Base::dirname($self->{'path'}));
         return 1;
     }
 

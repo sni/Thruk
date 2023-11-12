@@ -966,6 +966,8 @@ sub _cmd_configtool {
             my $file = $c->{'obj_db'}->get_file_by_path($f);
             if($file && !$file->readonly()) {
                 unlink($f);
+                # try removing folder as well to not keep empty folders
+                rmdir(Thruk::Base::dirname($f));
 
                 # create log message
                 _info(sprintf("[config][%s][%s][ext] deleted file '%s'",
