@@ -38,6 +38,13 @@ function add_conf_attribute(table, key, rt) {
         }
         newObj.cells[0].innerHTML = "<input type=\"text\" name=\"objkey." + running_number + "\" value=\"" + value + "\" class=\"attrkey\" onchange=\"conf_update_attr_customvar_name(this)\">";
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/class="obj_customvariable"/g, 'class="obj_customvariable obj_'+running_number+'"');
+
+        // make first cell a td to not break styles
+        var newHeader = document.createElement('td');
+        newHeader.innerHTML = newObj.cells[0].innerHTML;
+        newHeader.className = newObj.cells[0].className;
+        newHeader.abbr      = newObj.cells[0].abbr;
+        newObj.cells[0].replaceWith(newHeader);
     }
     if(key == 'customvariable') {
         newObj.cells[2].innerHTML = newObj.cells[2].innerHTML.replace(/id="id_customvariable0"/g, 'id="id_customvariable'+running_number+'"');

@@ -16,7 +16,15 @@
       [% class = "line-through font-normal" %]
     [% END %]
     <tr>
-      <th class='[%+ class %] pl-2 align-top w-[210px]' abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display' ,'none')">[% IF !obj.default.exists(key) %]<input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="conf_update_attr_customvar_name(this)">[% ELSE %][% key %][% END %]</th>
+      [% IF !obj.default.exists(key) %]
+        <td class='[%+ class %] pl-2 align-top w-[210px]' abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display' ,'none')">
+          <input type="text" name="objkey.[% loop.count %]" value="[% key %]" class="attrkey" onchange="conf_update_attr_customvar_name(this)">
+        </td>
+      [% ELSE %]
+        <th class='[%+ class %] pl-2 align-top w-[210px]' abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display' ,'none')">
+          [% key %]
+        </th>
+      [% END %]
       <td class='[%+ class %] clickable align-top w-6' abbr="[% key %]" onmouseover="jQuery('#del_[% loop.count %]').css('display', '')" onmouseout="jQuery('#del_[% loop.count %]').css('display', 'none')"><i class="fa-solid fa-square-minus" id="del_[% loop.count %]" title="remove this attribute" onclick="remove_conf_attribute(this.parentNode.abbr, 'del_[% loop.count %]'); return false;" style="display: none;"></i></td>
       <td colspan=2>
         [% PROCESS _conf_object_row nr = loop.count edit = 1 defaults = obj.default key = key obj_conf = obj.conf %]
