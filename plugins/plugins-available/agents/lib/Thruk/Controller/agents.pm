@@ -31,7 +31,6 @@ sub index {
     my($c) = @_;
     &timing_breakpoint('index start');
 
-    # Safe Defaults required for changing backends
     return unless Thruk::Action::AddDefaults::add_defaults($c);
 
     return $c->detach('/error/index/8') unless $c->check_user_roles("admin");
@@ -93,7 +92,10 @@ sub _process_show {
                                               'custom_variables' => { '~' => 'AGENT .+' },
                                             ],
                                  );
-    $c->stash->{data} = $hosts;
+    for my $hst (@{$hosts}) {
+        Thruk::Utils::set_data_row_cust_vars($hst, 1);
+    }
+    $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'host_name', 'site']);
 
     my $versions = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                          'host_custom_variables' => { '~' => 'AGENT .+' },
