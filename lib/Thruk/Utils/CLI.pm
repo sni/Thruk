@@ -1127,6 +1127,7 @@ sub _cmd_raw {
         }
         $res->[2]->{$key}->{'configtool'} = $configtool;            # old variant
         $res->[2]->{$key}->{'thruk'}->{'configtool'} = $configtool; # new way, put everyting into a single thruk hash
+        $res->[2]->{$key}->{'thruk'}->{'remotekey'} = $peer->{'remotekey'} if $peer->{'remotekey'};
     }
 
     return($res, 0);

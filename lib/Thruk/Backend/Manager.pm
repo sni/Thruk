@@ -1629,8 +1629,11 @@ sub _do_on_peers {
                 }
                 $peer->{'thrukextras'} = $res->{'thruk'} if $res->{'thruk'};
 
-                if($res->{'remote_peer_key'}) {
+                if($res->{'remote_peer_key'}) { # set from HTTP.pm
                     $peer->{'remotekey'} = $res->{'remote_peer_key'};
+                }
+                if($res->{'thruk'} && $res->{'thruk'}->{'remotekey'}) { # set via LMD
+                    $peer->{'remotekey'} = $res->{'thruk'}->{'remotekey'};
                 }
             }
         }
