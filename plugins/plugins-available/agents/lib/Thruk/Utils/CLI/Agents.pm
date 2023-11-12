@@ -477,7 +477,7 @@ sub _check_inventory {
             (scalar @{$checks->{'new'}} != 1 ? 's' : ''),
             $perfdata,
             join("\n", @details),
-        ), 2);
+        ), 1);
     }
 
     my @details;

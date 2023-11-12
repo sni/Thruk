@@ -97,12 +97,29 @@ sub _process_show {
     }
     $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'host_name', 'site']);
 
-    my $versions = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                          'host_custom_variables' => { '~' => 'AGENT .+' },
-                                         'description' => 'agent version',
+                                         'description' => { '~' => '^(agent version|agent inventory)$' },
                                         ],
                                  );
-    $c->stash->{versions} = Thruk::Base::array2hash($versions, "host_name");
+    my $info = {};
+    for my $svc (@{$services}) {
+        my $extra = $info->{$svc->{'host_name'}} // {};
+        if($svc->{'description'} eq 'agent version') {
+            my $v = $svc->{'plugin_output'};
+            $v =~ s/^.*\sv/v/gmx;
+            $extra->{'version'}          = $v;
+            $extra->{'state'}            = $svc->{'state'};
+            $extra->{'has_been_checked'} = $svc->{'has_been_checked'};
+        }
+        if($svc->{'description'} eq 'agent inventory') {
+            $extra->{'inv_state'}        = $svc->{'state'};
+            $extra->{'inv_out'}          = $svc->{'plugin_output'};
+            $extra->{'inv_out'}          =~ s/^\w+\ \-\ //gmx;
+        }
+        $info->{$svc->{'host_name'}} = $extra;
+    }
+    $c->stash->{info} = $info;
 
     # set fallback backend for start page so the apply button can be shown
     if(!$c->req->parameters->{'backend'} && !$c->stash->{'param_backend'}) {

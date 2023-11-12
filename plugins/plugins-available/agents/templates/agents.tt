@@ -43,14 +43,14 @@
             <td><a class="link" href="status.cgi?host=[% h.name | uri %]">[% h.name | html %]</a></td>
             <td>
               [% state = 'PENDING' %]
-              [% IF versions.exists(hostname) %]
-                [% state = servicestatetext(versions.$hostname) %]
+              [% IF info.exists(hostname) %]
+                [% state = servicestatetext(info.$hostname) %]
               [% END %]
               <div class='text-center badge [% state %]'>[% state %]</div>
             </td>
             <td>[% peer_name(h) | html %]</td>
             <td><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=20 height=20 class="inline"> [% agent.type | html %]</td>
-            <td>[% IF versions.exists(hostname) %][% versions.$hostname.plugin_output.replace('^.*\sv', 'v') | html %][% END %]</td>
+            <td>[% IF info.exists(hostname) && info.$hostname.exists("version") %][% info.$hostname.version | html %][% END %]</td>
             <td>
               <div class="flexrow flex-nowrap gap-x-2">
                 <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]"><i class="fa-solid fa-pencil text-sm" title='Edit this host'></i></a>
@@ -59,6 +59,12 @@
                   data   => { 'action' => 'remove', 'hostname' => h.name, backend => h.peer_key, CSRFtoken => get_user_token(c), },
                   button => { class => 'iconOnly', title => "Remove this host with all services.", onclick => "return(confirm('really remove host?'))", html => '<i class="uil uil-trash-alt"></i>' },
                 }%]
+                [% IF info.exists(hostname) && info.$hostname.exists("inv_state") && info.$hostname.inv_state != 0 %]
+                  <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]">
+                    <i class="fa-solid fa-exclamation round small [% IF info.$hostname.inv_state == 1 %]yellow[% ELSE %]orange[% END %]" title="[% info.$hostname.inv_out | html %]"></i>
+                  </a>
+                  [% info.$hostname.inv_state %]
+                [% END %]
               </div>
             </td>
           </tr>
