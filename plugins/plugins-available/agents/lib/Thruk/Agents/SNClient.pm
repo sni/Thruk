@@ -91,7 +91,7 @@ sub get_config_objects {
         $hostobj->set_uniq_id($c->{'obj_db'});
         $hostobj->{'conf'}->{'host_name'} = $hostname;
         $hostobj->{'conf'}->{'alias'}     = $hostname;
-        $hostobj->{'conf'}->{'use'}       = ['generic-host'];
+        $hostobj->{'conf'}->{'use'}       = ['generic-thruk-agent-host'];
         $hostobj->{'conf'}->{'address'}   = $ip || $hostname;
     } else {
         $hostobj = $objects->[0];
@@ -217,7 +217,28 @@ sub get_inventory {
         command_name => 'check_snclient',
         command_line => '$USER1$/check_nsc_web $ARG1$',
     };
-    Thruk::Utils::Agents::check_for_check_commands($c, [$cmd]);
+
+    my $extra_templates = [];
+    push @{$extra_templates}, {
+        type => 'host',
+        name => 'generic-thruk-agent-host',
+        file => 'agents/templates.cfg',
+        conf => {
+            'name'  => 'generic-thruk-agent-host',
+            'use'   => ['generic-host'],
+        },
+    };
+    push @{$extra_templates}, {
+        type => 'service',
+        name => 'generic-thruk-agent-service',
+        file => 'agents/templates.cfg',
+        conf => {
+            'name'  => 'generic-thruk-agent-service',
+            'use'   => ['generic-service'],
+        },
+    };
+
+    Thruk::Utils::Agents::check_for_check_commands($c, [$cmd], $extra_templates);
 
     _debug("scan command: %s!%s", $command, $args);
     my $output = $c->{'obj_db'}->get_plugin_preview($c,
@@ -302,7 +323,7 @@ sub _extract_checks {
         $chk->{'svc_conf'} = {
             'host_name'           => $hostname,
             'service_description' => $chk->{'name'},
-            'use'                 => ['generic-service'],
+            'use'                 => ['generic-thruk-agent-service'],
             'check_interval'      => $interval,
             'check_command'       => $command,
             '_AGENT_AUTO_CHECK'   => $chk->{'id'},

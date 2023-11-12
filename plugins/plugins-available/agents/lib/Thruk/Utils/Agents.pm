@@ -250,13 +250,13 @@ sub build_agent {
 
 =head2 check_for_check_commands
 
-    check_for_check_commands($c, [$extra_cmd])
+    check_for_check_commands($c, [$extra_cmd], [$extra_objects])
 
 create agent check commands if missing
 
 =cut
 sub check_for_check_commands {
-    my($c, $agent_cmds) = @_;
+    my($c, $agent_cmds, $extra_objects) = @_;
 
     $agent_cmds = [] unless defined $agent_cmds;
     push @{$agent_cmds}, {
@@ -266,7 +266,13 @@ sub check_for_check_commands {
 
     my $changed = 0;
     for my $cmd (@{$agent_cmds}) {
-        $changed++ unless _ensure_command_exists($c, $cmd->{'command_name'}, $cmd);
+        $changed++ unless _ensure_command_exists($c, 'command', $cmd->{'command_name'}, $cmd, 'agents/commands.cfg');
+    }
+
+    if($extra_objects) {
+        for my $ex (@{$extra_objects}) {
+            $changed++ unless _ensure_command_exists($c, $ex->{'type'}, $ex->{'name'}, $ex->{'conf'}, $ex->{'file'});
+        }
     }
 
     if($changed) {
@@ -623,17 +629,17 @@ sub _check_pattern {
 
 ##########################################################
 sub _ensure_command_exists {
-    my($c, $name, $data) = @_;
+    my($c, $type, $name, $data, $filename) = @_;
 
-    my $objects = $c->{'obj_db'}->get_objects_by_name('command', $name);
+    my $objects = $c->{'obj_db'}->get_objects_by_name($type, $name);
     if($objects && scalar @{$objects} > 0) {
         return 1;
     }
 
-    my $obj = Monitoring::Config::Object->new( type     => 'command',
+    my $obj = Monitoring::Config::Object->new( type     => $type,
                                                coretype => $c->{'obj_db'}->{'coretype'},
                                             );
-    my $file = Thruk::Controller::conf::get_context_file($c, $obj, 'agents/commands.cfg');
+    my $file = Thruk::Controller::conf::get_context_file($c, $obj, $filename);
     die("creating file failed") unless $file;
     $obj->set_file($file);
     $obj->set_uniq_id($c->{'obj_db'});
