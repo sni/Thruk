@@ -6,7 +6,6 @@ use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
 
 use Monitoring::Config::Object ();
-use Thruk::Controller::conf ();
 use Thruk::Utils ();
 use Thruk::Utils::Agents ();
 use Thruk::Utils::Log qw/:all/;

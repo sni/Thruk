@@ -46,6 +46,7 @@ use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Backend::Manager ();
+use Thruk::Controller::conf ();
 use Thruk::Utils ();
 use Thruk::Utils::Agents ();
 use Thruk::Utils::Auth ();

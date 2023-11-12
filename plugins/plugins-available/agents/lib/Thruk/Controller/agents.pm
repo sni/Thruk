@@ -4,6 +4,8 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Backend::Manager ();
+use Thruk::Controller::conf ();
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::Agents ();
 use Thruk::Utils::Auth ();
