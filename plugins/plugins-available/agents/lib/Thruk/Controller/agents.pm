@@ -230,13 +230,9 @@ sub _process_save {
         return _process_new($c);
     }
 
-    if(Thruk::Base::check_for_nasty_filename($hostname)) {
-        Thruk::Utils::set_message( $c, 'fail_message', "this hostname is not allowed");
-        return _process_new($c);
-    }
-
-    if(Thruk::Base::check_for_nasty_filename($section)) {
-        Thruk::Utils::set_message( $c, 'fail_message', "this section is not allowed");
+    my $err = Thruk::Utils::Agents::validate_params($hostname, $section);
+    if($err) {
+        Thruk::Utils::set_message( $c, 'fail_message', $err);
         return _process_new($c);
     }
 
@@ -255,7 +251,8 @@ sub _process_save {
     my $agent   = $class->new();
     my($objects, $remove) = $agent->get_config_objects($c, $data, $c->req->parameters);
     for my $obj (@{$objects}) {
-        my $file = $obj->{'file'};
+        my $file = Thruk::Controller::conf::get_context_file($c, $obj, $obj->{'_filename'});
+        my $oldfile = $obj->{'file'};
         if(defined $file && $file->{'readonly'}) {
             Thruk::Utils::set_message( $c, 'fail_message', sprintf("cannot write to %s, file is marked readonly", $file->{'display'}));
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
@@ -263,6 +260,12 @@ sub _process_save {
         if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
             Thruk::Utils::set_message( $c, 'fail_message', "unable to save changes");
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
+        }
+        if(!$oldfile) {
+            $obj->set_file($file);
+            $obj->set_uniq_id($c->{'obj_db'});
+        } elsif($oldfile->{'path'} ne $file->{'path'}) {
+            $c->{'obj_db'}->move_object($obj, $file);
         }
     }
     for my $obj (@{$remove}) {
@@ -340,7 +343,7 @@ sub _process_json {
         my $sections = {};
         for my $hst (@{$hosts}) {
             my $vars  = Thruk::Utils::get_custom_vars($c, $hst);
-            $sections->{$vars->{'_AGENT_SECTION'}} = 1 if $vars->{'_AGENT_SECTION'};
+            $sections->{$vars->{'AGENT_SECTION'}} = 1 if $vars->{'AGENT_SECTION'};
         }
         push @{$json}, { 'name' => "sections", 'data' => [sort keys %{$sections} ] };
     }

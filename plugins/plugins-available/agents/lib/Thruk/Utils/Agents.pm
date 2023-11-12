@@ -595,6 +595,31 @@ sub check_disable {
 }
 
 ##########################################################
+
+=head2 validate_params
+
+    validate_params($hostname, $section)
+
+returns undef or error message
+
+=cut
+sub validate_params {
+    my($hostname, $section) = @_;
+    if(Thruk::Base::check_for_nasty_filename($hostname)) {
+        return("this hostname is not allowed");
+    }
+
+    my @sections = split/\//mx, $section;
+    for my $sect (@sections) {
+        if(Thruk::Base::check_for_nasty_filename($sect)) {
+            return("this section is not allowed");
+        }
+    }
+
+    return;
+}
+
+##########################################################
 sub _check_pattern {
     my($val, $pattern) = @_;
     for my $f (@{Thruk::Base::list($pattern)}) {

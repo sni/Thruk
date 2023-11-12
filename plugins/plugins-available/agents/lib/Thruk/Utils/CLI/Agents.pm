@@ -304,6 +304,11 @@ sub _run_add {
         return($output, $rc);
     }
 
+    my $err = Thruk::Utils::Agents::validate_params($hostname, $opt->{'section'});
+    if($err) {
+        return($err, 2);
+    }
+
     my($checks, $checks_num, $hst, $hostobj, $data) = _get_checks($c, $hostname, $opt, $edit_only ? 0 : 1);
     if($edit_only) {
         return(sprintf("no host found by name: %s\n", $hostname), 3) unless $hostobj;
@@ -374,9 +379,16 @@ sub _run_add {
     my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, $opt->{'fresh'});
     my @result;
     for my $obj (@{$objects}) {
-        my $file = $obj->{'file'};
+        my $file = Thruk::Controller::conf::get_context_file($c, $obj, $obj->{'_filename'});
+        my $oldfile = $obj->{'file'};
         if(defined $file && $file->{'readonly'}) {
             return(sprintf("cannot write to %s, file is marked readonly\n", $file->{'display'}), 2);
+        }
+        if(!$oldfile) {
+            $obj->set_file($file);
+            $obj->set_uniq_id($c->{'obj_db'});
+        } elsif($oldfile->{'path'} ne $file->{'path'}) {
+            $c->{'obj_db'}->move_object($obj, $file);
         }
         if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
             return("unable to save changes\n", 2);

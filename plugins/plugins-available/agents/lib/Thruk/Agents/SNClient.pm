@@ -77,6 +77,9 @@ sub get_config_objects {
     my $password = $data->{'password'} // '';
     my $port     = $data->{'port'}     || $settings->{'default_port'};
 
+    $section =~ s|^\/*||gmx if $section;
+    $section =~ s|\/*$||gmx if $section;
+    $section =~ s|\/+|/|gmx if $section;
     my $filename = $section ? sprintf('agents/%s/%s.cfg', $section, $hostname) : sprintf('agents/%s.cfg', $hostname);
     my $objects  = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
     my $hostobj;
@@ -85,10 +88,6 @@ sub get_config_objects {
         $hostobj = Monitoring::Config::Object->new( type    => 'host',
                                                    coretype => $c->{'obj_db'}->{'coretype'},
                                                 );
-        my $file = Thruk::Controller::conf::get_context_file($c, $hostobj, $filename);
-        die("creating file failed") unless $file;
-        $hostobj->set_file($file);
-        $hostobj->set_uniq_id($c->{'obj_db'});
         $hostobj->{'conf'}->{'host_name'} = $hostname;
         $hostobj->{'conf'}->{'alias'}     = $hostname;
         $hostobj->{'conf'}->{'use'}       = ['generic-thruk-agent-host'];
@@ -96,6 +95,7 @@ sub get_config_objects {
     } else {
         $hostobj = $objects->[0];
     }
+    $hostobj->{'_filename'} = $filename;
 
     my @list = ($hostobj);
     my @remove;
@@ -132,10 +132,6 @@ sub get_config_objects {
             $svc = Monitoring::Config::Object->new( type     => 'service',
                                                     coretype => $c->{'obj_db'}->{'coretype'},
                                                     );
-            my $file = Thruk::Controller::conf::get_context_file($c, $svc, $filename);
-            die("creating file failed") unless $file;
-            $svc->set_file($file);
-            $svc->set_uniq_id($c->{'obj_db'});
         }
 
         if($type eq 'new') {
@@ -149,10 +145,7 @@ sub get_config_objects {
         }
         next unless($type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//''));
 
-        # always set right file name
-        my $file = Thruk::Controller::conf::get_context_file($c, $svc, $filename);
-        die("creating file failed") unless $file;
-        $svc->set_file($file);
+        $svc->{'_filename'} = $filename;
         $svc->{'conf'} = $chk->{'svc_conf'};
         delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
         $chk->{'svc_conf'}->{'_AGENT_ARGS'} = $args if $args;
