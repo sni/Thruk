@@ -69,11 +69,20 @@ _test_filter('(host_name = 1) or (host_name = 2) or (host_name = 3)',
 
 sub _test_filter {
     my($filter, $expect, $exp_ftext) = @_;
-    my $f = Thruk::Utils::Status::parse_lexical_filter($filter);
-    my $s = Monitoring::Livestatus::Class::Lite->new('test.sock')->table('hosts')->filter($f)->statement(1);
-    $s    = join("\n", @{$s});
-    $s      =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
-    $expect =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
+    my($f, $s);
+    # add retry, check depends on time
+    for(1..3) {
+        $f = Thruk::Utils::Status::parse_lexical_filter($filter);
+        $s = Monitoring::Livestatus::Class::Lite->new('test.sock')->table('hosts')->filter($f)->statement(1);
+        $s = join("\n", @{$s});
+        $s =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
+        $expect =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
+        if($s eq $expect) {
+            last;
+        }
+        sleep(1);
+    }
+
     is($s, $expect, 'got correct statement');
 
     my $txt = Thruk::Utils::Status::filter2text($c, "service", $f);
