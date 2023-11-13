@@ -46,8 +46,12 @@ var is_report = process.argv[7];
         console.error("login window present, export failed");
         process.exit(2);
       }),
-      page.waitForSelector('div.alert-error').then(() => {
+      page.waitForSelector('div.alert-error').then(async () => {
         console.error("alert message found, export failed");
+        console.error("alert message found, export failed:");
+        let element = await page.$('div.alert-error')
+        let value = await page.evaluate(el => el.textContent, element)
+        console.error(value);
         process.exit(2);
       }),
       page.waitForSelector('DIV.flot-text', {timeout: 20000}).then(() => {
