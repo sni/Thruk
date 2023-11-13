@@ -76,6 +76,7 @@ sub index {
     $c->stash->{'reload_required'} = ($c->{'obj_db'} && $c->{'obj_db'}->{'last_changed'}) ? 1 : 0;
 
     if($action eq 'show') {
+        $c->stash->{'reload_required'} = $c->req->parameters->{'activate'} // $c->stash->{'reload_required'};
         $c->stash->{'backend_chooser'} = 'select';
         $c->stash->{'param_backend'} = '';
         $c->req->parameters->{'backend'} = $backend;
@@ -260,15 +261,15 @@ sub _process_save {
             Thruk::Utils::set_message( $c, 'fail_message', sprintf("cannot write to %s, file is marked readonly", $file->{'display'}));
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
         }
-        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
-            Thruk::Utils::set_message( $c, 'fail_message', "unable to save changes");
-            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
-        }
         if(!$oldfile) {
             $obj->set_file($file);
             $obj->set_uniq_id($c->{'obj_db'});
         } elsif($oldfile->{'path'} ne $file->{'path'}) {
             $c->{'obj_db'}->move_object($obj, $file);
+        }
+        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
+            Thruk::Utils::set_message( $c, 'fail_message', "unable to save changes");
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
         }
     }
     for my $obj (@{$remove}) {
@@ -310,8 +311,8 @@ sub _process_remove {
 
     Thruk::Utils::Agents::remove_host($c, $hostname, $backend);
 
-    Thruk::Utils::set_message( $c, 'success_message', "host $hostname removed successfully");
-    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi");
+    Thruk::Utils::set_message( $c, 'success_message', "host $hostname removed successfully, activate to apply changes.");
+    return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?activate=$backend");
 }
 
 ##########################################################

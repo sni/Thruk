@@ -16,7 +16,7 @@
         [% PROCESS _button btn = {
           form   => { action => 'conf.cgi', },
           data   => { sub => 'objects', 'apply' => 'yes', 'reload' => 'yes', CSRFtoken => get_user_token(c), },
-          button => { class => 'w-full orange', title => "Apply all changes and reload core", onclick => "return send_form_in_background_and_reload(this);", html => '<i class="uil uil-sync"></i>Activate Changes' },
+          button => { class => 'w-full orange', title => "Apply all changes and reload core", onclick => "removeParams['activate'] = true; return send_form_in_background_and_reload(this);", html => '<i class="uil uil-sync"></i>Activate Changes' },
         }%]
         [% END %]
       </div>
