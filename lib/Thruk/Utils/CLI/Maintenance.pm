@@ -72,6 +72,9 @@ sub cmd {
     ($total, $removed) = Thruk::Utils::External::cleanup_job_folders($c, 1);
     _info("  - %-20s: removed %5d / %5d old job folders", "jobs", $removed, $total);
 
+    ($total, $removed) = _cleanup_puppeteer_folders($c, 1);
+    _info("  - %-20s: removed %5d / %5d old puppeteer folders", "reports", $removed, $total);
+
     $c->stats->profile(end => "_cmd_maintenance($action)");
     return("maintenance complete\n", 0);
 }
@@ -127,6 +130,30 @@ sub clean_old_user_files {
     }
 
     $c->stats->profile(end => "clean_old_user_files");
+    return($total, $removed);
+}
+
+##############################################
+sub _cleanup_puppeteer_folders {
+    my($c, $verbose) = @_;
+
+    $c->stats->profile(begin => "_cleanup_puppeteer_folders");
+
+    my($total, $removed) = (0, 0);
+    my $max_age      = time() - 7200;      # keep them for two hours
+    for my $olddir (glob("/tmp/puppeteer_dev_chrome_profile-*")) {
+        $total++;
+        my @stat = stat($olddir);
+        if($stat[9] < $max_age) {
+            Thruk::Utils::IO::cmd("rm -rf $olddir");
+            $removed++;
+            if($verbose && -d $olddir.'/.') {
+                _warn("unable to remove puppeteer folder: %s", $olddir);
+            }
+        }
+    }
+
+    $c->stats->profile(end => "_cleanup_puppeteer_folders");
     return($total, $removed);
 }
 

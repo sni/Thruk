@@ -25,6 +25,8 @@ var is_report = process.argv[7];
               '--disable-setuid-sandbox',
               '--window-size='+width+','+height
           ]
+          // doesn't work: makes puppeteer twice as slow
+          //,userDataDir: '/dev/null' // avoid leaking /tmp/puppeteer_dev_profile-xxxx folders https://github.com/puppeteer/puppeteer/issues/6414
   });
   const page = await browser.newPage();
   page.setViewport({width: Number(width), height: Number(height)});

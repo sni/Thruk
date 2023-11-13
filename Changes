@@ -9,7 +9,7 @@ next:
           - Config Tool:
             - style fixes
           - Reports:
-            - fix leaking /tmp/puppeteer_dev_profile-... folders
+            - cleanup /tmp/puppeteer_dev_profile-... folders
 
 3.10     Sun Nov  5 16:24:33 CET 2023
           - add new agents plugin
