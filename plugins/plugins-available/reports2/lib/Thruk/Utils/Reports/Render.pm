@@ -607,7 +607,7 @@ sub get_day_name {
   get_graph_source(c, host, service)
 
 return index of first graph for given host (or service) provided
-by the _GRAPH_SOURCE custom variable or 0 as default fallback.
+by the _GRAPH_SOURCE custom variable or 1 as default fallback.
 
 =cut
 sub get_graph_source {
@@ -625,10 +625,9 @@ sub get_graph_source {
         my $grafanaurl = Thruk::Utils::get_histou_url($c, $data, 1);
         if($grafanaurl) {
             return($c->config->{'grafana_default_panelId'}) if defined $c->config->{'grafana_default_panelId'};
-            return 1;
         }
     }
-    return 0;
+    return 1;
 }
 
 
