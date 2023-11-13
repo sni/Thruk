@@ -452,7 +452,10 @@ sub _run_remove {
     }
 
     my($checks, $checks_num, $hst, $hostobj) = _get_checks($c, $hostname, $opt, 0);
-    return(sprintf("no host found by name: %s\n", $hostname), 3) unless $hostobj;
+    if(!$hostobj) {
+        return(sprintf("no host found by name: %s\n", $hostname), 0) if $global_options->{'force'};
+        return(sprintf("no host found by name: %s\n", $hostname), 3);
+    }
 
     if(!$global_options->{'yes'}) {
         _info("Really  remove host: %s", $hostname);

@@ -155,7 +155,8 @@ sub get_config_objects {
             $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
         } else {
             # check for default args
-            #$c->config->{'Thruk::Agents'}->{'snclient'}->{'default_'.$attr}
+            $args = _get_default_args($c, $svc->{'conf'}->{'service_description'}, $hostname, $section);
+            $chk->{'svc_conf'}->{'check_command'} .= " ".$args if $args;
         }
         $chk->{'svc_conf'}->{'use'} = $template;
 
@@ -449,6 +450,21 @@ sub _check_nsc_web_extra_options {
 sub _make_section_template {
     my($type, $section) = @_;
     return("agent-".$type."-".$section);
+}
+
+##########################################################
+sub _get_default_args {
+    my($c, $name, $hostname, $section) = @_;
+    my $args = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'args'});
+    my $res;
+    for my $arg (@{$args}) {
+        next unless Thruk::Utils::Agents::check_wildcard_match($name, $arg->{'match'});
+        next unless Thruk::Agents::SNClient::check_host_match($arg->{'host'});
+        next unless Thruk::Utils::Agents::check_wildcard_match($section, $arg->{'section'});
+        $res = $arg->{'value'};
+    }
+
+    return $res;
 }
 
 ##########################################################

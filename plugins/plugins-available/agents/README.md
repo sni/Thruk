@@ -97,6 +97,16 @@ For example:
           #host = ANY
           #section ~ test # apply this process check only to sections containing "test"
         </proc>
+
+        # set default args (if multiple args match, the last one overrides previous ones)
+        <args>
+          value = warn='load > 95' crit='load > 100'
+          match = cpu # regex match on service name
+          # restrict to specific hosts (regular expression)
+          #host = ANY
+          #section ~ test # apply this process check only to sections containing "test"
+        </args>
+
       </snclient>
     </Component>
 
