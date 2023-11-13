@@ -150,8 +150,10 @@ sub get_config_objects {
         $svc->{'_filename'} = $filename;
         $svc->{'conf'} = $chk->{'svc_conf'};
         delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
-        $chk->{'svc_conf'}->{'_AGENT_ARGS'} = $args if $args;
-        $chk->{'svc_conf'}->{'check_command'} .= " ".$args if $args;
+        if($args) {
+            $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
+            $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
+        }
         $chk->{'svc_conf'}->{'use'} = $template;
 
         push @list, $svc;
