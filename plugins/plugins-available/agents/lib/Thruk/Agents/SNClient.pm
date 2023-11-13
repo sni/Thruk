@@ -105,7 +105,7 @@ sub get_config_objects {
     my $services = Thruk::Utils::Agents::get_host_agent_services($c, $hostobj);
 
     # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh);
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section);
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
     confess("missing host config") unless $checks_hash->{'_host'};
@@ -153,6 +153,9 @@ sub get_config_objects {
         if($args) {
             $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
             $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
+        } else {
+            # check for default args
+            #$c->config->{'Thruk::Agents'}->{'snclient'}->{'default_'.$attr}
         }
         $chk->{'svc_conf'}->{'use'} = $template;
 
@@ -217,18 +220,18 @@ sub get_config_objects {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $hostname, $hostobj, $password, $fresh)
+    get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section)
 
 returns list of Monitoring::Objects for the host / services
 
 =cut
 sub get_services_checks {
-    my($self, $c, $hostname, $hostobj, $password, $fresh) = @_;
+    my($self, $c, $hostname, $hostobj, $password, $fresh, $section) = @_;
     my $datafile = $c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json';
     my $checks = [];
     if(-r $datafile) {
         my $data = Thruk::Utils::IO::json_lock_retrieve($datafile);
-        $checks = _extract_checks($c, $data->{'inventory'}, $hostname, $password, $fresh) if $data->{'inventory'};
+        $checks = _extract_checks($c, $data->{'inventory'}, $hostname, $password, $fresh, $section) if $data->{'inventory'};
     }
     return($checks);
 }
@@ -304,7 +307,7 @@ sub get_inventory {
 
 ##########################################################
 sub _extract_checks {
-    my($c, $inventory, $hostname, $password, $fresh) = @_;
+    my($c, $inventory, $hostname, $password, $fresh, $section) = @_;
     my $checks = [];
 
     # get available modules
@@ -314,7 +317,7 @@ sub _extract_checks {
         $mod =~ s/\//::/gmx;
         $mod =~ s/\.pm$//gmx;
         $mod->import;
-        push @{$checks}, @{$mod->get_checks($c, $inventory, $hostname, $password)};
+        push @{$checks}, @{$mod->get_checks($c, $inventory, $hostname, $password, $section)};
     }
 
     # compute host configuration

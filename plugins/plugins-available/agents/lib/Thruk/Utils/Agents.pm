@@ -24,15 +24,17 @@ Thruk::Utils::Agents - Utils for agents
 
 =head2 get_agent_checks_for_host
 
-    get_agent_checks_for_host($c, $backend, $hostname, $hostobj, [$agenttype], [$fresh])
+    get_agent_checks_for_host($c, $backend, $hostname, $hostobj, [$agenttype], [$fresh], [$section])
 
 returns list of checks for this host grouped by type (new, exists, obsolete, disabled) along with the total number of checks.
 
 =cut
 sub get_agent_checks_for_host {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $fresh) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $fresh, $section) = @_;
+    $section = $section // $hostobj->{'conf'}->{'_AGENT_SECTION'};
+
     # extract checks and group by type
-    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $fresh);
+    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $fresh, $section);
     my $checks = Thruk::Base::array_group_by($flat, "exists");
     for my $key (qw/new exists obsolete disabled/) {
         $checks->{$key} = [] unless defined $checks->{$key};
@@ -96,13 +98,13 @@ sub update_inventory {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh)
+    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh, $section)
 
 returns list of checks as flat list.
 
 =cut
 sub get_services_checks {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh, $section) = @_;
     my $checks   = [];
     return($checks) unless $hostname;
 
@@ -114,7 +116,7 @@ sub get_services_checks {
         confess("no peer found by name: ".$backend) unless $peer;
         confess("no remotekey") unless $peer->remotekey();
         confess("need agenttype") unless $agenttype;
-        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $fresh], 1);
+        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $fresh, $section], 1);
         return($res[0]);
     }
 
@@ -133,7 +135,7 @@ sub get_services_checks {
     $password = $password || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
 
     my $agent = build_agent($agenttype // $hostobj);
-    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $fresh);
+    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section);
     _set_checks_category($c, $hostname, $hostobj, $checks, $type, $fresh);
 
     return($checks);

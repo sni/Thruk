@@ -160,6 +160,7 @@ sub _process_edit {
     my $hostname = $c->req->parameters->{'hostname'};
     my $backend  = $c->req->parameters->{'backend'};
     my $type     = $c->req->parameters->{'type'} // Thruk::Utils::Agents::default_agent_type($c);
+    my $section  = $c->req->parameters->{'section'};
 
     my $config_backends = Thruk::Utils::Conf::set_backends_with_obj_config($c);
     $c->stash->{config_backends}       = $config_backends;
@@ -179,7 +180,7 @@ sub _process_edit {
             'type'     => $type,
             'hostname' => $hostname,
             'ip'       => $obj->{'address'}         // '',
-            'section'  => $obj->{'_AGENT_SECTION'}  // '',
+            'section'  => $section // $obj->{'_AGENT_SECTION'} // '',
             'port'     => $obj->{'_AGENT_PORT'}     // '',
             'password' => $obj->{'_AGENT_PASSWORD'} // '',
             'peer_key' => $backend,
@@ -187,7 +188,7 @@ sub _process_edit {
     }
 
     # extract checks
-    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type);
+    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, undef, ($section // $agent->{'section'}));
 
     my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $hostname }], backend => $backend );
     $services = Thruk::Base::array2hash($services, "description");

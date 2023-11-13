@@ -576,7 +576,7 @@ sub _get_checks {
         'type'     => $type,
         'hostname' => $hostname,
         'backend'  => $backend,
-        'section'  => $opt->{'section'},
+        'section'  => $opt->{'section'} // '',
         'password' => $opt->{'password'},
         'port'     => $port,
         'ip'       => $opt->{'address'} || $hst->{'address'},
@@ -596,7 +596,7 @@ sub _get_checks {
         }
     }
 
-    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, $opt->{'fresh'});
+    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, $opt->{'fresh'}, $data->{'section'});
     return($checks, $checks_num, $hst->{'peer_key'} ? $hst : undef, $hostobj, $data);
 }
 

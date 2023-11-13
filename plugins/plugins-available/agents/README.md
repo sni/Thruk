@@ -66,7 +66,8 @@ For example:
           #type = df./proc      # type string match
           #type ~ ^extscript\.  # type regex, disable all external scripts by default
           #host !~ \.win\.      # apply this exclude only to specific hosts, only hosts not matching ".win."
-          #host ~ ^l            # apply this exclude only hosts starting with an "l"
+          #host ~ ^l            # apply this exclude only to hosts starting with an "l"
+          #section ~ test       # apply this exclude only to sections containing "test"
         </exclude>
 
         # include services in discovery
@@ -84,6 +85,7 @@ For example:
 
           # restrict to specific hosts (regular expression)
           #host = ANY
+          #section ~ test # apply this service only to sections containing "test"
         </service>
 
         <proc>
@@ -93,6 +95,7 @@ For example:
           user  = mon
           # restrict to specific hosts (regular expression)
           #host = ANY
+          #section ~ test # apply this process check only to sections containing "test"
         </proc>
       </snclient>
     </Component>

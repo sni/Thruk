@@ -233,11 +233,13 @@ function updateChecksTable(form) {
     var host    = jQuery(form).find("INPUT[name=hostname]").val();
     var backend = jQuery(form).find("INPUT[name=backend]").val();
     var type    = jQuery(form).find("INPUT[name=type]").val();
+    var section = jQuery(form).find("INPUT[name=section]").val();
     jQuery('#checksTable').html("<div class='spinner'><\/div>");
     var url = "agents.cgi #checksTableContent";
     var data = {
       action:   'edit',
       hostname: host,
+      section:  section,
       backend:  backend,
       type:     type
     };

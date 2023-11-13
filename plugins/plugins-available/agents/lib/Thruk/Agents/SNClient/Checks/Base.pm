@@ -26,7 +26,7 @@ returns snclient checks
 
 =cut
 sub get_checks {
-    my($self, $c, $inventory, $hostname, $password) = @_;
+    my($self, $c, $inventory, $hostname, $password, $section) = @_;
     my $checks = [];
 
     # agent check itself
@@ -97,6 +97,7 @@ sub get_checks {
         my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'service'});
         for my $cfg (@{$configs}) {
             next unless Thruk::Agents::SNClient::check_host_match($cfg->{'host'});
+            next unless Thruk::Utils::Agents::check_wildcard_match($section, $cfg->{'section'});
             next unless $cfg->{'service'};
             for my $n (@{Thruk::Base::list($cfg->{'service'})}) {
                 $wanted->{$n} = $cfg;
@@ -123,6 +124,7 @@ sub get_checks {
         my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'proc'});
         for my $cfg (@{$configs}) {
             next unless Thruk::Agents::SNClient::check_host_match($cfg->{'host'});
+            next unless Thruk::Utils::Agents::check_wildcard_match($section, $cfg->{'section'});
             next unless $cfg->{'match'};
             for my $n (@{Thruk::Base::list($cfg->{'match'})}) {
                 push @{$wanted->{$n}}, $cfg;
