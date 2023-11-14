@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 16;
+plan tests => 27;
 
 ###########################################################
 # test thruks script path
@@ -31,5 +31,15 @@ TestUtils::test_command({
     TestUtils::test_command({
         cmd     => "/thruk/examples/get_logs var/log/naemon.log -n",
         like    => ['/^$/'],
+    });
+    TestUtils::test_command({
+        cmd     => "/usr/bin/env thruk r '/logs'",
+        like    => ['/class/', '/starting/'],
+    });
+    TestUtils::test_command({
+        cmd     => "/usr/bin/env thruk r '/logs?limit=1&plugin_output[ne]='",
+    });
+    TestUtils::test_command({
+        cmd     => "/usr/bin/env thruk r '/logs?limit=1&contact_name[ne]='",
     });
 };
