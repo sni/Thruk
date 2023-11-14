@@ -1537,6 +1537,7 @@ sub log_line_plugin_output {
     my $output = $l->{'message'};
     $output =~ s/^\[\d+\]\s+//gmx;
     my @parts = split(/;/mx, $output);
+    return('') unless defined $l->{'type'};
     if($l->{'type'} eq 'SERVICE NOTIFICATION') {
         return($parts[5] // '');
     }

@@ -928,6 +928,7 @@ sub _replace_column_name {
     if($col eq 'contact_name') {
         return("c.name", $val);
     }
+
     # using ids makes mysql prefer index
     if($col eq 'host_name' && $self->{'query_meta'}->{'prefix'}) {
         $col = 'l.host_id';

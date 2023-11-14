@@ -960,7 +960,7 @@ sub _apply_sort {
 sub _livestatus_options {
     my($c, $type) = @_;
     my $options = {};
-    if($c->req->parameters->{'limit'}) {
+    if($c->req->parameters->{'limit'} && !$c->stash->{'filter_fixed_up'}) {
         $options->{'options'}->{'limit'} = $c->req->parameters->{'limit'};
         if($c->req->parameters->{'offset'}) {
             $options->{'options'}->{'limit'} += $c->req->parameters->{'offset'};
@@ -1041,28 +1041,31 @@ sub _livestatus_filter {
         }
         elsif($ref_columns eq 'logs') {
             $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
+            # logcache has no plugin_output column
+            delete $ref_columns->{"plugin_output"};
         } else {
             confess("unsupported type: ".$ref_columns);
         }
     }
     my $filter = _get_filter($c, PRE_STATS);
-    _fixup_livestatus_filter($filter, $ref_columns);
+    $c->stash->{'filter_fixed_up'} = 0;
+    _fixup_livestatus_filter($c, $filter, $ref_columns);
     return $filter;
 }
 
 ##########################################################
 sub _fixup_livestatus_filter {
-    my($filter, $ref_columns) = @_;
+    my($c, $filter, $ref_columns) = @_;
 
     if(ref $filter eq 'ARRAY') {
         for my $f (@{$filter}) {
-            _fixup_livestatus_filter($f, $ref_columns);
+            _fixup_livestatus_filter($c, $f, $ref_columns);
         }
     }
     elsif(ref $filter eq 'HASH') {
         for my $f (keys %{$filter}) {
             if($f eq '-and' || $f eq '-or') {
-                _fixup_livestatus_filter($filter->{$f}, $ref_columns);
+                _fixup_livestatus_filter($c, $filter->{$f}, $ref_columns);
             } else {
                 if($ref_columns && !$ref_columns->{$f}) {
                     # normalize filter
@@ -1078,6 +1081,9 @@ sub _fixup_livestatus_filter {
                     my $op  = $ops[0];
                     my $val = $filter->{$f}->{$op};
                     delete $filter->{$f};
+
+                    # add flag, so we cannot use limit to optimize query result
+                    $c->stash->{'filter_fixed_up'} = 1;
 
                     if($f =~ m/^_/mx) {
                         # convert custom variable filter
@@ -2019,7 +2025,7 @@ sub _rest_get_livestatus_logs {
     my($c) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
+    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name'])));
 }
 
 ##########################################################
@@ -2031,7 +2037,7 @@ sub _rest_get_livestatus_notifications {
     my($c) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
+    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name'])));
 }
 
 ##########################################################
@@ -2043,7 +2049,7 @@ sub _rest_get_livestatus_host_notifications {
     my($c, undef, $host) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name']));
+    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name'])));
 }
 
 ##########################################################
@@ -2055,7 +2061,7 @@ sub _rest_get_livestatus_alerts {
     my($c) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)}));
+    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)})));
 }
 
 ##########################################################
@@ -2067,7 +2073,7 @@ sub _rest_get_livestatus_host_alerts {
     my($c, undef, $host) = @_;
     my $filter = _livestatus_filter($c, 'logs');
     _append_time_filter($c, $filter);
-    return($c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { host_name => $host, type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)}));
+    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { host_name => $host, type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)})));
 }
 
 ##########################################################
@@ -2318,6 +2324,23 @@ sub _add_comment_downtimes {
     }
     $row->{$target_column} = join(", ", @{$res});
     return;
+}
+
+##########################################################
+sub _post_process_logs {
+    my($c, $logs) = @_;
+
+    if(!$logs || scalar @{$logs} == 0) {
+        return($logs);
+    }
+
+    # when using logcache, there is no plugin_output, so add it here
+    for my $l (@{$logs}) {
+        my $output = Thruk::Utils::Filter::log_line_plugin_output($l);
+        $l->{'plugin_output'} = $output;
+    }
+
+    return($logs);
 }
 
 ##########################################################
