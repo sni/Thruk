@@ -858,6 +858,7 @@ sub _get_subfilter {
         if(scalar keys %{$inp} == 1) {
             my $k = [keys   %{$inp}]->[0];
             my $v = [values %{$inp}]->[0];
+            ($k, $v) = $self->_replace_column_name($k, $v);
             if($k eq '=')                           { return '= '._quote($v); }
             if($k eq '!=')                          { return '!= '._quote($v); }
             if($k eq '~')                           { return 'RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
@@ -905,15 +906,7 @@ sub _get_subfilter {
                 }
                 return $k.' '.$v;
             }
-            # using ids makes mysql prefer index
-            if($k eq 'host_name' && $self->{'query_meta'}->{'prefix'}) {
-                $k = 'l.host_id';
-                $self->{'query_meta'}->{'host_lookup'} = _get_host_lookup($self->{'query_meta'}->{'dbh'},undef,$self->{'query_meta'}->{'prefix'}, 1) unless defined $self->{'query_meta'}->{'host_lookup'};
-                $v = $self->{'query_meta'}->{'host_lookup'}->{$v} // 0;
-            }
-            if($k eq 'contact_name') {
-                $k = 'c.name';
-            }
+            ($k, $v) = $self->_replace_column_name($k, $v);
             return $k.' = '._quote($v);
         }
 
@@ -926,6 +919,22 @@ sub _get_subfilter {
         return $self->_get_subfilter({'-and' => $list});
     }
     return $inp;
+}
+
+##########################################################
+# replace column name with correct table column
+sub _replace_column_name {
+    my($self, $col, $val) = @_;
+    if($col eq 'contact_name') {
+        return("c.name", $val);
+    }
+    # using ids makes mysql prefer index
+    if($col eq 'host_name' && $self->{'query_meta'}->{'prefix'}) {
+        $col = 'l.host_id';
+        $self->{'query_meta'}->{'host_lookup'} = _get_host_lookup($self->{'query_meta'}->{'dbh'},undef,$self->{'query_meta'}->{'prefix'}, 1) unless defined $self->{'query_meta'}->{'host_lookup'};
+        $val = $self->{'query_meta'}->{'host_lookup'}->{$val} // 0;
+    }
+    return($col, $val);
 }
 
 ##########################################################
