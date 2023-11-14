@@ -46,7 +46,7 @@
       [% FOREACH col = default_columns.$paneprefix %]
         [% IF loop.index >= start_with %]
           [% center = "" %]
-          [% IF col.field == "current_attempt" || col.field == "peer_name" || col.field == "check_interval" || col.field == "check_period" || col.field == "execution_time" || col.field == "latency" || col.field == "next_check" || col.field == "notification_period" || col.field == "percent_state_change" || col.field == "in_notification_period" || col.field == "in_check_period" || col.field == "lmd_last_cache_update" %]
+          [% IF col.field == "current_attempt" || col.field == "peer_name" || col.field == "check_interval" || col.field == "check_period" || col.field == "execution_time" || col.field == "latency" || col.field == "next_check" || col.field == "notification_period" || col.field == "percent_state_change" || col.field == "in_notification_period" || col.field == "in_check_period" || col.field == "lmd_last_cache_update" || col.field == "last_state_change" %]
             [% center = " text-center" %]
           [% END %]
             <th class="status col_[% col.field | html %][% center %]" style="display: none;">
@@ -208,6 +208,7 @@
           <td class='[% class %] percent_state_change text-center' style="display: none;">[% sprintf('%.2f', h.percent_state_change) %]%</td>
           <td class='[% class %] in_notification_period text-center' style="display: none;">[% IF h.in_notification_period %]Yes[% ELSE %]No[% END %]</td>
           <td class='[% class %] in_check_period text-center' style="display: none;">[% IF h.in_check_period %]Yes[% ELSE %]No[% END %]</td>
+          <td class='[% class %] last_state_change text-center' style="display: none;">[% last_check(c, h.last_state_change) %]</td>
           [% IF has_lmd %]
             <td class='[% class %] lmd_last_cache_update text-center' style="display: none;">[% date_format(c, h.lmd_last_cache_update) %]</td>
           [% END %]

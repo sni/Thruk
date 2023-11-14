@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add options status column: last state change
           - Agents:
             - add default args
             - add support for section based settings
