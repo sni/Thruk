@@ -94,6 +94,7 @@ sub get_config_objects {
         $hostobj = $objects->[0];
     }
     $hostobj->{'_filename'} = $filename;
+    $hostobj->{'conf'}->{'address'} = $ip if $ip;
 
     $hostobj->{'conf'}->{'use'} = $section ? [_make_section_template("host", $section)] : ['generic-thruk-agent-host'];
 
@@ -112,6 +113,7 @@ sub get_config_objects {
     for my $key (sort keys %{$checks_hash->{'_host'}->{'conf'}}) {
         $hostdata->{$key} = $checks_hash->{'_host'}->{'conf'}->{$key};
     }
+    my $section_changed = (!$hostdata->{'_AGENT_SECTION'} || $hostdata->{'_AGENT_SECTION'} ne $section);
     $hostdata->{'_AGENT_SECTION'}  = $section;
     $hostdata->{'_AGENT_PORT'}     = $port;
     my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
@@ -139,28 +141,35 @@ sub get_config_objects {
         if($type eq 'new') {
             $settings->{'disabled'} = Thruk::Base::array_remove($settings->{'disabled'}, $id);
             push @remove, $svc if $svc;
+            next;
         }
 
         if($type eq 'off') {
             push @remove, $svc if $svc;
             push @{$settings->{'disabled'}}, $id;
+            next;
         }
-        next unless($type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//''));
-
         $svc->{'_filename'} = $filename;
-        $svc->{'conf'} = $chk->{'svc_conf'};
-        delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
-        if($args) {
-            $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
-            $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
-        } else {
-            # check for default args
-            $args = _get_default_args($c, $svc->{'conf'}->{'service_description'}, $hostname, $section);
-            $chk->{'svc_conf'}->{'check_command'} .= " ".$args if $args;
-        }
-        $chk->{'svc_conf'}->{'use'} = $template;
+        $svc->{'conf'}->{'use'} = $template;
 
-        push @list, $svc;
+        if($fresh || $type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//'')) {
+            $svc->{'conf'} = $chk->{'svc_conf'};
+            delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
+            if($args) {
+                $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
+                $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
+            } else {
+                # check for default args
+                $args = _get_default_args($c, $svc->{'conf'}->{'service_description'}, $hostname, $section);
+                $chk->{'svc_conf'}->{'check_command'} .= " ".$args if $args;
+            }
+            push @list, $svc;
+            next;
+        }
+        if($section_changed) {
+            push @list, $svc;
+            next;
+        }
     }
 
     my $json = Cpanel::JSON::XS->new->canonical;

@@ -321,7 +321,13 @@ sub _run_add {
     my $checks_config = _build_checks_config($checks);
     if($opt->{'interactive'}) {
         my @lines = (
-            "# set checks into desired states (legend is at the end of the file):",
+            "# edit host: ".$hostname,
+            "#",
+            "address: ".($opt->{'address'} // $hostobj->{'conf'}->{'address'}),
+            "section: ".($opt->{'section'} // $hostobj->{'conf'}->{'_AGENT_SECTION'}),
+            "#",
+            "# services:",
+            "# short legend: (e)nable - (k)eep - (n)ew - (o)bsolete - (d)isabled - (u)pdate (complete legend at the end of this file)",
             "# state  id                        args             name",
         );
         for my $t (qw/new exists obsolete disabled/) {
@@ -362,12 +368,14 @@ sub _run_add {
             elsif($m eq 'n') { $checks_config->{'check.'.$id} = "new"; }
             elsif($m eq 'o') { $checks_config->{'check.'.$id} = "keep"; }
             elsif($m eq 'u') { $checks_config->{'check.'.$id} = "on"; }
+            elsif($m eq 'address:') { $data->{'address'} = $id; next; }
+            elsif($m eq 'section:') { $data->{'section'} = $id; next; }
 
             $checks_config->{'args.'.$id} = $args = $args;
         }
     } else {
         # none-interactive - set all new to enabled automatically
-        if(scalar @{$checks->{'new'}} == 0) {
+        if(scalar @{$checks->{'new'}} == 0 && !$opt->{'fresh'}) {
             return(sprintf("no new checks found for host %s - %d existing checks found, use (-i) to edit them.\n", $hostname, $checks_num), 0);
         }
         for my $chk (@{$checks->{'new'}}) {
@@ -391,9 +399,6 @@ sub _run_add {
         } elsif($oldfile->{'path'} ne $file->{'path'}) {
             $c->{'obj_db'}->move_object($obj, $file);
         }
-        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
-            return("unable to save changes\n", 2);
-        }
         # build output
         if($obj->{'conf'}->{'service_description'}) {
             my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
@@ -402,6 +407,18 @@ sub _run_add {
                 'name'    => $obj->{'conf'}->{'service_description'},
                 '_change' => sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id}),
             };
+        } elsif($obj->{'conf'}->{'host_name'}) {
+            if($data->{'address'} ne $obj->{'conf'}->{'address'}) {
+                push @result, {
+                    'id'      => '',
+                    'name'    => $obj->{'conf'}->{'host_name'},
+                    '_change' => sprintf("ip updated: %s -> %s", $obj->{'conf'}->{'address'}, $data->{'address'}),
+                };
+                $obj->{'conf'}->{'address'} = $data->{'address'};
+            }
+        }
+        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
+            return("unable to save changes\n", 2);
         }
     }
 
