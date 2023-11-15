@@ -437,6 +437,8 @@ sub _run_add {
 
     return(sprintf("no changes made.\n"), 0) if scalar @result == 0;
 
+    Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
+
     if($c->{'obj_db'}->commit($c)) {
         $c->stash->{'obj_model_changed'} = 1;
     }

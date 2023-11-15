@@ -276,6 +276,8 @@ sub _process_save {
         $c->{'obj_db'}->delete_object($obj);
     }
 
+    Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
+
     if($c->{'obj_db'}->commit($c)) {
         $c->stash->{'obj_model_changed'} = 1;
     }

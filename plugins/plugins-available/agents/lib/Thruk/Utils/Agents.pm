@@ -624,6 +624,28 @@ sub validate_params {
 }
 
 ##########################################################
+
+=head2 remove_orphaned_agent_templates
+
+    remove_orphaned_agent_templates($c)
+
+removes agent templates which are no longer used
+
+=cut
+sub remove_orphaned_agent_templates {
+    my($c) = @_;
+    my $result = $c->{'obj_db'}->_check_orphaned_objects();
+    for my $hst (@{$result}) {
+        next unless $hst->{'type'} eq 'host';
+        next unless defined $hst->{'obj'}->{'conf'}->{'register'};
+        next unless $hst->{'obj'}->{'conf'}->{'register'} == 0;
+        next unless $hst->{'obj'}->{'conf'}->{'name'} =~ m/^agent\-/mx;
+        $c->{'obj_db'}->delete_object($hst->{'obj'});
+    }
+    return;
+}
+
+##########################################################
 sub _check_pattern {
     my($val, $pattern) = @_;
     for my $f (@{Thruk::Base::list($pattern)}) {
