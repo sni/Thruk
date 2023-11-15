@@ -150,10 +150,10 @@ sub get_config_objects {
             next;
         }
         $svc->{'_filename'} = $filename;
-        $svc->{'conf'}->{'use'} = $template;
 
         if($fresh || $type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//'')) {
             $svc->{'conf'} = $chk->{'svc_conf'};
+            $svc->{'conf'}->{'use'} = $template;
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
             if($args) {
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
@@ -167,6 +167,7 @@ sub get_config_objects {
             next;
         }
         if($section_changed) {
+            $svc->{'conf'}->{'use'} = $template;
             push @list, $svc;
             next;
         }
