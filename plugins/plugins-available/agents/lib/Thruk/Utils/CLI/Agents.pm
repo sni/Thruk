@@ -408,7 +408,7 @@ sub _run_add {
                 '_change' => sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id}),
             };
         } elsif($obj->{'conf'}->{'host_name'}) {
-            if($data->{'address'} ne $obj->{'conf'}->{'address'}) {
+            if($data->{'address'} && $data->{'address'} ne $obj->{'conf'}->{'address'}) {
                 push @result, {
                     'id'      => '',
                     'name'    => $obj->{'conf'}->{'host_name'},

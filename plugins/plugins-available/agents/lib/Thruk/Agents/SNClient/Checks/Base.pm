@@ -31,7 +31,7 @@ sub get_checks {
 
     # agent check itself
     push @{$checks}, { 'id' => 'inventory', 'name' => 'agent inventory', check => 'inventory', parent => 'agent version'};
-    push @{$checks}, { 'id' => 'version', 'name' => 'agent version', check => 'check_snclient_version'};
+    push @{$checks}, { 'id' => 'version', 'name' => 'agent version', check => 'check_snclient_version', 'noperf' => 1};
 
     if($inventory->{'cpu'}) {
         push @{$checks}, { 'id' => 'cpu', 'name' => 'cpu', check => 'check_cpu', parent => 'agent version' };
@@ -61,6 +61,7 @@ sub get_checks {
             'name'   => 'os version',
             'check'  => 'check_os_version',
             'parent' => 'agent version',
+            'noperf' => 1,
         };
     }
 

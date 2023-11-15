@@ -96,7 +96,14 @@ sub get_config_objects {
     $hostobj->{'_filename'} = $filename;
     $hostobj->{'conf'}->{'address'} = $ip if $ip;
 
-    $hostobj->{'conf'}->{'use'} = $section ? [_make_section_template("host", $section)] : ['generic-thruk-agent-host'];
+    my $perf_template      = 'srv-pnp';
+    my $host_perf_template = 'host-pnp';
+    if($ENV{'CONFIG_GRAFANA'} && $ENV{'CONFIG_GRAFANA'} eq 'on') {
+        $perf_template      = 'srv-perf';
+        $host_perf_template = 'host-perf';
+    }
+
+    $hostobj->{'conf'}->{'use'} = [$host_perf_template, ($section ? _make_section_template("host", $section) : 'generic-thruk-agent-host')];
 
     my @list = ($hostobj);
     my @remove;
@@ -118,7 +125,7 @@ sub get_config_objects {
     $hostdata->{'_AGENT_PORT'}     = $port;
     my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
 
-    my $template = $section ? [_make_section_template("service", $section)] : ['generic-thruk-agent-service'];
+    my $template = $section ? _make_section_template("service", $section) : 'generic-thruk-agent-service';
 
     for my $id (sort keys %{$checks_hash}) {
         next if $id eq '_host';
@@ -150,10 +157,12 @@ sub get_config_objects {
             next;
         }
         $svc->{'_filename'} = $filename;
+        my @templates = ($template);
+        unshift @templates, $perf_template unless $chk->{'noperf'};
 
         if($fresh || $type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//'')) {
             $svc->{'conf'} = $chk->{'svc_conf'};
-            $svc->{'conf'}->{'use'} = $template;
+            $svc->{'conf'}->{'use'} = \@templates;
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
             if($args) {
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
@@ -167,7 +176,7 @@ sub get_config_objects {
             next;
         }
         if($section_changed) {
-            $svc->{'conf'}->{'use'} = $template;
+            $svc->{'conf'}->{'use'} = \@templates;
             push @list, $svc;
             next;
         }
