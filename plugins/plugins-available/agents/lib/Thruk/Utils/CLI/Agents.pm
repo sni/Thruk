@@ -306,16 +306,44 @@ sub _run_add {
     my $output = "usage: $0 agents add <host>\n";
     my $rc     = 3;
 
-    my $hostname = shift @{$commandoptions} // '';
-    if(!$hostname) {
+    my $hosts = $commandoptions;
+    if(!$hosts || scalar @{$hosts} == 0) {
         return($output, $rc);
     }
 
-    my $err = Thruk::Utils::Agents::validate_params($hostname, $opt->{'section'});
-    if($err) {
-        _error($err);
-        return("", 2);
+    for my $hostname (@{$hosts}) {
+        my $err = Thruk::Utils::Agents::validate_params($hostname, $opt->{'section'});
+        if($err) {
+            _error($err);
+            return("", 2);
+        }
     }
+
+    for my $hostname (@{$hosts}) {
+        my($out, $rc) = _run_add_host($c, $hostname, $opt, $edit_only);
+        _info($out);
+        if($rc > 0) {
+            return("", $rc);
+        }
+    }
+
+    Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
+
+    if($c->{'obj_db'}->commit($c)) {
+        $c->stash->{'obj_model_changed'} = 1;
+    }
+    Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
+
+	my $out = "";
+    if(!$opt->{'reload'}) {
+        $out .= "\n(use -R to activate changes)\n";
+    }
+    return($out, 0);
+}
+
+##############################################
+sub _run_add_host {
+    my($c, $hostname, $opt, $edit_only) = @_;
 
     my($checks, $checks_num, $hst, $hostobj, $data) = _get_checks($c, $hostname, $opt, $edit_only ? 0 : 1);
     if($edit_only) {
@@ -419,7 +447,7 @@ sub _run_add {
             push @result, {
                 'id'      => $id,
                 'name'    => $obj->{'conf'}->{'service_description'},
-                '_change' => sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id}),
+                '_change' => $orig_checks->{'check.'.$id} ne $checks_config->{'check.'.$id} ? sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id}) : "",
             };
         } elsif($obj->{'conf'}->{'host_name'}) {
             if($data->{'address'} && $data->{'address'} ne $obj->{'conf'}->{'address'}) {
@@ -452,13 +480,6 @@ sub _run_add {
 
     return(sprintf("no changes made.\n"), 0) if scalar @result == 0;
 
-    Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
-
-    if($c->{'obj_db'}->commit($c)) {
-        $c->stash->{'obj_model_changed'} = 1;
-    }
-    Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
-
     # build result table
     my $out = Thruk::Utils::text_table(
         keys => [['', '_change'],
@@ -467,10 +488,8 @@ sub _run_add {
                 ],
         data => \@result,
     );
-    if(!$opt->{'reload'}) {
-        $out .= "\n(use -R to activate changes)\n";
-    }
-    return($out, 0);
+    _info($out);
+    return("", 0);
 }
 
 ##############################################

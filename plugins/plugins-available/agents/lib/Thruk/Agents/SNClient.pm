@@ -120,7 +120,7 @@ sub get_config_objects {
     for my $key (sort keys %{$checks_hash->{'_host'}->{'conf'}}) {
         $hostdata->{$key} = $checks_hash->{'_host'}->{'conf'}->{$key};
     }
-    my $section_changed = (!$hostdata->{'_AGENT_SECTION'} || $hostdata->{'_AGENT_SECTION'} ne $section);
+    my $section_changed = (!defined $hostdata->{'_AGENT_SECTION'} || $hostdata->{'_AGENT_SECTION'} ne $section);
     $hostdata->{'_AGENT_SECTION'}  = $section;
     $hostdata->{'_AGENT_PORT'}     = $port;
     my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
