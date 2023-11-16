@@ -52,6 +52,9 @@
           [% END %]
           [% IF type == "disabled" %]
             <div class='text-center badge PENDING'>disabled</div>
+            [% IF agent.exists("settings") && agent.settings.exists("disabled") && agent.settings.disabled.exists(check.id) %]
+              <div class='text-center badge UNKNOWN' title="check has been manually disabled">manually</div>
+            [% END %]
           [% END %]
         </td>
         [% IF type == "new" || type == "exists" || type == "obsolete" %]

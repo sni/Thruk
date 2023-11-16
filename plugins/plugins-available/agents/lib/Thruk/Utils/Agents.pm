@@ -355,7 +355,7 @@ sub _set_checks_category {
             $chk->{'args'}   = $chk->{'args'} || $svc->{'conf'}->{'_AGENT_ARGS'} || '';
         } else {
             # disabled manually from previous inventory run
-            if(!$fresh && $settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {
+            if($settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {
                 $chk->{'exists'} = 'disabled';
             }
             elsif($chk->{'disabled'}) {

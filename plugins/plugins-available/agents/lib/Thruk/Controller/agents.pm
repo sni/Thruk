@@ -2,6 +2,7 @@ package Thruk::Controller::agents;
 
 use warnings;
 use strict;
+use Cpanel::JSON::XS qw/decode_json/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
@@ -150,6 +151,7 @@ sub _process_new {
         'port'     => $c->req->parameters->{'port'}     // '',
         'password' => $c->req->parameters->{'password'} // $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'} // '',
         'peer_key' => $c->req->parameters->{'backend'}  // $c->stash->{'param_backend'},
+        'settings' => {},
     };
     return _process_edit($c, $agent);
 }
@@ -185,7 +187,11 @@ sub _process_edit {
             'port'     => $obj->{'_AGENT_PORT'}     // '',
             'password' => $obj->{'_AGENT_PASSWORD'} // '',
             'peer_key' => $backend,
+            'settings' => decode_json($obj->{'_AGENT_CONFIG'}) // {},
         };
+        if($agent->{'settings'}->{'disabled'}) {
+            $agent->{'settings'}->{'disabled'} = Thruk::Base::array2hash($agent->{'settings'}->{'disabled'});
+        }
     }
 
     # extract checks
