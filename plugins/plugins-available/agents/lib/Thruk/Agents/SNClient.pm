@@ -449,7 +449,7 @@ sub make_name {
 
     check_host_match($config)
 
-returns true if checks is enabled on this host
+returns true if check is enabled on this host
 
 =cut
 sub check_host_match {
@@ -477,9 +477,9 @@ sub _get_default_args {
     my $args = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'args'});
     my $res;
     for my $arg (@{$args}) {
-        next unless Thruk::Utils::Agents::check_wildcard_match($name, $arg->{'match'});
+        next unless Thruk::Utils::Agents::check_wildcard_match($name, ($arg->{'match'} // 'ANY'));
         next unless Thruk::Agents::SNClient::check_host_match($arg->{'host'});
-        next unless Thruk::Utils::Agents::check_wildcard_match($section, $arg->{'section'});
+        next unless Thruk::Utils::Agents::check_wildcard_match($section, ($arg->{'section'} // 'ANY'));
         $res = $arg->{'value'};
     }
 
