@@ -311,6 +311,19 @@ sub _run_add {
         return($output, $rc);
     }
 
+    # expand "ALL" hosts
+    if($opt->{'fresh'} && $hosts->[0] eq 'ALL') {
+        my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                                'custom_variables' => { '~' => 'AGENT .+' },
+                                                ],
+                                      columns => [qw/name/],
+        );
+        $hosts = [];
+        for my $hst (@{$data}) {
+            push @{$hosts}, $hst->{'name'};
+        }
+    }
+
     for my $hostname (@{$hosts}) {
         my $err = Thruk::Utils::Agents::validate_params($hostname, $opt->{'section'});
         if($err) {

@@ -183,7 +183,9 @@ sub get_config_objects {
     }
 
     my $json = Cpanel::JSON::XS->new->canonical;
-    $settings->{'disabled'} = Thruk::Base::array_uniq($settings->{'disabled'}) if $settings->{'disabled'};
+    if($settings->{'disabled'}) {
+        $settings->{'disabled'} = Thruk::Base::array_uniq($settings->{'disabled'});
+    }
     $settings = $json->encode($settings);
     if($settings ne ($hostdata->{'_AGENT_CONFIG'}//"")) {
         $hostdata->{'_AGENT_CONFIG'} = $settings;
