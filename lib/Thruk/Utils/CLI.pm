@@ -1412,9 +1412,14 @@ sub read_stdin_password {
     my $key;
     print $msg;
     if($has_readkey) {
+        local $SIG{'INT'} = sub {
+            ReadMode(1); # restore
+            _info("canceled");
+            exit(1);
+        };
         ReadMode('noecho');
         my $key = ReadLine(0);
-        ReadMode(0);
+        ReadMode(1);
         chomp ($key);
         return($key);
     }
