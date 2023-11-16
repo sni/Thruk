@@ -92,6 +92,7 @@ sub get_config_objects {
         $hostobj->{'conf'}->{'address'}   = $ip || $hostname;
     } else {
         $hostobj = $objects->[0];
+        $hostobj->{'_prev_conf'} = Thruk::Utils::dclone($hostobj->{'conf'});
     }
     $hostobj->{'_filename'} = $filename;
     $hostobj->{'conf'}->{'address'} = $ip if $ip;
@@ -160,6 +161,7 @@ sub get_config_objects {
             next;
         }
         $svc->{'_filename'} = $filename;
+        $svc->{'_prev_conf'} = Thruk::Utils::dclone($svc->{'conf'});
         my @templates = ($template);
         unshift @templates, $perf_template unless $chk->{'noperf'};
 

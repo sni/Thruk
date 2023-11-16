@@ -458,11 +458,18 @@ sub _run_add_host {
         # build output
         if($obj->{'conf'}->{'service_description'}) {
             my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
+            my $change = "";
+            if($orig_checks->{'check.'.$id} ne $checks_config->{'check.'.$id}) {
+                $change = sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id});
+            }
+            if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"use" => 0 })) {
+                $change = "updated";
+            }
             push @result, {
                 'id'      => $id,
                 'name'    => $obj->{'conf'}->{'service_description'},
-                '_change' => $orig_checks->{'check.'.$id} ne $checks_config->{'check.'.$id} ? sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id}) : "",
-            };
+                '_change' => $change,
+            } if $change;
         } elsif($obj->{'conf'}->{'host_name'}) {
             if($data->{'address'} && $data->{'address'} ne $obj->{'conf'}->{'address'}) {
                 push @result, {
@@ -471,6 +478,12 @@ sub _run_add_host {
                     '_change' => sprintf("ip updated: %s -> %s", $obj->{'conf'}->{'address'}, $data->{'address'}),
                 };
                 $obj->{'conf'}->{'address'} = $data->{'address'};
+            } elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'})) {
+                push @result, {
+                    'id'      => "_HOST_",
+                    'name'    => $obj->{'conf'}->{'host_name'},
+                    '_change' => "updated",
+                }
             }
         }
         if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
@@ -738,6 +751,38 @@ sub _build_checks_config {
     }
 
     return($checks_config);
+}
+
+##############################################
+sub _deep_compare {
+    my($obj1, $obj2, $skip_keys) = @_;
+
+    # check type
+    return if(ref $obj1 ne ref $obj2);
+
+    if(ref $obj1 eq 'ARRAY') {
+        # check size of array
+        return if(scalar @{$obj1} ne scalar @{$obj2});
+
+        for(my $x = 0; $x < scalar @{$obj1}; $x++) {
+            return if(!_deep_compare($obj1->[$x], $obj2->[$x], $skip_keys));
+        }
+
+        return 1;
+    }
+
+    if(ref $obj1 eq 'HASH') {
+        # check size of array
+        return if(scalar keys %{$obj1} ne scalar keys %{$obj2});
+        for my $key (sort keys %{$obj1}) {
+            next if $skip_keys && exists $skip_keys->{$key};
+            return if(!exists $obj2->{$key});
+            return if(!_deep_compare($obj1->{$key}, $obj2->{$key}, $skip_keys));
+        }
+        return 1;
+    }
+
+    return($obj1 eq $obj2);
 }
 
 ##############################################
