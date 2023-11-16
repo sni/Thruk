@@ -334,7 +334,7 @@ sub _run_add {
 
     for my $hostname (@{$hosts}) {
         my($out, $rc) = _run_add_host($c, $hostname, $opt, $edit_only);
-        _info($out);
+        print($out."\n");
         if($rc > 0) {
             return("", $rc);
         }
@@ -462,7 +462,7 @@ sub _run_add_host {
             if($orig_checks->{'check.'.$id} ne $checks_config->{'check.'.$id}) {
                 $change = sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id});
             }
-            if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"use" => 0 })) {
+            elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"use" => 0 })) {
                 $change = "updated";
             }
             push @result, {
@@ -515,7 +515,7 @@ sub _run_add_host {
                 ],
         data => \@result,
     );
-    _info($out);
+    print($out."\n");
     return("", 0);
 }
 
@@ -549,7 +549,7 @@ sub _run_remove {
 
         my $backend = $hst->{'peer_key'} // _get_backend($c);
         Thruk::Utils::Agents::remove_host($c, $hostname, $backend);
-        _info("host %s removed successsfully\n", $hostname);
+        printf("host %s removed successsfully\n", $hostname);
     }
 
 	my $out = "";
