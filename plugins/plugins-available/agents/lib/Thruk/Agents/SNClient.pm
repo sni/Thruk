@@ -175,7 +175,7 @@ sub get_config_objects {
             push @list, $svc;
             next;
         }
-        if($section_changed) {
+        if($section_changed && $svc->{'conf'}) {
             $svc->{'conf'}->{'use'} = \@templates;
             push @list, $svc;
             next;
