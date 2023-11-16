@@ -341,6 +341,7 @@ sub _run_add {
     }
 
     Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
+    Thruk::Utils::Agents::sort_config_objects($c);
 
     if($c->{'obj_db'}->commit($c)) {
         $c->stash->{'obj_model_changed'} = 1;
@@ -472,7 +473,7 @@ sub _run_add_host {
                 $obj->{'conf'}->{'address'} = $data->{'address'};
             }
         }
-        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
+        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
             _error("unable to save changes");
             return("", 2);
         }

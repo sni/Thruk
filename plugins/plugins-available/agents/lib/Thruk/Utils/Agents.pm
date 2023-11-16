@@ -646,6 +646,32 @@ sub remove_orphaned_agent_templates {
 }
 
 ##########################################################
+
+=head2 sort_config_objects
+
+    sort_config_objects($c)
+
+sort objects by service name with host on top
+
+=cut
+sub sort_config_objects {
+    my($c) = @_;
+    my $hosts = $c->{'obj_db'}->get_objects_by_type("host");
+    for my $hst (@{$hosts}) {
+        my $file = $hst->{'file'};
+        next unless $file->{'changed'};
+        next unless $hst->{'conf'}->{'_AGENT'};
+        # sort by type and name
+        my $line = 1;
+        for my $obj (sort { $a->{'type'} cmp $b->{'type'} || $a->{'conf'}->{'service_description'} cmp $b->{'conf'}->{'service_description'} } @{$file->{'objects'}}) {
+            $obj->{'line'} = $line++;
+        }
+    }
+
+    return;
+}
+
+##########################################################
 sub _check_pattern {
     my($val, $pattern) = @_;
     for my $f (@{Thruk::Base::list($pattern)}) {

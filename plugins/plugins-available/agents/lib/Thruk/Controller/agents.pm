@@ -267,7 +267,7 @@ sub _process_save {
         } elsif($oldfile->{'path'} ne $file->{'path'}) {
             $c->{'obj_db'}->move_object($obj, $file);
         }
-        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
+        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
             Thruk::Utils::set_message( $c, 'fail_message', "unable to save changes");
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
         }
@@ -277,6 +277,7 @@ sub _process_save {
     }
 
     Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
+    Thruk::Utils::Agents::sort_config_objects($c);
 
     if($c->{'obj_db'}->commit($c)) {
         $c->stash->{'obj_model_changed'} = 1;
