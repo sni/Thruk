@@ -18,14 +18,14 @@ The agents command handles agent configs.
 
 Available commands are:
 
-  - help                    print help and exit
-  - check  | -C   <host>    run checks, ex. inventory
-  - list   | -l             list agent hosts
-  - show   | -S   <host>    show checks for host
-  - add    | -I   <host>    add/inventory new/existing host
-  - update | -II  <host>    add/inventory new/existing host and freshly apply excludes
-  - rm     | -D   <host>    delete existing host
-  - reload | -R             reload monitoring core
+  - help                      print help and exit
+  - check  | -C   <host>      run checks, ex. inventory
+  - list   | -l               list agent hosts
+  - show   | -S   <host>      show checks for host
+  - add    | -I   <host> ...  add/inventory for new/existing host(s)
+  - update | -II  <host> ...  add/inventory for new/existing host(s) and freshly apply excludes
+  - rm     | -D   <host> ...  delete existing host(s)
+  - reload | -R               reload monitoring core
 
   -i                interactive mode (available in edit/add mode)
   --all             show all items   (available in show mode)
@@ -68,7 +68,8 @@ sub cmd {
     $c->stats->profile(begin => "_cmd_agents()");
 
     if(!$c->check_user_roles('authorized_for_admin')) {
-        return("ERROR - authorized_for_admin role required", 1);
+        _error("authorized_for_admin role required");
+        return("", 1);
     }
 
     # parse options
@@ -137,7 +138,8 @@ sub cmd {
     elsif($action eq 'rm')     { ($output, $rc) = _run_remove($c, $commandoptions, $opt, $global_options); }
     elsif($action eq 'reload') {} # handled later
     else {
-        return("unknown command, see help for available commands\n", 3);
+        _error("unknown command, see help for available commands");
+        return("", 3);
     }
 
     # reload can be combined with existing actions like ex.: add
@@ -256,10 +258,14 @@ sub _run_show {
     }
 
     my($checks, $checks_num, $hst, $hostobj, undef) = _get_checks($c, $hostname, $opt, 0);
-    return("something went wrong\n", 3) unless $checks;
+    unless($checks) {
+        _error("something went wrong");
+        return("", 3);
+    }
 
     if(!$hst && !$hostobj) {
-        return(sprintf("no host %s (with agent checks) found\n", $hostname), 3);
+        _error("no host %s (with agent checks) found\n", $hostname);
+        return("", 3);
     }
     if(!$hst && $hostobj) {
         _info("host %s has not yet been activated (reload core with -R)\n", $hostname);
@@ -307,15 +313,22 @@ sub _run_add {
 
     my $err = Thruk::Utils::Agents::validate_params($hostname, $opt->{'section'});
     if($err) {
-        return($err, 2);
+        _error($err);
+        return("", 2);
     }
 
     my($checks, $checks_num, $hst, $hostobj, $data) = _get_checks($c, $hostname, $opt, $edit_only ? 0 : 1);
     if($edit_only) {
-        return(sprintf("no host found by name: %s\n", $hostname), 3) unless $hostobj;
+        if(!$hostobj) {
+            _error("no host found by name: %s", $hostname);
+            return("", 3);
+        }
         $opt->{'interactive'} = 1;
     }
-    return("something went wrong\n", 3) unless $checks;
+    if(!$checks) {
+        _error("something went wrong");
+        return("", 3);
+    }
 
     my $orig_checks   = _build_checks_config($checks);
     my $checks_config = _build_checks_config($checks);
@@ -391,7 +404,8 @@ sub _run_add {
         my $file = Thruk::Controller::conf::get_context_file($c, $obj, $obj->{'_filename'});
         my $oldfile = $obj->{'file'};
         if(defined $file && $file->{'readonly'}) {
-            return(sprintf("cannot write to %s, file is marked readonly\n", $file->{'display'}), 2);
+            _error("cannot write to %s, file is marked readonly\n", $file->{'display'});
+            return("", 2);
         }
         if(!$oldfile) {
             $obj->set_file($file);
@@ -418,7 +432,8 @@ sub _run_add {
             }
         }
         if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, "", 1)) {
-            return("unable to save changes\n", 2);
+            _error("unable to save changes");
+            return("", 2);
         }
     }
 
@@ -465,26 +480,37 @@ sub _run_remove {
     my $output = "usage: $0 agents rm <host>\n";
     my $rc     = 3;
 
-    my $hostname = shift @{$commandoptions} // '';
-    if(!$hostname) {
+    my $hosts = $commandoptions;
+    if(!$hosts || scalar @{$hosts} == 0) {
         return($output, $rc);
     }
 
-    my($checks, $checks_num, $hst, $hostobj) = _get_checks($c, $hostname, $opt, 0);
-    if(!$hostobj) {
-        return(sprintf("no host found by name: %s\n", $hostname), 0) if $global_options->{'force'};
-        return(sprintf("no host found by name: %s\n", $hostname), 3);
+    for my $hostname (@{$hosts}) {
+        my($checks, $checks_num, $hst, $hostobj) = _get_checks($c, $hostname, $opt, 0);
+        if(!$hostobj) {
+            return(sprintf("no host found by name: %s\n", $hostname), 0) if $global_options->{'force'};
+            _error("no host found by name: %s", $hostname);
+            return("", 3);
+        }
+
+        if(!$global_options->{'yes'}) {
+            _info("Really  remove host: %s", $hostname);
+            _info("(use -y to skip this message)");
+            my $rc = _user_confirm();
+            $global_options->{'yes'} = 1 if($rc && lc($rc) eq 'a');
+            return("canceled\n", 1) unless $rc;
+        }
+
+        my $backend = $hst->{'peer_key'} // _get_backend($c);
+        Thruk::Utils::Agents::remove_host($c, $hostname, $backend);
+        _info("host %s removed successsfully\n", $hostname);
     }
 
-    if(!$global_options->{'yes'}) {
-        _info("Really  remove host: %s", $hostname);
-        _info("(use -y to skip this message)");
-        return("canceled\n", 1) unless _user_confirm();
+	my $out = "";
+    if(!$opt->{'reload'}) {
+        $out .= "\n(use -R to activate changes)\n";
     }
-
-    my $backend = $hst->{'peer_key'} // _get_backend($c);
-    Thruk::Utils::Agents::remove_host($c, $hostname, $backend);
-    return(sprintf("host %s removed successsfully\n", $hostname), 0);
+    return($out, 0);
 }
 
 ##############################################
@@ -624,14 +650,42 @@ sub _get_checks {
 
 ##############################################
 sub _user_confirm {
-    _infos("Continue? [n]: ");
-    my $buf;
-    sysread STDIN, $buf, 1;
-    if($buf !~ m/^(y|j)/mxi) {
+    _infos("Continue? (y)es - (a)ll - (n)o: ");
+
+    ## no critic
+    if(!-t 0) {
+        _warn("no terminal, cannot ask for confirmation");
         return;
     }
-    _info("");
-    return(1);
+    ## use critic
+    my $has_readkey = 0;
+    eval {
+        require Term::ReadKey;
+        Term::ReadKey->import();
+        $has_readkey = 1;
+    };
+    _debug("has readkey support: ".$has_readkey);
+
+    my $key;
+    if($has_readkey) {
+        local $SIG{'INT'} = sub {
+            ReadMode(1); # restore
+            _info("canceled");
+            exit(1);
+        };
+        ReadMode('cbreak');
+        sysread STDIN, $key, 1;
+        ReadMode(1); # restore
+        _info($key);
+    } else {
+        sysread STDIN, $key, 1;
+    }
+    chomp ($key);
+    if($key =~ m/^(y|j|a)/mxi) {
+        _info("");
+        return($1);
+    }
+    return;
 }
 
 ##############################################
