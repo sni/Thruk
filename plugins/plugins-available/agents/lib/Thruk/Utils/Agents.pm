@@ -571,6 +571,10 @@ sub check_wildcard_match {
         $p =~ s/\*/.*/gmx;
         return "ANY" if $p eq 'ANY';
         return "ANY" if $p eq '.*';
+        if(!defined $str) {
+            _warn(Carp::longmess("undef wildcard match"));
+            return(undef);
+        }
         ## no critic
         return $p if $str =~ m/$p/i;
         ## use critic
@@ -663,7 +667,7 @@ sub sort_config_objects {
         next unless $hst->{'conf'}->{'_AGENT'};
         # sort by type and name
         my $line = 1;
-        for my $obj (sort { $a->{'type'} cmp $b->{'type'} || $a->{'conf'}->{'service_description'} cmp $b->{'conf'}->{'service_description'} } @{$file->{'objects'}}) {
+        for my $obj (sort { $a->{'type'} cmp $b->{'type'} || ($a->{'conf'}->{'service_description'}//'') cmp ($b->{'conf'}->{'service_description'}//'') } @{$file->{'objects'}}) {
             $obj->{'line'} = $line++;
         }
     }

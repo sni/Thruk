@@ -168,6 +168,11 @@ sub get_config_objects {
         if($fresh || $type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//'')) {
             $svc->{'conf'} = $chk->{'svc_conf'};
             $svc->{'conf'}->{'use'} = \@templates;
+            if(!defined $svc->{'conf'}->{'service_description'}) {
+                require Data::Dumper;
+                _warn(Carp::longmess("no service description:".Dumper($chk)));
+                next;
+            }
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
             if($args) {
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;

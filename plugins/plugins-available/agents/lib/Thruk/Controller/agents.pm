@@ -99,7 +99,7 @@ sub _process_show {
     for my $hst (@{$hosts}) {
         Thruk::Utils::set_data_row_cust_vars($hst, 1);
     }
-    $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'host_name', 'site']);
+    $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'name', 'peer_name']);
 
     my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                          'host_custom_variables' => { '~' => 'AGENT .+' },
