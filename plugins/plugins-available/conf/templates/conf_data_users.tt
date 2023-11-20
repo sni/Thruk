@@ -19,6 +19,7 @@
         <tr>
           <th class="w-0 pr-2">Username</th>
           <td>
+            <input type="text" style="display:none"><input type="password" style="display:none"><!--prevent firefox from showing about:login page-->
             <input type="text" name="data.username" id="data.username" value="[% user_name | html %]" onclick="ajax_search.init(this, 'contact', {url:'conf.cgi?action=cgi_contacts'})" class="w-full">
           </td>
         </tr>
@@ -79,11 +80,11 @@
               </tr>
               <tr>
                 <th>Password</th>
-                <td><input type="password" name="data.password" value="" class="w-full" autocomplete="off"></td>
+                <td><input type="password" name="data.password" value="" class="w-full" autocomplete="new-password"></td>
               </tr>
               <tr>
                 <th class="align-top">Verify Password</th>
-                <td><input type="password" name="data.password2" value="" class="w-full" autocomplete="off"><br>
+                <td><input type="password" name="data.password2" value="" class="w-full" autocomplete="new-password"><br>
                   <i>([% htpasswd_file %])</i>
                 </td>
               </tr>

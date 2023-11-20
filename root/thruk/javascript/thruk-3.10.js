@@ -8631,7 +8631,7 @@ var ajax_search = {
             }
         }
 
-        input.setAttribute("autocomplete", "off");
+        jQuery(input).attr("autocomplete", "off");
         if(!iPhone) {
             ajax_search.dont_hide = true;
             input.blur();   // blur & focus the element, otherwise the first
@@ -8772,7 +8772,7 @@ var ajax_search = {
             tmpElem = tmpElem.parentNode;
             if(tmpElem.tagName == 'FORM') {
                 addEvent(tmpElem, 'submit', ajax_search.hide_results);
-                tmpElem.setAttribute("autocomplete", "off");
+                jQuery(tmpElem).attr("autocomplete", "off");
             }
         }
 
