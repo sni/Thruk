@@ -2866,13 +2866,17 @@ sub get_plugin_preview {
         return(sprintf("could not replace all macros in: %s", $file));
     }
 
+    my $timeout = 45;
     eval {
         local $SIG{ALRM} = sub { die('alarm'); };
-        alarm(45);
+        alarm($timeout);
         $cmd = $cmd." 2>/dev/null";
         $output = `$cmd`;
         alarm(0);
     };
+    if($@) {
+        $output = sprintf("timeout after %ds for: %s", $timeout, $command);
+    }
     return $output;
 }
 
