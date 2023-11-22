@@ -384,14 +384,14 @@ sub test_page {
         for my $like (@{_list($opts->{'like'})}) {
             use Carp;
             my $regex = ref $like ? $like : qr/$like/;
-            like($return->{'content'}, $regex, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($regex)) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string()); # diag($opts->{'url'});
+            like($return->{'content'}, $regex, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($regex)) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string());
         }
     }
 
     # text that shouldn't appear
     if(defined $opts->{'unlike'}) {
         for my $unlike (@{_list($opts->{'unlike'})}) {
-            unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) or diag($opts->{'url'});
+            unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string());
         }
     }
 
@@ -399,7 +399,7 @@ sub test_page {
     $return->{'content_type'} = $request->header('content-type');
     my $content_type = $request->header('content-type') || '';
     if(defined $opts->{'content_type'}) {
-        is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'}) or diag($opts->{'url'});
+        is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'}) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string());
     }
 
 
