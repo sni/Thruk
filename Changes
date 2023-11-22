@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - add config option 'admin_role_from_system_and_conf'
           - add options status column: last state change
+          - fix exposing check_command via rest api
           - Agents:
             - add default args
             - add support for section based settings

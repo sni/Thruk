@@ -553,14 +553,13 @@ sub _process_details_page {
                 delete $s->{'state_order'}             unless $keep_state_order;
             }
         }
-        if(!$c->check_user_roles("authorized_for_configuration_information")) {
+
+        my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        for my $s (@{$services}) {
             # remove custom macro colums which could contain confidential informations
-            for my $s (@{$services}) {
-                delete $s->{'host_custom_variable_names'};
-                delete $s->{'host_custom_variable_values'};
-                delete $s->{'custom_variable_names'};
-                delete $s->{'custom_variable_values'};
-            }
+            Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline);
         }
         return $c->render(json => $services);
     }
@@ -677,12 +676,12 @@ sub _process_hostdetails_page {
                 delete $h->{'last_state_change_order'} unless $keep_last_state;
             }
         }
-        if(!$c->check_user_roles("authorized_for_configuration_information")) {
+        my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        for my $h (@{$hosts}) {
             # remove custom macro colums which could contain confidential informations
-            for my $h (@{$hosts}) {
-                delete $h->{'custom_variable_names'};
-                delete $h->{'custom_variable_values'};
-            }
+            Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline);
         }
         return $c->render(json => $hosts);
     }
@@ -1194,18 +1193,15 @@ sub _process_combined_page {
         return $c->render_excel();
     }
     elsif ( $view_mode eq 'json' ) {
-        if(!$c->check_user_roles("authorized_for_configuration_information")) {
-            # remove custom macro colums which could contain confidential informations
-            for my $h (@{$hosts}) {
-                delete $h->{'custom_variable_names'};
-                delete $h->{'custom_variable_values'};
-            }
-            for my $s (@{$services}) {
-                delete $s->{'host_custom_variable_names'};
-                delete $s->{'host_custom_variable_values'};
-                delete $s->{'custom_variable_names'};
-                delete $s->{'custom_variable_values'};
-            }
+        my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        # remove custom macro colums which could contain confidential informations
+        for my $h (@{$hosts}) {
+            Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline);
+        }
+        for my $s (@{$services}) {
+            Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline);
         }
         my $json = {
             'hosts'    => $hosts,

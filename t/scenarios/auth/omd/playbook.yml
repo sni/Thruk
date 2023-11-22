@@ -35,6 +35,7 @@
       owner: "demo"
       group: "demo"
   - shell: sudo su - demo -c "htpasswd -b etc/htpasswd admin admin"
+  - shell: sudo su - demo -c "htpasswd -b etc/htpasswd confinfo confinfo"
   - shell: sudo su - demo -c "htpasswd -b etc/htpasswd test test"
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
   - file:

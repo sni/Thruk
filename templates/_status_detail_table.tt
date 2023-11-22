@@ -202,7 +202,7 @@
             <td class='host_parents' style="display: none;">[% s.host_parents.join(', ') | html %]</td>
             <td class='host_groups' style="display: none;">[% s.host_groups.join(', ') | html %]</td>
           [% END %]
-          <td class='check_command' style="display: none;">[% s.check_command.replace("\!.*$", "") | html %]</td>
+          <td class='check_command' style="display: none;">[% s.check_command | strip_command_args | html %]</td>
           <td class='check_interval text-center' style="display: none;">[% s.check_interval | html %]</td>
           <td class='check_period text-center' style="display: none;">[% s.check_period | html %]</td>
           <td class='contacts truncate' style="display: none;">[% s.contacts.join(', ') | html %]</td>

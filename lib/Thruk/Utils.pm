@@ -980,15 +980,15 @@ sub check_custom_var_list {
 
 ########################################
 
-=head2 set_data_row_cust_vars
+=head2 set_allowed_rows_data
 
-  set_data_row_cust_vars($obj, $allowed, $allowed_list)
+  set_allowed_rows_data($obj, $allowed, $allowed_list, $show_full_commandline)
 
 set custom variables for host/service obj
 
 =cut
-sub set_data_row_cust_vars {
-    my($obj, $allowed, $allowed_list) = @_;
+sub set_allowed_rows_data {
+    my($obj, $allowed, $allowed_list, $show_full_commandline) = @_;
 
     if($obj->{'custom_variable_names'}) {
         $obj->{'custom_variables'} = get_custom_vars(undef, $obj);
@@ -1004,6 +1004,11 @@ sub set_data_row_cust_vars {
             $obj->{'custom_variable_values'} = [values %{$obj->{'custom_variables'}}];
         }
     }
+    elsif($obj->{'custom_variable_values'} && !$allowed) {
+        $obj->{'custom_variables'}       = {} if $obj->{'custom_variables'};
+        $obj->{'custom_variable_values'} = [];
+    }
+
     if($obj->{'host_custom_variable_names'}) {
         $obj->{'host_custom_variables'} = get_custom_vars(undef, $obj, 'host_');
         for my $key (@{$obj->{'host_custom_variable_names'}}) {
@@ -1018,6 +1023,36 @@ sub set_data_row_cust_vars {
             $obj->{'host_custom_variable_values'} = [values %{$obj->{'host_custom_variables'}}];
         }
     }
+    elsif($obj->{'host_custom_variable_values'} && !$allowed) {
+        $obj->{'host_custom_variables'}       = {} if $obj->{'host_custom_variables'};
+        $obj->{'host_custom_variable_values'} = [];
+    }
+
+    # update check command and apply obfuscation
+    my $c = $Thruk::Globals::c or die("not initialized!");
+    if($obj->{'check_command'}) {
+        if($show_full_commandline && (($show_full_commandline == 1 && $allowed) || $show_full_commandline == 2)) {
+            if($obj->{'host_name'}) {
+                my $command = $c->db->expand_command('host' => $obj, 'service' => $obj, 'source' => $c->config->{'show_full_commandline_source'} );
+                $obj->{'check_command'} = $command->{'line'};
+            } else {
+                my $command = $c->db->expand_command('host' => $obj, 'source' => $c->config->{'show_full_commandline_source'} );
+                $obj->{'check_command'} = $command->{'line'};
+            }
+        } else {
+            $obj->{'check_command'} = Thruk::Utils::Filter::strip_command_args($obj->{'check_command'});
+        }
+    }
+
+    if($obj->{'host_check_command'}) {
+        if($show_full_commandline && (($show_full_commandline == 1 && $allowed) || $show_full_commandline == 2)) {
+            my $command = $c->db->expand_command('host' => $obj, 'source' => $c->config->{'show_full_commandline_source'} );
+            $obj->{'host_check_command'} = $command->{'line'};
+        } else {
+            $obj->{'host_check_command'} = Thruk::Utils::Filter::strip_command_args($obj->{'host_check_command'});
+        }
+    }
+
     return($obj);
 }
 

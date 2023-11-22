@@ -139,7 +139,7 @@
       data-state="[% state %]"
       data-perfdata="[% escape_html(perfdata) %]"
       data-plugin-output="[% escape_html(plugin_output) %]"
-      data-check-command="[% escape_html(check_command) %]"
+      data-check-command="[% check_command | strip_command_args | html %]"
       data-pnp-url="[% IF pnp_url; pnp_url | html %]/graph?host=[% hst | html %]&srv=[% svc | html; END %]"
       data-is-host=[% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]
     ></div>

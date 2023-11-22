@@ -1151,12 +1151,17 @@ sub _expand_perfdata_and_custom_vars {
                 $found = 0;
                 last;
             }
+            if($col =~ m/^(custom_var|check_command)/mx) {
+                $found = 0;
+                last;
+            }
         }
         return($data) if $found;
     }
 
+    my $show_full_commandline = $c->config->{'show_full_commandline'};
     for my $row (@{$data}) {
-        Thruk::Utils::set_data_row_cust_vars($row, $allowed, $allowed_list);
+        Thruk::Utils::set_allowed_rows_data($row, $allowed, $allowed_list, $show_full_commandline);
 
         if($row->{'perf_data'}) {
             my $perfdata = (Thruk::Utils::Filter::split_perfdata($row->{'perf_data'}))[0];

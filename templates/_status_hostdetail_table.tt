@@ -183,7 +183,7 @@
           <td class='[% class %] address' style="display: none;">[% h.address | html %]</td>
           <td class='[% class %] alias' style="display: none;">[% h.alias | html %]</td>
           <td class='[% class %] parents' style="display: none;">[% h.parents.join(', ') | html %]</td>
-          <td class='[% class %] check_command' style="display: none;">[% h.check_command.replace("\!.*$", "") | html %]</td>
+          <td class='[% class %] check_command' style="display: none;">[% h.check_command | strip_command_args | html %]</td>
           <td class='[% class %] check_interval text-center' style="display: none;">[% h.check_interval | html %]</td>
           <td class='[% class %] check_period text-center' style="display: none;">[% h.check_period | html %]</td>
           <td class='[% class %] contacts truncate' style="display: none;">[% h.contacts.join(', ') | html %]</td>
