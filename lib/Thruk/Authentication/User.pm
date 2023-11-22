@@ -41,6 +41,7 @@ sub new {
     $self->{'roles_from_groups'} = {};
     $self->{'superuser'}         = $superuser ? 1 : 0;
     $self->{'internal'}          = $internal  ? 1 : 0;
+    $self->{'admin_role_from_system_and_conf'} = $c->config->{'admin_role_from_system_and_conf'} // 1;
 
     # add roles from cgi_conf
     for my $role (@{$Thruk::Constants::possible_roles}) {
@@ -361,7 +362,15 @@ sub check_user_roles {
         if($self->check_user_roles('authorized_for_admin')) {
             return(1);
         }
-        if($self->check_user_roles('authorized_for_system_commands') && $self->check_user_roles('authorized_for_configuration_information')) {
+        # for historical reasons (there was no explicit admin role in the past) any user with both, the
+        # - authorized_for_system_commands and
+        # - authorized_for_configuration_information
+        # gains the full admin role as well.
+        # change this behaviour with the 'admin_role_from_system_and_conf' setting.
+        if($self->{'admin_role_from_system_and_conf'}
+            && $self->check_user_roles('authorized_for_system_commands')
+            && $self->check_user_roles('authorized_for_configuration_information')
+        ) {
             return(1);
         }
     }

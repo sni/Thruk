@@ -85,6 +85,7 @@ my $base_defaults = {
     'strict_passive_mode'                   => 1,
     'hide_passive_icon'                     => 0,
     'hide_top'                              => 'auto',
+    'admin_role_from_system_and_conf'       => 1,
     'show_full_commandline'                 => 1,
     'show_modified_attributes'              => 1,
     'show_contacts'                         => 1,

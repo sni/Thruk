@@ -114,8 +114,11 @@ ex.:
 
   authorized_for_admin = thrukadmin
 
-Note: For historical reasons, any use which has the `authorized_for_system_information` and the `authorized_for_configuration_information` role will also gain the admin role.
+Note: For historical reasons (there was no explicit admin role in the past), any user
+which has the `authorized_for_system_commands` and the `authorized_for_configuration_information`
+role will also gain the full admin role.
 This is considered deprecated and might change in the future.
+Change this behaviour with the 'admin_role_from_system_and_conf' setting.
 
 
 === authorized_for_system_information

@@ -1140,6 +1140,16 @@ ex.:
   show_config_edit_buttons = 1
 
 
+=== admin_role_from_system_and_conf
+{% include new_since.ad version="3.12" %}
+For historical reasons (there was no explicit admin role in the past) any user with both, the
+- authorized_for_system_commands and
+- authorized_for_configuration_information
+gains the full admin role as well. This behaviour can be disabled
+with this admin_role_from_system_and_conf switch. This is deprecated
+and the default will change in a future release.
+
+
 === show_full_commandline
 Display the full command line for host / service checks .
 Be warned, the command line could contain passwords and other confidential data.
