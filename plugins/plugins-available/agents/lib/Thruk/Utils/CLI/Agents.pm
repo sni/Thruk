@@ -303,7 +303,7 @@ sub _run_show {
 sub _run_add {
     my($c, $commandoptions, $opt, $edit_only) = @_;
 
-    my $output = "usage: $0 agents add <host>\n";
+    my $output = "usage: $0 agents add <host>|ALL\n";
     my $rc     = 3;
 
     my $hosts = $commandoptions;
