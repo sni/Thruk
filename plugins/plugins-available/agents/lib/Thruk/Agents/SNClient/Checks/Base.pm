@@ -35,6 +35,7 @@ sub get_checks {
 
     if($inventory->{'cpu'}) {
         push @{$checks}, { 'id' => 'cpu', 'name' => 'cpu', check => 'check_cpu', parent => 'agent version' };
+        push @{$checks}, { 'id' => 'cpuutilization', 'name' => 'cpu utilization', check => 'check_cpu_utilization', parent => 'agent version' };
     }
 
     if($inventory->{'memory'}) {
@@ -93,7 +94,34 @@ sub get_checks {
         }
     }
 
+    if($inventory->{'mount'}) {
+        for my $mount (@{$inventory->{'mount'}}) {
+            push @{$checks}, {
+                'id'       => 'mount.'.Thruk::Utils::Agents::to_id($mount->{'mount'}),
+                'name'     => 'mount '.$mount->{'mount'},
+                'check'    => 'check_mount',
+                'args'     => { "mount" => $mount->{'mount'}, "options" => $mount->{'options'}, "fstype" => $mount->{'fstype'} },
+                'parent'   => 'agent version',
+                'info'     => Thruk::Agents::SNClient::make_info($mount),
+                'disabled' => Thruk::Utils::Agents::check_disable($mount, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{mount}),
+                'noperf'   => 1,
+            };
+        }
+    }
+
     if($inventory->{'service'}) {
+        my $services = Thruk::Base::list($inventory->{'service'});
+        # generic services check
+        if(scalar @{$services} > 0) {
+            push @{$checks}, {
+                'id'       => 'svc',
+                'name'     => 'services',
+                'check'    => 'check_service',
+                'parent'   => 'agent version',
+            };
+        }
+
+        # specifically configured service checks
         my $wanted = {};
         my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'service'});
         for my $cfg (@{$configs}) {
@@ -104,7 +132,6 @@ sub get_checks {
                 $wanted->{$n} = $cfg;
             }
         }
-        my $services = Thruk::Base::list($inventory->{'service'});
         for my $svc (@{$services}) {
             next unless $wanted->{$svc->{'name'}};
             my $cfg = $wanted->{$svc->{'name'}};
