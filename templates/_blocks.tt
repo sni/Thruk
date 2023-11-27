@@ -67,12 +67,12 @@
     [% END %]
     [% IF with_status                             %]<div><a href="status.cgi?host=[% host.$host_name | uri %]" title='View Service Details For This Host'><i class="fa-solid fa-bars"></i></a></div>[% END %]
   </div>
-[% END %]
+[%- END -%]
 
 
 
 
-[% BLOCK _status_service_attributes %]
+[%- BLOCK _status_service_attributes -%]
   [%
     peer_key     = service.peer_key
     passive_icon = 'fa-solid fa-arrows-down-to-line'
@@ -126,12 +126,12 @@
     </div>
     [% END %]
   </div>
-[% END %]
+[%- END -%]
 
 
 
 
-[% BLOCK _perfdata_table %]
+[%- BLOCK _perfdata_table -%]
   [% IF perf_bar_mode != 'off' %]
     <div
       class="js-perf-bar w-[75px] h-5 relative"
@@ -144,11 +144,11 @@
       data-is-host=[% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]
     ></div>
   [% END %]
-[% END %]
+[%- END -%]
 
 
 
-[% BLOCK _logs_line %]
+[%- BLOCK _logs_line -%]
 [% SET message = l.message.substr(13) %]
 [% SET has_type = 1 %]
 [% SET type = 'INFO' %]
@@ -207,10 +207,10 @@
 [% ELSIF l.type.match('Bailing\ out')             %][% SET pic = "fa-solid fa-power-off"   desc = "Program End" %][% SET has_type = 0 %][% SET type = 'SHUTDOWN' %]
 [% ELSE                                           %][% SET pic = "fa-solid fa-info"        desc = "Informational Message" %][% SET has_type = 0 %]
 [% END %]
-[% END %]
+[%- END -%]
 
 
-[% BLOCK _button %]
+[%- BLOCK _button -%]
 [% UNLESS btn.defined('skipform') && btn.skipform %]
 <form [% IF !btn.form.defined("method") %]method="POST"[% END %][% FOREACH k = btn.form.keys %] [% k | html %]="[% btn.form.$k | html %]"[% END %]>
 [% END %]
@@ -221,4 +221,4 @@
 [% END %]
 <button[% FOREACH k = btn.button.keys; IF k == "text" || k == "html"; NEXT; END %] [% k | html %]="[% btn.button.$k | html %]"[% END %]>[% IF btn.button.defined('text'); btn.button.text | html; END %][% IF btn.button.defined('html'); btn.button.html; END %]</button>
 [% UNLESS btn.defined('skipform') && btn.skipform %]</form>[% END %]
-[% END %]
+[%- END -%]
