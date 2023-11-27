@@ -324,6 +324,7 @@ sub get_inventory {
                                         $hostname,
                                         '',
                                     );
+    $output = Thruk::Base::trim_whitespace($output) if $output;
     if($output =~ m/^\{/mx) {
         my $data;
         eval {
@@ -335,7 +336,7 @@ sub get_inventory {
         }
         return $data;
     }
-    die($output);
+    die($output || 'no output from inventory scan command');
 }
 
 ##########################################################
