@@ -1945,7 +1945,9 @@ function redirect_url(url) {
     return(window_location_replace(url));
 }
 function window_location_replace(url) {
-    window.location.replace(url);
+    try {
+        window.location.replace(url);
+    } catch(err) { console.log(err) }
 }
 
 /* redirect to new url, but only after precheck url succeeds */
