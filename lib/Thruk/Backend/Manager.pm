@@ -8,6 +8,7 @@ use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Backend::Peer ();
+use Thruk::Constants ':backend_handling';
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
@@ -1577,8 +1578,8 @@ sub _do_on_peers {
         _debug($err);
         $err = $short_err if $short_err;
         $c->stash->{'backend_error'} = 1;
-        if($function eq 'send_command') {
-            die($err);
+        if($function eq 'send_command' || $c->stash->{backend_errors_handling} == DIE) {
+            die($err || 'No backend available');
         }
     }
 
@@ -2661,6 +2662,10 @@ set defaults for some results
 
 sub _set_result_defaults {
     my($self, $function, $data) = @_;
+
+    if(ref $data ne 'ARRAY') {
+        return($data);
+    }
 
     my $stats_name;
     if($function =~ m/get_(.*)$/mx) {

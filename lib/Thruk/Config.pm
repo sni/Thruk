@@ -9,6 +9,7 @@ use Cwd ();
 use POSIX ();
 
 use Thruk::Base ();
+use Thruk::Constants ':backend_handling';
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
@@ -355,6 +356,7 @@ sub get_default_stash {
         'fav_counter'               => 0,
         'show_last_update'          => 1,
         'data_sorted'               => {},
+        'backend_errors_handling'   => CONTINUE,
     };
     $stash = {%{$pre}, %{$stash}};
     return($stash);

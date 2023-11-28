@@ -353,11 +353,6 @@ sub _dispatcher {
         }
     }
 
-    # backend errors should not return 200 OK
-    if($c->stash->{'backend_error'} && $c->res->code() == 200) {
-        $c->res->code(503); # Service Unavailable
-    }
-
     $c->{'stage'} = 'post';
     unless($c->{'rendered'}) {
         eval {

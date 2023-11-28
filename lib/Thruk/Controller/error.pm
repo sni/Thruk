@@ -164,7 +164,7 @@ sub index {
             'code' => 403, # forbidden
         },
         '9'  => {
-            'mess'    => 'No Backend available',
+            'mess'    => 'No backend available',
             'dscr'    => 'None of the selected Backends could be reached, please have a look at the logfile for detailed information and make sure the core is up and running.',
             'details' => _get_connection_details($c),
             'code'    => 503, # Service Unavailable

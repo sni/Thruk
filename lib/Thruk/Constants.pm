@@ -37,6 +37,24 @@ my %peer_states = (
     HIDDEN_LMD_PARENT => 8,
 );
 
+push @EXPORT_OK, keys(%peer_states);
+constant->import(\%peer_states);
+$EXPORT_TAGS{peer_states} = [keys %peer_states];
+
+
+###################################################
+# possible ways to handle backend errors
+my %backend_handling = (
+    DIE              => 1, # die when all backends are down
+    CONTINUE         => 2, # continue showing page
+);
+
+push @EXPORT_OK, keys(%backend_handling);
+constant->import(\%backend_handling);
+$EXPORT_TAGS{backend_handling} = [keys %backend_handling];
+
+###################################################
+# available roles
 our $possible_roles = [
     'authorized_for_admin',
     'authorized_for_all_host_commands',
@@ -53,10 +71,6 @@ our $possible_roles = [
     'authorized_for_public_bookmarks',
     'authorized_for_read_only',
 ];
-
-push @EXPORT_OK, keys(%peer_states);
-constant->import(\%peer_states);
-$EXPORT_TAGS{peer_states} = [keys %peer_states];
 
 ###################################################
 # available AddDefaults variants

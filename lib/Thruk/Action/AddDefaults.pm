@@ -25,7 +25,7 @@ use Scalar::Util qw/weaken/;
 
 use Thruk::Base ();
 use Thruk::Config 'noautoload';
-use Thruk::Constants qw/:add_defaults :peer_states/;
+use Thruk::Constants qw/:add_defaults :peer_states :backend_handling/;
 use Thruk::Utils ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
@@ -261,6 +261,11 @@ sub end {
                 $c->stash->{hidetop} = 0;
             }
         }
+    }
+
+    # backend errors should not return 200 OK
+    if($c->stash->{'backend_error'} && $c->res->code() == 200 && $c->stash->{backend_errors_handling} != DIE) {
+        $c->res->code(503); # Service Unavailable
     }
 
     my @errors = @{ $c->error };

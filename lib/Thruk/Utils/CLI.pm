@@ -23,6 +23,7 @@ use Time::HiRes ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Config; # autoload config
+use Thruk::Constants ':backend_handling';
 use Thruk::UserAgent ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
@@ -595,6 +596,8 @@ sub _run_commands {
         'output'  => '',
         'rc'      => 0,
     };
+
+    $c->stash->{'backend_errors_handling'} = DIE;
 
     # which command to run?
     my @actions = split(/\s*,\s*/mx, ($opt->{'action'} || ''));

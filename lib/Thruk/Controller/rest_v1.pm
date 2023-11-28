@@ -12,6 +12,7 @@ use Thruk::Action::AddDefaults ();
 use Thruk::Authentication::User ();
 use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
+use Thruk::Constants ':backend_handling';
 use Thruk::Utils::Auth ();
 use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::Log qw/:all/;
@@ -75,6 +76,8 @@ sub index {
 
     # printing audit log breaks json output, ex. for commands
     local $ENV{'THRUK_QUIET'} = 1 unless Thruk::Base->verbose;
+
+    $c->stash->{'backend_errors_handling'} = DIE;
 
     my $format   = 'json';
     my $backends = [];
