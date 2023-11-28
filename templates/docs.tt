@@ -2,17 +2,29 @@
 
   [% PROCESS _infobox.tt %]
 
-  <div class="card mx-auto min-w-fit mt-4">
-    <div class="head">
-      <h3>Thruk Documentation</h3>
+  <div class="mx-auto max-w-[600px] flexcol gap-y-10">
+    <div class="card w-full">
+      <div class="head">
+        <h3>Thruk Documentation</h3>
+      </div>
+      <div class="body">
+        <div>Thruks documentation itself is available online at <a class="link font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank"><i class="uil uil-external-link-alt text-sm m-0"></i>www.thruk.org/documentation/</a>.</div>
+        <div class="py-2">For installation information and general Thruk help look at the <a class="link font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank"><i class="uil uil-external-link-alt text-sm m-0"></i>online documentation</a>.</div>
+        <button class="green big mx-auto my-2"><a href="http://www.thruk.org/documentation/" target="_blank">Continue to the Thruk Online Documentation</a></button>
+      </div>
     </div>
-	<div class="body">
-		<div>Thruks documentation itself is available online at <a class="link font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank"><i class="uil uil-external-link-alt text-sm m-0"></i>www.thruk.org/documentation/</a>.</div>
-		<div class="pt-2">To replace this link with the documentation of your monitoring tool add a <b>documentation_link</b> config item to your thruk_local.conf.</div>
-		<div class="pt-2">If you don't need a documentation link at all, set the <b>documentation_link</b> option to a blank value.</div>
-		<div class="py-2">For installation information and general Thruk help look at the <a class="link font-semibold underline" href="http://www.thruk.org/documentation/" target="_blank"><i class="uil uil-external-link-alt text-sm m-0"></i>online documentation</a>.</div>
-		<button class="green big"><a href="http://www.thruk.org/documentation/" target="_blank">Continue to the Thruk Online Documentation</a></button>
-	</div>
+
+    [% IF c.check_user_roles('admin') %]
+      <div class="card w-full">
+        <div class="head">
+          <h3>Custom Documentation</h3>
+        </div>
+        <div class="body">
+          <div class="pt-2">To replace this link with the documentation of your monitoring tool add a <b>documentation_link</b> config item to your thruk_local.conf.</div>
+          <div class="pt-2">If you don't need a documentation link at all, set the <b>documentation_link</b> option to a blank value.</div>
+        </div>
+      </div>
+    [% END %]
   </div>
 
 [% PROCESS _footer.tt %]
