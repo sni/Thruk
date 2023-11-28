@@ -128,7 +128,12 @@
             </div>
           </td>
         </tr>
-      [%  END %]
+      [% END %]
+      [% IF data.size == 0 %]
+      <tr>
+        <td class='text-center textALERT' colspan="7">There are no items scheduled</td>
+      </tr>
+      [% END %]
     </table>
   </div>
 
