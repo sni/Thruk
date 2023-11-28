@@ -1543,7 +1543,7 @@ sub _do_on_peers {
                 eval {
                     ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
                 };
-                my $err  = $@;
+                $err  = $@;
                 if($err) {
                     _debug($err);
                     my $code = 500;
@@ -1563,6 +1563,7 @@ sub _do_on_peers {
                     die("internal lmd error - ".($c->stash->{'lmd_error'} || $err));
                 }
             }
+            die($err) if $err;
         } else {
             $skip_lmd = 1;
             _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
@@ -1579,7 +1580,7 @@ sub _do_on_peers {
         $err = $short_err if $short_err;
         $c->stash->{'backend_error'} = 1;
         if($function eq 'send_command' || $c->stash->{backend_errors_handling} == DIE) {
-            die($err || 'No backend available');
+            die($err);
         }
     }
 
@@ -1891,6 +1892,7 @@ sub _get_result_lmd {
             $peer->{'last_error'} = $meta->{'failed'}->{$key};
         }
         if(scalar keys %{$meta->{'failed'}} == @{$peers} && @{$peers} > 0) {
+            _error("no backend available");
             $c->stash->{'backend_error'} = 1;
         }
     }
