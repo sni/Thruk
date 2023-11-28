@@ -857,7 +857,7 @@ sub expand_command {
     if(defined $command) {
         $expanded = $command->{'line'};
     } else {
-        my $commands = $self->get_commands( filter => [ { 'name' => $name } ], backend => [$obj->{'peer_key'}] );
+        my $commands = $self->get_commands( filter => [ { 'name' => $name } ], backend => Thruk::Base::list($obj->{'peer_key'}) );
         $expanded = $commands->[0]->{'line'};
     }
 
@@ -1851,6 +1851,7 @@ sub _get_result_lmd {
     delete $c->stash->{'lmd_error'};
 
     if(scalar @{$peers} == 0) {
+        _add_query_stats($c, 0, $function, $arg, {});
         return($result, $type, $totalsize);
     }
 
@@ -1885,7 +1886,7 @@ sub _get_result_lmd {
             $peer->{'runnning'}   = 0;
             $peer->{'last_error'} = $meta->{'failed'}->{$key};
         }
-        if(scalar keys %{$meta->{'failed'}} == @{$peers}) {
+        if(scalar keys %{$meta->{'failed'}} == @{$peers} && @{$peers} > 0) {
             $c->stash->{'backend_error'} = 1;
         }
     }
