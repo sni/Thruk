@@ -1513,96 +1513,70 @@ sub _do_on_peers {
     }
 
     my($result, $type, $totalsize, $skip_lmd);
-    if($ENV{'THRUK_USE_LMD'}
-       && ($function =~ m/^get_/mx || $function eq 'send_command')
-       && ($function ne 'get_logs' || !$c->config->{'logcache'})
-       ) {
-        _debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
+    eval {
+        if($ENV{'THRUK_USE_LMD'}
+        && ($function =~ m/^get_/mx || $function eq 'send_command')
+        && ($function ne 'get_logs' || !$c->config->{'logcache'})
+        ) {
+            _debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
 
-        eval {
-            ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
-        };
-        my $err = $@;
-        if($err && $err =~ m|^502:|mx) {
-            $c->stash->{'lmd_ok'} = 1;
-        }
-        if($err && !$c->stash->{'lmd_ok'}) {
-            # catch command errors
-            if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
-                die($err);
-            }
-            $c->stats->profile( begin => "_do_on_peers, check lmd proc");
-            require Thruk::Utils::LMD;
-            Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
-            sleep(1);
-            $c->stats->profile( end => "_do_on_peers, check lmd proc");
-            # then retry again
             eval {
                 ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
             };
-            if($@) {
-                my $err  = $@;
-                my $code = 500;
-                if($err =~ m|^(\d+):\s*(.*)$|smx) {
-                    $code = $1;
-                    $err  = $2;
-                }
-                my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
-                if(defined $short_err) {
-                    _debug($err);
-                    $err = $short_err;
-                }
-
-                if(!$c->stash->{'lmd_ok'} && $code != 502) {
-                    $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
-                    $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
-                    require Thruk::Utils::External;
-                    Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
-                }
-                die("internal lmd error - ".($c->stash->{'lmd_error'} || $err));
+            my $err = $@;
+            _debug($err) if $err;
+            if($err && $err =~ m|^502:|mx) {
+                $c->stash->{'lmd_ok'} = 1;
             }
+            if($err && !$c->stash->{'lmd_ok'}) {
+                # catch command errors
+                if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
+                    die($err);
+                }
+                $c->stats->profile( begin => "_do_on_peers, check lmd proc");
+                require Thruk::Utils::LMD;
+                Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
+                sleep(1);
+                $c->stats->profile( end => "_do_on_peers, check lmd proc");
+                # then retry again
+                eval {
+                    ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
+                };
+                my $err  = $@;
+                if($err) {
+                    _debug($err);
+                    my $code = 500;
+                    if($err =~ m|^(\d+):\s*(.*)$|smx) {
+                        $code = $1;
+                        $err  = $2 || $err;
+                    }
+                    my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
+                    $err = $short_err if $short_err;
+
+                    if(!$c->stash->{'lmd_ok'} && $code != 502) {
+                        $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
+                        $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
+                        require Thruk::Utils::External;
+                        Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
+                    }
+                    die("internal lmd error - ".($c->stash->{'lmd_error'} || $err));
+                }
+            }
+        } else {
+            $skip_lmd = 1;
+            _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
+            ($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
         }
-    } else {
-        $skip_lmd = 1;
-        _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
-        ($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
-    }
+    };
+    my $err = $@;
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
 
     &timing_breakpoint('_get_result: '.$function);
-    if(!defined $result && $num_selected_backends != 0) {
-        # we don't need a full stacktrace for known errors
-        my $err = $@; # only set if there is exact one backend
+    if(!defined $result || $err) {
+        my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
         _debug($err);
+        $err = $short_err if $short_err;
         $c->stash->{'backend_error'} = 1;
-        if($err =~ m/(couldn't\s+connect\s+to\s+server\s+[^\s]+)/mx) {
-            die($1);
-        }
-        # failed to open socket /tmp/live.sock: No such file or directory
-        elsif($err =~ m|(failed\s+to\s+open\s+socket\s+[^:]+:.*?)\s+at\s+|mx) {
-            die($1);
-        }
-        # failed to connect at .../Class/Lite.pm line 245.
-        elsif($err =~ m|(failed\s+to\s+connect)\s+at\s+|mx) {
-            die($1);
-        }
-        elsif($err =~ m|(hit\s\+.*?timeout\s+on.*?)\s+at\s+|mx) {
-            die($1);
-        }
-        elsif($err =~ m|^(DBI\s+.*?)\s+at\s+|mx) {
-            die($1);
-        }
-        elsif($err =~ m|(^\d{3}:\s+.*?)\s+at\s+|smx) {
-            die($1);
-        }
-        elsif($err) {
-            die($err);
-        } else {
-            # multiple backends and all fail
-            # die with a small error for know, usually an empty result means that
-            # none of our backends were reachable
-            die("did not get a valid response for at least any site");
-        }
     }
 
     # extract some extra data
@@ -1913,7 +1887,6 @@ sub _get_result_lmd {
         }
         if(scalar keys %{$meta->{'failed'}} == @{$peers}) {
             $c->stash->{'backend_error'} = 1;
-            die("did not get a valid response for at least any site");
         }
     }
 
@@ -2684,10 +2657,6 @@ set defaults for some results
 
 sub _set_result_defaults {
     my($self, $function, $data) = @_;
-
-    if(ref $data ne 'ARRAY') {
-        return($data);
-    }
 
     my $stats_name;
     if($function =~ m/get_(.*)$/mx) {

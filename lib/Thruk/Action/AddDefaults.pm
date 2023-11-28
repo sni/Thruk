@@ -550,8 +550,6 @@ sub add_defaults {
             } else {
                 _debug("data source error: $err");
             }
-            return 1 if $flags_hash->{ADD_SAFE_DEFAULTS};
-            return $c->detach('/error/index/9');
         }
         $c->stash->{'last_program_restart'} = $last_program_restart;
 
@@ -576,8 +574,6 @@ sub add_defaults {
     }
 
     ###############################
-    die_when_no_backends($c);
-
     if(defined $ENV{'OMD_ROOT'}) {
         # get core from init script link (omd)
         my $core = '';
@@ -845,6 +841,8 @@ sub update_site_panel_hashes {
         elsif(scalar @{$backends} == 1) { $show_sitepanel = 'off'; }
         else { $show_sitepanel = 'list'; }
     }
+
+    if(scalar @{$backends} == 1 && $c->stash->{'backend_error'}) { $show_sitepanel = 'list'; }
 
     $c->stash->{'initial_backends'} = $initial_backends;
     $c->stash->{'show_sitepanel'}   = $show_sitepanel;

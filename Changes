@@ -4,6 +4,7 @@ next:
           - add config option 'admin_role_from_system_and_conf'
           - add options status column: last state change
           - fix exposing check_command via rest api
+          - do not show error page if all backends are down, but show page with empty data
           - Agents:
             - add default args
             - add support for section based settings
