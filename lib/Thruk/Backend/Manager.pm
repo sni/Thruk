@@ -1577,6 +1577,9 @@ sub _do_on_peers {
         _debug($err);
         $err = $short_err if $short_err;
         $c->stash->{'backend_error'} = 1;
+        if($function eq 'send_command') {
+            die($err);
+        }
     }
 
     # extract some extra data
