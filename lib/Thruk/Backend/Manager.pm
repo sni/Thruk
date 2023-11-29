@@ -819,7 +819,8 @@ sub expand_command {
     croak("no host")    unless defined $data{'host'};
     my $host     = $data{'host'};
     my $service  = $data{'service'};
-    my $command  = $data{'command'};
+    my $command  = $data{'command'};  # optional reference to a command object from the commands tabls
+    my $commands = $data{'commands'}; # optional lookup table for commands
     my $source   = $data{'source'};
 
     my $obj          = $host;
@@ -845,12 +846,11 @@ sub expand_command {
 
     # it is possible to define hosts without a command
     if(!defined $name || $name =~ m/^\s*$/mx) {
-        my $return = {
+        return({
             'line'          => 'no command defined',
             'line_expanded' => '',
             'note'          => '',
-        };
-        return $return;
+        });
     }
 
     # get command data
@@ -858,8 +858,23 @@ sub expand_command {
     if(defined $command) {
         $expanded = $command->{'line'};
     } else {
-        my $commands = $self->get_commands( filter => [ { 'name' => $name } ], backend => Thruk::Base::list($obj->{'peer_key'}) );
-        $expanded = $commands->[0]->{'line'};
+        if(defined $commands) {
+            my $cmd = $commands->{Thruk::Base::list($obj->{'peer_key'})->[0]}->{$name};
+            if($cmd) {
+                $expanded = $cmd->{'line'};
+            }
+        } else {
+            my $commands = $self->get_commands( filter => [ { 'name' => $name } ], backend => Thruk::Base::list($obj->{'peer_key'}) );
+            $expanded = $commands->[0]->{'line'};
+        }
+    }
+
+    if(!$expanded) {
+        return({
+            'line'          => '',
+            'line_expanded' => '',
+            'note'          => '',
+        });
     }
 
     my($rc, $obfuscated, $orig);

@@ -1739,9 +1739,10 @@ sub _rest_get_livestatus_hosts_commandline {
         return({ 'message' => 'not authorized', 'description' => 'you are not authorized to view the command line', code => 403 });
     }
     my $data = [];
+    my $all_commands = Thruk::Base::array2hash(\@{$c->db->get_commands()}, 'peer_key', 'name');
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
     for my $hst (@{$hosts}) {
-        my $command = $c->db->expand_command('host' => $hst, 'source' => $c->config->{'show_full_commandline_source'} );
+        my $command = $c->db->expand_command('host' => $hst, commands => $all_commands, 'source' => $c->config->{'show_full_commandline_source'} );
         push @{$data}, {
             'command_line'  => $command->{'line_expanded'},
             'check_command' => $command->{'line'},
@@ -1831,9 +1832,10 @@ sub _rest_get_livestatus_services_commandline {
         return({'message' => 'not authorized', 'description' => 'you are not authorized to view the command line', code => 403 });
     }
     my $data = [];
+    my $all_commands = Thruk::Base::array2hash(\@{$c->db->get_commands()}, 'peer_key', 'name');
     my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
     for my $svc (@{$services}) {
-        my $command = $c->db->expand_command('host' => $svc, 'service' => $svc, 'source' => $c->config->{'show_full_commandline_source'} );
+        my $command = $c->db->expand_command('host' => $svc, 'service' => $svc, commands => $all_commands, 'source' => $c->config->{'show_full_commandline_source'} );
         push @{$data}, {
             'command_line'        => $command->{'line_expanded'},
             'check_command'       => $command->{'line'},
