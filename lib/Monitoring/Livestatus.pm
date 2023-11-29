@@ -1127,12 +1127,12 @@ sub _send_socket {
             return($status, $msg, $recv) if $msg;
             return(&_read_socket_do($self, $sock, $statement));
         }
-        confess($err) if $self->{'errors_are_fatal'};
+        _die_or_confess($err) if $self->{'errors_are_fatal'};
     }
 
     $status = $sock unless $status;
     $msg =~ s/^$status:\s+//gmx;
-    confess($status.": ".$msg) if($status >= 400 and $self->{'errors_are_fatal'});
+    _die_or_confess($status.": ".$msg) if($status >= 400 and $self->{'errors_are_fatal'});
 
     return($status, $msg, $recv);
 }
@@ -1229,7 +1229,7 @@ sub _socket_error {
 
     if($self->{'retries_on_connection_error'} <= 0) {
         if($self->{'errors_are_fatal'}) {
-            confess($message);
+            _die_or_confess($message);
         }
         else {
             carp($message);
@@ -1553,6 +1553,16 @@ sub _log_statement {
     $cleanstatement =~ s/\n/\\n/gmx;
     $self->{'logger'}->debug('selectall_arrayref("'.$cleanstatement.'", '.$optstring.', '.$limit.')');
     return 1;
+}
+
+########################################
+sub _die_or_confess {
+    my($msg) = @_;
+    my @lines = split/\n/mx, $msg;
+    if(scalar @lines > 2) {
+        die($msg);
+    }
+    confess($msg);
 }
 
 ########################################

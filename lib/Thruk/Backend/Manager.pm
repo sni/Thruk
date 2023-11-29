@@ -1478,16 +1478,17 @@ sub _set_service_macros {
 
     return $macros;
 }
+
 ########################################
 
 =head2 _do_on_peers
 
-  _do_on_peers($function, $options)
+  _do_on_peers($function, $args, [ $force_serial ], [ $backends ], [ $raw_result ])
 
 returns a result for a function called for all peers
 
   $function is the name of the function called on our peers
-  $options is a hash:
+  $args is a hash:
   {
     backend => []     # array of backends where this sub should be called
   }
@@ -1495,7 +1496,7 @@ returns a result for a function called for all peers
 =cut
 
 sub _do_on_peers {
-    my( $self, $function, $arg, $force_serial, $backends, $raw_result) = @_;
+    my( $self, $function, $arg, $force_serial, $backends, $raw_result ) = @_;
     my $c = $Thruk::Globals::c;
     confess("no context") unless $c;
 
@@ -1513,64 +1514,18 @@ sub _do_on_peers {
         $c->stash->{'selected_backends'}     = $get_results_for;
     }
 
-    my($result, $type, $totalsize, $skip_lmd);
-    eval {
-        if($ENV{'THRUK_USE_LMD'}
+    my($result, $type, $totalsize, $err, $skip_lmd);
+    if($ENV{'THRUK_USE_LMD'}
         && ($function =~ m/^get_/mx || $function eq 'send_command')
         && ($function ne 'get_logs' || !$c->config->{'logcache'})
-        ) {
-            _debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
-
-            eval {
-                ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
-            };
-            my $err = $@;
-            _debug($err) if $err;
-            if($err && $err =~ m|^502:|mx) {
-                $c->stash->{'lmd_ok'} = 1;
-            }
-            if($err && !$c->stash->{'lmd_ok'}) {
-                # catch command errors
-                if($function eq 'send_command' && $err =~ m/^\d+:\s/mx) {
-                    die($err);
-                }
-                $c->stats->profile( begin => "_do_on_peers, check lmd proc");
-                require Thruk::Utils::LMD;
-                Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
-                sleep(1);
-                $c->stats->profile( end => "_do_on_peers, check lmd proc");
-                # then retry again
-                eval {
-                    ($result, $type, $totalsize) = $self->_get_result_lmd($get_results_for, $function, $arg);
-                };
-                $err  = $@;
-                if($err) {
-                    _debug($err);
-                    my $code = 500;
-                    if($err =~ m|^(\d+):\s*(.*)$|smx) {
-                        $code = $1;
-                        $err  = $2 || $err;
-                    }
-                    my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
-                    $err = $short_err if $short_err;
-
-                    if(!$c->stash->{'lmd_ok'} && $code != 502) {
-                        $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
-                        $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
-                        require Thruk::Utils::External;
-                        Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
-                    }
-                    die("internal lmd error - ".($c->stash->{'lmd_error'} || $err));
-                }
-            }
-            die($err) if $err;
-        } else {
-            $skip_lmd = 1;
-            _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
-            ($result, $type, $totalsize) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
-        }
-    };
-    my $err = $@;
+    ) {
+        _debug('livestatus (by lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
+        ($result, $type, $totalsize, $err) = $self->_get_result_lmd_with_retries($c, $get_results_for, $function, $arg, 1);
+    } else {
+        $skip_lmd = 1;
+        _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
+        ($result, $type, $totalsize, $err) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
+    }
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
 
     &timing_breakpoint('_get_result: '.$function);
@@ -1826,13 +1781,18 @@ run function on several peers and collect result.
 
 sub _get_result {
     my($self, $peers, $function, $arg, $force_serial) = @_;
-    if($ENV{'THRUK_NO_CONNECTION_POOL'}
-       or $force_serial
-       or scalar @{$peers} <= 1)
-    {
-        return $self->_get_result_serial($peers, $function, $arg);
-    }
-    return $self->_get_result_parallel($peers, $function, $arg);
+
+    my($result, $type, $totalsize);
+    eval {
+        if($ENV{'THRUK_NO_CONNECTION_POOL'} || $force_serial || scalar @{$peers} <= 1) {
+            ($result, $type, $totalsize) = $self->_get_result_serial($peers, $function, $arg);
+        } else {
+            ($result, $type, $totalsize) = $self->_get_result_parallel($peers, $function, $arg);
+        }
+    };
+    my $err = $@;
+
+    return($result, $type, $totalsize, $err);
 }
 
 ########################################
@@ -1891,8 +1851,8 @@ sub _get_result_lmd {
             $peer->{'runnning'}   = 0;
             $peer->{'last_error'} = $meta->{'failed'}->{$key};
         }
-        if(scalar keys %{$meta->{'failed'}} == @{$peers} && @{$peers} > 0) {
-            _error("no backend available");
+        if(scalar keys %{$meta->{'failed'}} == scalar @{$peers} && scalar @{$peers} > 0) {
+            _debug("%s: none of the %d selected backends were available", $function, scalar @{$peers});
             $c->stash->{'backend_error'} = 1;
         }
     }
@@ -1924,6 +1884,61 @@ sub _get_result_lmd {
 
     $c->stats->profile( end => "_get_result_lmd($function)");
     return($result, $type, $totalsize);
+}
+
+########################################
+sub _get_result_lmd_with_retries {
+    my($self, $c, $peers, $function, $arg, $retries) = @_;
+
+    my($result, $type, $totalsize);
+    eval {
+        ($result, $type, $totalsize) = $self->_get_result_lmd($peers, $function, $arg);
+    };
+    my $err = $@;
+    return($result, $type, $totalsize, undef) unless $err;
+
+    _debug($err) if $err;
+    if($err && $err =~ m|^502:|mx) { # lmd sends error 502 if all backends are down
+        $c->stash->{'lmd_ok'} = 1;
+    }
+
+    # catch command errors
+    if($function eq 'send_command' && $err && $err =~ m/^\d+:\s/mx) {
+        return($result, $type, $totalsize, $err) unless $err;
+    }
+
+    if($err && !$c->stash->{'lmd_ok'}) {
+        $c->stats->profile( begin => "_get_result_lmd_with_retries, check lmd proc");
+        require Thruk::Utils::LMD;
+        Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
+        sleep(1);
+        $c->stats->profile( end => "_get_result_lmd_with_retries, check lmd proc");
+
+        # then retry again
+        if($retries > 0) {
+            $retries = $retries - 1;
+            return($self->_get_result_lmd_with_retries($c, $peers, $function, $arg, $retries));
+        }
+
+        # no more retries
+        my $code = 500;
+        if($err =~ m|^(\d+):\s*(.*)$|smx) {
+            $code = $1;
+            $err  = $2 || $err;
+        }
+        my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
+        $err = $short_err if $short_err;
+
+        if($code != 502) {
+            $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
+            $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
+            require Thruk::Utils::External;
+            Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
+        }
+        $err = "internal lmd error - ".($c->stash->{'lmd_error'} || $err);
+    }
+
+    return($result, $type, $totalsize, $err);
 }
 
 ########################################
