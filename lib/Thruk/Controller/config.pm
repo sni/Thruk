@@ -76,12 +76,16 @@ sub index {
         $c->db->get_hosts(sort => 'name', remove_duplicates => 1, pager => 1, extra_columns => ['contacts', 'contact_groups'], filter => $filter );
         # use obfuscated command later
         for my $hst (@{$c->stash->{'data'}}) {
-            my $check_command = $hst->{'check_command'};
-            $check_command =~ s/\!.*$//gmx;
-            my $cmd = $all_commands->{Thruk::Base::list($hst->{'peer_key'})->[0]}->{$check_command};
-            die("cannot find command definition for: ".$check_command) unless $cmd;
-            $hst->{'command'} = $cmd;
-            $hst->{'_check_command'} = $c->db->expand_command('host' => $hst, command => $hst->{'command'}, 'source' => $c->config->{'show_full_commandline_source'} );
+            if($hst->{'check_command'}) {
+                $hst->{'_check_command'} = { 'line' => '' };
+            } else {
+                my $check_command = $hst->{'check_command'};
+                $check_command =~ s/\!.*$//gmx;
+                my $cmd = $all_commands->{Thruk::Base::list($hst->{'peer_key'})->[0]}->{$check_command};
+                die("cannot find command definition for: ".$check_command) unless $cmd;
+                $hst->{'command'} = $cmd;
+                $hst->{'_check_command'} = $c->db->expand_command('host' => $hst, command => $hst->{'command'}, 'source' => $c->config->{'show_full_commandline_source'} );
+            }
         }
         $c->stash->{template} = 'config_hosts.tt';
     }
@@ -100,12 +104,16 @@ sub index {
         $c->db->get_services(sort => [ 'host_name', 'description' ], remove_duplicates => 1, pager => 1, extra_columns => ['contacts', 'contact_groups'], filter => $filter);
         # use obfuscated command later
         for my $svc (@{$c->stash->{'data'}}) {
-            my $check_command = $svc->{'check_command'};
-            $check_command =~ s/\!.*$//gmx;
-            my $cmd = $all_commands->{Thruk::Base::list($svc->{'peer_key'})->[0]}->{$check_command};
-            die("cannot find command definition for: ".$check_command) unless $cmd;
-            $svc->{'command'} = $cmd;
-            $svc->{'_check_command'} = $c->db->expand_command('host' => $svc, 'service' => $svc, 'source' => $c->config->{'show_full_commandline_source'} );
+            if($svc->{'check_command'}) {
+                $svc->{'_check_command'} = { 'line' => '' };
+            } else {
+                my $check_command = $svc->{'check_command'};
+                $check_command =~ s/\!.*$//gmx;
+                my $cmd = $all_commands->{Thruk::Base::list($svc->{'peer_key'})->[0]}->{$check_command};
+                die("cannot find command definition for: ".$check_command) unless $cmd;
+                $svc->{'command'} = $cmd;
+                $svc->{'_check_command'} = $c->db->expand_command('host' => $svc, 'service' => $svc, 'source' => $c->config->{'show_full_commandline_source'} );
+            }
         }
         $c->stash->{template} = 'config_services.tt';
     }
