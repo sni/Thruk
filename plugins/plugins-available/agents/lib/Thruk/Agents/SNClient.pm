@@ -169,8 +169,7 @@ sub get_config_objects {
             $svc->{'conf'} = $chk->{'svc_conf'};
             $svc->{'conf'}->{'use'} = \@templates;
             if(!defined $svc->{'conf'}->{'service_description'}) {
-                require Data::Dumper;
-                _warn(Carp::longmess("no service description:".Data::Dumper::Dumper($chk)));
+                # these are obsolete services, just keep them as is
                 next;
             }
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
