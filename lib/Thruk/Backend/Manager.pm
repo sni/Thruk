@@ -1528,8 +1528,17 @@ sub _do_on_peers {
     }
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
 
+    for my $key (sort keys %{$c->stash->{'failed_backends'}}) {
+        # cleanup errors a bit
+        $c->stash->{'failed_backends'}->{$key} =~ s/^ERROR:\s*//mx;
+        $c->stash->{'failed_backends'}->{$key} =~ s/,\s*<GEN1>\s*line\s*\d+\.$//mx;
+    }
+
     &timing_breakpoint('_get_result: '.$function);
     if(!defined $result || $err) {
+        if(!$err) {
+            $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
+        }
         my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
         _debug($err);
         $err = $short_err if $short_err;
@@ -1903,8 +1912,8 @@ sub _get_result_lmd_with_retries {
     }
 
     # catch command errors
-    if($function eq 'send_command' && $err && $err =~ m/^\d+:\s/mx) {
-        return($result, $type, $totalsize, $err) unless $err;
+    if($function eq 'send_command' && (!$err || $err =~ m/^\d+:\s/mx)) {
+        return($result, $type, $totalsize, $err);
     }
 
     if($err && !$c->stash->{'lmd_ok'}) {

@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/305-controller_rest_commands.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 1053;
+    plan tests => 1062;
 
     use lib('t');
     require TestUtils;
@@ -73,6 +73,21 @@ for my $type (sort keys %{$cmds}) {
     }
 }
 
+########################################
+# test command error message
+TestUtils::test_page(
+    'content_type' => 'application/json; charset=utf-8',
+    'url'          => '/thruk/r/hosts/'.$host.'/cmd/schedule_host_downtime',
+    'code'         => 400,
+    'like'         => ['demo: 400: Couldn\'t parse ulong argument trigger_id', 'COMMAND', 'sending command failed', '"code" : 400'],
+    'unlike'       => ['Command successfully submitted'],
+    'post'         => {
+        comment_data        => "test",
+        triggered_by        => "test",
+    },
+);
+
+########################################
 # enable some things again
 TestUtils::test_page(
     'content_type' => 'application/json; charset=utf-8',

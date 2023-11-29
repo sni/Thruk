@@ -2561,6 +2561,7 @@ t/scenarios/rest_api/t/301-controller_rest_scenario.t
 t/scenarios/rest_api/t/305-controller_rest_commands.t
 t/scenarios/rest_api/t/local/rest.t
 t/scenarios/rest_api/t/local/rest_check_thruk_rest.t
+t/scenarios/rest_api/t/local/rest_commands.t
 t/scenarios/rest_api/t/local/rest_configtool.t
 t/scenarios/rest_api/t/local/rest_csv_output.t
 t/scenarios/rest_api/t/local/rest_errors.t
