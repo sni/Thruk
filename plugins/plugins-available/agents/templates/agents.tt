@@ -61,9 +61,12 @@
                 }%]
                 [% IF info.exists(hostname) && info.$hostname.exists("inv_state") && info.$hostname.inv_state != 0 %]
                   <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]">
-                    <i class="fa-solid fa-exclamation round small [% IF info.$hostname.inv_state == 1 %]yellow[% ELSE %]orange[% END %]" title="[% info.$hostname.inv_out | html %]"></i>
+                    [% color = "yellow" %]
+                    [% IF info.$hostname.inv_state != 1 || info.$hostname.inv_out.match('timeout after') %]
+                      [% color = "orange" %]
+                    [% END %]
+                    <i class="fa-solid fa-exclamation round small [% color %]" title="[% info.$hostname.inv_out | html %]"></i>
                   </a>
-                  [% info.$hostname.inv_state %]
                 [% END %]
               </div>
             </td>
