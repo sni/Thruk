@@ -39,12 +39,26 @@ sub get_checks {
     }
 
     if($inventory->{'memory'}) {
-        push @{$checks}, {
-            'id'     => 'mem',
-            'name'   => 'memory',
-            'check'  => 'check_memory',
-            'parent' => 'agent version',
-        };
+        for my $mem (@{$inventory->{'memory'}}) {
+            if($mem->{'type'} eq 'physical') {
+                push @{$checks}, {
+                    'id'     => 'mem',
+                    'name'   => 'memory',
+                    'check'  => 'check_memory',
+                    'args'     => { "type" => "physical" },
+                    'parent' => 'agent version',
+                };
+            }
+            if($mem->{'type'} eq 'commited') {
+                push @{$checks}, {
+                    'id'     => 'mem',
+                    'name'   => 'memory swap',
+                    'check'  => 'check_memory',
+                    'parent' => 'agent version',
+                    'args'     => { "type" => "commited" },
+                };
+            }
+        }
     }
 
     if($inventory->{'uptime'}) {
