@@ -1147,6 +1147,7 @@ sub config_reload {
     my $peer = $c->db->get_peer_by_key($backend);
     my $pkey = $peer->peer_key();
     my $wait = 1;
+    my $rc   = 1;
 
     my $cmd = $c->stash->{'peer_conftool'}->{'obj_reload_cmd'};
     $cmd = $cmd.' 2>&1' if($cmd && $cmd !~ m|>|mx);
@@ -1173,6 +1174,7 @@ sub config_reload {
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', 'config reload failed!' );
             $wait = 0;
+            $rc   = 0;
         }
 
         _nice_check_output($c);
@@ -1193,11 +1195,13 @@ sub config_reload {
         if(!Thruk::Utils::wait_after_reload($c, $pkey, $last_reload)) {
             $c->stash->{'original_output'} .= 'Warning: waiting for core reload failed.';
             $c->stash->{'output'}          .= "\n<font color='red'>".$c->stash->{'original_output'}."</font>";
+            $rc = 0;
         }
     }
 
     $c->stats->profile(end => "Conf::config_reload");
-    return(1, $c->stash->{'original_output'});
+    $c->stash->{'reload_rc'} = $rc;
+    return($rc, $c->stash->{'original_output'});
 }
 
 ##########################################################

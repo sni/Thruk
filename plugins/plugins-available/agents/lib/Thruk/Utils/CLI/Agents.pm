@@ -338,17 +338,17 @@ sub _run_add {
         if($rc > 0) {
             return("", $rc);
         }
+
+        Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
+        Thruk::Utils::Agents::sort_config_objects($c);
+
+        if($c->{'obj_db'}->commit($c)) {
+            $c->stash->{'obj_model_changed'} = 1;
+        }
+        Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
     }
 
-    Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
-    Thruk::Utils::Agents::sort_config_objects($c);
-
-    if($c->{'obj_db'}->commit($c)) {
-        $c->stash->{'obj_model_changed'} = 1;
-    }
-    Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
-
-	my $out = "";
+    my $out = "";
     if(!$opt->{'reload'}) {
         $out .= "\n(use -R to activate changes)\n";
     }

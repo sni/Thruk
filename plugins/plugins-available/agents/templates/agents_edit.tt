@@ -114,9 +114,9 @@
       <div class="w-40">
         [% class = ""; IF reload_required; class=" orange"; END %]
         [% PROCESS _button btn = {
-          form   => { action => 'conf.cgi', },
-          data   => { sub => 'objects', 'apply' => 'yes', 'reload' => 'yes', CSRFtoken => get_user_token(c), },
-          button => { class => 'js-activate-btn w-full' _ class, title => "Apply all changes and reload core", onclick => "return send_form_in_background_and_reload(this);", html => '<i class="uil uil-sync"></i>Activate Changes' },
+          form   => { action => '../r/config/reload', },
+          data   => { backend => agent.peer_key, CSRFtoken => get_user_token(c), },
+          button => { class => 'js-activate-btn w-full' _ class, title => "Apply all changes and reload core", onclick => "return agents_activate(this);", html => '<i class="uil uil-sync"></i>Activate Changes' },
         }%]
       </div>
     </div>
@@ -287,6 +287,25 @@ function checkSaveButtonColor() {
   } else {
     jQuery(".js-save-btn").removeClass("green");
   }
+}
+
+function agents_activate(form) {
+  send_form_in_background_with_callback(form, {}, function(form, success, data, textStatus, jqXHR) {
+    var btn = jQuery(form).find("BUTTON").first();
+    if(!success) {
+      var msg = getXHRerrorMsg("", textStatus, jqXHR, false);
+      setBtnError(btn, msg);
+      return false;
+    }
+    if(data && data[0] && !data[0]["failed"]) {
+      setBtnSuccess(btn);
+      reloadPage();
+    } else {
+      setBtnError(btn, "reload failed");
+      thruk_message(1, "reload failed, please check your logs...\n"+data[0]["output"]);
+    }
+  });
+  return false;
 }
 
 jQuery(document).on("click", checkSaveButtonColor);
