@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 247;
+    plan tests => 287;
 
     use lib('t');
     require TestUtils;
@@ -128,7 +128,29 @@ my $pages = [{
         url     => 'POST /config/revert',
         post    => {},
         like    => ['successfully reverted stashed changes for 1 site.'],
-    },
+    }, {
+# break something
+        url     => 'PATCH /hosts/<name>/config',
+        post    => { parents => 'none' },
+        like    => ['changed 1 objects successfully.'],
+    }, {
+        url     => 'POST /config/save',
+        post    => {},
+        like    => ['successfully saved changes for 1 site.'],
+    }, {
+        url     => 'POST /config/reload',
+        post    => {},
+        like    => ['"failed" : true'],
+    }, {
+        # unbreak it
+        url     => 'PATCH /hosts/<name>/config',
+        post    => { parents => '' },
+        like    => ['changed 1 objects successfully.'],
+    }, {
+        url     => 'POST /config/save',
+        post    => {},
+        like    => ['successfully saved changes for 1 site.'],
+    }
 ];
 
 for my $test (@{$pages}) {

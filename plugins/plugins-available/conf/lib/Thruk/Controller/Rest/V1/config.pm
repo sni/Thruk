@@ -573,11 +573,11 @@ sub _rest_get_config_reload {
             Time::HiRes::sleep(0.2);
         }
         my($out,$err,$time,$dir,$stash,$rc) = Thruk::Utils::External::get_result($c, $job);
-        $rc = $c->stash->{'reload_rc'} if defined $c->stash->{'reload_rc'};
+        $rc = !$stash->{'reload_rc'} if defined $stash->{'reload_rc'};
         push @{$reloads}, {
             'peer_key' => $peer_key,
             'output'   => $stash->{'original_output'},
-            'failed'   => $rc == 0 ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
+            'failed'   => $rc != 0 ? Cpanel::JSON::XS::true : Cpanel::JSON::XS::false,
         };
     }
     return($reloads);
