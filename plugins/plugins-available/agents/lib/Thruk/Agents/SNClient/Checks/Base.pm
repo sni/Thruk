@@ -45,17 +45,17 @@ sub get_checks {
                     'id'     => 'mem',
                     'name'   => 'memory',
                     'check'  => 'check_memory',
-                    'args'     => { "type" => "physical" },
+                    'args'   => { "type" => "physical" },
                     'parent' => 'agent version',
                 };
             }
             if($mem->{'type'} eq 'commited') {
                 push @{$checks}, {
-                    'id'     => 'mem',
+                    'id'     => 'mem.swap',
                     'name'   => 'memory swap',
                     'check'  => 'check_memory',
                     'parent' => 'agent version',
-                    'args'     => { "type" => "commited" },
+                    'args'   => { "type" => "commited" },
                 };
             }
         }
@@ -89,7 +89,7 @@ sub get_checks {
                 'args'     => { "filter" => "name=\"".$net->{'name'}."\"" },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($net),
-                'disabled' => Thruk::Utils::Agents::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{network}),
+                'disabled' => Thruk::Utils::Agents::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'network'}),
             };
         }
     }
@@ -103,7 +103,7 @@ sub get_checks {
                 'args'     => { "drive" => $drive->{'drive'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($drive),
-                'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{drivesize}),
+                'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'drivesize'}),
             };
         }
     }
@@ -117,7 +117,7 @@ sub get_checks {
                 'args'     => { "mount" => $mount->{'mount'}, "options" => $mount->{'options'}, "fstype" => $mount->{'fstype'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($mount),
-                'disabled' => Thruk::Utils::Agents::check_disable($mount, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{mount}),
+                'disabled' => Thruk::Utils::Agents::check_disable($mount, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'mount'}),
                 'noperf'   => 1,
             };
         }
