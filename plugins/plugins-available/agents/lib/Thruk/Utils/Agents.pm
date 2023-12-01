@@ -353,6 +353,9 @@ sub _set_checks_category {
             $chk->{'exists'} = 'exists';
             $chk->{'_svc'}   = $svc;
             $chk->{'args'}   = $chk->{'args'} || $svc->{'conf'}->{'_AGENT_ARGS'} || '';
+            if($chk->{'disabled'}) {
+                $chk->{'exists'} = 'obsolete';
+            }
         } else {
             # disabled manually from previous inventory run
             if($settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {
@@ -678,7 +681,8 @@ sub sort_config_objects {
 ##########################################################
 sub _check_pattern {
     my($val, $pattern) = @_;
-    for my $f (@{Thruk::Base::list($pattern)}) {
+    for my $entry (@{Thruk::Base::list($pattern)}) {
+        my $f = "$entry"; # make copy
         my $op = '=';
         if($f =~ m/^([\!=~]+)\s+(.*)$/mx) {
             $op = $1;

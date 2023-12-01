@@ -24,6 +24,7 @@ Available commands are:
   - show   | -S   <host>      show checks for host
   - add    | -I   <host> ...  add/inventory for new/existing host(s)
   - update | -II  <host> ...  add/inventory for new/existing host(s) and freshly apply excludes
+             -III <host> ...  add/inventory for new/existing host(s) and remove manual overrides
   - rm     | -D   <host> ...  delete existing host(s)
   - reload | -R               reload monitoring core
 
@@ -41,6 +42,7 @@ Available commands are:
 
 use warnings;
 use strict;
+use Cpanel::JSON::XS qw/decode_json/;
 use File::Temp ();
 use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval/;
@@ -74,21 +76,23 @@ sub cmd {
 
     # parse options
     my $opt = {
-        'interactive' => undef,
-        'port'        => undef,
-        'password'    => undef,
-        'address'     => undef,
-        'type'        => undef,
-        'reload'      => undef,
-        'check'       => undef,
-        'list'        => undef,
-        'show'        => undef,
-        'edit'        => undef,
-        'remove'      => undef,
-        'fresh'       => undef,
-        'section'     => undef,
+        'interactive'  => undef,
+        'port'         => undef,
+        'password'     => undef,
+        'address'      => undef,
+        'type'         => undef,
+        'reload'       => undef,
+        'check'        => undef,
+        'list'         => undef,
+        'show'         => undef,
+        'edit'         => undef,
+        'remove'       => undef,
+        'fresh'        => undef,
+        'clear_manual' => undef,
+        'section'      => undef,
     };
-    $opt->{'fresh'} = 1 if Thruk::Base::array_contains('-II', $commandoptions);
+    $opt->{'fresh'}        = 1 if Thruk::Base::array_contains('-II',  $commandoptions);
+    $opt->{'clear_manual'} = 1 if Thruk::Base::array_contains('-III', $commandoptions);
     Getopt::Long::Configure('no_ignore_case');
     Getopt::Long::Configure('bundling');
     Getopt::Long::Configure('pass_through');
@@ -104,6 +108,7 @@ sub cmd {
        "R|reload"     => \$opt->{'reload'},
        "I|add"        => \$opt->{'add'},
        "II|update"    => \$opt->{'fresh'},
+       "III"          => \$opt->{'clear_manual'},
        "E|edit"       => \$opt->{'edit'},
        "D|remove"     => \$opt->{'remove'},
        "ip=s"         => \$opt->{'address'},
@@ -113,14 +118,15 @@ sub cmd {
     };
 
     my $action;
-    if($opt->{'list'})   { $action = "list"; }
-    if($opt->{'add'})    { $action = "add"; }
-    if($opt->{'edit'})   { $action = "edit"; }
-    if($opt->{'fresh'})  { $action = "add"; }
-    if($opt->{'show'})   { $action = "show"; }
-    if($opt->{'remove'}) { $action = "rm"; }
-    if($opt->{'check'})  { $action = "check"; if($commandoptions->[0] ne 'inventory') { unshift(@{$commandoptions}, 'inventory') } }
-    if($opt->{'reload'}) { $action = "reload" unless $action; }
+    if($opt->{'list'})         { $action = "list"; }
+    if($opt->{'add'})          { $action = "add"; }
+    if($opt->{'edit'})         { $action = "edit"; }
+    if($opt->{'fresh'})        { $action = "add"; }
+    if($opt->{'clear_manual'}) { $action = "add"; }
+    if($opt->{'show'})         { $action = "show"; }
+    if($opt->{'remove'})       { $action = "rm"; }
+    if($opt->{'check'})        { $action = "check"; if($commandoptions->[0] ne 'inventory') { unshift(@{$commandoptions}, 'inventory') } }
+    if($opt->{'reload'})       { $action = "reload" unless $action; }
 
     $action = $action // shift @{$commandoptions} // '';
 
@@ -310,6 +316,8 @@ sub _run_add {
     if(!$hosts || scalar @{$hosts} == 0) {
         return($output, $rc);
     }
+
+    $opt->{'fresh'} = 1 if $opt->{'clear_manual'};
 
     # expand "ALL" hosts
     if($opt->{'fresh'} && $hosts->[0] eq 'ALL') {
@@ -678,6 +686,13 @@ sub _get_checks {
     if($hostobj) {
         $data->{'ip'}       = $hostobj->{'conf'}->{'address'}         unless $data->{'ip'};
         $data->{'password'} = $hostobj->{'conf'}->{'_AGENT_PASSWORD'} unless $data->{'password'};
+        if($opt->{'clear_manual'}) {
+            # remove manual disabled settings
+            my $settings = $hostobj->{'conf'}->{'_AGENT_CONFIG'} ? decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'}) : {};
+            delete $settings->{'disabled'};
+            my $json = Cpanel::JSON::XS->new->canonical;
+            $hostobj->{'conf'}->{'_AGENT_CONFIG'} = $json->encode($settings);
+        }
     }
 
     if($update) {
