@@ -40,7 +40,12 @@
         [% FOREACH h = data; agent = build_agent(h); hostname = h.name %]
           <tr>
             <td>[% agent.section %]</td>
-            <td><a class="link" href="status.cgi?host=[% h.name | uri %]">[% h.name | html %]</a></td>
+            <td>
+              <div class="flexrow flex-nowrap gap-x-1 justify-between">
+                <a class="link" href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]" title="edit this host">[% h.name | html %]</i></a>
+                <a href="status.cgi?host=[% h.name | uri %]" title="view service details for this host"><i class="fa-solid fa-bars"></i></a>
+              </div>
+            </td>
             <td>
               [% state = 'PENDING' %]
               [% IF info.exists(hostname) %]
