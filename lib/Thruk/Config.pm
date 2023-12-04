@@ -1340,6 +1340,8 @@ sub merge_sub_config {
                     for my $entry (@{$add->{$key}}) {
                         Thruk::Utils::IO::merge_deep($config->{$key}, $entry);
                     }
+                } else {
+                    $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
                 }
             } else {
                 if(ref $add->{$key} eq 'HASH') {
