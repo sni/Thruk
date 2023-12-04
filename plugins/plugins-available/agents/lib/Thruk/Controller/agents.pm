@@ -111,8 +111,11 @@ sub _process_show {
         my $extra = $info->{$svc->{'host_name'}} // {};
         if($svc->{'description'} eq 'agent version') {
             my $v = $svc->{'plugin_output'};
-            $v =~ s/^.*\sv/v/gmx;
-            $extra->{'version'}          = $v;
+            $extra->{'version'}          = "";
+            if($svc->{'state'} == 0) {
+                $v =~ s/^.*\sv/v/gmx;
+                $extra->{'version'}      = $v;
+            }
             $extra->{'state'}            = $svc->{'state'};
             $extra->{'has_been_checked'} = $svc->{'has_been_checked'};
         }

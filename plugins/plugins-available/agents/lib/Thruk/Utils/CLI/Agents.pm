@@ -203,6 +203,7 @@ sub _run_list {
                                          'host_custom_variables' => { '~' => 'AGENT .+' },
                                          'description' => 'agent version',
                                         ],
+                                        columns => [qw/host_name plugin_output state/],
                                  );
     $versions = Thruk::Base::array2hash($versions, "host_name");
 
@@ -221,9 +222,12 @@ sub _run_list {
             'address'   => $address,
         };
         if($versions->{$hst->{'name'}}) {
-            my $v = $versions->{$hst->{'name'}}->{'plugin_output'};
-            $v =~ s/^.*v/v/gmx;
-            $row->{'version'} = $v;
+            my $versiondata = $versions->{$hst->{'name'}};
+            if($versiondata->{'state'} == 0) {
+                my $v = $versiondata->{'plugin_output'};
+                $v =~ s/^.*v/v/gmx;
+                $row->{'version'} = $v;
+            }
         }
         push @result, $row;
     }
@@ -491,7 +495,7 @@ sub _run_add_host {
                     'id'      => "_HOST_",
                     'name'    => $obj->{'conf'}->{'host_name'},
                     '_change' => "updated",
-                }
+                };
             }
         }
         if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
