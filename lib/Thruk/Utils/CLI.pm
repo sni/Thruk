@@ -701,6 +701,7 @@ sub _run_command_action {
         my($err);
         my @mods = ($action);
         if($action =~ m/s$/mx) { $action =~ s/s$//gmx; push @mods, $action; }
+        $data->{'output'} = "";
         for my $mod (@mods) {
             $action = $mod;
             my $modname = "Thruk::Utils::CLI::".ucfirst($mod);
@@ -714,8 +715,14 @@ sub _run_command_action {
 
             if($err =~ m|^Can't\ locate\ .*\ in\ \@INC|mx && $err !~ m/Compilation\ failed\ in\ require\ at/mx) {
                 _debug($err);
-                $data->{'output'} = "FAILED - no such command: ".$action.".\n".
-                                    "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n";
+                # try to locate disabled module
+                if(my $addon = _has_available_module($c, $mod)) {
+                    $data->{'output'} = "FAILED - command '".$action."' is available via the '".$addon."' module, but it is not enabled.\n";
+                } else {
+                    $data->{'output'} = "FAILED - no such command: ".$action.".\n".
+                                        "Enabled cli plugins: ".join(", ", @{Thruk::Utils::get_cli_modules()})."\n"
+                        unless $data->{'output'};
+                }
             } elsif($err) {
                 _error($err);
                 $data->{'output'} = "FAILED - to load command module: ".$action.".\n";
@@ -1438,6 +1445,22 @@ sub _is_allowed_user_function {
     my($function) = @_;
     return 1 if $function eq 'Thruk::Utils::get_fake_session';
     return 1 if $function eq 'Thruk::Utils::get_perf_image';
+    return;
+}
+
+##############################################
+sub _has_available_module {
+    my($c, $module) = @_;
+
+    require Thruk::Utils::Plugin;
+    my(undef, $plugin_available_dir) = Thruk::Utils::Plugin::get_plugin_paths($c);
+    for my $addon (glob($plugin_available_dir.'/*/')) {
+        if(-s $addon.'lib/Thruk/Utils/CLI/'.ucfirst($module).".pm") {
+            $addon =~ s/\/+$//gmx;
+            return Thruk::Base::basename($addon);
+        }
+    }
+
     return;
 }
 
