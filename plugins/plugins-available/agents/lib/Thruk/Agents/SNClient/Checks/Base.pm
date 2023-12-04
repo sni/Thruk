@@ -47,6 +47,7 @@ sub get_checks {
                     'check'  => 'check_memory',
                     'args'   => { "type" => "physical" },
                     'parent' => 'agent version',
+                    'info'   => Thruk::Agents::SNClient::make_info($mem),
                 };
             }
             if($mem->{'type'} eq 'commited') {
@@ -56,6 +57,7 @@ sub get_checks {
                     'check'  => 'check_memory',
                     'parent' => 'agent version',
                     'args'   => { "type" => "commited" },
+                    'info'   => Thruk::Agents::SNClient::make_info($mem),
                 };
             }
         }
