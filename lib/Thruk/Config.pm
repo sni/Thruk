@@ -1287,7 +1287,7 @@ sub merge_sub_config {
     my $config = $base;
 
     for my $key (keys %{$add}) {
-        if($key =~ '^Thruk::Plugin::' && !defined $config->{$key}) {
+        if($key =~ m/^(Thruk::Plugin::|Thruk::Agents)/mx && !defined $config->{$key}) {
             $config->{$key} = {};
         }
         if(defined $config->{$key} && ref $config->{$key} eq 'HASH') {
@@ -1334,6 +1334,13 @@ sub merge_sub_config {
                     confess("tried to merge into hash: ".Data::Dumper::Dumper({key => $key, from_file => $add->{$key}, base => $config->{$key}}));
                 }
                 $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
+            }
+            elsif($key eq 'Thruk::Agents') {
+                if(ref $add->{$key} eq 'ARRAY') {
+                    for my $entry (@{$add->{$key}}) {
+                        Thruk::Utils::IO::merge_deep($config->{$key}, $entry);
+                    }
+                }
             } else {
                 if(ref $add->{$key} eq 'HASH') {
                     $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
