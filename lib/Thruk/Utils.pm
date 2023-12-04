@@ -3198,7 +3198,7 @@ returns expanded timefilter value
 sub expand_relative_timefilter {
     my($key, $op, $val) = @_;
     # expand relative time filter for some operators
-    if($op =~ m%^(>|<|>=|<=)$%mx) {
+    if($op =~ m%^(>|<|>=|<=)$%mx || $key =~ m/^(time|next_.*|last_.*)$/mx) {
         if($val =~ m/^\-?\d+\w{1}$/mxo) {
             my $duration = expand_duration($val);
             if($duration ne $val) {
