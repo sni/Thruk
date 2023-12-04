@@ -91,21 +91,25 @@ sub get_checks {
                 'args'     => { "filter" => "name=\"".$net->{'name'}."\"" },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($net),
-                'disabled' => Thruk::Utils::Agents::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'network'}),
+                'disabled' => Thruk::Utils::Agents::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, 'network'),
             };
         }
     }
 
     if($inventory->{'drivesize'}) {
         for my $drive (@{$inventory->{'drivesize'}}) {
+            my $prefix = "disk";
+            $prefix = "nfs"  if $drive->{'fstype'} eq 'nfs';
+            $prefix = "cifs" if $drive->{'fstype'} eq 'cifs';
+            $prefix = "fuse" if $drive->{'fstype'} eq 'fuseblk';
             push @{$checks}, {
                 'id'       => 'df.'.Thruk::Utils::Agents::to_id($drive->{'drive'}),
-                'name'     => 'disk '.$drive->{'drive'},
+                'name'     => $prefix.' '.$drive->{'drive'},
                 'check'    => 'check_drivesize',
                 'args'     => { "drive" => $drive->{'drive'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($drive),
-                'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'drivesize'}),
+                'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['drivesize', $prefix]),
             };
         }
     }
@@ -119,7 +123,7 @@ sub get_checks {
                 'args'     => { "mount" => $mount->{'mount'}, "options" => $mount->{'options'}, "fstype" => $mount->{'fstype'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($mount),
-                'disabled' => Thruk::Utils::Agents::check_disable($mount, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'mount'}),
+                'disabled' => Thruk::Utils::Agents::check_disable($mount, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, 'mount'),
                 'noperf'   => 1,
             };
         }
@@ -223,7 +227,9 @@ sub get_checks {
     }
 
     if($inventory->{'omd'}) {
-        my $disabled_config = $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'omd'} // { 'autostart' => '!= 1'};
+        my $disabled_config = $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'omd'}
+                                ? $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}
+                                / { 'omd' => { 'autostart' => '!= 1'}};
         for my $omd (@{$inventory->{'omd'}}) {
             push @{$checks}, {
                 'id'       => 'omd.'.Thruk::Utils::Agents::to_id($omd->{'site'}),
@@ -232,7 +238,7 @@ sub get_checks {
                 'args'     => { "site" => $omd->{'site'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($omd),
-                'disabled' => Thruk::Utils::Agents::check_disable($omd, $disabled_config),
+                'disabled' => Thruk::Utils::Agents::check_disable($omd, $disabled_config, 'omd'),
             };
         }
     }

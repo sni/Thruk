@@ -38,6 +38,9 @@ sub get_agent_checks_for_host {
     my $checks = Thruk::Base::array_group_by($flat, "exists");
     for my $key (qw/new exists obsolete disabled/) {
         $checks->{$key} = [] unless defined $checks->{$key};
+
+        # sort by name
+        $checks->{$key} = [(sort { $a->{'name'} cmp $b->{'name'} } @{$checks->{$key}})];
     }
 
     return($checks, scalar @{$flat});
@@ -589,16 +592,20 @@ sub check_wildcard_match {
 
 =head2 check_disable
 
-    check_disable($data, $config)
+    check_disable($data, $disabled_config, $keys)
 
 returns if checks disabled for given config
 
 =cut
 sub check_disable {
-    my($data, $conf) = @_;
-    for my $attr (sort keys %{$conf}) {
-        my $val = $data->{$attr} // '';
-        return 1 if _check_pattern($val, $conf->{$attr});
+    my($data, $disabled_config, $keys) = @_;
+    $keys = Thruk::Base::list($keys);
+    for my $conf_key (@{$keys}) {
+        my $conf = $disabled_config->{$conf_key} // next;
+        for my $attr (sort keys %{$conf}) {
+            my $val = $data->{$attr} // '';
+            return 1 if _check_pattern($val, $conf->{$attr});
+        }
     }
     return(0);
 }

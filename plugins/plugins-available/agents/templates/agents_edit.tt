@@ -68,7 +68,7 @@
         [% END %]
         <td class="[% IF type != "exists" %]w-full[% END %]">
           [% IF check.defined("info") %]
-            <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'bodyEl': 'info_[% check.id %]', 'caption': 'details for [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
+            <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'bodyEl': 'info_[% check.id %]', 'caption': 'details for [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
             <div id="info_[% check.id %]" class="hidden whitespace-pre text-left">[% check.info | nl2br %]</div>
           [% END %]
         </td>
