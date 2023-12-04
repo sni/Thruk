@@ -3922,6 +3922,10 @@ sub extract_connection_error {
         return($1, $err);
     }
 
+    if($err =~ m|(bad\ request:.*)|mx) {
+        return($1, $err);
+    }
+
     return(undef, $err);
 }
 

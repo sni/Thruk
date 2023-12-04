@@ -1922,7 +1922,7 @@ sub _get_result_lmd_with_retries {
     return($result, $type, $totalsize, undef) unless $err;
 
     _debug($err) if $err;
-    if($err && $err =~ m|^502:|mx) { # lmd sends error 502 if all backends are down
+    if($err && $err =~ m/^502:|bad\ request:/mx) { # lmd sends error 502 if all backends are down
         $c->stash->{'lmd_ok'} = 1;
     }
 

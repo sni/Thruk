@@ -192,7 +192,11 @@ sub process_rest_request {
         };
         my $err = $@;
         if($err) {
-            $data = { 'message' => 'error during request', description => $err, code => 500 };
+            if($err =~ m/bad\ request:\s*(.*)\s+at\s+.*\.pm\s+line\s+\d+\.$/mx) {
+                $data = { 'message' => 'error during request', description => $1, code => 400 };
+            } else {
+                $data = { 'message' => 'error during request', description => $err, code => 500 };
+            }
             if($c->{"detached"}) {
                 _debug($err);
             } else {
