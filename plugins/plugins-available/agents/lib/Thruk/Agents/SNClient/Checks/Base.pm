@@ -50,13 +50,13 @@ sub get_checks {
                     'info'   => Thruk::Agents::SNClient::make_info($mem),
                 };
             }
-            if($mem->{'type'} eq 'commited') {
+            if($mem->{'type'} eq 'committed') {
                 push @{$checks}, {
                     'id'     => 'mem.swap',
                     'name'   => 'memory swap',
                     'check'  => 'check_memory',
                     'parent' => 'agent version',
-                    'args'   => { "type" => "commited" },
+                    'args'   => { "type" => "committed" },
                     'info'   => Thruk::Agents::SNClient::make_info($mem),
                 };
             }
