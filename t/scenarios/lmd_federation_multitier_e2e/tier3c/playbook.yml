@@ -1,0 +1,18 @@
+---
+- hosts: all
+  roles:
+    - role: common
+  tasks:
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=none
+        CORE=icinga2
+        LIVESTATUS_TCP=on
+        PNP4NAGIOS=off
+  - copy:
+      src: /root/hosts.conf
+      dest: /omd/sites/demo/etc/icinga2/conf.d/hosts.conf
+      owner: demo
+      group: demo

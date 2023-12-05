@@ -24,6 +24,10 @@ services:
           - tier1a.tier1.test.local
     hostname: tier1a
     domainname: tier1.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 500M
 
   tier1b:
     build: tier1b/
@@ -42,6 +46,10 @@ services:
           - tier1b.tier1.test.local
     hostname: tier1b
     domainname: tier1.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 300M
 
   tier1c:
     build: tier1c/
@@ -60,6 +68,10 @@ services:
           - tier1c.tier1.test.local
     hostname: tier1c
     domainname: tier1.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 600M
 
   tier1d:
     build: tier1d/
@@ -78,6 +90,10 @@ services:
           - tier1d.tier1.test.local
     hostname: tier1d
     domainname: tier1.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 300M
 
 
   tier2a:
@@ -94,6 +110,10 @@ services:
           - tier2a.tier2.test.local
     hostname: tier2a
     domainname: tier2.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 500M
 
   tier2b:
     build: tier2b/
@@ -109,6 +129,10 @@ services:
           - tier2b.tier2.test.local
     hostname: tier2b
     domainname: tier2.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 300M
 
   tier2c:
     build: tier2c/
@@ -123,6 +147,10 @@ services:
           - tier2c.tier2.test.local
     hostname: tier2c
     domainname: tier2.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 600M
 
   tier2d:
     build: tier2d/
@@ -138,6 +166,10 @@ services:
           - tier2d.tier2.test.local
     hostname: tier2d
     domainname: tier2.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 300M
 
   tier2e:
     build: tier2e/
@@ -153,6 +185,10 @@ services:
           - tier2e.tier2.test.local
     hostname: tier2e
     domainname: tier2.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 300M
 
   tier3a:
     build: tier3a/
@@ -167,6 +203,10 @@ services:
           - tier3a.tier3.test.local
     hostname: tier3a
     domainname: tier3.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 300M
 
   tier3b:
     build: tier3b/
@@ -181,3 +221,25 @@ services:
           - tier3b.tier3.test.local
     hostname: tier3b
     domainname: tier3.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 600M
+
+  tier3c:
+    build: tier3c/
+    environment:
+        - PREFIX=tier3c
+    volumes:
+        - .:/scenario:ro
+        - ../../../:/thruk:ro
+    networks:
+      tier3.test.local:
+        aliases:
+          - tier3c.tier3.test.local
+    hostname: tier3c
+    domainname: tier3.test.local
+    deploy:
+      resources:
+        limits:
+          memory: 300M

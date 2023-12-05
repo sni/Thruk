@@ -6,7 +6,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 232;
+    plan tests => 245;
 }
 
 
@@ -28,7 +28,7 @@ my $test = TestUtils::test_page(
 );
 my $procinfo = Cpanel::JSON::XS::decode_json($test->{'content'});
 my $ids      = {map { $_->{'peer_name'} => $_->{'peer_key'} } values %{$procinfo}};
-is(scalar keys %{$ids}, 11, 'got backend ids') || die("all backends required");
+is(scalar keys %{$ids}, 12, 'got backend ids') || die("all backends required");
 ok(defined $ids->{'tier1a'}, 'got backend ids II');
 
 ###############################################################################

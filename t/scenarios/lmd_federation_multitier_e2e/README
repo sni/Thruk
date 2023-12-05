@@ -7,6 +7,7 @@ this scenario tests federation with lmd or http. The topology looks like:
   │   ├── tier2a
   │   │    ├── tier3a
   │   │    └── tier3b
+  │   │    └── tier3c  # icinga 2 instance
   │   ├── tier2b
   │   └── tier2c
   ├── tier1b

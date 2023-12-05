@@ -28,7 +28,7 @@ my $test = TestUtils::test_page(
 );
 my $procinfo = Cpanel::JSON::XS::decode_json($test->{'content'});
 my $ids      = {map { $_->{'peer_name'} => $_->{'peer_key'} } values %{$procinfo}};
-is(scalar keys %{$ids}, 11, 'got backend ids') || die("all backends required");
+is(scalar keys %{$ids}, 12, 'got backend ids') || die("all backends required");
 ok(defined $ids->{'tier1a'}, 'got backend ids II');
 
 ###########################################################
@@ -39,35 +39,35 @@ ok(defined $ids->{'tier1a'}, 'got backend ids II');
         like   => ['/tier1a/', '/tier2b/', '/tier2c/'],
     };
     TestUtils::test_command($test);
-    is(scalar(split/\n/, $test->{'stdout'}), 15, "output number of lines ok");
+    is(scalar(split/\n/, $test->{'stdout'}), 16, "output number of lines ok");
 
     $test = {
         cmd    => './script/thruk -l -b tier1a/tier2a',
         like   => ['/tier2a/', '/tier3a/', '/tier3b/'],
     };
     TestUtils::test_command($test);
-    is(scalar(split/\n/, $test->{'stdout'}), 7, "output number of lines ok");
+    is(scalar(split/\n/, $test->{'stdout'}), 8, "output number of lines ok");
 
     $test = {
         cmd    => './script/thruk -l -b /tier1a/tier2a',
         like   => ['/tier2a/', '/tier3a/', '/tier3b/'],
     };
     TestUtils::test_command($test);
-    is(scalar(split/\n/, $test->{'stdout'}), 7, "output number of lines ok");
+    is(scalar(split/\n/, $test->{'stdout'}), 8, "output number of lines ok");
 
     $test = {
         cmd    => './script/thruk -l -b /tier1a/tier2a/',
         like   => ['/tier2a/', '/tier3a/', '/tier3b/'],
     };
     TestUtils::test_command($test);
-    is(scalar(split/\n/, $test->{'stdout'}), 7, "output number of lines ok");
+    is(scalar(split/\n/, $test->{'stdout'}), 8, "output number of lines ok");
 
     $test = {
         cmd    => './script/thruk -l -b /tier1a',
         like   => ['/tier2a/', '/tier3a/', '/tier3b/'],
     };
     TestUtils::test_command($test);
-    is(scalar(split/\n/, $test->{'stdout'}), 11, "output number of lines ok");
+    is(scalar(split/\n/, $test->{'stdout'}), 12, "output number of lines ok");
 
     $test = TestUtils::test_page(
         'url'    => '/thruk/r/csv/processinfo?columns=peer_name&backends=/tier1d',
@@ -79,7 +79,7 @@ ok(defined $ids->{'tier1a'}, 'got backend ids II');
         'url'    => '/thruk/r/csv/processinfo?columns=peer_name&backends=tier1a/tier2a',
         'like'   => [ 'tier2a', 'tier3a' ],
     );
-    is(scalar(split/\n/, $test->{'content'}), 4, "output number of lines ok");
+    is(scalar(split/\n/, $test->{'content'}), 5, "output number of lines ok");
 };
 
 ###############################################################################

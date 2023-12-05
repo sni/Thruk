@@ -6,7 +6,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 261;
+    plan tests => 282;
 }
 
 
@@ -20,7 +20,7 @@ BEGIN {
 TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail',
     'like'   => [
-                '"total":11', '"disabled":0', '"up":11', ,'"down":0',
+                '"total":12', '"disabled":0', '"up":12', ,'"down":0',
             ],
 );
 
@@ -36,7 +36,7 @@ my $test = TestUtils::test_page(
 );
 my $procinfo = Cpanel::JSON::XS::decode_json($test->{'content'});
 my $ids      = {map { $_->{'peer_name'} => $_->{'peer_key'} } values %{$procinfo}};
-is(scalar keys %{$ids}, 11, 'got backend ids') || die("all backends required");
+is(scalar keys %{$ids}, 12, 'got backend ids') || die("all backends required");
 ok(defined $ids->{'tier1a'}, 'got backend ids II');
 
 ###############################################################################
@@ -47,7 +47,11 @@ for my $hst (sort keys %{$ids}) {
         'method' => 'POST',
         'like'   => [ 'Command successfully submitted' ],
     );
-    for my $svc (qw/Ping Load/) {
+    my @svc = qw/Ping Load/;
+    if($hst eq 'tier3c') {
+        @svc = qw/ping4 disk/;
+    }
+    for my $svc (@svc) {
         TestUtils::test_page(
             'url'    => '/thruk/r/services/'.$hst.'/'.$svc.'/cmd/schedule_forced_svc_check',
             'method' => 'POST',
@@ -60,7 +64,7 @@ for my $hst (sort keys %{$ids}) {
 TestUtils::test_command({
     cmd     => './script/thruk selfcheck lmd',
     like => ['/lmd running with pid/',
-             '/11\/11 backends online/',
+             '/12\/12 backends online/',
             ],
     exit    => 0,
 });
