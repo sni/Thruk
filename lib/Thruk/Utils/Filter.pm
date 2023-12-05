@@ -1709,8 +1709,8 @@ sub _is_frame_url_allowed {
                 return 1;
             }
         } else {
-            my $new = URL->new_abs($allowed, $req);
-            if($new->hostname eq $url->hostname and $new->protocol eq $url->protocol) {
+            my $new = URI->new_abs($allowed, $req);
+            if($new->host eq $url->host and $new->scheme eq $url->scheme) {
                 return 1;
             }
         }
