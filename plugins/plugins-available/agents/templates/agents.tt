@@ -47,11 +47,15 @@
               </div>
             </td>
             <td>
-              [% state = 'PENDING' %]
+              [% state  = 'PENDING' %]
+              [% output = '' %]
               [% IF info.exists(hostname) %]
                 [% state = servicestatetext(info.$hostname) %]
+                [% IF info.$hostname.state >= 1 %]
+                  [% output = info.$hostname.plugin_output %]
+                [% END %]
               [% END %]
-              <div class='text-center badge [% state %]'>[% state %]</div>
+              <div class='text-center badge [% state %]'[% IF output != "" %] title="[% output | html %]"[% END %]>[% state %]</div>
             </td>
             <td>[% peer_name(h) | html %]</td>
             <td><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=20 height=20 class="inline"> [% agent.type | html %]</td>

@@ -117,6 +117,7 @@ sub _process_show {
                 $extra->{'version'}      = $v;
             }
             $extra->{'state'}            = $svc->{'state'};
+            $extra->{'plugin_output'}    = $svc->{'plugin_output'};
             $extra->{'has_been_checked'} = $svc->{'has_been_checked'};
         }
         if($svc->{'description'} eq 'agent inventory') {
