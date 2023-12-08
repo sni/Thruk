@@ -474,6 +474,7 @@ sub write_lmd_config {
         $site_config .= "tlsSkipVerify  = 1\n" if(defined $peer->{'peer_config'}->{'options'}->{'verify'} && $peer->{'peer_config'}->{'options'}->{'verify'} == 0);
         $site_config .= "tlsServerName  = '".$peer->{'peer_config'}->{'options'}->{'verifycn_name'}."'\n"  if $peer->{'peer_config'}->{'options'}->{'verifycn_name'};
         $site_config .= "proxy          = '".$peer->{'peer_config'}->{'options'}->{'proxy'}."'\n"    if $peer->{'peer_config'}->{'options'}->{'proxy'};
+        $site_config .= "noconfigtool   = 1\n" if($peer->{'peer_config'}->{'configtool'} && $peer->{'peer_config'}->{'configtool'}->{'disable'});
         if($peer->{'peer_config'}->{'lmd_options'}) {
             for my $key (sort keys %{$peer->{'peer_config'}->{'lmd_options'}}) {
                 $site_config .= sprintf("%-14s = %s\n", $key, $peer->{'peer_config'}->{'lmd_options'}->{$key});

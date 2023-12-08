@@ -1129,7 +1129,7 @@ sub _cmd_raw {
         my $configtool = {
             'disable' => 1,
         };
-        if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0) {
+        if($c->check_user_roles('authorized_for_admin') && $tmp && ref $tmp eq 'HASH' && scalar keys %{$tmp} > 0 && !$tmp->{'disable'}) {
             $configtool = {
                 'core_type'      => $tmp->{'core_type'},
                 'obj_readonly'   => $tmp->{'obj_readonly'},
