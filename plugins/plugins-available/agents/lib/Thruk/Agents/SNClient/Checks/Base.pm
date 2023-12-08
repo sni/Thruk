@@ -100,6 +100,7 @@ sub get_checks {
         for my $drive (@{$inventory->{'drivesize'}}) {
             my $prefix = "disk";
             $prefix = "nfs"  if $drive->{'fstype'} eq 'nfs';
+            $prefix = "nfs"  if $drive->{'fstype'} eq 'nfs4';
             $prefix = "cifs" if $drive->{'fstype'} eq 'cifs';
             $prefix = "fuse" if $drive->{'fstype'} eq 'fuseblk';
             push @{$checks}, {
