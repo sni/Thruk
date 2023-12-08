@@ -1575,6 +1575,14 @@ sub _do_on_peers {
             }
             if($res && ($res->{'configtool'} || ($res->{'thruk'} && $res->{'thruk'}->{'configtool'}))) {
                 my $peer = $self->get_peer_by_key($key);
+                $peer->{'thrukextras'} = $res->{'thruk'} if $res->{'thruk'};
+                if($res->{'remote_peer_key'}) { # set from HTTP.pm
+                    $peer->{'remotekey'} = $res->{'remote_peer_key'};
+                }
+                if($res->{'thruk'} && $res->{'thruk'}->{'remotekey'}) { # set via LMD
+                    $peer->{'remotekey'} = $res->{'thruk'}->{'remotekey'};
+                }
+
                 next if $peer->{'configtool'}->{'disable'};
                 my $configtool = $res->{'configtool'} // $res->{'thruk'}->{'configtool'};
                 next if $configtool->{'disable'};
@@ -1584,14 +1592,6 @@ sub _do_on_peers {
                 $peer->{'configtool'} = { remote => 1 };
                 for my $attr (keys %{$configtool}) {
                     $peer->{'configtool'}->{$attr} = $configtool->{$attr};
-                }
-                $peer->{'thrukextras'} = $res->{'thruk'} if $res->{'thruk'};
-
-                if($res->{'remote_peer_key'}) { # set from HTTP.pm
-                    $peer->{'remotekey'} = $res->{'remote_peer_key'};
-                }
-                if($res->{'thruk'} && $res->{'thruk'}->{'remotekey'}) { # set via LMD
-                    $peer->{'remotekey'} = $res->{'thruk'}->{'remotekey'};
                 }
             }
         }
