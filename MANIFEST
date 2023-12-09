@@ -2478,6 +2478,9 @@ t/scenarios/lmd_federation_multitier_e2e/tier3b/1.tbp
 t/scenarios/lmd_federation_multitier_e2e/tier3b/Dockerfile
 t/scenarios/lmd_federation_multitier_e2e/tier3b/playbook.yml
 t/scenarios/lmd_federation_multitier_e2e/tier3b/thruk_local.conf
+t/scenarios/lmd_federation_multitier_e2e/tier3c/Dockerfile
+t/scenarios/lmd_federation_multitier_e2e/tier3c/hosts.conf
+t/scenarios/lmd_federation_multitier_e2e/tier3c/playbook.yml
 t/scenarios/logfile_cache_http/backend/Dockerfile
 t/scenarios/logfile_cache_http/backend/playbook.yml
 t/scenarios/logfile_cache_http/backend/test.cfg
