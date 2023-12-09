@@ -2,7 +2,7 @@
 [% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
-<-- add some classes required in plugin so they will be rendered into the css files -->
+<!-- add some classes required in plugins so they will be rendered into the css files -->
 <div class="hidden pt-px pb-px"></div>
 
 <div class="flexrow justify-between">
