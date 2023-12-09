@@ -88,7 +88,7 @@ sub get_checks {
                 'id'       => 'net.'.Thruk::Utils::Agents::to_id($net->{'name'}),
                 'name'     => 'net '.$net->{'name'},
                 'check'    => 'check_network',
-                'args'     => { "filter" => "name=\"".$net->{'name'}."\"" },
+                'args'     => { "device" => $net->{'name'} },
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($net),
                 'disabled' => Thruk::Utils::Agents::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, 'network'),
@@ -103,6 +103,7 @@ sub get_checks {
             $prefix = "nfs"  if $drive->{'fstype'} eq 'nfs4';
             $prefix = "cifs" if $drive->{'fstype'} eq 'cifs';
             $prefix = "fuse" if $drive->{'fstype'} eq 'fuseblk';
+            $prefix = "fuse" if $drive->{'fstype'} eq 'fuse';
             push @{$checks}, {
                 'id'       => 'df.'.Thruk::Utils::Agents::to_id($drive->{'drive'}),
                 'name'     => $prefix.' '.$drive->{'drive'},
