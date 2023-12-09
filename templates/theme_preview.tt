@@ -19,7 +19,7 @@
   </div>
 </div>
 
-<div class="flexrow mt-5">
+<div class="flexrow flex-nowrap mt-5">
   <div class="card overflow-hidden">
     <div class="head justify-between">
       <h3>Icons</h3>
