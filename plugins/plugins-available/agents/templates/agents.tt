@@ -27,12 +27,16 @@
     <table class="mainTable js-striped" id="agentTable">
       <thead>
         <tr>
-          <th class="w-32">Section</th>
+          <th class="w-20">Section</th>
           <th class="">Hostname</th>
           <th class="w-20 text-center">Status</th>
-          <th class="w-32">Site</th>
-          <th class="w-32">Agent</th>
-          <th class="w-32">Version</th>
+          <th class="w-20">Site</th>
+          <th class="w-20">Agent</th>
+          <th class="w-20">Version</th>
+          <th class="w-11">Chk</th>
+          <th class="w-11">New</th>
+          <th class="w-11" title="obsolete">Obs.</th>
+          <th class="w-11" title="disabled">Dis.</th>
           <th class="w-32"></th>
         </tr>
       </thead>
@@ -60,6 +64,10 @@
             <td>[% peer_name(h) | html %]</td>
             <td><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=20 height=20 class="inline"> [% agent.type | html %]</td>
             <td>[% IF info.exists(hostname) && info.$hostname.exists("version") %][% info.$hostname.version | html %][% END %]</td>
+            <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_checks") %][% info.$hostname.inv_checks %][% END %]</td>
+            <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_new") %][% info.$hostname.inv_new %][% END %]</td>
+            <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_obsolete") %][% info.$hostname.inv_obsolete %][% END %]</td>
+            <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_disabled") %][% info.$hostname.inv_disabled %][% END %]</td>
             <td>
               <div class="flexrow flex-nowrap gap-x-2">
                 <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]"><i class="fa-solid fa-pencil text-sm" title='Edit this host'></i></a>

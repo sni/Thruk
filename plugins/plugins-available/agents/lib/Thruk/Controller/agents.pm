@@ -124,6 +124,22 @@ sub _process_show {
             $extra->{'inv_state'}        = $svc->{'state'};
             $extra->{'inv_out'}          = $svc->{'plugin_output'};
             $extra->{'inv_out'}          =~ s/^\w+\ \-\ //gmx;
+            $extra->{'inv_checks'}       = "";
+            $extra->{'inv_new'}          = "";
+            $extra->{'inv_obsolete'}     = "";
+            $extra->{'inv_disabled'}     = "";
+            if($svc->{'perf_data'} =~ m/checks=(\d+)/mx) {
+                $extra->{'inv_checks'}   = $1;
+            }
+            if($svc->{'perf_data'} =~ m/new=(\d+)/mx) {
+                $extra->{'inv_new'}      = $1;
+            }
+            if($svc->{'perf_data'} =~ m/obsolete=(\d+)/mx) {
+                $extra->{'inv_obsolete'} = $1;
+            }
+            if($svc->{'perf_data'} =~ m/disabled=(\d+)/mx) {
+                $extra->{'inv_disabled'} = $1;
+            }
         }
         $info->{$svc->{'host_name'}} = $extra;
     }
