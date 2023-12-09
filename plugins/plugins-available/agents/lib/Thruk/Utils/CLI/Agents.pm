@@ -585,7 +585,13 @@ sub _check_inventory {
     return(sprintf("UNKNOWN - no host found by name: %s\n", $hostname), 3) unless $hostobj;
 
     my $elapsed  = tv_interval($t1);
-    my $perfdata = sprintf("duration=%ss", $elapsed);
+    my $perfdata = sprintf("duration=%ss;;;0; checks=%d;;;0; new=%d;;;0; obsolete=%d;;;0; disabled=%d;;;0;",
+        $elapsed,
+        scalar @{$checks->{'exists'} // []},
+        scalar @{$checks->{'new'} // []},
+        scalar @{$checks->{'obsolete'} // []},
+        scalar @{$checks->{'disabled'} // []},
+        );
     if(scalar @{$checks->{'new'}} > 0) {
         my @details;
         for my $chk (@{$checks->{'new'}}) {
