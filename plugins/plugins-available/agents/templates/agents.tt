@@ -72,7 +72,9 @@
             <td><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=20 height=20 class="inline"> [% agent.type | html %]</td>
             <td>[% IF info.exists(hostname) && info.$hostname.exists("version") %][% info.$hostname.version | html %][% END %]</td>
             <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_checks") %][% info.$hostname.inv_checks %][% END %]</td>
-            <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_new") %][% info.$hostname.inv_new %][% END %]</td>
+            <td [% IF info.exists(hostname) && info.$hostname.exists("inv_new") && info.$hostname.inv_new > 0 %]class="WARNING"[% END %]>
+                [% IF info.exists(hostname) && info.$hostname.exists("inv_new") %][% info.$hostname.inv_new %][% END %]
+            </td>
             <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_obsolete") %][% info.$hostname.inv_obsolete %][% END %]</td>
             <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_disabled") %][% info.$hostname.inv_disabled %][% END %]</td>
             <td>
