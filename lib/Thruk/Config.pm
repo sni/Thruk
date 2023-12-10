@@ -1040,7 +1040,7 @@ sub _parse_rows {
     my($file, $rows, $conf, $cur_line, $until, $until_source) = @_;
     my $lastline = '';
     $cur_line = 0 unless defined $cur_line;
-    while(my $line = shift @{$rows}) {
+    while(defined (my $line = shift @{$rows})) {
         $cur_line++;
         $line =~ s/(^|\s)\#.*$//gmxo;
         $line =~ s|^\s+||gmxo;
