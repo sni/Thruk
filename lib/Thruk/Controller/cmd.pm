@@ -359,6 +359,20 @@ sub _check_for_commands {
         return $c->detach('/error/index/12');
     }
 
+    if($cmd_mod == 2 && ref $c->req->parameters->{'host'} || ref $c->req->parameters->{'service'}) {
+        my $hsts = Thruk::Base::list($c->req->parameters->{'host'});
+        my $svcs = Thruk::Base::list($c->req->parameters->{'service'});
+        for my $hst (@{$hsts}) {
+            for my $svc (@{$svcs}) {
+                $c->req->parameters->{'host'}    = $hst;
+                $c->req->parameters->{'service'} = $svc;
+                do_send_command($c);
+            }
+        }
+        redirect_or_success( $c, -2 );
+        return 1;
+    }
+
     # command commited?
     if( $cmd_mod == 2 and do_send_command($c) ) {
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );

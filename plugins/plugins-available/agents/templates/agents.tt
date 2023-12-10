@@ -1,4 +1,5 @@
-﻿[% PROCESS _header.tt %]
+﻿[% USE date %]
+[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 [% PROCESS _blocks.tt %]
 
@@ -33,10 +34,10 @@
           <th class="w-20">Site</th>
           <th class="w-20">Agent</th>
           <th class="w-20">Version</th>
-          <th class="w-11">Chk</th>
-          <th class="w-11">New</th>
-          <th class="w-11" title="obsolete">Obs.</th>
-          <th class="w-11" title="disabled">Dis.</th>
+          <th class="w-11" title="number of enabled checks">Act.</th>
+          <th class="w-11" title="number of new discovered checks">New</th>
+          <th class="w-11" title="number of obsolete checks">Obs.</th>
+          <th class="w-11" title="number of disabled checks">Dis.</th>
           <th class="w-32"></th>
         </tr>
       </thead>
@@ -70,21 +71,25 @@
             <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_disabled") %][% info.$hostname.inv_disabled %][% END %]</td>
             <td>
               <div class="flexrow flex-nowrap gap-x-2">
+                <form action="cmd.cgi" method="POST">
+                  <input type="hidden" name="cmd_typ" value="7">
+                  <input type="hidden" name="cmd_mod" value="2">
+                  <input type="hidden" name="host" value="[% h.name | html %]">
+                  <input type="hidden" name="service" value="agent version">
+                  <input type="hidden" name="service" value="agent inventory">
+                  <input type="hidden" name="force_check" value="1">
+                  <input type="hidden" name="backend" value="[% h.peer_key %]">
+                  <input type="hidden" name="start_time" value="[% date.now %]">
+                  <input type="hidden" name="json" value="1">
+                  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                  <a href="#" onclick="return send_form_in_background_and_reload(this)"><i class="fa-solid fa-arrows-rotate text-sm" title="Update Inventory"></i></a>
+                </form>
                 <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]"><i class="fa-solid fa-pencil text-sm" title='Edit this host'></i></a>
                 [% PROCESS _button btn = {
                   form   => { action => 'agents.cgi', },
                   data   => { 'action' => 'remove', 'hostname' => h.name, backend => h.peer_key, CSRFtoken => get_user_token(c), },
                   button => { class => 'iconOnly', title => "Remove this host with all services.", onclick => "return(confirm('really remove host?'))", html => '<i class="uil uil-trash-alt"></i>' },
                 }%]
-                [% IF info.exists(hostname) && info.$hostname.exists("inv_state") && info.$hostname.inv_state != 0 %]
-                  <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]">
-                    [% color = "yellow" %]
-                    [% IF info.$hostname.inv_state != 1 || info.$hostname.inv_out.match('timeout after') %]
-                      [% color = "orange" %]
-                    [% END %]
-                    <i class="fa-solid fa-exclamation round small [% color %]" title="[% info.$hostname.inv_out | html %]"></i>
-                  </a>
-                [% END %]
               </div>
             </td>
           </tr>
