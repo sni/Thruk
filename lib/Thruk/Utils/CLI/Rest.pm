@@ -255,7 +255,7 @@ sub _set_postdata {
     }
 
     my($key,$val) = split(/=/mx, $data, 2);
-    if($src && $src eq 'local') {
+    if($src && $src eq 'local' && defined $val) {
         $val =~ s/\+/ /gmx;
         $val = Thruk::Request->unescape($val);
     }
