@@ -233,8 +233,10 @@ sub _set_postdata {
         for my $key (sort keys %{$data}) {
             $postdata->{$key} = $data->{$key};
         }
+
         return;
     }
+
     if(ref $data eq '' && $data =~ m/^\{.*\}$/mx) {
         my $json = Cpanel::JSON::XS->new->utf8;
         $json->relaxed();
@@ -247,9 +249,15 @@ sub _set_postdata {
         for my $key (sort keys %{$data}) {
             $postdata->{$key} = $data->{$key};
         }
+
         return;
     }
+
     my($key,$val) = split(/=/mx, $data, 2);
+    if($src && $src eq 'local') {
+        $val =~ s/\+/ /gmx;
+        $val = Thruk::Request->unescape($val);
+    }
     return unless $key;
     if(defined $postdata->{$key} && !$overwrite) {
         $postdata->{$key} = [$postdata->{$key}] unless ref $postdata->{$key} eq 'ARRAY';

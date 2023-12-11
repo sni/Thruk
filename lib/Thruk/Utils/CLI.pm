@@ -560,6 +560,7 @@ sub from_fcgi {
         });
     }
 
+    delete $c->{'user'};
     if(!$c->authenticate(apikey => $data->{'credential'})) {
         return({
             'output' => "authorization failed, ". $c->req->url." does not accept this key.\n",
