@@ -359,7 +359,7 @@ sub _check_for_commands {
         return $c->detach('/error/index/12');
     }
 
-    if($cmd_mod == 2 && ref $c->req->parameters->{'host'} || ref $c->req->parameters->{'service'}) {
+    if($cmd_mod == 2 && (ref $c->req->parameters->{'host'} || ref $c->req->parameters->{'service'})) {
         my $hsts = Thruk::Base::list($c->req->parameters->{'host'});
         my $svcs = Thruk::Base::list($c->req->parameters->{'service'});
         for my $hst (@{$hsts}) {

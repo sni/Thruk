@@ -156,6 +156,7 @@ sub _handle_file {
             for my $hst (@{$hosts}) {
                 next if $done->{'hosts'}->{$hst};
                 $downtime->{'host'} = $hst;
+                $downtime->{'service'} = undef;
                 my $rc;
                 eval {
                     $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
@@ -200,6 +201,8 @@ sub _handle_file {
             my $grps = $downtime->{$downtime->{'target'}};
             for my $grp (@{$grps}) {
                 next if $done->{'groups'}->{$grp};
+                $downtime->{'host'}    = undef;
+                $downtime->{'service'} = undef;
                 $downtime->{$downtime->{'target'}} = $grp;
                 my $rc;
                 eval {
