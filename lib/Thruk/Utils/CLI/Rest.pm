@@ -28,6 +28,7 @@ use POSIX ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
+use Thruk::Request ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
 
