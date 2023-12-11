@@ -622,10 +622,10 @@ sub _get_value_ref_check {
 ##############################################
 # determines if command requires backends or not
 sub _skip_backends {
-    my($c, $opts) = @_;
+    my($c, $opts, $src) = @_;
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless $c->stash->{'processinfo_time'};
     return unless $opts->{'commandoptions'};
-    my $cmds = _parse_args($opts->{'commandoptions'});
+    my $cmds = _parse_args($opts->{'commandoptions'}, $src);
     $opts->{'_parsed_args'} = $cmds;
     for my $cmd (@{$cmds}) {
         if(!$cmd->{'url'} || $cmd->{'url'} !~ m/^https?:\/\//mx) {

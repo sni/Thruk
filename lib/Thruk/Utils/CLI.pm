@@ -747,7 +747,7 @@ sub _run_command_action {
             ## use critic
             $skip_backends = ${"Thruk::Utils::CLI::".ucfirst($action)."::skip_backends"};
             if(ref $skip_backends eq 'CODE') {
-                $skip_backends = &{$skip_backends}($c, $opt);
+                $skip_backends = &{$skip_backends}($c, $opt, $src);
             }
         }
         if(!defined $c->stash->{'defaults_added'} && !$skip_backends) {

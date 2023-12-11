@@ -139,7 +139,7 @@ sub index {
     } elsif($path_info =~ m/\.cgi$/mx) {
         my $uri = $c->env->{'thruk.request.url'} // $c->req->url();
         $uri =~ s/^.*?\/r\/(v1\/|)/\/cgi-bin\//gmx;
-        my $sub_c = $c->sub_request($uri, undef, undef, 1, 7);
+        my $sub_c = $c->sub_request($uri, $c->req->env->{'REQUEST_METHOD'}, $c->req->parameters, 1, 7);
         $c->res->status($sub_c->res->code);
         $c->res->headers($sub_c->res->headers);
         $c->res->body($sub_c->res->content);
