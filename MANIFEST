@@ -177,6 +177,17 @@ META.yml
 plugins/plugins-available/agents/description.txt
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Base.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/CPU.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Drivesize.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Kernelstats.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Memory.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Mount.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Network.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/OMD.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Pagefile.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Process.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Service.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Temperature.pm
 plugins/plugins-available/agents/lib/Thruk/Controller/agents.pm
 plugins/plugins-available/agents/lib/Thruk/Utils/Agents.pm
 plugins/plugins-available/agents/lib/Thruk/Utils/CLI/Agents.pm

@@ -352,7 +352,8 @@ sub _extract_checks {
         $mod =~ s/\//::/gmx;
         $mod =~ s/\.pm$//gmx;
         $mod->import;
-        push @{$checks}, @{$mod->get_checks($c, $inventory, $hostname, $password, $section)};
+        my $add = $mod->get_checks($c, $inventory, $hostname, $password, $section);
+        push @{$checks}, @{$add} if $add;
     }
 
     # compute host configuration
@@ -470,6 +471,24 @@ returns true if check is enabled on this host
 sub check_host_match {
     my($hosts) = @_;
     return(Thruk::Utils::Agents::check_wildcard_match($Thruk::Globals::HOSTNAME, $hosts));
+}
+
+##########################################################
+
+=head2 get_disabled_config
+
+    get_disabled_config($c, $key, $default)
+
+returns disabled config for this key with a fallback
+
+=cut
+sub get_disabled_config {
+    my($c, $key, $fallback) = @_;
+
+    my $dis =   $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{$key}
+              ? $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}
+              : { $key => $fallback };
+    return($dis);
 }
 
 ##########################################################
