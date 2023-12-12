@@ -99,6 +99,7 @@ sub get_checks {
     if($inventory->{'drivesize'}) {
         for my $drive (@{$inventory->{'drivesize'}}) {
             my $prefix = "disk";
+            $drive->{'fstype'} = '' unless defined $drive->{'fstype'};
             $prefix = "nfs"  if $drive->{'fstype'} eq 'nfs';
             $prefix = "nfs"  if $drive->{'fstype'} eq 'nfs4';
             $prefix = "cifs" if $drive->{'fstype'} eq 'cifs';
