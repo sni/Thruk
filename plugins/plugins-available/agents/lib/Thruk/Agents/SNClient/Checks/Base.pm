@@ -99,26 +99,41 @@ sub get_checks {
     if($inventory->{'drivesize'}) {
         for my $drive (@{$inventory->{'drivesize'}}) {
             my $prefix = "disk";
-            $drive->{'fstype'} = '' unless defined $drive->{'fstype'};
+            $drive->{'fstype'} = lc($drive->{'fstype'} // '');
             $prefix = "nfs"  if $drive->{'fstype'} eq 'nfs';
             $prefix = "nfs"  if $drive->{'fstype'} eq 'nfs4';
             $prefix = "cifs" if $drive->{'fstype'} eq 'cifs';
             $prefix = "fuse" if $drive->{'fstype'} eq 'fuseblk';
             $prefix = "fuse" if $drive->{'fstype'} eq 'fuse';
-            push @{$checks}, {
-                'id'       => 'df.'.Thruk::Utils::Agents::to_id($drive->{'drive'}),
-                'name'     => $prefix.' '.$drive->{'drive'},
-                'check'    => 'check_drivesize',
-                'args'     => { "drive" => $drive->{'drive'} },
-                'parent'   => 'agent version',
-                'info'     => Thruk::Agents::SNClient::make_info($drive),
-                'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['drivesize', $prefix]),
-            };
+            if($drive->{'type'} && $drive->{'type'} eq 'cdrom') {
+                # add check if cdrom is empty
+                push @{$checks}, {
+                    'id'       => 'cdrom.'.Thruk::Utils::Agents::to_id($drive->{'drive_or_id'}),
+                    'name'     => 'cdrom empty '.$drive->{'drive_or_id'},
+                    'check'    => 'check_drivesize',
+                    'args'     => { "drive" => $drive->{'drive_or_id'}, 'warn' => 'mounted = 1' },
+                    'parent'   => 'agent version',
+                    'info'     => Thruk::Agents::SNClient::make_info($drive),
+                    'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['cdrom']),
+                };
+            } else {
+                push @{$checks}, {
+                    'id'       => 'df.'.Thruk::Utils::Agents::to_id($drive->{'drive_or_id'}),
+                    'name'     => $prefix.' '.$drive->{'drive_or_id'},
+                    'check'    => 'check_drivesize',
+                    'args'     => { "drive" => $drive->{'drive_or_id'} },
+                    'parent'   => 'agent version',
+                    'info'     => Thruk::Agents::SNClient::make_info($drive),
+                    'disabled' => !$drive->{'drive'} ? 1 : Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['drivesize', $prefix]),
+                };
+            }
         }
     }
 
     if($inventory->{'mount'}) {
         for my $mount (@{$inventory->{'mount'}}) {
+            $mount->{'fstype'} = lc($mount->{'fstype'} // '');
+            next if $mount->{'fstype'} eq 'cdfs';
             push @{$checks}, {
                 'id'       => 'mount.'.Thruk::Utils::Agents::to_id($mount->{'mount'}),
                 'name'     => 'mount '.$mount->{'mount'},
