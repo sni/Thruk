@@ -27,7 +27,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 500M
+          memory: 1000M
 
   tier1b:
     build: tier1b/
