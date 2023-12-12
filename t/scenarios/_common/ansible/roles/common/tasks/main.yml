@@ -24,3 +24,14 @@
     line: "check_workers=2"
     regexp: '^check_workers='
   when: naemon_conf.stat.exists == true
+- name: increase slow_page_log_threshold
+  lineinfile:
+    dest: /opt/omd/sites/{{ site }}/etc/thruk/thruk_local.d/test_adjustments.conf
+    line: "slow_page_log_threshold = 35"
+    regexp: '^slow_page_log_threshold'
+    create: true
+- name: lower max fcig processes
+  lineinfile:
+    dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/02_fcgid.conf
+    line: "MaxProcessCount 4"
+    regexp: '^MaxProcessCount'
