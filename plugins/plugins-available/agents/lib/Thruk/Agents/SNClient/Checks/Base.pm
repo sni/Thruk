@@ -280,6 +280,17 @@ sub get_checks {
         }
     }
 
+    if($inventory->{'eventlog'}) {
+        push @{$checks}, {
+            'id'     => 'eventlog',
+            'name'   => 'eventlog',
+            'check'  => 'check_eventlog',
+            'args'   => { "scan-range" => "1h" },
+            'parent' => 'agent version',
+            'noperf' => 1,
+        };
+    }
+
     return $checks;
 }
 
