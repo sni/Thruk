@@ -63,6 +63,23 @@ sub get_checks {
         }
     }
 
+    if($inventory->{'pagefile'}) {
+        my $disabled_config = $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'pagefile'}
+                                ? $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}
+                                : { 'pagefile' => { 'name' => '!= total'}};
+        for my $page (@{$inventory->{'pagefile'}}) {
+            push @{$checks}, {
+                'id'       => 'pagefile.'.Thruk::Utils::Agents::to_id($page->{'name'}),
+                'name'     => $page->{'name'} eq 'total' ? 'pagefile' : 'pagefile '.$page->{'name'},
+                'check'    => 'check_pagefile',
+                'args'     => { "filter" => "name='".$page->{'name'}."'" },
+                'parent'   => 'agent version',
+                'info'     => Thruk::Agents::SNClient::make_info($page),
+                'disabled' => Thruk::Utils::Agents::check_disable($page, $disabled_config, 'pagefile'),
+            };
+        }
+    }
+
     if($inventory->{'uptime'}) {
         push @{$checks}, {
             'id'     => 'uptime',
@@ -131,9 +148,11 @@ sub get_checks {
     }
 
     if($inventory->{'mount'}) {
+        my $disabled_config = $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'mount'}
+                                ? $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}
+                                : { 'mount' => { 'fstype' => '= cdfs'}};
         for my $mount (@{$inventory->{'mount'}}) {
             $mount->{'fstype'} = lc($mount->{'fstype'} // '');
-            next if $mount->{'fstype'} eq 'cdfs';
             push @{$checks}, {
                 'id'       => 'mount.'.Thruk::Utils::Agents::to_id($mount->{'mount'}),
                 'name'     => 'mount '.$mount->{'mount'},
