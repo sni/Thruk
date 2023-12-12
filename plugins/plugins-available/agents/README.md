@@ -44,6 +44,10 @@ For example:
         # set default contactgroups(s)
         default_contactgroups = group, ...
 
+        # set performance data templates (default is autodetect based on wether grafana is enabled)
+        # perf_template      = srv-perf
+        # host_perf_template = host-perf
+
         # disable network checks matching these attributes
         <disable network>
           enabled != true

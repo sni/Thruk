@@ -103,6 +103,8 @@ sub get_config_objects {
         $perf_template      = 'srv-perf';
         $host_perf_template = 'host-perf';
     }
+    $perf_template      = $c->config->{'Thruk::Agents'}->{'snclient'}->{'perf_template'}      // $perf_template;
+    $host_perf_template = $c->config->{'Thruk::Agents'}->{'snclient'}->{'host_perf_template'} // $host_perf_template;
 
     $hostobj->{'conf'}->{'use'} = [$host_perf_template, ($section ? _make_section_template("host", $section) : 'generic-thruk-agent-host')];
 
