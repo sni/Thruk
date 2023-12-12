@@ -604,7 +604,10 @@ sub check_disable {
         my $conf = $disabled_config->{$conf_key} // next;
         for my $attr (sort keys %{$conf}) {
             my $val = $data->{$attr} // '';
-            return 1 if _check_pattern($val, $conf->{$attr});
+            if(_check_pattern($val, $conf->{$attr})) {
+                return sprintf("disabled by '<disabled %s>' configuration:\nattribute %s ('%s') matched filter '%s'",
+                    $conf_key, $attr, $val, $conf->{$attr});
+            }
         }
     }
     return(0);

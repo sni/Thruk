@@ -51,7 +51,17 @@
             <div class='text-center badge PENDING'>new</div>
           [% END %]
           [% IF type == "disabled" %]
-            <div class='text-center badge PENDING'>disabled</div>
+            [% IF check.defined("disabled") %]
+              [% reason = check.disabled %]
+              [% IF reason == 0; reason = "manually disabled"; END %]
+              [% IF reason == 1; reason = "unknown reason"; END %]
+              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'bodyEl': 'disabled_[% check.id %]', 'caption': 'disabled details for [% check.name | html %]', 'width': 900 }); return false;">
+                <div class='text-center badge PENDING'>disabled</div>
+              </a>
+              <div id="disabled_[% check.id %]" class="hidden whitespace-pre text-left">[% reason | html | nl2br %]</div>
+            [% ELSE %]
+              <div class='text-center badge PENDING'>disabled</div>
+            [% END %]
             [% IF agent.exists("settings") && agent.settings.exists("disabled") && agent.settings.disabled.exists(check.id) %]
               <div class='text-center badge UNKNOWN' title="check has been manually disabled">manually</div>
             [% END %]

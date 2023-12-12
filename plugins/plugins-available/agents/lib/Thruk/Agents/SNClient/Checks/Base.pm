@@ -141,7 +141,7 @@ sub get_checks {
                     'args'     => { "drive" => $drive->{'drive_or_id'} },
                     'parent'   => 'agent version',
                     'info'     => Thruk::Agents::SNClient::make_info($drive),
-                    'disabled' => !$drive->{'drive'} ? 1 : Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['drivesize', $prefix]),
+                    'disabled' => !$drive->{'drive'} ? 'drive has no name' : Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['drivesize', $prefix]),
                 };
             }
         }
@@ -150,7 +150,7 @@ sub get_checks {
     if($inventory->{'mount'}) {
         my $disabled_config = $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{'mount'}
                                 ? $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}
-                                : { 'mount' => { 'fstype' => '= cdfs'}};
+                                : { 'mount' => { 'fstype' => '= cdfs', 'mount' => '~ ^(/var/lib/docker|/Volumes/com.apple.TimeMachine.localsnapshots|/private/tmp/)' }};
         for my $mount (@{$inventory->{'mount'}}) {
             $mount->{'fstype'} = lc($mount->{'fstype'} // '');
             push @{$checks}, {
