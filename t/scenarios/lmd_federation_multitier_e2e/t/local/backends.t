@@ -24,7 +24,7 @@ TestUtils::test_command({
         like   => ['/tier1a/', '/tier3a/'],
     };
     TestUtils::test_command($test);
-    is(scalar(split/\n/, $test->{'stdout'}), 11, "output number of lines ok");
+    is(scalar(split/\n/, $test->{'stdout'}), 12, "output number of lines ok");
 };
 
 ###########################################################
