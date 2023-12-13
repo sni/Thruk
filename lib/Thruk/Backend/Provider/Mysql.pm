@@ -931,6 +931,18 @@ sub _replace_column_name {
 
     # using ids makes mysql prefer index
     if($col eq 'host_name' && $self->{'query_meta'}->{'prefix'}) {
+        # val can be scalar or hash
+        if(ref $val eq 'HASH') {
+            my @keys = keys %{$val};
+            if(scalar @keys == 1) {
+                my $op = $keys[0];
+                $val = $val->{$op};
+                my($col, $id) = $self->_replace_column_name($col, $val);
+                return($col, { $op => $id });
+            }
+            # no replacement possible
+            return($col, $val);
+        }
         $self->{'query_meta'}->{'host_lookup'} = _get_host_lookup($self->{'query_meta'}->{'dbh'},undef,$self->{'query_meta'}->{'prefix'}, 1) unless defined $self->{'query_meta'}->{'host_lookup'};
         my $id = $self->{'query_meta'}->{'host_lookup'}->{$val};
         return('l.host_id', $id) if defined $id;
