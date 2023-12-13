@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 use Data::Dumper;
-use Test::More tests => 69;
+use Test::More tests => 72;
 
 $Data::Dumper::Sortkeys = 1;
 
@@ -265,6 +265,32 @@ test_filter(
     " WHERE (host_name RLIKE '.*' AND description = 'http')",
 );
 
+#####################################################################
+$m->{'query_meta'} = {
+    'prefix'      => 'test',
+    'host_lookup' => { 'localhost' => 1 },
+};
+test_filter(
+    'host id filter',
+    [{ '-and' => [
+        { 'host_name'   => { '=' => 'localhost' } },
+        { 'description' => 'http' }
+    ]}],
+    " WHERE (l.host_id = 1 AND description = 'http')",
+);
+test_filter(
+    'host id filter2',
+    [{ '-and' => [
+        { 'host_name'   => 'localhost' },
+        { 'description' => 'http' }
+    ]}],
+    " WHERE (l.host_id = 1 AND description = 'http')",
+);
+test_filter(
+    'host id filter3',
+    [{ 'host_name' => 'localhost' }],
+    " WHERE l.host_id = 1",
+);
 
 #####################################################################
 # SUBS
