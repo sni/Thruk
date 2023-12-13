@@ -3,6 +3,8 @@ package Thruk::Agents::SNClient::Checks::Kernelstats;
 use warnings;
 use strict;
 
+use Thruk::Utils::Agents ();
+
 =head1 NAME
 
 Thruk::Agents::SNClient::Checks::Kernelstats - returns kernelstats checks for snclient
