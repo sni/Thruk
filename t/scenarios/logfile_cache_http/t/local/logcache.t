@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 27;
+plan tests => 42;
 
 ###########################################################
 # test thruks script path
@@ -41,5 +41,28 @@ TestUtils::test_command({
     });
     TestUtils::test_command({
         cmd     => "/usr/bin/env thruk r '/logs?limit=1&contact_name[ne]='",
+    });
+};
+
+###########################################################
+# some more /logs rest calls
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/logs?limit=5&q=***host_name = "localhost"***\'',
+        like => ['/command_name/', '/plugin_output/'],
+    });
+};
+
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/logs?limit=5&q=***host_name = "localhost" AND time > -24h***\'',
+        like => ['/command_name/', '/plugin_output/'],
+    });
+};
+
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/logs?limit=5&q=***host_name != "" AND time > -24h***\'',
+        like => ['/command_name/', '/plugin_output/'],
     });
 };

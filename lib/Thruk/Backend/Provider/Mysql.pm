@@ -931,9 +931,9 @@ sub _replace_column_name {
 
     # using ids makes mysql prefer index
     if($col eq 'host_name' && $self->{'query_meta'}->{'prefix'}) {
-        $col = 'l.host_id';
         $self->{'query_meta'}->{'host_lookup'} = _get_host_lookup($self->{'query_meta'}->{'dbh'},undef,$self->{'query_meta'}->{'prefix'}, 1) unless defined $self->{'query_meta'}->{'host_lookup'};
-        $val = $self->{'query_meta'}->{'host_lookup'}->{$val} // 0;
+        my $id = $self->{'query_meta'}->{'host_lookup'}->{$val};
+        return('l.host_id', $id) if defined $id;
     }
     return($col, $val);
 }
