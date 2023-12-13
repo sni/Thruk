@@ -993,6 +993,12 @@ sub _livestatus_options {
             elsif($type eq 'logs') {
                 $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
             }
+            elsif($type eq 'comments') {
+                $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_comments_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_comments_columns}]);
+            }
+            elsif($type eq 'downtimes') {
+                $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_downtimes_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_downtimes_columns}]);
+            }
 
             if($ref_columns) {
                 # if all requested columns are default columns, we can pass the columns to livestatus
@@ -1995,7 +2001,7 @@ sub _rest_get_livestatus_commands_by_name {
 register_rest_path_v1('GET', qr%^/comments?$%mx, \&_rest_get_livestatus_comments);
 sub _rest_get_livestatus_comments {
     my($c) = @_;
-    return($c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+    return($c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), _livestatus_filter($c) ], %{_livestatus_options($c, "comments")}));
 }
 
 ##########################################################
@@ -2005,7 +2011,7 @@ sub _rest_get_livestatus_comments {
 register_rest_path_v1('GET', qr%^/comments?/([^/]+)$%mx, \&_rest_get_livestatus_comments_by_id);
 sub _rest_get_livestatus_comments_by_id {
     my($c, undef, $id) = @_;
-    my $data = $c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), { "id" => $id }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    my $data = $c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), { "id" => $id }, _livestatus_filter($c) ], %{_livestatus_options($c, "comments")});
     return($data);
 }
 
@@ -2016,7 +2022,7 @@ sub _rest_get_livestatus_comments_by_id {
 register_rest_path_v1('GET', qr%^/downtimes?$%mx, \&_rest_get_livestatus_downtimes);
 sub _rest_get_livestatus_downtimes {
     my($c) = @_;
-    return($c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), _livestatus_filter($c) ], %{_livestatus_options($c)}));
+    return($c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), _livestatus_filter($c) ], %{_livestatus_options($c, "downtimes")}));
 }
 
 ##########################################################
@@ -2026,7 +2032,7 @@ sub _rest_get_livestatus_downtimes {
 register_rest_path_v1('GET', qr%^/downtimes?/([^/]+)$%mx, \&_rest_get_livestatus_downtimes_by_id);
 sub _rest_get_livestatus_downtimes_by_id {
     my($c, undef, $id) = @_;
-    my $data = $c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), { "id" => $id }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    my $data = $c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'downtimes'), { "id" => $id }, _livestatus_filter($c) ], %{_livestatus_options($c, "downtimes")});
     return($data);
 }
 

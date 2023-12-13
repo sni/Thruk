@@ -14,6 +14,8 @@ next:
             - style fixes
           - Reports:
             - cleanup /tmp/puppeteer_dev_profile-... folders
+          - Rest:
+            - add host/service columns to comments/downtimes
 
 3.10     Sun Nov  5 16:24:33 CET 2023
           - add new agents plugin

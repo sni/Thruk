@@ -90,7 +90,7 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
     in_check_period in_notification_period host_parents
 /];
 $Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
-    contacts contact_groups long_plugin_output comments_with_info downtimes_with_info
+    contacts contact_groups long_plugin_output comments_with_info downtimes_with_info host_contacts host_contact_groups
 /];
 $Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns = [qw/
     num_services
@@ -113,6 +113,23 @@ $Thruk::Backend::Provider::Livestatus::extra_contact_columns = [qw/
 $Thruk::Backend::Provider::Livestatus::default_logs_columns = [qw/
     class time type state host_name service_description plugin_output message options state_type contact_name
 /];
+
+$Thruk::Backend::Provider::Livestatus::default_comments_columns = [qw/
+    author comment entry_time entry_type expires
+    expire_time host_name id persistent service_description
+    source type
+/];
+$Thruk::Backend::Provider::Livestatus::extra_comments_columns = [
+    @{_add_service_prefix([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}])},
+];
+
+$Thruk::Backend::Provider::Livestatus::default_downtimes_columns = [qw/
+    author comment end_time entry_time fixed host_name
+    id start_time service_description triggered_by duration
+/];
+$Thruk::Backend::Provider::Livestatus::extra_downtimes_columns = [
+    @{_add_service_prefix([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}])},
+];
 
 ##########################################################
 
@@ -764,11 +781,7 @@ sub get_comments {
     }
 
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            author comment entry_time entry_type expires
-            expire_time host_name id persistent service_description
-            source type
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_comments_columns}];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
@@ -816,10 +829,7 @@ sub get_downtimes {
     }
 
     unless(defined $options{'columns'}) {
-        $options{'columns'} = [qw/
-            author comment end_time entry_time fixed host_name
-            id start_time service_description triggered_by duration
-        /];
+        $options{'columns'} = [@{$Thruk::Backend::Provider::Livestatus::default_downtimes_columns}];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
@@ -2083,5 +2093,17 @@ sub _normalize_version_number {
 }
 
 ##########################################################
+sub _add_service_prefix {
+    my($list) = @_;
+    my $newlist = [];
+    for my $el (@{$list}) {
+        my $item = "$el";
+        if($item !~ m/^host_/mx) {
+            $item =~ s/^/service_/gmx;
+        }
+        push @{$newlist}, $item;
+    }
+    return($newlist);
+}
 
 1;
