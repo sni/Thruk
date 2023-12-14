@@ -179,7 +179,7 @@ Possible operators with their alias:
 |+++ ~     +++|         |Regular expression match (case-sensitive)
 |+++ !~    +++|         |Negated regular expression match (case-sensitive)
 |+++ ~~    +++| regex   |Regular expression match (case-insensitive)
-|+++ !~    +++| nregex  |Negated regular expression match (case-insensitive)
+|+++ !~~   +++| nregex  |Negated regular expression match (case-insensitive)
 |+++ >     +++| gt      |Greater than numeric comparisson
 |+++ <     +++| lt      |Lower than numeric comparisson
 |+++ >=    +++| gte     |Greater or equal numeric comparisson. `contains` in list context
@@ -2263,4 +2263,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
