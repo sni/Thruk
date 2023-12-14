@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 42;
+plan tests => 46;
 
 ###########################################################
 # test thruks script path
@@ -16,6 +16,15 @@ TestUtils::test_command({
     cmd  => '/bin/bash -c "type thruk"',
     like => ['/\/thruk\/script\/thruk/'],
 }) or BAIL_OUT("wrong thruk path");
+
+###########################################################
+# schedule at least one check
+{
+    TestUtils::test_command({
+        cmd     => "/usr/bin/env thruk r -d '' /services/localhost/Http/cmd/schedule_forced_svc_check",
+        like    => ['/Command successfully submitted/'],
+    });
+}
 
 ###########################################################
 # test thruk logcache example
@@ -48,21 +57,21 @@ TestUtils::test_command({
 # some more /logs rest calls
 {
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r \'/logs?limit=5&q=***host_name = "localhost"***\'',
+        cmd  => '/usr/bin/env thruk r \'/logs?limit=1&q=***host_name = "localhost"***\'',
         like => ['/command_name/', '/plugin_output/'],
     });
 };
 
 {
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r \'/logs?limit=5&q=***host_name = "localhost" AND time > -24h***\'',
+        cmd  => '/usr/bin/env thruk r \'/logs?limit=1&q=***host_name = "localhost" AND time > -24h***\'',
         like => ['/command_name/', '/plugin_output/'],
     });
 };
 
 {
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r \'/logs?limit=5&q=***host_name != "" AND time > -24h***\'',
+        cmd  => '/usr/bin/env thruk r \'/logs?limit=1&q=***host_name != "" AND time > -24h***\'',
         like => ['/command_name/', '/plugin_output/'],
     });
 };
