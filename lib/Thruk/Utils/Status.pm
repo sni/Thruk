@@ -2731,8 +2731,8 @@ sub parse_lexical_filter {
             elsif(!defined $op) {
                 $op = $token;
                 if($op eq 'like')   { $op =  '~~'; }
-                if($op eq '~')      { $op =  '~~'; }
-                if($op eq '!~')     { $op = '!~~'; }
+                if($op eq '~')      { $op =  '~~'; } # breaks case sensitive rest queries
+                if($op eq '!~')     { $op = '!~~'; } # this too
                 if($op eq 'unlike') { $op = '!~~'; }
                 if(!$supported_operator->{$op}) {
                     die("unknown operator ".$token);
