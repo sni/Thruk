@@ -30,8 +30,14 @@
     line: "slow_page_log_threshold = 35"
     regexp: '^slow_page_log_threshold'
     create: true
-- name: lower max fcig processes
+- name: lower max fcgi processes
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/02_fcgid.conf
-    line: "MaxProcessCount 4"
+    line: "MaxProcessCount 5"
     regexp: '^MaxProcessCount'
+- name: lower max fcgi processes for thruk
+  lineinfile:
+    dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/thruk.conf
+    insertafter: "IOTimeout"
+    line: "MaxProcesses 3 \\"
+    regexp: 'MaxProcesses'
