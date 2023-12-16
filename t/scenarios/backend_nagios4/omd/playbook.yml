@@ -51,7 +51,7 @@
     livestatus_version: "1.2.8p27"
   tasks:
   - name: "wget nagios-{{ nagios_version }}.tar.gz"
-    shell: wget "https://github.com/NagiosEnterprises/nagioscore/archive/nagios-{{ nagios_version }}.tar.gz"
+    shell: wget "https://download.thruk.org/nagios-{{ nagios_version }}.tar.gz"
     args:
       chdir: /tmp/
       creates: /tmp/nagios-{{ nagios_version }}.tar.gz
@@ -60,17 +60,17 @@
     args:
       chdir: /tmp/
   - name: "make nagios"
-    shell: "cd /tmp/nagioscore-nagios-{{ nagios_version }} && ./configure && make nagios"
+    shell: "cd /tmp/nagios-{{ nagios_version }} && ./configure && make nagios"
   - name: "cp nagios bin/"
-    shell: "cp /tmp/nagioscore-nagios-{{ nagios_version }}/base/nagios ~/local/bin/nagios-{{ nagios_version }}"
+    shell: "cp /tmp/nagios-{{ nagios_version }}/base/nagios ~/local/bin/nagios-{{ nagios_version }}"
   - name: "change path in init script"
     lineinfile:
      path: /omd/sites/demo/etc/init.d/naemon
      state: present
-     regexp: '^BIN='
-     line: 'BIN=$OMD_ROOT/local/bin/nagios-{{ nagios_version }}'
+     regexp: '^DAEMON='
+     line: 'DAEMON=$OMD_ROOT/local/bin/nagios-{{ nagios_version }}'
   - name: "wget check_mk-{{ livestatus_version }}.tar.gz"
-    shell: wget "https://mathias-kettner.de/support/{{ livestatus_version }}/check_mk-{{ livestatus_version }}.tar.gz"
+    shell: wget "https://download.thruk.org/check_mk-{{ livestatus_version }}.tar.gz"
     args:
       chdir: /tmp/
       creates: /tmp/check_mk-{{ livestatus_version }}.tar.gz
@@ -84,6 +84,12 @@
     shell: tar zxf ../check_mk-{{ livestatus_version }}/livestatus.tar.gz
     args:
       chdir: /tmp/livestatus
+  - name: "fix builds"
+    lineinfile:
+     path: /tmp/livestatus/src/logger.c
+     state: present
+     regexp: '^pthread_t g_mainthread_id'
+     line: 'extern pthread_t g_mainthread_id;'
   - name: "make livestatus"
     shell: "cd /tmp/livestatus && ./configure --with-nagios4 && make"
   - name: "cp livestatus.o"
