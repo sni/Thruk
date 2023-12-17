@@ -32,12 +32,12 @@
           <th class="">Hostname</th>
           <th class="w-20 text-center">Status</th>
           <th class="w-20">Site</th>
-          <th class="w-20">Agent</th>
+          <th class="w-24">Agent</th>
           <th class="w-20">Version</th>
-          <th class="w-11" title="number of enabled checks">Act.</th>
-          <th class="w-11" title="number of new discovered checks">New</th>
-          <th class="w-11" title="number of obsolete checks">Obs.</th>
-          <th class="w-11" title="number of disabled checks">Dis.</th>
+          <th class="w-24">CPU</th>
+          <th class="w-24">Memory</th>
+          <th class="w-24">Disk</th>
+          <th class="w-24">Checks</th>
           <th class="w-32">
             <div class="flexrow flex-nowrap gap-x-1 justify-between">
               <div class="flexrow flex-nowrap gap-x-1">
@@ -70,13 +70,43 @@
             </td>
             <td>[% peer_name(h) | html %]</td>
             <td><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=20 height=20 class="inline"> [% agent.type | html %]</td>
-            <td>[% IF info.exists(hostname) && info.$hostname.exists("version") %][% info.$hostname.version | html %][% END %]</td>
-            <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_checks") %][% info.$hostname.inv_checks %][% END %]</td>
-            <td [% IF info.exists(hostname) && info.$hostname.exists("inv_new") && info.$hostname.inv_new > 0 %]class="WARNING"[% END %]>
-                [% IF info.exists(hostname) && info.$hostname.exists("inv_new") %][% info.$hostname.inv_new %][% END %]
+            <td>[% IF info.exists(hostname) %]<div class="w-full h-full" title="[% info.$hostname.full_version | html %]">[% info.$hostname.version | html %]</div>[% END %]</td>
+
+
+            <td class='align-top relative'>
+              [% IF info.$hostname.cpu_perc; %][%IF info.$hostname.cpu_perc > 1; info.$hostname.cpu_perc = 1; END %]
+              <div style='width: [% 100 * info.$hostname.cpu_perc %]%; height: 100%;' class='[% IF info.$hostname.cpu_state == 2 %]CRITICAL[% ELSIF info.$hostname.cpu_state == 1 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0' title="cpu usage: [% 100 * info.$hostname.cpu_perc %]%"></div>
+              [% END %]
+              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF info.$hostname.cpu_perc; sprintf("%.d", info.$hostname.cpu_perc*100); "% used"; END %]">
+                [% IF info.$hostname.cpu_cores; info.$hostname.cpu_cores; " Cores"; END %]
+              </span>
             </td>
-            <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_obsolete") %][% info.$hostname.inv_obsolete %][% END %]</td>
-            <td>[% IF info.exists(hostname) && info.$hostname.exists("inv_disabled") %][% info.$hostname.inv_disabled %][% END %]</td>
+            <td class='align-top relative'>
+              [% IF info.$hostname.memfree; perc = ( info.$hostname.memtotal - info.$hostname.memfree ) / info.$hostname.memtotal %][%IF perc > 1; perc = 1; END %]
+              <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF info.$hostname.mem_state == 2 %]CRITICAL[% ELSIF info.$hostname.mem_state == 1 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
+              [% END %]
+              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF info.$hostname.memfree; sprintf("%.d", perc*100); "% used"; END %]">
+                [% IF info.$hostname.memtotal; n = reduce_number(info.$hostname.memtotal, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
+              </span>
+            </td>
+            <td class='align-top relative'>
+              [% IF info.$hostname.disk_total; perc = ( info.$hostname.disk_total - info.$hostname.disk_free ) / info.$hostname.disk_total %][%IF perc > 1; perc = 1; END %]
+              <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF info.$hostname.disk_state == 2 %]CRITICAL[% ELSIF info.$hostname.disk_state == 1 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
+              [% END %]
+              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF info.$hostname.disk_total %][% sprintf("%.d", perc*100) %]% used, [% n = reduce_number(info.$hostname.disk_free, 'B', 1024); sprintf('%.1f %s',n.0, n.1) %] free[% END %]">
+                [% IF info.$hostname.disk_total; n = reduce_number(info.$hostname.disk_total, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
+              </span>
+            </td>
+            <td>
+              [% IF info.exists(hostname) %]
+                <div class="badge min-w-full text-center [% IF info.exists(hostname) && info.$hostname.inv_new > 0 %]yellow[% END %]" title="new / obsolete / checks / disabled">
+                  [% info.$hostname.inv_new %] /
+                  [% info.$hostname.inv_obsolete %] /
+                  [% info.$hostname.inv_checks %] /
+                  [% info.$hostname.inv_disabled %]
+                </div>
+              [% END %]
+            </td>
             <td>
               <div class="flexrow flex-nowrap gap-x-2">
                 <form action="cmd.cgi" method="POST">

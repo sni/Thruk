@@ -103,19 +103,42 @@ sub _process_show {
 
     my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                          'host_custom_variables' => { '~' => 'AGENT .+' },
-                                         'description' => { '~' => '^(agent version|agent inventory)$' },
+                                         'description' => { '~' => '^(agent version|agent inventory|memory|cpu|disk.*)$' },
                                         ],
                                  );
     my $info = {};
     for my $svc (@{$services}) {
-        my $extra = $info->{$svc->{'host_name'}} // {};
+        my $extra = $info->{$svc->{'host_name'}} // {
+            'version'          => '',
+            'full_version'     => '',
+            'build'            => '',
+            'state'            => '',
+            'plugin_output'    => '',
+            'has_been_checked' => '',
+            'inv_state'        => '',
+            'inv_out'          => '',
+            'inv_checks'       => '',
+            'inv_new'          => '',
+            'inv_obsolete'     => '',
+            'inv_disabled'     => '',
+            'cpu_state'        => 0,
+            'cpu_perc'         => '',
+            'cpu_cores'        => '',
+            'mem_state'        => 0,
+            'memfree'          => '',
+            'memtotal'         => '',
+            'disk_state'       => 0,
+            'disk_total'       => '',
+            'disk_free'        => '',
+        };
         if($svc->{'description'} eq 'agent version') {
-            my $v = $svc->{'plugin_output'};
-            $extra->{'version'}          = "";
             if($svc->{'state'} == 0) {
+                my $v = $svc->{'plugin_output'};
                 $v =~ s/^.*\sv/v/gmx;
-                $extra->{'version'}      = $v;
+                $v =~ s/\s*\(.*\)//gmx;
+                $extra->{'version'} = $v;
             }
+            $extra->{'full_version'}     = $svc->{'plugin_output'};
             $extra->{'state'}            = $svc->{'state'};
             $extra->{'plugin_output'}    = $svc->{'plugin_output'};
             $extra->{'has_been_checked'} = $svc->{'has_been_checked'};
@@ -124,10 +147,6 @@ sub _process_show {
             $extra->{'inv_state'}        = $svc->{'state'};
             $extra->{'inv_out'}          = $svc->{'plugin_output'};
             $extra->{'inv_out'}          =~ s/^\w+\ \-\ //gmx;
-            $extra->{'inv_checks'}       = "";
-            $extra->{'inv_new'}          = "";
-            $extra->{'inv_obsolete'}     = "";
-            $extra->{'inv_disabled'}     = "";
             if($svc->{'perf_data'} =~ m/checks=(\d+)/mx) {
                 $extra->{'inv_checks'}   = $1;
             }
@@ -139,6 +158,32 @@ sub _process_show {
             }
             if($svc->{'perf_data'} =~ m/disabled=(\d+)/mx) {
                 $extra->{'inv_disabled'} = $1;
+            }
+        }
+        if($svc->{'description'} eq 'memory') {
+            if($svc->{'perf_data'} =~ m/'physical'=(\d+)B;(\d+);(\d+);(\d+);(\d+)/mx) {
+                $extra->{'mem_state'} = $svc->{'state'};
+                $extra->{'memtotal'}  = $5;
+                $extra->{'memfree'}   = $extra->{'memtotal'} - $1;
+            }
+        }
+        if($svc->{'description'} eq 'cpu') {
+            if($svc->{'perf_data'} =~ m/total\s+1m'=(\d+)%/mx) {
+                $extra->{'cpu_perc'}  = $1 / 100;
+                $extra->{'cpu_state'} = $svc->{'state'};
+            }
+            if($svc->{'plugin_output'} =~ m/on\s+(\d+)\s+cores/mx) {
+                $extra->{'cpu_cores'}  = $1;
+            }
+        }
+        if($svc->{'description'} =~ /^disk\s(.*)$/) {
+            my $disk = lc($1);
+            if($disk eq '/' || $disk eq 'c:') {
+                if($svc->{'perf_data'} =~ m/'.* used'=(\d+)B;\d+;\d+;\d+;(\d+)/mx) {
+                    $extra->{'disk_total'} = $2;
+                    $extra->{'disk_free'}  = $extra->{'disk_total'} - $1;
+                    $extra->{'disk_state'} = $svc->{'state'};
+                }
             }
         }
         $info->{$svc->{'host_name'}} = $extra;
@@ -345,6 +390,7 @@ sub _process_remove {
 }
 
 ##########################################################
+# update inventory
 sub _process_scan {
     my($c, $params, $return) = @_;
 
@@ -353,8 +399,13 @@ sub _process_scan {
     my $err = Thruk::Utils::Agents::scan_agent($c, $c->req->parameters);
     if($err) {
         _error($err);
-        if(length($err) > 100) { $err = substr($err, 0, 97)."..." }
-        Thruk::Utils::set_message( $c, 'fail_message', "failed to scan agent: ".$err );
+        $err =~ s/\s+at\s+.*\.pm\s+line\s+\d+\.//gmx;
+        if(length($err) > 100) {
+            my $short = substr($err, 0, 97)."...";
+            Thruk::Utils::set_message( $c, 'fail_message', "failed to scan agent: ".$short, $err );
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', "failed to scan agent: ".$err );
+        }
 
         return $c->render(json => { ok => 0, err => $err });
     }
