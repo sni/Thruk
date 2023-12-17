@@ -14,7 +14,7 @@ use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 114;
+    plan tests => 115;
 
     use lib('t');
     require TestUtils;
@@ -389,6 +389,17 @@ is(scalar @{$chunks->[33]}, 1, "array_chunk_fixed_size returns fixed sized chunk
 };
 
 #########################
-my $testparams = { 'credential' => 'secret', "options" => { 'credential' => 'secret' }, 'CSRFtoken' => "secret", "test" => { 'credential' => 'secret' } };
+my $testparams = {
+  'credential' => 'secret',
+  "options" => {
+    'credential' => 'secret'
+  },
+  'CSRFtoken' => "secret",
+  "test" => { 'credential' => 'secret' },
+  'data' => '{"credential": "secret", ', # json encoded string
+};
 my $dump       = Thruk::Utils::dump_params($testparams);
+unlike($dump, "/secret/", "dump contains no secrets");
+
+$dump          = Thruk::Utils::dump_params($testparams, undef, 0);
 unlike($dump, "/secret/", "dump contains no secrets");
