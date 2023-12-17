@@ -35,6 +35,11 @@
     dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/02_fcgid.conf
     line: "MaxProcessCount 5"
     regexp: '^MaxProcessCount'
+- name: increase max requests
+  lineinfile:
+    dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/02_fcgid.conf
+    line: "MaxRequestsPerProcess 100000"
+    regexp: '^MaxRequestsPerProcess'
 - name: lower max fcgi processes for thruk
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/thruk.conf
