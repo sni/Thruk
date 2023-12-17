@@ -53,6 +53,7 @@ my $whitelist_regex = [
     qr/^loop\.\w+$/,
     qr/^a\.(x|y)\d*$/,
     qr/^action_icon\(/,
+    qr/cpu_perc/,
     qr/^c\.config/,
 ];
 my @dirs = glob("./templates ./plugins/plugins-available/*/templates ./themes/themes-available/*/templates");
