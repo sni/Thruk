@@ -3,6 +3,8 @@ package Thruk::Agents::SNClient::Checks::NTP;
 use warnings;
 use strict;
 
+use Thruk::Agents::SNClient ();
+
 =head1 NAME
 
 Thruk::Agents::SNClient::Checks::NTP - returns ntp checks for snclient
