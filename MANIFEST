@@ -183,6 +183,7 @@ plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Kernelstats.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Memory.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Mount.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Network.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/NTP.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/OMD.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Pagefile.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Process.pm
