@@ -180,6 +180,7 @@ plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Base.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/CPU.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Drivesize.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Kernelstats.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Mailq.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Memory.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Mount.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Network.pm

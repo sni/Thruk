@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Agents::SNClient ();
+use Thruk::Utils::Agents ();
 
 =head1 NAME
 
@@ -36,7 +37,7 @@ sub get_checks {
             'check'     => 'check_ntp_offset',
             'parent'    => 'agent version',
             'info'     => Thruk::Agents::SNClient::make_info($ntp),
-            #'disabled' => Thruk::Utils::Agents::check_disable($ntp, $disabled_config, 'ntp'),
+            'disabled' => Thruk::Utils::Agents::check_disable($ntp, $disabled_config, 'ntp'),
         };
     }
 
