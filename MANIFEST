@@ -177,6 +177,7 @@ META.yml
 plugins/plugins-available/agents/description.txt
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Base.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Connections.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/CPU.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Drivesize.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Kernelstats.pm
