@@ -7,30 +7,36 @@
 [% PROCESS _status_cmd_pane.tt %]
 [% UNLESS minimal %]
 
-  [% WRAPPER _status_totals_header.tt %]
-    <div class="card overflow-hidden">
-      <div class="actionbox less-padding">
-        [% IF hostgroup == 'all' %]
-          <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>
-          <div><a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a></div>
-          <div><a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a></div>
-          <div><a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a></div>
-        [% ELSIF hostgroup != '' %]
-          <div><a href="status.cgi?hostgroup=all&amp;style=hostdetail">View Host Status Detail For All Host Groups</a></div>
-          <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail">View Service Status Detail For This Host Group</a></div>
-          <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview">View Status Overview For This Host Group</a></div>
-          <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary">View Status Summary For This Host Group</a></div>
-          <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid">View Status Grid For This Host Group</a></div>
-        [% ELSE %]
-          <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>
-          <div><a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a></div>
-          <div><a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a></div>
-          <div><a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a></div>
-        [% END %]
+  [% IF explore %]
+    [% PROCESS _status_explore.tt %]
+  [% END %]
+  [% IF !explore %]
+    [% WRAPPER _status_totals_header.tt %]
+      <div class="card overflow-hidden">
+        <div class="actionbox less-padding">
+          [% IF hostgroup == 'all' %]
+            <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>
+            <div><a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a></div>
+            <div><a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a></div>
+            <div><a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a></div>
+          [% ELSIF hostgroup != '' %]
+            <div><a href="status.cgi?hostgroup=all&amp;style=hostdetail">View Host Status Detail For All Host Groups</a></div>
+            <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail">View Service Status Detail For This Host Group</a></div>
+            <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview">View Status Overview For This Host Group</a></div>
+            <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary">View Status Summary For This Host Group</a></div>
+            <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=grid">View Status Grid For This Host Group</a></div>
+          [% ELSE %]
+            <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>
+            <div><a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a></div>
+            <div><a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a></div>
+            <div><a href='status.cgi?hostgroup=all&amp;style=grid'>View Status Grid For All Host Groups</a></div>
+          [% END %]
+        </div>
       </div>
-    </div>
+    [% END %]
   [% END %]
 
+  [% IF !explore %]
   <h1 class="mt-2">
     [% IF custom_title != '' %][% custom_title %]
     [% ELSIF hostgroup == 'all' %]Host Status Details For All Host Groups
@@ -38,6 +44,7 @@
     [% ELSE %]Host Status Details
     [% END %]
   </h1>
+  [% END %]
 
   <div class="flexrow sm:flex-nowrap my-2 gap-y-1">
     <div class="flex basis-1/3 self-end gap-1">
@@ -77,26 +84,30 @@
   </div>
 [% END %]
 
-<div class="card w-full min-w-[420px]">
-  <div class="mainTableHeader">
-    <div>
-      <div class="flex flex-nowrap gap-x-2 items-center">
-        [% PROCESS _status_column_select.tt colprefix="hst" columns_name="host" %]
-        [% PROCESS _status_filter.tt %]
+<div id="statusTableContainer" class="relative">
+  <div class="card w-full min-w-[420px]" id="statusTableContent">
+    <div class="mainTableHeader">
+      <div>
+        <div class="flex flex-nowrap gap-x-2 items-center">
+          [% PROCESS _status_column_select.tt colprefix="hst" columns_name="host" %]
+          [% IF ! explore %]
+            [% PROCESS _status_filter.tt %]
+          [% END %]
+        </div>
+      </div>
+      <div>
+        [% PROCESS _pager.tt %]
+      </div>
+      <div>
+        [% PROCESS _pager_per_page.tt %]
       </div>
     </div>
-    <div>
-      [% PROCESS _pager.tt %]
+    <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
+      [% PROCESS _status_hostdetail_table.tt %]
     </div>
-    <div>
-      [% PROCESS _pager_per_page.tt %]
+    <div class="mainTableFooter">
+      [% PROCESS _pager_total_items.tt %]
     </div>
-  </div>
-  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
-    [% PROCESS _status_hostdetail_table.tt %]
-  </div>
-  <div class="mainTableFooter">
-    [% PROCESS _pager_total_items.tt %]
   </div>
 </div>
 

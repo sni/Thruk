@@ -2667,6 +2667,7 @@ templates/_stacktrace.tt
 templates/_status_cmd_pane.tt
 templates/_status_column_select.tt
 templates/_status_detail_table.tt
+templates/_status_explore.tt
 templates/_status_filter.tt
 templates/_status_filter_single.tt
 templates/_status_hostdetail_table.tt

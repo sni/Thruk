@@ -8,25 +8,7 @@
 [% UNLESS minimal %]
 
   [% IF explore %]
-  <form action="" method="GET" style="display: initial;" onsubmit="explorerUpdateStatusTable(); return false;" id="explorForm">
-    <input type="hidden" name="explore" value="1">
-    <input type="hidden" name="style" value="detail">
-    <input type="hidden" name="entries" value="[% entries | html %]">
-    <input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
-
-    <div class="card overflow-hidden w-full">
-      <div class="head flexrow flex-nowrap justify-between border-b-0 w-full">
-        <h3>Explore Services</h3>
-        <div class="flexrow gap-x-1">
-          <div class="textHINTsoft flex items-center js-advancedfilter">(ctrl+enter)</div>
-          <button class="js-advancedfilter" type="submit" name="update"><i class="uil uil-corner-down-right-alt"></i> run query </button>
-        </div>
-      </div>
-      <div class="body min-w-[800px] border-t borderDefault flexcol js-advancedfilter">
-        [% WRAPPER _filter_advanced.tt disabled=0 %][% IF has_lex_filter; has_lex_filter; END %][% END %]
-      </div>
-    </div>
-  </form>
+    [% PROCESS _status_explore.tt %]
   [% END %]
   [% IF !explore %]
     [% WRAPPER _status_totals_header.tt %]
@@ -152,44 +134,6 @@
 <script>
   var dfl_Hash = [% get_cmd_submit_hash(data, 'svc') %];
   start_hide_activity_icons_timer();
-
-  [% IF explore %]
-  jQuery(document).ready(function() {
-    jQuery("TEXTAREA").focus();
-  });
-  [% END %]
-
-  function explorerUpdateStatusTable() {
-    var form = document.getElementById("explorForm");
-
-    // copy entries
-    var entries = jQuery("SELECT[name='entries']").val();
-    jQuery(form).find("[name='entries']").val(entries);
-
-    var data = jQuery(form).serializeArray();
-    var url  = jQuery(form).attr("action");
-    if(url == "") {
-      url = document.location.pathname;
-    }
-    url = url.replace(/\?.*$/, '')+"  #statusTableContent";
-
-    // update url from form data so reloads works as well
-    updateUrl(document.location.pathname + '?' + jQuery(form).serialize());
-
-    jQuery('#statusTableContainer').append("<div class='spinner absolute w-6 h-6 top-2 left-2 z-10'><\/div>");
-    jQuery('#statusTableContent').addClass("opacity-50");
-    jQuery('#statusTableContainer').load(url, data, function(text, status, req) {
-      start_hide_activity_icons_timer();
-      if(status == "error") {
-        jQuery('#statusTableContainer').html("failed to load status data");
-        return;
-      } else {
-        init_page();
-        initStatusTable();
-      }
-    });
-  }
-
 </script>
 [% END %]
 

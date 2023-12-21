@@ -586,7 +586,9 @@ sub _process_hostdetails_page {
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
     $c->stash->{'minimal'} = 1 if $view_mode ne 'html';
+    $c->stash->{'explore'} = 1 if $c->req->parameters->{'explore'};
     $c->stash->{'show_column_select'} = 1;
+    $c->stash->{'auto_reload_fn'} = "explorerUpdateStatusTable" if $c->stash->{'explore'};
     $c->stash->{'status_search_add_default_filter'} = "host";
 
     my $has_columns = 0;

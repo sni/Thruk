@@ -232,7 +232,7 @@
 <!--
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_host_columns %]";
-  jQuery(document).ready(function() {
+  function initStatusTable() {
     [% IF has_columns %]
     updateStatusColumns("[% paneprefix %]", false);
     [% END %]
@@ -240,6 +240,9 @@
     initStatusTableColumnSorting('[% paneprefix %]', 'mainTable');
     toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
     [% END %]
+  }
+  jQuery(document).ready(function() {
+    initStatusTable();
   });
 -->
 </script>
