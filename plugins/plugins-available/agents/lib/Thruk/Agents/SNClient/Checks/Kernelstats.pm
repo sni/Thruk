@@ -30,7 +30,7 @@ sub get_checks {
     for my $k (@{$inventory->{'kernel_stats'}}) {
         push @{$checks}, {
             'id'        => 'kernelstats.'.Thruk::Utils::Agents::to_id($k->{'name'}),
-            'name'      => lc($k->{'label'}),
+            'name'      => 'kernel '.lc($k->{'label'}),
             'check'     => 'check_kernel_stats',
             'args'      => { "type" => $k->{'name'} },
             'parent'    => 'agent version',
