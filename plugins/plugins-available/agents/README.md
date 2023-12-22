@@ -102,6 +102,12 @@ For example:
           #section ~ test # apply this process check only to sections containing "test"
         </proc>
 
+        <proc>
+          # if no match is given, use the name as exe filter
+          name  = snclient
+          name  = httpd
+        </proc>
+
         # set default args (if multiple args match, the last one overrides previous ones)
         <args>
           value = warn='load > 95' crit='load > 100'
