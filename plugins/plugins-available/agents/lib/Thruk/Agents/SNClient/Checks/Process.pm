@@ -61,7 +61,7 @@ sub get_checks {
     for my $p (@{$procs}) {
         for my $cfg (@{$wanted}) {
             my $args = [
-                "top-syntax='%{status} - %{count} processes, memory %{rss|h}B, started %{oldest:age|duration} ago'",
+                "top-syntax='%{status} - %{count} processes, memory %{rss|h}B, cpu %{cpu:fmt=%.1f}%, started %{oldest:age|duration} ago'",
             ];
             my $match;
             if($cfg->{'match'}) {
@@ -84,6 +84,18 @@ sub get_checks {
                 push @{$args}, "filter='username ~~ /".$user."/'";
             }
             my $username = $user ne 'ANY' ? $p->{'username'} : "";
+
+            if($cfg->{'warn'}) {
+                my($low,$high) = split(/:/mx,$cfg->{'warn'});
+                if(!defined $high) { $high = $low; $low  = 1; }
+                push @{$args}, sprintf("warn='count < %d || count > %d'", $low, $high);
+            }
+
+            if($cfg->{'crit'}) {
+                my($low,$high) = split(/:/mx,$cfg->{'crit'});
+                if(!defined $high) { $high = $low; $low  = 1; }
+                push @{$args}, sprintf("crit='count < %d || count > %d'", $low, $high);
+            }
 
             my $id = 'proc.'.Thruk::Utils::Agents::to_id($match.'_'.($username || 'ANY'));
             next if $already_checked->{$id};

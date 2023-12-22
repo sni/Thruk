@@ -100,6 +100,8 @@ For example:
           # restrict to specific hosts (regular expression)
           #host = ANY
           #section ~ test # apply this process check only to sections containing "test"
+          #warn = 1:5  # warning threshold for number of processes (low:high)
+          #crit = 1:10 # critical threshold
         </proc>
 
         <proc>
