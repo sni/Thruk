@@ -6,6 +6,7 @@ use strict;
 use Thruk::Agents::SNClient ();
 use Thruk::Base ();
 use Thruk::Utils::Agents ();
+use Thruk::Utils::IO ();
 
 =head1 NAME
 
