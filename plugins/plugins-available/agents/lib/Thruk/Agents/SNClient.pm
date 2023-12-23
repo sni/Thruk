@@ -373,7 +373,7 @@ sub _extract_checks {
         if($password ne '' && $password =~ m/^\$.*\$$/mx) {
             $svc_password = $password;
         }
-        my $command = sprintf("check_snclient!%s -p '%s' -u 'https://%s:%s' %s",
+        my $command = sprintf("check_snclient!%s -p '%s' -u 'https://%s:%s' '%s'",
                 _check_nsc_web_extra_options($c),
                 $svc_password,
                 '$HOSTADDRESS$',
