@@ -25,6 +25,7 @@
   --text-body:                #f2f2f2;
   --text-card:                #ddd;
   --text-th:                  #eee;
+  --text-highlight-bg:        var(--color-yellow-900);
   --text-hint:                var(--color-orange-600);
   --text-hint-soft:           var(--color-gray-400);
   --text-active1:             var(--color-blue-400);

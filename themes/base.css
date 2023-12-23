@@ -28,6 +28,7 @@
   --text-body:                var(--color-river-bed-600);
   --text-card:                var(--color-river-bed-900);
   --text-th:                  var(--color-gray-600);
+  --text-highlight-bg:        var(--color-yellow-100);
   --text-hint:                var(--color-orange-600);
   --text-hint-soft:           var(--color-gray-400);
   --text-active1:             var(--color-blue-600);
