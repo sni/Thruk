@@ -52,7 +52,7 @@
   --button-pager-bg-hover:    #666;
 
   --badge-fg:                 #333;
-  --badge-bg:                 var(--color-gray-200);
+  --badge-bg:                 var(--color-gray-300);
   --badge-ok-bg:              var(--color-green-600);
   --badge-ok-fg:              var(--text-body);
   --badge-warning-bg:         var(--color-yellow-500);
