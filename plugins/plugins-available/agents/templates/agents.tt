@@ -99,7 +99,7 @@
             </td>
             <td>
               [% IF info.exists(hostname) && info.$hostname.inv_checks != "" %]
-                <div class="badge min-w-full text-center [% IF info.$hostname.inv_new > 0 %]WARNING[% END %]" title="new / obsolete / checks / disabled">
+                <div class="badge min-w-full text-center [% IF info.$hostname.inv_new > 0 %]WARNING[% END %]" title="[% IF info.$hostname.inv_new > 0 %][% info.$hostname.inv_out | html %][% ELSE %]new / obsolete / checks / disabled[% END %]">
                   [% info.$hostname.inv_new %] /
                   [% info.$hostname.inv_obsolete %] /
                   [% info.$hostname.inv_checks %] /

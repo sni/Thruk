@@ -105,6 +105,7 @@ sub _process_show {
                                          'host_custom_variables' => { '~' => 'AGENT .+' },
                                          'description' => { '~' => '^(agent version|agent inventory|memory|cpu|disk.*)$' },
                                         ],
+                                        'extra_columns' => [qw/long_plugin_output/],
                                  );
     my $info = {};
     for my $svc (@{$services}) {
@@ -145,8 +146,9 @@ sub _process_show {
         }
         if($svc->{'description'} eq 'agent inventory') {
             $extra->{'inv_state'}        = $svc->{'state'};
-            $extra->{'inv_out'}          = $svc->{'plugin_output'};
+            $extra->{'inv_out'}          = $svc->{'plugin_output'}."\n".$svc->{'long_plugin_output'};
             $extra->{'inv_out'}          =~ s/^\w+\ \-\ //gmx;
+            $extra->{'inv_out'}          =~ s/\\n/\n/gmx;
             if($svc->{'perf_data'} =~ m/checks=(\d+)/mx) {
                 $extra->{'inv_checks'}   = $1;
             }
