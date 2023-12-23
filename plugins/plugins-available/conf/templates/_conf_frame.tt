@@ -14,7 +14,8 @@
 </div>
 [% END %]
 
-<div class="flexrow justify-between hidden xl:flex">
+[% IF action != "editor" %]
+<div class="flexrow justify-between hidden 2xl:flex">
   <div class="flex">
     [% PROCESS _infobox.tt has_proc_info=0 %]
   </div>
@@ -57,8 +58,9 @@
     </div>
   </div>
 </div>
+[% END %]
 
-[% IF action != "tree" %]
+[% IF action != "tree" && action != "editor" %]
 <div class="flex place-content-center">
   <h1 class='mainTitle'>[% subtitle %]</h1>
 </div>
