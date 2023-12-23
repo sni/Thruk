@@ -1724,6 +1724,8 @@ DIV.daterangepicker SELECT {
 
 DIV.linedwrap {
   display: flex;
+  overflow: hidden;
+  border: 0;
 }
 
 DIV.linedtextarea {

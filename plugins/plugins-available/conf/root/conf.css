@@ -22,6 +22,22 @@ TD.dataVar DIV#editor {
   color: #23238E !important;
 }
 
+.dark .ace_comment {
+  color: #00b600 !important;
+}
+/* define host */
+.dark .ace_keyword, .ace_constant.ace_language {
+  color: #ffc4f6 !important;
+}
+/* macros $USER1$ */
+.dark .ace_keyword.ace_operator {
+  color: #cf0000 !important;
+}
+/* object attributes: host_name */
+.dark .ace_support.ace_function {
+  color: #6767ff !important;
+}
+
 /* object browser */
 /* icons layout */
 DIV.layout_icons.browser_file_item {

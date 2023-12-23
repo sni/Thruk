@@ -33,7 +33,7 @@
         [% UNLESS readonly %]<a class="button w-40 green" href='#' onClick="save_file(this); return false;"><i class="uil uil-save"></i> save</a>[% END %]
       </div>
     </div>
-    <div class="w-full h-full flex">
+    <div class="w-full h-full flex overflow-hidden">
       <textarea id="texteditor" name="texteditor" class="w-full h-full" wrap="off"[% IF readonly %] readonly[% END %] style="line-height: 15px; white-space: pre;">[% escape_html(file_content) %]</textarea>
       <script>
         var editor;
