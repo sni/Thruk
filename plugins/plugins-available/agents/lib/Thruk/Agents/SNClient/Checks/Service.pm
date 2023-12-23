@@ -53,6 +53,7 @@ sub get_checks {
         }
     }
     for my $svc (@{$services}) {
+        next if($svc->{'active'} && $svc->{'active'} eq 'inactive');
         next unless $wanted->{$svc->{'name'}};
         my $cfg = $wanted->{$svc->{'name'}};
         push @{$checks}, {
