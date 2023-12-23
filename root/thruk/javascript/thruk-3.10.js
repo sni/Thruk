@@ -1085,6 +1085,11 @@ function switchTheme(sel) {
     if(is_array(theme)) {
         theme = theme[0];
     }
+    if(theme.match(/dark/i)) {
+        jQuery("BODY").addClass("dark");
+    } else {
+        jQuery("BODY").removeClass("dark");
+    }
     cookieSave('thruk_theme', theme);
     jQuery("LINK.maintheme").attr("href", url_prefix+"themes/"+theme+"/stylesheets/"+theme+".css");
     jQuery("IMG").each(function() {

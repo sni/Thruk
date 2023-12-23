@@ -371,6 +371,9 @@ sub end {
     if($c->stash->{'minimal'}) {
         $c->stash->{'extrahtmlclass'} .= " minimal";
     }
+    if($c->stash->{'theme'} =~ m/dark/i) {
+        $c->stash->{'extrahtmlclass'} .= " dark";
+    }
 
     $c->stats->profile(end => "Root end");
     return 1;
