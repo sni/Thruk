@@ -371,7 +371,7 @@ sub end {
     if($c->stash->{'minimal'}) {
         $c->stash->{'extrahtmlclass'} .= " minimal";
     }
-    if($c->stash->{'theme'} =~ m/dark/i) {
+    if($c->stash->{'theme'} =~ m/dark/mi) {
         $c->stash->{'extrahtmlclass'} .= " dark";
     }
 
