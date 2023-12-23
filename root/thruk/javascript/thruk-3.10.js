@@ -5190,6 +5190,50 @@ function measureText(pText, pFontSize, pFont) {
     return lResult;
 }
 
+var refresh_table_rows_timer;
+var refresh_table_rows_refresh_interval = 5000;
+function refresh_table_rows(url, extraData, selector) {
+    window.clearTimeout(refresh_table_rows_timer);
+    if(!selector) { selector = "DIV.spinner"; }
+    var rows = [];
+    jQuery(selector).each(function(i, el) {
+        if(el.tagName == "TR") {
+            rows.push(el);
+        } else {
+            rows = rows.concat(jQuery(el).parents("TR"));
+        }
+    })
+    if(rows.length == 0) {
+        return;
+    }
+    jQuery.ajax({
+        url:      url,
+        data:     extraData,
+        complete: function(data, textStatus, jqXHR) {
+            if(data && data.responseText) {
+                var table = jQuery(rows[0]).parents('TABLE')[0];
+                jQuery(rows).each(function(i, el) {
+                    if(el.id && data.responseText.match(el.id)) {
+                        var newRow = jQuery(data.responseText).find('#'+el.id);
+                        if(newRow.length > 0) {
+                            jQuery('#'+el.id).replaceWith(newRow);
+                        } else {
+                            console.log("found no new row in result for id: "+el.id);
+                        }
+                    }
+                });
+                applyRowStripes(table);
+            }
+            rows = jQuery("DIV.spinner").parents("TR");
+            if(rows.length > 0) {
+                refresh_table_rows_timer = window.setTimeout(function() {
+                    refresh_table_rows_timer = refresh_table_rows(url, extraData, selector);
+                }, refresh_table_rows_refresh_interval)
+            }
+        }
+    });
+}
+
 /*******************************************************************************
  *   ,ad8888ba,   ,ad8888ba,   88b           d88 88888888ba  88          88888888888 888888888888 88   ,ad8888ba,   888b      88
  *  d8"'    `"8b d8"'    `"8b  888b         d888 88      "8b 88          88               88      88  d8"'    `"8b  8888b     88

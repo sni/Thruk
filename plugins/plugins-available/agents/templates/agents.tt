@@ -24,7 +24,7 @@
       <a href="agents.cgi?action=new" class="button green w-40 mx-2"><i class="fa-solid fa-plus"></i> add new host</a>
     </div>
   </div>
-  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
+  <div class="mainTable [% IF main_table_full %]fullsize[% ELSE %]max-h-full[% END %]">
     <table class="mainTable js-striped" id="agentTable">
       <thead>
         <tr>
@@ -49,8 +49,8 @@
       </thead>
       <tbody class="rowhover">
         [% FOREACH h = data; agent = build_agent(h); hostname = h.name %]
-          <tr>
-            <td>[% agent.section %]</td>
+          <tr id="agent_row_[% name2id(h.peer_key) | html %]_[% name2id(hostname) | html %]">
+            <td class="js-agent-row">[% agent.section %]</td>
             <td>
               <div class="flexrow flex-nowrap gap-x-1 justify-between">
                 <a class="link" href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]" title="edit this host">[% h.name | html %]</a>
@@ -167,10 +167,12 @@ function agents_run_all(mainBtn, cls, extraData) {
         }
         running++;
         var btn = list.shift();
+        var rowid = jQuery(btn).parents("TR").attr("id");
         setBtnSpinner(btn, true);
         var form = jQuery(btn).parents('FORM');
         submitFormInBackground(form, function() {
             running--;
+            refresh_table_rows("agents.cgi", {}, "#"+rowid);
             setBtnNoSpinner(btn);
             startNext();
         }, extraData);
