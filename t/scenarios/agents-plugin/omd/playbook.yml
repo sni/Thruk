@@ -19,6 +19,15 @@
       owner: "demo"
       group: "demo"
 
+  - name: "create secret.key"
+    shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - name: "set permissions on secret.key"
+    file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+
   - name: create symlink to agents plugin
     shell: "ln -sfn /thruk/plugins/plugins-available/agents /opt/omd/sites/demo/etc/thruk/plugins-enabled/agents"
 
@@ -38,3 +47,4 @@
     wait_for:
       host: livestatus-backend
       port: 7001
+
