@@ -168,12 +168,12 @@ sub get_config_objects {
         unshift @templates, $perf_template unless $chk->{'noperf'};
 
         if($fresh || $type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//'')) {
-            $svc->{'conf'} = $chk->{'svc_conf'};
-            $svc->{'conf'}->{'use'} = \@templates;
-            if(!defined $svc->{'conf'}->{'service_description'}) {
+            if(!defined $chk->{'svc_conf'}->{'service_description'}) {
                 # these are obsolete services, just keep them as is
                 next;
             }
+            $svc->{'conf'} = $chk->{'svc_conf'};
+            $svc->{'conf'}->{'use'} = \@templates;
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
             if($args) {
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
