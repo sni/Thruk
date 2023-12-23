@@ -98,8 +98,8 @@
               </span>
             </td>
             <td>
-              [% IF info.exists(hostname) %]
-                <div class="badge min-w-full text-center [% IF info.exists(hostname) && info.$hostname.inv_new > 0 %]WARNING[% END %]" title="new / obsolete / checks / disabled">
+              [% IF info.exists(hostname) && info.$hostname.inv_checks != "" %]
+                <div class="badge min-w-full text-center [% IF info.$hostname.inv_new > 0 %]WARNING[% END %]" title="new / obsolete / checks / disabled">
                   [% info.$hostname.inv_new %] /
                   [% info.$hostname.inv_obsolete %] /
                   [% info.$hostname.inv_checks %] /
