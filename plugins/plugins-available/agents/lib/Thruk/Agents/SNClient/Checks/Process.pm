@@ -86,16 +86,24 @@ sub get_checks {
             }
             my $username = $user ne 'ANY' ? $p->{'username'} : "";
 
+            my $has_zero = 0;
             if($cfg->{'warn'}) {
                 my($low,$high) = split(/:/mx,$cfg->{'warn'});
                 if(!defined $high) { $high = $low; $low  = 1; }
                 push @{$args}, sprintf("warn='count < %d || count > %d'", $low, $high);
+                $has_zero = 1 if $low <= 0;
             }
 
             if($cfg->{'crit'}) {
                 my($low,$high) = split(/:/mx,$cfg->{'crit'});
                 if(!defined $high) { $high = $low; $low  = 1; }
                 push @{$args}, sprintf("crit='count < %d || count > %d'", $low, $high);
+                $has_zero = 1 if $low <= 0;
+            }
+
+            if($has_zero) {
+                # if zero is a valid threshold, do not make check unknown
+                push @{$args}, 'empty-state=0';
             }
 
             my $id = 'proc.'.Thruk::Utils::Agents::to_id($match.'_'.($username || 'ANY'));
