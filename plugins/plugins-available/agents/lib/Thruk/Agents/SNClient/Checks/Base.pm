@@ -39,7 +39,6 @@ sub get_checks {
         'id'        => 'version',
         'name'      => 'agent version',
         'check'     => 'check_snclient_version',
-        'noperf'    => 1,
     };
 
     if($inventory->{'uptime'}) {
@@ -58,7 +57,6 @@ sub get_checks {
             'name'   => 'os version',
             'check'  => 'check_os_version',
             'parent' => 'agent version',
-            'noperf' => 1,
             'info'   => Thruk::Agents::SNClient::make_info($inventory->{'os_version'}->[0]),
         };
     }
