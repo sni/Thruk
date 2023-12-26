@@ -440,6 +440,7 @@ returns check info as string
 =cut
 sub make_info {
     my($data) = @_;
+    return "" unless $data;
     return(Thruk::Utils::dump_params($data, 5000, 0));
 }
 

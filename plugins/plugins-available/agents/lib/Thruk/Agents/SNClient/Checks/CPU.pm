@@ -30,12 +30,16 @@ sub get_checks {
             'name'      => 'cpu',
             'check'     => 'check_cpu',
             'parent'    => 'agent version',
+            'info'      => Thruk::Agents::SNClient::make_info($inventory->{'cpu'}->[0]),
         };
+    }
+    if($inventory->{'cpu_utilization'}) {
         push @{$checks}, {
             'id'        => 'cpuutilization',
             'name'      => 'cpu utilization',
             'check'     => 'check_cpu_utilization',
             'parent'    => 'agent version',
+            'info'      => Thruk::Agents::SNClient::make_info($inventory->{'cpu_utilization'}->[0]),
         };
     }
 

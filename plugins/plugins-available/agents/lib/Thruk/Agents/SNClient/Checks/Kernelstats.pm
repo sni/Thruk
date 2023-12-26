@@ -34,6 +34,7 @@ sub get_checks {
             'check'     => 'check_kernel_stats',
             'args'      => { "type" => $k->{'name'} },
             'parent'    => 'agent version',
+            'info'      => Thruk::Agents::SNClient::make_info($k),
         };
     }
 
