@@ -3,6 +3,7 @@ package Thruk::Agents::SNClient::Checks::Base;
 use warnings;
 use strict;
 
+use Thruk::Agents::SNClient ();
 use Thruk::Utils::Agents ();
 use Thruk::Utils::Log qw/:all/;
 

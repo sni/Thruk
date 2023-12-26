@@ -3,6 +3,7 @@ package Thruk::Agents::SNClient::Checks::Kernelstats;
 use warnings;
 use strict;
 
+use Thruk::Agents::SNClient ();
 use Thruk::Utils::Agents ();
 
 =head1 NAME
