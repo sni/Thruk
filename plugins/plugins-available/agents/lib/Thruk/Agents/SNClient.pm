@@ -113,7 +113,8 @@ sub get_config_objects {
 
     my $hostdata = $hostobj->{'conf'} // {};
 
-    my $services = Thruk::Utils::Agents::get_host_agent_services($c, $hostobj);
+    my $services       = Thruk::Utils::Agents::get_host_agent_services($c, $hostobj);
+    my $services_by_id = Thruk::Utils::Agents::get_host_agent_services_by_id($services);
 
     # save services
     my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section);
@@ -136,7 +137,7 @@ sub get_config_objects {
         my $args = $checks_config->{'args.'.$id}  // '';
         my $chk  = $checks_hash->{$id};
         confess("no name") unless $chk->{'name'};
-        my $svc = $services->{$chk->{'name'}};
+        my $svc = $services_by_id->{$chk->{'id'}} // $services->{$chk->{'name'}};
         if(!$svc && $type eq 'keep') {
             $type = 'on';
             $checks_config->{'check.'.$id} = 'on';
@@ -204,50 +205,56 @@ sub get_config_objects {
     }
     $hostobj->{'conf'} = $hostdata;
 
-    # add templates
-    if($section) {
-        my @paths = split(/\//mx, $section);
-        my $cur = "";
-        my $parent_svc = "generic-thruk-agent-service";
-        my $parent_hst = "generic-thruk-agent-host";
-        while(scalar @paths > 0) {
-            my $p = shift @paths;
-            $cur = ($cur ? $cur."/" : "").$p;
-            my $svc = Monitoring::Config::Object->new( type  => 'service',
-                                                    coretype => $c->{'obj_db'}->{'coretype'},
-                                                    );
-            $svc->{'_filename'} = sprintf('agents/%s/templates.cfg', $cur);
-            my $name = _make_section_template("service", $cur);
-            $svc->{'conf'} = {
-                "name"      => $name,
-                "use"       => [$parent_svc],
-                "register"  => 0,
-            };
-            my $objects = $c->{'obj_db'}->get_objects_by_name("service", $name);
-            if(!$objects || scalar @{$objects} == 0) {
-                push @list, $svc;
-            }
-            $parent_svc = $name;
-
-            $name = _make_section_template("host", $cur);
-            my $hst = Monitoring::Config::Object->new( type  => 'host',
-                                                    coretype => $c->{'obj_db'}->{'coretype'},
-                                                    );
-            $hst->{'_filename'} = sprintf('agents/%s/templates.cfg', $cur);
-            $hst->{'conf'} = {
-                "name"      => $name,
-                "use"       => [$parent_hst],
-                "register"  => 0,
-            };
-            $objects = $c->{'obj_db'}->get_objects_by_name("host", $name);
-            if(!$objects || scalar @{$objects} == 0) {
-                push @list, $hst;
-            }
-            $parent_hst = $name;
-        }
-    }
+    _add_templates($c, \@list, $section);
 
     return(\@list, \@remove);
+}
+
+##########################################################
+sub _add_templates {
+    my($c, $list, $section) = @_;
+
+    return unless $section;
+
+    my @paths = split(/\//mx, $section);
+    my $cur = "";
+    my $parent_svc = "generic-thruk-agent-service";
+    my $parent_hst = "generic-thruk-agent-host";
+    while(scalar @paths > 0) {
+        my $p = shift @paths;
+        $cur = ($cur ? $cur."/" : "").$p;
+        my $svc = Monitoring::Config::Object->new( type  => 'service',
+                                                coretype => $c->{'obj_db'}->{'coretype'},
+                                                );
+        $svc->{'_filename'} = sprintf('agents/%s/templates.cfg', $cur);
+        my $name = _make_section_template("service", $cur);
+        $svc->{'conf'} = {
+            "name"      => $name,
+            "use"       => [$parent_svc],
+            "register"  => 0,
+        };
+        my $objects = $c->{'obj_db'}->get_objects_by_name("service", $name);
+        if(!$objects || scalar @{$objects} == 0) {
+            push @{$list}, $svc;
+        }
+        $parent_svc = $name;
+
+        $name = _make_section_template("host", $cur);
+        my $hst = Monitoring::Config::Object->new( type  => 'host',
+                                                coretype => $c->{'obj_db'}->{'coretype'},
+                                                );
+        $hst->{'_filename'} = sprintf('agents/%s/templates.cfg', $cur);
+        $hst->{'conf'} = {
+            "name"      => $name,
+            "use"       => [$parent_hst],
+            "register"  => 0,
+        };
+        $objects = $c->{'obj_db'}->get_objects_by_name("host", $name);
+        if(!$objects || scalar @{$objects} == 0) {
+            push @{$list}, $hst;
+        }
+        $parent_hst = $name;
+    }
 }
 
 ##########################################################

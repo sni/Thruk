@@ -163,6 +163,25 @@ sub get_host_agent_services {
 
 ##########################################################
 
+=head2 get_host_agent_services_by_id
+
+    get_host_agent_services_by_id($services)
+
+transforms list of services into hash by check id
+
+=cut
+sub get_host_agent_services_by_id {
+    my($services) = @_;
+    my $by_id = {};
+    for my $svc (values %{$services}) {
+        my $id = $svc->{'conf'}->{'_AGENT_AUTO_CHECK'};
+        $by_id->{$id} = $svc if $id;
+    }
+    return($by_id);
+}
+
+##########################################################
+
 =head2 find_agent_module_names
 
     find_agent_module_names()
@@ -342,6 +361,7 @@ sub _set_checks_category {
     my($c, $hostname, $hostobj, $checks, $agenttype, $fresh) = @_;
 
     my $services = $hostobj ? get_host_agent_services($c, $hostobj) : {};
+    my $services_by_id = get_host_agent_services_by_id($services);
     my $settings = $hostobj->{'conf'}->{'_AGENT_CONFIG'} ? decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'}) : {};
 
     my $excludes = $c->config->{'Thruk::Agents'}->{lc($agenttype)}->{'exclude'};
@@ -351,7 +371,7 @@ sub _set_checks_category {
         next if $chk->{'id'} eq '_host';
         my $name = $chk->{'name'};
         $existing->{$chk->{'id'}} = 1;
-        my $svc = $services->{$name};
+        my $svc = $services_by_id->{$chk->{'id'}} // $services->{$name};
         if($svc && $svc->{'conf'}->{'_AGENT_AUTO_CHECK'}) {
             $chk->{'exists'} = 'exists';
             $chk->{'_svc'}   = $svc;
