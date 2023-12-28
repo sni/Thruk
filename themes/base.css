@@ -967,11 +967,11 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=
   }
 
   &.round {
-    @apply w-8 h-8 text-xl rounded-full text-center justify-center;
+    @apply w-8 h-8 p-0 text-xl rounded-full text-center justify-center;
     align-items: center;
 
     I.fa-solid, I.uil {
-      @apply mr-0 contents;
+      @apply m-0 h-fit w-fit leading-normal;
       font-size: inherit;
     }
 
