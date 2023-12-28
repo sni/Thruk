@@ -971,8 +971,9 @@ BUTTON, INPUT[type=submit], INPUT[type=button], A.button, [type="button"],[type=
     align-items: center;
 
     I.fa-solid, I.uil {
-      @apply m-0 h-fit w-fit leading-normal;
+      @apply m-0 h-fit w-fit;
       font-size: inherit;
+      line-height: inherit;
     }
 
     &.big {
