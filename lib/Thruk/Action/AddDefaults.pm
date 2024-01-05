@@ -94,6 +94,7 @@ sub begin {
     $theme = 'Light'                       unless defined $available_themes->{$theme};
     $theme = $c->config->{'themes'}->[0]   unless defined $available_themes->{$theme};
     $c->stash->{'theme'} = $theme || 'None';
+    $c->stash->{'cookie_theme'} = $cookie_theme // '';
 
     if(exists $c->req->parameters->{'noheader'}) {
         $c->req->parameters->{'hidetop'}  = 1;

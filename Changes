@@ -5,6 +5,7 @@ next:
           - add options status column: last state change
           - fix exposing check_command via rest api
           - do not show error page if all backends are down, but show page with empty data
+          - switch to dark mode automatically
           - Agents:
             - add default args
             - add support for section based settings

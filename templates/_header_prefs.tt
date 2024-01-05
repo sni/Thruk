@@ -19,17 +19,21 @@
     <td class="flex gap-x-1">
       [% IF c.config.themes.size > 4 %]
         <select name="theme" id="pref_theme" class="w-40" onchange="switchTheme(this)">
+          <option value="">default</option>
           [% FOR t = c.config.themes %]
-          <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+          <option value="[% t | html %]"[% IF cookie_theme && t == theme %] selected[% END %]>[% t | html %]</option>
           [% END %]
         </select>
       [% ELSE %]
       <div class="radiogroup min-w-[18rem]">
         [% FOR t = c.config.themes %]
-        <input type="radio" name="theme" value="[% t | html %]" id="theme-[% t | html %]" onchange="switchTheme('[% t | html %]')" [% IF t == theme %]checked[% END %]><label for="theme-[% t | html %]">[% t | html %]</label>
+        <input type="radio" name="theme" value="[% t | html %]" id="theme-[% t | html %]" onchange="switchTheme('[% t | html %]')" [% IF cookie_theme && t == theme %]checked[% END %]><label for="theme-[% t | html %]">[% t | html %]</label>
         [% END %]
       </div>
       [% END %]
+      <button class="iconOnly" onclick="cookieRemove('thruk_theme'); reloadPage(50, true); return false;" title="use default theme">
+        <i class="uil uil-cloud-times"></i>
+      </button>
     </td>
   </tr>
   [% IF show_sounds %]
@@ -57,9 +61,9 @@
     <th class="align-middle">Navigation</th>
     <td>
       <div class="radiogroup w-72">
-        <input type="radio" name="navigation" value="0" id="nav0" onchange="setNavigationStyle(0)" [% IF menu_states.exists('cl') && menu_states.cl == 0 %]checked[% END %]><label for="nav0">Default</label>
-        <input type="radio" name="navigation" value="1" id="nav1" onchange="setNavigationStyle(1)" [% IF menu_states.exists('cl') && menu_states.cl == 1 %]checked[% END %]><label for="nav1">Collapsed</label>
-        <input type="radio" name="navigation" value="2" id="nav2" onchange="setNavigationStyle(2)" [% IF menu_states.exists('cl') && menu_states.cl == 2 %]checked[% END %]><label for="nav2">Hover</label>
+        <input type="radio" name="navigation" value="0" id="nav0" onchange="setNavigationStyle(0)" [% IF menu_states.exists('cl') && menu_states.cl == 0 %]checked[% END %]><label for="nav0">default</label>
+        <input type="radio" name="navigation" value="1" id="nav1" onchange="setNavigationStyle(1)" [% IF menu_states.exists('cl') && menu_states.cl == 1 %]checked[% END %]><label for="nav1">collapsed</label>
+        <input type="radio" name="navigation" value="2" id="nav2" onchange="setNavigationStyle(2)" [% IF menu_states.exists('cl') && menu_states.cl == 2 %]checked[% END %]><label for="nav2">hover</label>
       </div>
     </td>
   </tr>

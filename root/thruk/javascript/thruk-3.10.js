@@ -1077,8 +1077,8 @@ function preventDblEvents(el) {
     return false;
 }
 
-function switchTheme(sel) {
-    var theme = sel;
+function switchTheme(sel, store) {
+    theme = sel;
     if(sel && sel.tagName) {
         theme = jQuery(sel).val();
     }
@@ -1090,11 +1090,17 @@ function switchTheme(sel) {
     } else {
         jQuery("BODY").removeClass("dark");
     }
-    cookieSave('thruk_theme', theme);
+    if(store !== false) {
+        cookieSave('thruk_theme', theme);
+    }
     jQuery("LINK.maintheme").attr("href", url_prefix+"themes/"+theme+"/stylesheets/"+theme+".css");
     jQuery("IMG").each(function() {
       this.src = this.src.replace(/\/themes\/.*?\//, "/themes/"+theme+"/");
     });
+}
+
+function isDarkModeEnabled() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
 }
 
 /* remove element from close elements list */

@@ -16,6 +16,7 @@
   var product_prefix      = '[% product_prefix %]';
   var cookie_path         = '[% cookie_path %]';
   var theme               = '[% theme %]';
+  var themes              = [% json_encode(c.config.themes) %];
   var has_expire_acks     = [% IF has_expire_acks %]true[% ELSE %]false[% END %];
   var fav_counter         = [% IF fav_counter +%]true[% ELSE %]false[% END %];
   var perf_bar_mode       = '[% perf_bar_mode %]';
@@ -79,6 +80,23 @@
       updateFaviconCounter([% totals.red + totals.yellow + totals.orange %], '#FF9E00');
     [%- END -%]
   [%- END -%]
+
+  // switch to dark theme if prefered by the user
+  var cookieTheme = readCookie('thruk_theme');
+  if(!cookieTheme && isDarkModeEnabled()) {
+    // user has not set any theme yet and prefers dark mode
+    if(jQuery.inArray(themes, "Dark")) {
+      switchTheme("Dark", false);
+    } else {
+      // use first theme which has dark in name
+      jQuery.each(themes, function(i, name) {
+        if(name.match(/dark/i)) {
+          switchTheme(name, false);
+          return false;
+        }
+      });
+    }
+  }
 
 -->
 </script>
