@@ -254,7 +254,7 @@ sub _process_edit {
             'port'     => $obj->{'_AGENT_PORT'}     // '',
             'password' => $obj->{'_AGENT_PASSWORD'} // '',
             'peer_key' => $backend,
-            'settings' => decode_json($obj->{'_AGENT_CONFIG'}) // {},
+            'settings' => decode_json($obj->{'_AGENT_CONFIG'} // "{}"),
         };
         if($agent->{'settings'}->{'disabled'}) {
             $agent->{'settings'}->{'disabled'} = Thruk::Base::array2hash($agent->{'settings'}->{'disabled'});
