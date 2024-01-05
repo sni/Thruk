@@ -9752,8 +9752,10 @@ function set_histou_img(start, end, id, source) {
     var newUrl = histou_frame_url + getParamFrom + getParamTo + '&panelId='+source;
 
     if(theme.match(/dark/i)) {
+        newUrl = newUrl.replace("&theme=light", "")
         newUrl = newUrl+'&theme=dark';
     } else {
+        newUrl = newUrl.replace("&theme=light", "")
         newUrl = newUrl+'&theme=light';
     }
 
