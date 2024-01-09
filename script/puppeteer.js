@@ -44,11 +44,11 @@ var is_report = process.argv[7];
   await page.goto(url);
   if(url.match(/histou\.js\?/) || url.match(/\/grafana\//)) {
     await Promise.race([
-      page.waitForSelector('#loginuser').then(() => {
+      page.waitForSelector('#loginuser', {timeout: 0}).then(() => {
         console.error("login window present, export failed");
         process.exit(2);
       }),
-      page.waitForSelector('div.alert-error').then(async () => {
+      page.waitForSelector('div.alert-error', {timeout: 0}).then(async () => {
         console.error("alert message found, export failed");
         console.error("alert message found, export failed:");
         let element = await page.$('div.alert-error')
@@ -56,14 +56,11 @@ var is_report = process.argv[7];
         console.error(value);
         process.exit(2);
       }),
-      page.waitForSelector('DIV.flot-text', {timeout: 20000}).then(() => {
+      page.waitForSelector('DIV.flot-text, p.panel-text-content, DIV.uplot', {timeout: 20000}).then(() => {
         console.log("chart panel found, export OK");
       }, () => {
         console.error("timeout while waiting for chart, export failed");
         process.exit(2);
-      }),
-      page.waitForSelector('p.panel-text-content', {timeout: 30000}).then(() => {
-        console.log("text panel found, export OK");
       })
     ]);
   }
