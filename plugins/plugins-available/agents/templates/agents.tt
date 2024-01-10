@@ -77,7 +77,7 @@
               </div>
             </td>
             <td>
-              <span title="[% info.$hostname.os_version_full %]">[% info.$hostname.os_version %]</span>
+              <span title="[% info.$hostname.os_version_full | html %]">[% info.$hostname.os_version | html %]</span>
             </td>
             <td>[% info.$hostname.os_arch %]</td>
             <td class='align-top relative'>
