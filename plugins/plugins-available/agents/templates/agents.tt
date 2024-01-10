@@ -32,8 +32,9 @@
           <th class="">Hostname</th>
           <th class="w-20 text-center">Status</th>
           <th class="w-20">Site</th>
-          <th class="w-24">Agent</th>
-          <th class="w-20">Version</th>
+          <th class="w-24">Version</th>
+          <th class="w-24">OS</th>
+          <th class="w-10">Arch</th>
           <th class="w-24">CPU</th>
           <th class="w-24">Memory</th>
           <th class="w-24">Disk</th>
@@ -69,10 +70,16 @@
               <div class='text-center badge [% state %]'[% IF output != "" %] title="[% output | html %]"[% END %]>[% state %]</div>
             </td>
             <td>[% peer_name(h) | html %]</td>
-            <td><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=20 height=20 class="inline"> [% agent.type | html %]</td>
-            <td>[% IF info.exists(hostname) %]<div class="w-full h-full" title="[% info.$hostname.full_version | html %]">[% info.$hostname.version | html %]</div>[% END %]</td>
-
-
+            <td>
+              <div class="flexrow flex-nowrap gap-x-1">
+                <div class="w-5 h-5 m-0 p-0 min-w-fit"><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=25 height=25></div>
+                [% IF info.exists(hostname) %]<div class="w-full h-full" title="[% info.$hostname.full_version | html %]">[% info.$hostname.version | html %]</div>[% END %]
+              </div>
+            </td>
+            <td>
+              <span title="[% info.$hostname.os_version_full %]">[% info.$hostname.os_version %]</span>
+            </td>
+            <td>[% info.$hostname.os_arch %]</td>
             <td class='align-top relative'>
               [% IF info.$hostname.cpu_perc; %][%IF info.$hostname.cpu_perc > 1; info.$hostname.cpu_perc = 1; END %]
               <div style='width: [% 100 * info.$hostname.cpu_perc %]%; height: 100%;' class='[% IF info.$hostname.cpu_state == 2 %]CRITICAL[% ELSIF info.$hostname.cpu_state == 1 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0' title="cpu usage: [% 100 * info.$hostname.cpu_perc %]%"></div>

@@ -103,7 +103,7 @@ sub _process_show {
 
     my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                          'host_custom_variables' => { '~' => 'AGENT .+' },
-                                         'description' => { '~' => '^(agent version|agent inventory|memory|cpu|disk.*)$' },
+                                         'description' => { '~' => '^(agent version|agent inventory|memory|cpu|disk.*|os version)$' },
                                         ],
                                         'extra_columns' => [qw/long_plugin_output/],
                                  );
@@ -131,6 +131,9 @@ sub _process_show {
             'disk_state'       => 0,
             'disk_total'       => '',
             'disk_free'        => '',
+            'os_version_full'  => '',
+            'os_version'       => '',
+            'os_arch'          => '',
         };
         if($svc->{'description'} eq 'agent version') {
             if($svc->{'state'} == 0) {
@@ -187,6 +190,22 @@ sub _process_show {
                     $extra->{'disk_state'} = $svc->{'state'};
                 }
             }
+        }
+        if($svc->{'description'} eq 'os version') {
+            if($svc->{'plugin_output'} =~ m/\(arch:(.*?)\)/mx) {
+                my $arch = Thruk::Base::trim_whitespace("$1");
+                $arch = "x86"     if $arch eq "amd64";
+                $arch = "aarch64" if $arch eq "arm64";
+                $extra->{'os_arch'} = $arch;
+            }
+            $extra->{'os_version_full'} = $svc->{'plugin_output'};
+            $extra->{'os_version_full'} =~ s/^\w+\ \- \ //gmx;
+            $extra->{'os_version'} = lc($svc->{'plugin_output'});
+            $extra->{'os_version'} =~ s/^\w+\ \- \ //gmx;
+            $extra->{'os_version'} =~ s/^microsoft\ //gmx;
+            $extra->{'os_version'} =~ s/\ build\ [\d.]+\ / /gmx;
+            $extra->{'os_version'} =~ s/\(arch:[^)]*\)+/ /gmx;
+            $extra->{'os_version'} =~ s/^darwin\ /mac osx /gmx;
         }
         $info->{$svc->{'host_name'}} = $extra;
     }
