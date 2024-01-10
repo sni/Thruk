@@ -405,12 +405,14 @@ sub _extract_checks {
         }
 
         $chk->{'name'} =~ s|[`~!\$%^&*\|'"<>?,()=]*||gmx; # remove nasty chars from object name
-        $chk->{'name'} =~ s|\\$||gmx; # remove trailing slashes from service names, in windows drives
+        $chk->{'name'} =~ s|\\$||gmx; # remove trailing slashes from service names, ex.: in windows drives
 
         $chk->{'svc_conf'} = {
             'host_name'           => $hostname,
             'service_description' => $chk->{'name'},
             'check_interval'      => $interval,
+            'retry_interval'      => $c->config->{'Thruk::Agents'}->{'snclient'}->{'retry_interval'}     // 0.5,
+            'max_check_attempts'  => $c->config->{'Thruk::Agents'}->{'snclient'}->{'max_check_attempts'} // 5,
             'check_command'       => $command,
             '_AGENT_AUTO_CHECK'   => $chk->{'id'},
         };

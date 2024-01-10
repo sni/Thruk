@@ -34,19 +34,21 @@ For example:
 
         # override check interval
         check_interval = 1
+        retry_interval = 0.5
+        max_check_attempts = 5
 
         # override inventory interval
         inventory_interval = 60
 
         # set default contact(s)
-        default_contacts = admin, other
+        #default_contacts = admin, other
 
         # set default contactgroups(s)
-        default_contactgroups = group, ...
+        #default_contactgroups = group, ...
 
-        # set performance data templates (default is autodetect based on wether grafana is enabled)
-        # perf_template      = srv-perf
-        # host_perf_template = host-perf
+        # set performance data templates (default is autodetect based on whether grafana is enabled)
+        #perf_template      = srv-perf
+        #host_perf_template = host-perf
 
         # disable network checks matching these attributes
         <disable network>
