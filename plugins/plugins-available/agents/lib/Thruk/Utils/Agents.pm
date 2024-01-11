@@ -30,11 +30,11 @@ returns list of checks for this host grouped by type (new, exists, obsolete, dis
 
 =cut
 sub get_agent_checks_for_host {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $fresh, $section) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $fresh, $section, $mode) = @_;
     $section = $section // $hostobj->{'conf'}->{'_AGENT_SECTION'};
 
     # extract checks and group by type
-    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $fresh, $section);
+    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $fresh, $section, $mode);
     my $checks = Thruk::Base::array_group_by($flat, "exists");
     for my $key (qw/new exists obsolete disabled/) {
         $checks->{$key} = [] unless defined $checks->{$key};
@@ -76,12 +76,13 @@ sub update_inventory {
     my $type      = $hostobj->{'conf'}->{'_AGENT'}          // default_agent_type($c);
     my $password  = $opt->{'password'} || $hostobj->{'conf'}->{'_AGENT_PASSWORD'} || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
     my $port      = $opt->{'port'}     || $hostobj->{'conf'}->{'_AGENT_PORT'}     // default_port($type);
+    my $mode      = $opt->{'mode'}     || $hostobj->{'conf'}->{'_AGENT_MODE'}     // 'https';
 
     my $class = Thruk::Utils::Agents::get_agent_class($type);
     my $agent = $class->new({});
     my $data;
     eval {
-        $data = $agent->get_inventory($c, $address, $hostname, $password, $port);
+        $data = $agent->get_inventory($c, $address, $hostname, $password, $port, $mode);
     };
     my $err = $@;
     if($err) {
@@ -107,7 +108,7 @@ returns list of checks as flat list.
 
 =cut
 sub get_services_checks {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh, $section) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh, $section, $mode) = @_;
     my $checks   = [];
     return($checks) unless $hostname;
 
@@ -119,7 +120,7 @@ sub get_services_checks {
         confess("no peer found by name: ".$backend) unless $peer;
         confess("no remotekey") unless $peer->remotekey();
         confess("need agenttype") unless $agenttype;
-        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $fresh, $section], 1);
+        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $fresh, $section, $mode], 1);
         return($res[0]);
     }
 
@@ -138,7 +139,7 @@ sub get_services_checks {
     $password = $password || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
 
     my $agent = build_agent($agenttype // $hostobj);
-    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section);
+    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode);
     _set_checks_category($c, $hostname, $hostobj, $checks, $type, $fresh);
 
     return($checks);
@@ -233,7 +234,7 @@ sub build_agent {
     my($host) = @_;
     my $c = $Thruk::Globals::c;
 
-    my($agenttype, $hostdata, $section, $port);
+    my($agenttype, $hostdata, $section, $port, $mode);
     if(!ref $host) {
         $agenttype = $host;
         $hostdata  = {};
@@ -243,12 +244,14 @@ sub build_agent {
         $agenttype = $host->{'conf'}->{'_AGENT'};
         $section   = $host->{'conf'}->{'_AGENT_SECTION'};
         $port      = $host->{'conf'}->{'_AGENT_PORT'};
+        $mode      = $host->{'conf'}->{'_AGENT_MODE'};
         $hostdata  = $host->{'conf'};
     } else {
         my $vars  = Thruk::Utils::get_custom_vars($c, $host);
         $agenttype = $vars->{'AGENT'};
         $section   = $vars->{'AGENT_SECTION'};
         $port      = $vars->{'AGENT_PORT'};
+        $mode      = $vars->{'AGENT_MODE'};
         $hostdata  = $host;
     }
     my $class = get_agent_class($agenttype);
@@ -261,6 +264,7 @@ sub build_agent {
     }
     $agent->{'section'} = $section || $settings->{'section'} // '';
     $agent->{'port'}    = $port    || $settings->{'default_port'} // '';
+    $agent->{'mode'}    = $mode    || 'https';
 
     if($c->stash->{'theme'} =~ m/dark/mxi) {
         $agent->{'icon'} = $settings->{'icon_dark'};
@@ -529,6 +533,7 @@ sub scan_agent {
     my $hostname  = $params->{'hostname'};
     my $address   = $params->{'ip'};
     my $password  = $params->{'password'};
+    my $mode      = $params->{'mode'};
     my $backend   = $params->{'backend'};
     my $port      = $params->{'port'} || default_port($agenttype);
 
@@ -559,7 +564,7 @@ sub scan_agent {
     my $agent = $class->new({});
     my $data;
     eval {
-        $data = $agent->get_inventory($c, $address, $hostname, $password, $port);
+        $data = $agent->get_inventory($c, $address, $hostname, $password, $port, $mode);
     };
     my $err = $@;
     if($err) {

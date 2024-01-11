@@ -75,6 +75,7 @@ sub get_config_objects {
     my $section  = $data->{'section'}  // '';
     my $password = $data->{'password'} // '';
     my $port     = $data->{'port'}     || $settings->{'default_port'};
+    my $mode     = $data->{'mode'}     || 'https';
 
     $section =~ s|^\/*||gmx if $section;
     $section =~ s|\/*$||gmx if $section;
@@ -117,7 +118,7 @@ sub get_config_objects {
     my $services_by_id = Thruk::Utils::Agents::get_host_agent_services_by_id($services);
 
     # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section);
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section, $mode);
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
     confess("missing host config") unless $checks_hash->{'_host'};
@@ -127,6 +128,10 @@ sub get_config_objects {
     my $section_changed = (!defined $hostdata->{'_AGENT_SECTION'} || $hostdata->{'_AGENT_SECTION'} ne $section);
     $hostdata->{'_AGENT_SECTION'}  = $section;
     $hostdata->{'_AGENT_PORT'}     = $port;
+    delete $hostdata->{'_AGENT_MODE'};
+    if($mode && $mode ne 'https') {
+        $hostdata->{'_AGENT_MODE'} = $mode;
+    }
     my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
 
     my $template = $section ? _make_section_template("service", $section) : 'generic-thruk-agent-service';
@@ -261,18 +266,18 @@ sub _add_templates {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section)
+    get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode)
 
 returns list of Monitoring::Objects for the host / services
 
 =cut
 sub get_services_checks {
-    my($self, $c, $hostname, $hostobj, $password, $fresh, $section) = @_;
+    my($self, $c, $hostname, $hostobj, $password, $fresh, $section, $mode) = @_;
     my $datafile = $c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json';
     my $checks = [];
     if(-r $datafile) {
         my $data = Thruk::Utils::IO::json_lock_retrieve($datafile);
-        $checks = _extract_checks($c, $data->{'inventory'}, $hostname, $password, $fresh, $section) if $data->{'inventory'};
+        $checks = _extract_checks($c, $data->{'inventory'}, $hostname, $password, $fresh, $section, $mode) if $data->{'inventory'};
     }
     return($checks);
 }
@@ -281,19 +286,22 @@ sub get_services_checks {
 
 =head2 get_inventory
 
-    get_inventory($c, $c, $address, $hostname, $password, $port)
+    get_inventory($c, $c, $address, $hostname, $password, $port, $mode)
 
 returns json structure from inventory api call.
 
 =cut
 sub get_inventory {
-    my($self, $c, $address, $hostname, $password, $port) = @_;
+    my($self, $c, $address, $hostname, $password, $port, $mode) = @_;
 
+    my $proto = "https";
+    $proto = "http" if($mode && $mode eq 'http');
     die("no password supplied") unless $password;
     my $command  = "check_snclient";
-    my $args     = sprintf("%s -p '%s' -r -u 'https://%s:%d/api/v1/inventory'",
-        _check_nsc_web_extra_options($c),
+    my $args     = sprintf("%s -p '%s' -r -u '%s://%s:%d/api/v1/inventory'",
+        _check_nsc_web_extra_options($c, $mode),
         $password,
+        $proto,
         ($address || $hostname),
         $port,
     );
@@ -349,7 +357,7 @@ sub get_inventory {
 
 ##########################################################
 sub _extract_checks {
-    my($c, $inventory, $hostname, $password, $fresh, $section) = @_;
+    my($c, $inventory, $hostname, $password, $fresh, $section, $mode) = @_;
     my $checks = [];
 
     # get available modules
@@ -380,9 +388,12 @@ sub _extract_checks {
         if($password ne '' && $password =~ m/^\$.*\$$/mx) {
             $svc_password = $password;
         }
-        my $command = sprintf("check_snclient!%s -p '%s' -u 'https://%s:%s' '%s'",
-                _check_nsc_web_extra_options($c),
+        my $proto = "https";
+        $proto = "http" if($mode && $mode eq 'http');
+        my $command = sprintf("check_snclient!%s -p '%s' -u '%s://%s:%s' '%s'",
+                _check_nsc_web_extra_options($c, $mode),
                 $svc_password,
+                $proto,
                 '$HOSTADDRESS$',
                 '$_HOSTAGENT_PORT$',
                 $chk->{'check'},
@@ -503,10 +514,11 @@ sub get_disabled_config {
 
 ##########################################################
 sub _check_nsc_web_extra_options {
-    my($c) = @_;
-    return(    $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_nsc_web_extra_options'}
-            // $settings->{'check_nsc_web_extra_options'}
-    );
+    my($c, $mode) = @_;
+    my $options = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_nsc_web_extra_options'}
+            // $settings->{'check_nsc_web_extra_options'};
+    $options = $options." -k " if($mode && $mode eq 'insecure');
+    return($options);
 }
 
 ##########################################################

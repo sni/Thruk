@@ -159,6 +159,12 @@
                     <input type="text" name="ip" value="[% agent.ip | html %]" placeholder="will use hostname if empty" class="flex-grow">
                     <button class="js-ip-wzd-button" title="autofill address from hostname ip lookup."><i class="uil uil-lightbulb mr-0"></i></button>
                   </div>
+                  <span class="ml-2 text-right w-14 textTH font-semibold self-center">Mode:</span>
+                  <select name="mode">
+                    <option value="https"[% IF agent.mode == "https" %] selected[% END %]>https</option>
+                    <option value="insecure"[% IF agent.mode == "insecure" %] selected[% END %]>https (no verification)</option>
+                    <option value="http"[% IF agent.mode == "http" %] selected[% END %]>plain http</option>
+                  </select>
                   <span class="ml-2 text-right w-14 textTH font-semibold self-center">Port:</span>
                   <input type="text" name="port" value="[% agent.port | html %]" class="w-36" placeholder="8443">
                 </div>

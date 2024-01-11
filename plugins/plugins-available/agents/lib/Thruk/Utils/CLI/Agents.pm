@@ -28,12 +28,13 @@ Available commands are:
   - rm     | -D   <host> ...  delete existing host(s)
   - reload | -R               reload monitoring core
 
-  -i                interactive mode (available in edit/add mode)
-  --all             show all items   (available in show mode)
-  -P | --password   set password     (available in add mode)
-  -p | --port       set tcp port     (available in add mode)
-       --ip         set ip address   (available in add mode)
-       --section    set section      (available in add mode)
+  -i                interactive mode      (available in edit/add mode)
+  --all             show all items        (available in show mode)
+  -P | --password   set password          (available in add mode)
+  -p | --port       set tcp port          (available in add mode)
+       --ip         set ip address        (available in add mode)
+       --section    set section           (available in add mode)
+  -k | --insecure   skip tls verification (available in add mode)
 
 
 =back
@@ -90,6 +91,7 @@ sub cmd {
         'fresh'        => undef,
         'clear_manual' => undef,
         'section'      => undef,
+        'insecure'     => undef,
     };
     $opt->{'fresh'}        = 1 if Thruk::Base::array_contains('-II',  $commandoptions);
     $opt->{'clear_manual'} = 1 if Thruk::Base::array_contains('-III', $commandoptions);
@@ -113,6 +115,7 @@ sub cmd {
        "D|remove"     => \$opt->{'remove'},
        "ip=s"         => \$opt->{'address'},
        "section=s"    => \$opt->{'section'},
+       "s|insecure=s" => \$opt->{'insecure'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -683,6 +686,10 @@ sub _get_checks {
 
     my $type    = $opt->{'type'} // $vars->{'AGENT'} // Thruk::Utils::Agents::default_agent_type($c);
     $port       = $port // $opt->{'port'} // $vars->{'AGENT_PORT'} // Thruk::Utils::Agents::default_port($type);
+    my $mode    = $vars->{'AGENT_MODE'} // 'https';
+    if($opt->{'insecure'}) {
+        $mode = 'insecure';
+    }
 
     my $data = {
         'type'     => $type,
@@ -690,6 +697,7 @@ sub _get_checks {
         'backend'  => $backend,
         'section'  => $opt->{'section'} // '',
         'password' => $opt->{'password'},
+        'mode'     => $mode,
         'port'     => $port,
         'ip'       => $opt->{'address'} || $hst->{'address'},
     };

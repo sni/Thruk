@@ -92,24 +92,14 @@ sub index {
 sub _process_show {
     my($c) = @_;
 
+    my $info = {};
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                               'custom_variables' => { '~' => 'AGENT .+' },
                                             ],
                                  );
     for my $hst (@{$hosts}) {
         Thruk::Utils::set_allowed_rows_data($hst, 1);
-    }
-    $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'name', 'peer_name']);
-
-    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
-                                         'host_custom_variables' => { '~' => 'AGENT .+' },
-                                         'description' => { '~' => '^(agent version|agent inventory|memory|cpu|disk.*|os version)$' },
-                                        ],
-                                        'extra_columns' => [qw/long_plugin_output/],
-                                 );
-    my $info = {};
-    for my $svc (@{$services}) {
-        my $extra = $info->{$svc->{'host_name'}} // {
+        $info->{$hst->{'name'}} = {
             'version'          => '',
             'full_version'     => '',
             'build'            => '',
@@ -135,6 +125,17 @@ sub _process_show {
             'os_version'       => '',
             'os_arch'          => '',
         };
+    }
+    $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'name', 'peer_name']);
+
+    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                         'host_custom_variables' => { '~' => 'AGENT .+' },
+                                         'description' => { '~' => '^(agent version|agent inventory|memory|cpu|disk.*|os version)$' },
+                                        ],
+                                        'extra_columns' => [qw/long_plugin_output/],
+                                 );
+    for my $svc (@{$services}) {
+        my $extra = $info->{$svc->{'host_name'}};
         if($svc->{'description'} eq 'agent version') {
             if($svc->{'state'} == 0) {
                 my $v = $svc->{'plugin_output'};
@@ -236,6 +237,7 @@ sub _process_new {
         'ip'       => $c->req->parameters->{'ip'}       // '',
         'port'     => $c->req->parameters->{'port'}     // '',
         'password' => $c->req->parameters->{'password'} // $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'} // '',
+        'mode'     => $c->req->parameters->{'mode'}     // 'https',
         'peer_key' => $c->req->parameters->{'backend'}  // $c->stash->{'param_backend'},
         'settings' => {},
     };
@@ -272,6 +274,7 @@ sub _process_edit {
             'section'  => $section // $obj->{'_AGENT_SECTION'} // '',
             'port'     => $obj->{'_AGENT_PORT'}     // '',
             'password' => $obj->{'_AGENT_PASSWORD'} // '',
+            'mode'     => $obj->{'_AGENT_MODE'}     // 'https',
             'peer_key' => $backend,
             'settings' => decode_json($obj->{'_AGENT_CONFIG'} // "{}"),
         };
@@ -313,6 +316,7 @@ sub _process_save {
     my $backend   = $c->req->parameters->{'backend'};
     my $section   = $c->req->parameters->{'section'}  // '';
     my $password  = $c->req->parameters->{'password'} || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
+    my $mode      = $c->req->parameters->{'mode'} // 'https';
     my $port      = $c->req->parameters->{'port'};
     my $ip        = $c->req->parameters->{'ip'};
 
@@ -339,6 +343,7 @@ sub _process_save {
         backend  => $backend,
         section  => $section,
         password => $password,
+        mode     => $mode,
         port     => $port,
         ip       => $ip,
     };
