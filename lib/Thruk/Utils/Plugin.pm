@@ -234,11 +234,13 @@ sub enable_plugin {
         elsif($ENV{'OMD_ROOT'}) {
             if(-d $plugin_enabled_dir.'/../plugins-available/'.$dir) {
                 $plugin_src_dir = '../plugins-available/'.$dir;
+            } elsif(-d $plugin_available_dir.'/../../.git') {
+                # keep
             } else {
                 $plugin_src_dir = '../../../share/thruk/plugins/plugins-available/'.$dir;
             }
         }
-        die($plugin_src_dir." does not exist") unless -d $plugin_enabled_dir.'/'.$plugin_src_dir;
+        die($plugin_src_dir." does not exist") unless -d ($plugin_src_dir =~ m/^\.\./mx ? $plugin_enabled_dir.'/'.$plugin_src_dir : $plugin_src_dir);
         symlink($plugin_src_dir,
                 $plugin_enabled_dir.'/'.$dir)
             or die("cannot create ".$plugin_enabled_dir.'/'.$dir." : ".$!);
