@@ -107,7 +107,11 @@ sub set_dynamic_attributes {
     my $data;
     if($skip_db_access) {
         _debug("using cached user data") if Thruk::Base->verbose;
-        $data = $c->cache->get->{'users'}->{$username} || {};
+        my $cache = $c->cache->get->{'users'};
+        $data = {};
+        if(ref $cache eq 'HASH') {
+            $data = $cache->{$username} || {};
+        }
         if($data->{'contactgroups'} && ref $data->{'contactgroups'} eq 'HASH') {
             $data->{'contactgroups'} = [sort keys %{$data->{'contactgroups'}}];
         }
