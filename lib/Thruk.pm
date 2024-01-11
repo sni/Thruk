@@ -44,6 +44,7 @@ BEGIN {
 use Thruk::Base qw/:all/;
 use Thruk::Config;
 use Thruk::Constants ':add_defaults';
+use Thruk::Controller::error ();
 use Thruk::Utils::Cache ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
@@ -309,6 +310,10 @@ sub _dispatcher {
         } else {
             _debug($begin_err);
         }
+        if(!$c->{'errored'} && !$c->{'rendered'} && !$c->{'detached'}) {
+            Thruk::Controller::error::index($c, 13);
+            $c->{'detached'} = 1;
+        }
         $c->{'errored'} = 1;
     }
     &timing_breakpoint("_dispatcher begin done");
@@ -319,7 +324,6 @@ sub _dispatcher {
     my($route, $routename);
     my $path_info = $c->req->path_info;
     if(!$c->{'errored'} && !$c->{'rendered'} && !$c->{'detached'}) {
-        require Thruk::Controller::error;
         eval {
             my $rc;
             if(($route, $routename) = $thruk->find_route_match($c, $path_info)) {
@@ -553,7 +557,6 @@ sub _check_exit_reason {
     }
 
     my $reason = longmess();
-    my $now    = time();
 
     ## no critic
     if($reason =~ m|Thruk::Utils::CLI::from_local|mx && -t 0 && $sig eq 'INT') {
@@ -568,7 +571,7 @@ sub _check_exit_reason {
         return;
     }
 
-    my $request_runtime = $now - $Thruk::Globals::c->stash->{'time_begin'}->[0];
+    my $request_runtime = tv_interval($Thruk::Globals::c->stash->{'time_begin'});
 
     local $| = 1;
     my $c = $Thruk::Globals::c;

@@ -62,8 +62,14 @@ sub index {
 
     $c->stash->{no_tt_trim} = 1;
 
-    Thruk::Action::AddDefaults::begin($c) unless $c->stash->{'root_begin'};
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
+    eval {
+        Thruk::Action::AddDefaults::begin($c) unless $c->stash->{'root_begin'};
+    };
+    _error("error begin failed: ".$@) if $@;
+    eval {
+        Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless defined $c->stash->{'defaults_added'};
+    };
+    _error("error add_defaults failed: ".$@) if $@;
 
     $c->stash->{errorDetails} = '' unless $c->stash->{errorDetails};
 
