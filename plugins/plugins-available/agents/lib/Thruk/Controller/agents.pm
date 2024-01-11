@@ -192,7 +192,7 @@ sub _process_show {
                 }
             }
         }
-        if($svc->{'description'} eq 'os version') {
+        if($svc->{'description'} eq 'os version' && $svc->{'state'} == 0) {
             if($svc->{'plugin_output'} =~ m/\(arch:(.*?)\)/mx) {
                 my $arch = Thruk::Base::trim_whitespace("$1");
                 $arch = "x86"     if $arch eq "amd64";

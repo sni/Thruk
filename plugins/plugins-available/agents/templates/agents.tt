@@ -70,6 +70,7 @@
               <div class='text-center badge [% state %]'[% IF output != "" %] title="[% output | html %]"[% END %]>[% state %]</div>
             </td>
             <td>[% peer_name(h) | html %]</td>
+            [% IF state == "OK" %]
             <td>
               <div class="flexrow flex-nowrap gap-x-1">
                 <div class="w-5 h-5 m-0 p-0 min-w-fit"><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | html %]" alt="[% agent.type | html %]" width=25 height=25></div>
@@ -114,6 +115,11 @@
                 </div>
               [% END %]
             </td>
+            [% ELSE %]
+            <td colspan="7">
+              [% info.$hostname.plugin_output.replace("^" _ state _ "(: | - )", "") %]
+            </td>
+            [% END %]
             <td>
               <div class="flexrow flex-nowrap gap-x-2">
                 <form action="cmd.cgi" method="POST">
