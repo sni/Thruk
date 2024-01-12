@@ -31,7 +31,7 @@ sub get_checks {
 
     my $disabled_config = Thruk::Agents::SNClient::get_disabled_config($c, 'mount', {
             'fstype' => '= cdfs',
-            'mount'  => '~ ^(/var/lib/docker|/Volumes/com.apple.TimeMachine.localsnapshots|/private/tmp/)',
+            'mount'  => '~ ^(/var/lib/docker|/Volumes/com.apple.TimeMachine.localsnapshots|/Volumes/.timemachine|/private/tmp/)',
     });
     for my $mount (@{$inventory->{'mount'}}) {
         $mount->{'fstype'} = lc($mount->{'fstype'} // '');
@@ -42,7 +42,7 @@ sub get_checks {
             'args'     => { "mount" => $mount->{'mount'}, "options" => $mount->{'options'}, "fstype" => $mount->{'fstype'} },
             'parent'   => 'agent version',
             'info'     => Thruk::Agents::SNClient::make_info($mount),
-            'disabled' => Thruk::Utils::Agents::check_disable($mount, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, 'mount'),
+            'disabled' => Thruk::Utils::Agents::check_disable($mount, $disabled_config, 'mount'),
             'noperf'   => 1,
         };
     }

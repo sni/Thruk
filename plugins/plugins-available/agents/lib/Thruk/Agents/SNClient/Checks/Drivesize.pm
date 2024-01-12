@@ -29,6 +29,13 @@ sub get_checks {
 
     return unless $inventory->{'drivesize'};
 
+    my $disabled_config = Thruk::Agents::SNClient::get_disabled_config($c, 'mount', {
+            'fstype'     => '= cdfs',
+            'mount'      => '~ ^(/var/lib/docker|/Volumes/com.apple.TimeMachine.localsnapshots|/Volumes/.timemachine|/private/tmp/)',
+            'mounted'    => "0",
+            'size_bytes' => "0",
+    });
+
     for my $drive (@{$inventory->{'drivesize'}}) {
         my $prefix = "disk";
         $drive->{'fstype'} = lc($drive->{'fstype'} // '');
@@ -53,10 +60,10 @@ sub get_checks {
                 'id'       => 'df.'.Thruk::Utils::Agents::to_id($drive->{'drive_or_id'}),
                 'name'     => $prefix.' '.$drive->{'drive_or_id'},
                 'check'    => 'check_drivesize',
-                'args'     => { "drive" => $drive->{'drive_or_id'} },
+                'args'     => [ 'drive' => $drive->{'drive_or_id'}, 'show-all' ],
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($drive),
-                'disabled' => !$drive->{'drive'} ? 'drive has no name' : Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['drivesize', $prefix]),
+                'disabled' => !$drive->{'drive'} ? 'drive has no name' : Thruk::Utils::Agents::check_disable($drive, $disabled_config, ['drivesize', $prefix]),
             };
         }
     }
