@@ -384,8 +384,33 @@ return basic config hash and sets environment
 sub set_config_env {
     my @files = @_;
 
+    my $conf = get_config_env(\@files);
+
+    ## no critic
+    if($conf->{'thruk_verbose'}) {
+        if(!$ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $conf->{'thruk_verbose'}) {
+            $ENV{'THRUK_VERBOSE'} = $conf->{'thruk_verbose'};
+        }
+    }
+    ## use critic
+
+    $config = $conf;
+
+    return($conf);
+}
+
+######################################
+
+=head2 get_config_env
+
+like set_config_env, but return config only
+
+=cut
+sub get_config_env {
+    my($files) = @_;
+
     my $conf    = Thruk::Utils::IO::dclone(get_base_config());
-    my $configs = _load_config_files(\@files);
+    my $configs = _load_config_files($files // []);
 
     ###################################################
     # merge files into defaults, use backends from base config unless specified in local configs
@@ -400,16 +425,8 @@ sub set_config_env {
     }
     $conf->{'Thruk::Backend'} = $base_backends unless($conf->{'Thruk::Backend'} && scalar keys %{$conf->{'Thruk::Backend'}} > 0);
 
-    ## no critic
-    if($conf->{'thruk_verbose'}) {
-        if(!$ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $conf->{'thruk_verbose'}) {
-            $ENV{'THRUK_VERBOSE'} = $conf->{'thruk_verbose'};
-        }
-    }
-    ## use critic
-
     $conf = set_default_config($conf);
-    $config = $conf;
+
     return($conf);
 }
 

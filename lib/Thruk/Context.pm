@@ -819,6 +819,28 @@ sub clone_user_config {
     return;
 }
 
+######################################
+
+=head2 reread_config
+
+$c->reread_config()
+
+replace $c->config with a newly parsed config
+
+=cut
+sub reread_config {
+    my($c) = @_;
+
+    $c->{'config'} = Thruk::Config::get_config_env();
+
+    # apply config defaults again
+    Thruk::Action::AddDefaults::begin($c);
+
+    return;
+}
+
+######################################
+
 =head2 log
 
 $c->log->...
