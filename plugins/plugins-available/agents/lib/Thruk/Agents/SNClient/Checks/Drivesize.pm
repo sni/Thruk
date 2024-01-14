@@ -29,9 +29,9 @@ sub get_checks {
 
     return unless $inventory->{'drivesize'};
 
-    my $disabled_config = Thruk::Agents::SNClient::get_disabled_config($c, 'mount', {
+    my $disabled_config = Thruk::Agents::SNClient::get_disabled_config($c, 'drivesize', {
             'fstype'     => '= cdfs',
-            'mount'      => '~ ^(/var/lib/docker|/Volumes/com.apple.TimeMachine.localsnapshots|/Volumes/.timemachine|/private/tmp/)',
+            'drive'      => '~ ^(/sys|/run|/dev|/proc|/var/lib/docker|/Volumes/com.apple.TimeMachine.localsnapshots|/Volumes/.timemachine|/private/tmp/)',
             'mounted'    => "0",
             'size_bytes' => "0",
     });

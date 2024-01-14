@@ -59,6 +59,9 @@ sub index {
 
     Thruk::Utils::ssi_include($c);
 
+    # update config
+    $c->reread_config();
+
     my $action = $c->req->parameters->{'action'} || 'show';
     $c->stash->{action} = $action;
 

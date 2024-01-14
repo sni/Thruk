@@ -31,7 +31,7 @@ sub get_checks {
 
     my $disabled_config = Thruk::Agents::SNClient::get_disabled_config($c, 'mount', {
             'fstype' => '= cdfs',
-            'mount'  => '~ ^(/var/lib/docker|/Volumes/com.apple.TimeMachine.localsnapshots|/Volumes/.timemachine|/private/tmp/)',
+            'mount'  => '~ ^(/sys/run|/dev|/proc|/var/lib/docker|/Volumes/com.apple.TimeMachine.localsnapshots|/Volumes/.timemachine|/private/tmp/)',
     });
     for my $mount (@{$inventory->{'mount'}}) {
         $mount->{'fstype'} = lc($mount->{'fstype'} // '');

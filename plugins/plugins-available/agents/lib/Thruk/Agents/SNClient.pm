@@ -163,7 +163,8 @@ sub get_config_objects {
         if($type eq 'off') {
             push @remove, $svc if $svc;
             # only save disabled information if it was disabled manually, not when disabled by config
-            if(!$chk->{'disabled'}) {
+            # and only if it wasn't orphanded
+            if(!$chk->{'disabled'} && $chk->{'exists'} ne 'obsolete') {
                 push @{$settings->{'disabled'}}, $id;
             }
             next;
@@ -178,6 +179,7 @@ sub get_config_objects {
                 # these are obsolete services, just keep them as is
                 next;
             }
+            $settings->{'disabled'} = Thruk::Base::array_remove($settings->{'disabled'}, $id);
             $svc->{'conf'} = $chk->{'svc_conf'};
             $svc->{'conf'}->{'use'} = \@templates;
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
@@ -203,6 +205,9 @@ sub get_config_objects {
     my $json = Cpanel::JSON::XS->new->canonical;
     if($settings->{'disabled'}) {
         $settings->{'disabled'} = Thruk::Base::array_uniq($settings->{'disabled'});
+        if(scalar @{$settings->{'disabled'}} == 0) {
+            delete $settings->{'disabled'};
+        }
     }
     $settings = $json->encode($settings);
     if($settings ne ($hostdata->{'_AGENT_CONFIG'}//"")) {
