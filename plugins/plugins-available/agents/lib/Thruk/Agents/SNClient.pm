@@ -94,6 +94,7 @@ sub get_config_objects {
     } else {
         $hostobj = $objects->[0];
         $hostobj->{'_prev_conf'} = Thruk::Utils::dclone($hostobj->{'conf'});
+        $password = $password || $hostobj->{'conf'}->{'_AGENT_PASSWORD'};
     }
     $hostobj->{'_filename'} = $filename;
     $hostobj->{'conf'}->{'address'} = $ip if $ip;

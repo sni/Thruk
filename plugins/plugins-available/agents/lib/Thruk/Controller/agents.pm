@@ -318,7 +318,7 @@ sub _process_save {
     my $hostname  = $c->req->parameters->{'hostname'};
     my $backend   = $c->req->parameters->{'backend'};
     my $section   = $c->req->parameters->{'section'}  // '';
-    my $password  = $c->req->parameters->{'password'} || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
+    my $password  = $c->req->parameters->{'password'} // '';
     my $mode      = $c->req->parameters->{'mode'} // 'https';
     my $port      = $c->req->parameters->{'port'};
     my $ip        = $c->req->parameters->{'ip'};
