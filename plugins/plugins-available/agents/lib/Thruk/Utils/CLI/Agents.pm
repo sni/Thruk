@@ -327,7 +327,7 @@ sub _run_add {
     $opt->{'fresh'} = 1 if $opt->{'clear_manual'};
 
     # expand "ALL" hosts
-    if($opt->{'fresh'} && $hosts->[0] eq 'ALL') {
+    if($hosts->[0] eq 'ALL') {
         my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                                 'custom_variables' => { '~' => 'AGENT .+' },
                                                 ],
