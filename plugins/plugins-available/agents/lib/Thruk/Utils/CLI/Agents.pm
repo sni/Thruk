@@ -349,7 +349,7 @@ sub _run_add {
 
     for my $hostname (@{$hosts}) {
         my($out, $rc) = _run_add_host($c, $hostname, $opt, $edit_only);
-        print($out."\n");
+        print(Thruk::Base::trim_whitespace($out)."\n");
         if($rc > 0) {
             return("", $rc);
         }
@@ -383,7 +383,7 @@ sub _run_add_host {
         $opt->{'interactive'} = 1;
     }
     if(!$checks) {
-        _error("something went wrong");
+        _error("%s: something went wrong", $hostname);
         return("", 3);
     }
 
@@ -502,7 +502,7 @@ sub _run_add_host {
             }
         }
         if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
-            _error("unable to save changes");
+            _error("%s: unable to save changes", $hostname);
             return("", 2);
         }
     }
@@ -520,7 +520,7 @@ sub _run_add_host {
         }
     }
 
-    return(sprintf("no changes made.\n"), 0) if scalar @result == 0;
+    return(sprintf("%s: no changes made.\n", $hostname), 0) if scalar @result == 0;
 
     # build result table
     my $out = Thruk::Utils::text_table(
