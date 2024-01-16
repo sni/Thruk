@@ -1,4 +1,4 @@
-## Agents Thruk Plugin
+# Agents Thruk Plugin
 
 Agent configuration for SNClient+ agents in Naemon.
 
@@ -113,6 +113,7 @@ For example:
         </proc>
 
         # set default args (if multiple args match, the last one overrides previous ones)
+        # block can be used multiple times
         <args>
           value = warn='load > 95' crit='load > 100'
           match = cpu # regex match on service name
@@ -121,8 +122,29 @@ For example:
           #section ~ test # apply this argument only to sections containing "test"
         </args>
 
+        # set extra host attributes (if multiple blocks match, each is applied in order)
+        # block can be used multiple times
+        <extra_host_opts>
+          match = hostname # regex match on host name
+          #section ~ test # apply this attributes only to sections containing "test"
+
+          # naemon host attributes will be added to the generated host configuration
+          #first_notification_delay = 30
+          # other attributes...
+        </extra_host_opts>
+
+        # set extra service attributes (if multiple blocks match, each is applied in order)
+        # block can be used multiple times
+        <extra_service_opts>
+          match = service description # regex match on service description
+          # restrict to specific hosts (regular expression)
+          #host = ANY
+          #section ~ test # apply this attributes only to sections containing "test"
+
+          # naemon service attributes will be added to the generated host configuration
+          first_notification_delay = 30
+          # other attributes...
+        </extra_service_opts>
+
       </snclient>
     </Component>
-
-You have to reload the apache to activate changes
-from the `thruk_local.d` folder.
