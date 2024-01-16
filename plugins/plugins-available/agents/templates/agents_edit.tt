@@ -225,16 +225,24 @@
 <!--
 function scan_callback(form, success, data, textStatus, jqXHR) {
   btn = jQuery(form).find("DIV.spinner").parents("BUTTON");
-  if(!success || (data && data.ok && data.ok == 0)) {
+  if(!success || (data && data.ok === 0)) {
+    var message = "unknown error";
+    if(data && data.message) {
+      message = data.message;
+    }
+    if(data && data.err) {
+      message = data.err;
+    }
     if(!showMessageFromCookie()) {
-      if(data && data.message) {
-        thruk_message(data.ok, data.message);
-      }
+      thruk_message(1, message);
     }
     if(btn) {
-      setBtnError(btn[0], "scan failed: "+(data ? data.message : 'unknown error'));
+      setBtnError(btn[0], "scan failed: "+message);
     }
     var msg = getXHRerrorMsg("", textStatus, jqXHR);
+    if(success) {
+      msg = message;
+    }
     jQuery("#checksTableContent").html("<div class='text-center textHINT mt-5'>"+msg+"</div>");
     return;
   }
