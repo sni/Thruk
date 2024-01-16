@@ -118,7 +118,7 @@ For example:
           match = cpu # regex match on service name
           # restrict to specific hosts (regular expression)
           #host = ANY
-          #section ~ test # apply this process check only to sections containing "test"
+          #section ~ test # apply this argument only to sections containing "test"
         </args>
 
       </snclient>
