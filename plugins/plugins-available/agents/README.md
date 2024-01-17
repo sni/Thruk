@@ -112,39 +112,34 @@ For example:
           name  = httpd
         </proc>
 
-        # set default args (if multiple args match, the last one overrides previous ones)
+        # set extra service attributes (if multiple blocks match, each is applied in order and overwrites previous values)
         # block can be used multiple times
-        <args>
-          value = warn='load > 95' crit='load > 100'
-          match = cpu # regex match on service name
+        <extra_service_opts>
+          service = ^cpu$ # regex match on service description
           # restrict to specific hosts (regular expression)
           #host = ANY
-          #section ~ test # apply this argument only to sections containing "test"
-        </args>
+          #section ~ test # apply this attributes only to sections containing "test"
+
+          # can be used to append extra arguments to the command line
+          #args = warn='load > 95' crit='load > 100'
+
+          # naemon service attributes will be added to the generated host configuration
+          first_notification_delay = 30
+          notification_options     = w,c
+          # other naemon service attributes...
+        </extra_service_opts>
 
         # set extra host attributes (if multiple blocks match, each is applied in order)
         # block can be used multiple times
         <extra_host_opts>
-          match = hostname # regex match on host name
+          host = ^hostname$ # regex match on host name
           #section ~ test # apply this attributes only to sections containing "test"
 
           # naemon host attributes will be added to the generated host configuration
           #first_notification_delay = 30
-          # other attributes...
+          #check_command = check-host-alive!$HOSTADDRESS$
+          # other naemon host attributes...
         </extra_host_opts>
-
-        # set extra service attributes (if multiple blocks match, each is applied in order)
-        # block can be used multiple times
-        <extra_service_opts>
-          match = service description # regex match on service description
-          # restrict to specific hosts (regular expression)
-          #host = ANY
-          #section ~ test # apply this attributes only to sections containing "test"
-
-          # naemon service attributes will be added to the generated host configuration
-          first_notification_delay = 30
-          # other attributes...
-        </extra_service_opts>
 
       </snclient>
     </Component>
