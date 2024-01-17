@@ -59,9 +59,9 @@ sub index {
     }
     elsif(!$c->check_user_roles("admin")) {
         if(    !defined $c->db()
-            || !defined $c->db->{'backends'}
-            || ref $c->db->{'backends'} ne 'ARRAY'
-            || scalar @{$c->db->{'backends'}} == 0 ) {
+            || !defined $c->db->peer_order()
+            || ref $c->db->peer_order ne 'ARRAY'
+            || scalar @{$c->db->peer_order} == 0 ) {
             # no backends configured or thruk config not possible
             if($c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'}) {
                 return $c->detach("/error/index/14");
