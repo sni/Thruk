@@ -205,6 +205,7 @@ sub get_config_objects {
                 for my $key (sort keys %{$ex}) {
                     next if $key eq 'host';
                     next if $key eq 'match';
+                    next if $key eq 'service';
                     next if $key eq 'section';
                     next if $key eq 'host_name';
                     next if $key eq 'args';
