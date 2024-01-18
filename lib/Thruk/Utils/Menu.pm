@@ -521,7 +521,7 @@ sub _get_section_by_name {
     my($name, $create) = @_;
 
     for my $section (@{$Thruk::Utils::Menu::navigation}) {
-        return $section if $section->{'name'} eq $name;
+        return $section if ($section->{'name'} && $section->{'name'} eq $name);
     }
 
     if($create) {
@@ -550,9 +550,9 @@ returns a link by name
 sub _get_sublink_by_name {
     my $section = shift;
     my $name    = shift;
-    next unless defined $section->{'links'};
+    return unless ($section && defined $section->{'links'} && $name);
     for my $sublink (@{$section->{'links'}}) {
-        if($sublink->{'name'} eq $name) {
+        if(($sublink->{'name'}//'') eq $name) {
             return($sublink);
         }
     }
