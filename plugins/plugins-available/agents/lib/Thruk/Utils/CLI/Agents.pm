@@ -115,10 +115,12 @@ sub cmd {
        "D|remove"     => \$opt->{'remove'},
        "ip=s"         => \$opt->{'address'},
        "section=s"    => \$opt->{'section'},
-       "s|insecure=s" => \$opt->{'insecure'},
+       "k|insecure"   => \$opt->{'insecure'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
+
+    $opt->{'insecure'} = 1 if $global_options->{'insecure'};
 
     my $action;
     if($opt->{'list'})         { $action = "list"; }
