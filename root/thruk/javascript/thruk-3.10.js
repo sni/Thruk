@@ -2950,11 +2950,11 @@ function is_shift_pressed(evt) {
 
 /* moves element from one select to another */
 function data_select_move(from, to, skip_sort) {
-    var from_sel = document.getElementsByName(from);
+    var from_sel = jQuery("SELECT[name='"+from+"']");
     if(!from_sel || from_sel.length == 0) {
         if(thruk_debug_js) { alert("ERROR: no element in data_select_move() for: " + from ); }
     }
-    var to_sel = document.getElementsByName(to);
+    var to_sel = jQuery("SELECT[name='"+to+"']");
     if(!to_sel || to_sel.length == 0) {
         if(thruk_debug_js) { alert("ERROR: no element in data_select_move() for: " + to ); }
     }
