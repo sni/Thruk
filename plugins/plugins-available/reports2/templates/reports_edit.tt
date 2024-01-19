@@ -2,8 +2,8 @@
 [% PROCESS _message.tt %]
 [% USE date %]
 
-<div class="flexrow 2xl:justify-between h-full">
-  [% PROCESS _infobox.tt %]
+<div class="flexrow h-full">
+  [% PROCESS _infobox.tt extra_classes="2xl:block hidden order-2" %]
 
   <form action="reports2.cgi" method="POST" class="w-[800px] h-full" onsubmit="setFormBtnSpinner(this)">
     <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
@@ -155,8 +155,6 @@
       </div>
     </div>
   </form>
-
-  <div class="w-[350px] hidden xl:block"></div>
 </div>
 
 
