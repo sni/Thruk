@@ -267,7 +267,7 @@
 <!--
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_service_columns %]";
-  function initStatusTable() {
+  function initStatusTableServices() {
     [% IF has_columns %]
       updateStatusColumns("[% paneprefix %]", false);
     [% END %]
@@ -277,7 +277,7 @@
     [% END %]
   }
   jQuery(document).ready(function() {
-    initStatusTable();
+    initStatusTableServices();
   });
 -->
 </script>

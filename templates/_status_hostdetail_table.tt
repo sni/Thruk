@@ -232,7 +232,7 @@
 <!--
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_host_columns %]";
-  function initStatusTable() {
+  function initStatusTableHosts() {
     [% IF has_columns %]
     updateStatusColumns("[% paneprefix %]", false);
     [% END %]
@@ -242,7 +242,7 @@
     [% END %]
   }
   jQuery(document).ready(function() {
-    initStatusTable();
+    initStatusTableHosts();
   });
 -->
 </script>

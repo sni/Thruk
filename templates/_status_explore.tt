@@ -49,7 +49,12 @@
         return;
       } else {
         init_page();
-        initStatusTable();
+        if(window.initStatusTableHosts) {
+          initStatusTableHosts();
+        }
+        if(window.initStatusTableServices) {
+          initStatusTableServices();
+        }
       }
     });
   }
