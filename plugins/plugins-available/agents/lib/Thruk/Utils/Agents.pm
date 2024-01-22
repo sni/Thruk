@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
+use File::Copy qw/move/;
 
 use Monitoring::Config::Object ();
 use Thruk::Controller::conf ();
@@ -713,6 +714,57 @@ sub sort_config_objects {
     }
 
     return;
+}
+
+##########################################################
+
+=head2 migrate_hostname
+
+    migrate_hostname($c, $old, $new, $section)
+
+rename agent host
+
+=cut
+sub migrate_hostname {
+    my($c, $old_host, $hostname, $section) = @_;
+    # hostname has changed
+    if(!$old_host || $hostname eq $old_host) {
+        return;
+    }
+
+    # move objects file
+    my($hostobj, $file);
+    my $objects  = $c->{'obj_db'}->get_objects_by_name('host', $old_host);
+    if($objects && scalar @{$objects} == 1) {
+        $hostobj = $objects->[0];
+    } else {
+        return;
+    }
+
+    my $services = get_host_agent_services($c, $hostobj);
+
+    my $filename = $section ? sprintf('agents/%s/%s.cfg', $section, $hostname) : sprintf('agents/%s.cfg', $hostname);
+    $file = Thruk::Controller::conf::get_context_file($c, $hostobj, $filename);
+    $hostobj->{'conf'}->{'host_name'} = $hostname;
+    $hostobj->{'conf'}->{'alias'}     = $hostname;
+    $c->{'obj_db'}->update_object($hostobj, $hostobj->{'conf'}, $hostobj->{'comments'}, 1);
+    $c->{'obj_db'}->move_object($hostobj, $file, 0);
+
+    # move services
+    for my $descr (sort keys %{$services}) {
+        my $svc = $services->{$descr};
+        $svc->{'conf'}->{'host_name'} = $hostname;
+        $c->{'obj_db'}->update_object($svc, $svc->{'conf'}, $svc->{'comments'}, 1);
+        $c->{'obj_db'}->move_object($svc, $file, 0);
+    }
+
+    # rename data file
+    my $df1 = $c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json';
+    my $df2 = $c->config->{'tmp_path'}.'/agents/hosts/'.$old_host.'.json';
+    if(-f $df2 && !-f $df1) {
+        move($df2, $df1);
+    }
+    unlink($df2);
 }
 
 ##########################################################

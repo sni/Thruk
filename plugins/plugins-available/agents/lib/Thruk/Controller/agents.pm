@@ -316,6 +316,7 @@ sub _process_save {
 
     my $type      = lc($c->req->parameters->{'type'});
     my $hostname  = $c->req->parameters->{'hostname'};
+    my $old_host  = $c->req->parameters->{'old_hostname'} || $hostname;
     my $backend   = $c->req->parameters->{'backend'};
     my $section   = $c->req->parameters->{'section'}  // '';
     my $password  = $c->req->parameters->{'password'} // '';
@@ -342,7 +343,7 @@ sub _process_save {
     return unless Thruk::Utils::Agents::set_object_model($c, $backend);
 
     my $data = {
-        hostname => $hostname,
+        hostname => $old_host,
         backend  => $backend,
         section  => $section,
         password => $password,
@@ -359,7 +360,7 @@ sub _process_save {
         my $oldfile = $obj->{'file'};
         if(defined $file && $file->{'readonly'}) {
             Thruk::Utils::set_message( $c, 'fail_message', sprintf("cannot write to %s, file is marked readonly", $file->{'display'}));
-            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$old_host."&backend=".$backend);
         }
         if(!$oldfile) {
             $obj->set_file($file);
@@ -369,11 +370,16 @@ sub _process_save {
         }
         if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
             Thruk::Utils::set_message( $c, 'fail_message', "unable to save changes");
-            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$old_host."&backend=".$backend);
         }
     }
     for my $obj (@{$remove}) {
         $c->{'obj_db'}->delete_object($obj);
+    }
+
+    # hostname has changed
+    if($old_host && $hostname ne $old_host) {
+        Thruk::Utils::Agents::migrate_hostname($c, $old_host, $hostname, $section);
     }
 
     Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
