@@ -23,7 +23,6 @@ Support
   * Mailing list on [Google Groups](https://groups.google.com/group/thruk).
   * File a Bug in [GitHub Issues](https://github.com/sni/Thruk/issues).
   * Report a Security Advisory [GitHub Security](https://github.com/sni/Thruk/security).
-  * [Tweet](https://twitter.com/ThrukGUI/) us with other feedback.
   * Chat with developers on [IRC Libera #thruk](irc://irc.libera.chat/thruk) ([Webchat](https://web.libera.chat/?nick=Guest?#thruk)).
 
 
