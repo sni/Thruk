@@ -439,7 +439,7 @@ sub _extract_checks {
         );
         my $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_interval'} // 1;
         if($chk->{'check'} eq 'inventory') {
-            $command  = sprintf("check_thruk_agents!agents check inventory '%s'", $hostname);
+            $command  = 'check_thruk_agents!agents check inventory \'$HOSTNAME$\'';
             $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
         }
         if($chk->{'args'}) {

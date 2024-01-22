@@ -95,6 +95,7 @@ sub index {
 sub _process_show {
     my($c) = @_;
 
+    $c->stash->{has_sections} = 0;
     my $info = {};
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                               'custom_variables' => { '~' => 'AGENT .+' },
@@ -128,6 +129,9 @@ sub _process_show {
             'os_version'       => '',
             'os_arch'          => '',
         };
+        if($hst->{'_AGENT_SECTION'}) {
+            $c->stash->{has_sections} = 1;
+        }
     }
     $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'name', 'peer_name']);
 

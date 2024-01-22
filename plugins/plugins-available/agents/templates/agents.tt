@@ -28,18 +28,20 @@
     <table class="mainTable js-striped" id="agentTable">
       <thead>
         <tr>
-          <th class="w-20">Section</th>
+          [% IF has_sections %]
+            <th class="w-20">Section</th>
+          [% END %]
           <th class="">Hostname</th>
           <th class="w-20 text-center">Status</th>
           [% IF num_backends > 1 %]
-          <th class="w-20">Site</th>
+            <th class="w-20">Site</th>
           [% END %]
           <th class="w-24">Version</th>
-          <th class="w-24">OS</th>
+          <th class="">OS</th>
           <th class="w-10">Arch</th>
-          <th class="w-24">CPU</th>
-          <th class="w-24">Memory</th>
-          <th class="w-24">Disk</th>
+          <th class="w-20">CPU</th>
+          <th class="w-20">Memory</th>
+          <th class="w-20">Disk</th>
           <th class="w-24">Checks</th>
           <th class="w-32">
             <div class="flexrow flex-nowrap gap-x-1 justify-between">
@@ -53,8 +55,10 @@
       <tbody class="rowhover">
         [% FOREACH h = data; agent = build_agent(h); hostname = h.name %]
           <tr id="agent_row_[% name2id(h.peer_key) | html %]_[% name2id(hostname) | html %]">
-            <td class="js-agent-row">[% agent.section %]</td>
-            <td>
+            [% IF has_sections %]
+              <td>[% agent.section %]</td>
+            [% END %]
+            <td class="text-ellipsis overflow-hidden max-w-0 js-agent-row">
               <div class="flexrow flex-nowrap gap-x-1 justify-between">
                 <a class="link" href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]" title="edit this host">[% h.name | html %]</a>
                 <a href="status.cgi?host=[% h.name | uri %]" title="view service details for this host"><i class="fa-solid fa-bars"></i></a>
@@ -72,7 +76,7 @@
               <div class='text-center badge [% state %]'[% IF output != "" %] title="[% output | html %]"[% END %]>[% state %]</div>
             </td>
             [% IF num_backends > 1 %]
-            <td>[% peer_name(h) | html %]</td>
+              <td>[% peer_name(h) | html %]</td>
             [% END %]
             [% IF state == "OK" %]
             <td>
