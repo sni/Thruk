@@ -145,7 +145,7 @@
               <th>Hostname</th>
               <td>
                 <div class="flexrow flex-nowrap gap-x-1">
-                  <input type="text" name="hostname" value="[% IF agent.hostname != 'new' %][% agent.hostname | html %][% END %]" class="flex-grow" required placeholder="enter existing or new hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', emptymsg:'create new host', autosubmit:false })">
+                  <input type="text" name="hostname" value="[% IF agent.hostname != 'new' %][% agent.hostname | html %][% END %]" class="flex-grow" required placeholder="enter existing or new hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', emptymsg:'[% IF agent.hostname != 'new' %]rename this host[% ELSE %]create new host[% END %]', autosubmit:false })">
                   <span class="ml-2 text-right w-14 textTH font-semibold self-center">Section:</span>
                   <input type="text" name="section" value="[% agent.section | html %]" class="w-36" onfocus="this.click()" onclick="ajax_search.init(this, 'section', { url: 'agents.cgi?action=json&amp;type=section', emptymsg:'create new section', autosubmit:false })">
                 </div>
