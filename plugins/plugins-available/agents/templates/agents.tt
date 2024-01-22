@@ -31,7 +31,9 @@
           <th class="w-20">Section</th>
           <th class="">Hostname</th>
           <th class="w-20 text-center">Status</th>
+          [% IF num_backends > 1 %]
           <th class="w-20">Site</th>
+          [% END %]
           <th class="w-24">Version</th>
           <th class="w-24">OS</th>
           <th class="w-10">Arch</th>
@@ -69,7 +71,9 @@
               [% END %]
               <div class='text-center badge [% state %]'[% IF output != "" %] title="[% output | html %]"[% END %]>[% state %]</div>
             </td>
+            [% IF num_backends > 1 %]
             <td>[% peer_name(h) | html %]</td>
+            [% END %]
             [% IF state == "OK" %]
             <td>
               <div class="flexrow flex-nowrap gap-x-1">
@@ -77,8 +81,8 @@
                 [% IF info.exists(hostname) %]<div class="w-full h-full" title="[% info.$hostname.full_version | html %]">[% info.$hostname.version | html %]</div>[% END %]
               </div>
             </td>
-            <td>
-              <span title="[% info.$hostname.os_version_full | html %]">[% info.$hostname.os_version | html %]</span>
+            <td title="[% info.$hostname.os_version_full | html %]" class="text-ellipsis overflow-hidden max-w-0">
+              [% info.$hostname.os_version | html %]
             </td>
             <td>[% info.$hostname.os_arch %]</td>
             <td class='align-top relative'>
