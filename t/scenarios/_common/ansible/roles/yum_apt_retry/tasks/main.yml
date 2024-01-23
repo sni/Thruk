@@ -1,6 +1,11 @@
 ---
 - name: "package yum/apt retry installer: {{ package }}"
-  shell: "if test -f /usr/bin/apt; then apt install -y {{ package | join(' ') }}; else yum install -y {{ package | join(' ') }}; fi"
+  shell: |
+      if test -f /usr/bin/apt; then
+        apt-get install -y {{ package | join(' ') }} {{ deb | join(' ') }}
+      else
+        yum install -y {{ package | join(' ') }} {{ rpm | join(' ') }}
+      fi
   register: install_result
   ignore_errors: yes
   failed_when: install_result.rc != 0

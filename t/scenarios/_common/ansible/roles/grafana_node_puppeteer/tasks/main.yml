@@ -5,5 +5,8 @@
     package:
       - npm
       - chromium
+    rpm:
       - libxshmfence
+    deb:
+      - libxshmfence1
 - shell: "sudo su - {{ site }} -c 'npm i puppeteer'"

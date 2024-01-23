@@ -3,11 +3,12 @@
     name: yum_apt_retry
   vars:
     package:
+      - diffutils
+      - expect  # contains unbuffer
+    rpm:
       - perl-Test-Harness
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
-      - diffutils
-      - expect  # contains unbuffer
 - lineinfile:
     path: /etc/locale.conf
     regexp: '^LANG='

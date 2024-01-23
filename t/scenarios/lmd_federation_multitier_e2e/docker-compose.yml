@@ -49,7 +49,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 1000M
 
   tier1c:
     build: tier1c/
@@ -71,7 +71,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 600M
+          memory: 1000M
 
   tier1d:
     build: tier1d/
@@ -93,7 +93,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 1000M
 
 
   tier2a:
@@ -113,7 +113,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 500M
+          memory: 1000M
 
   tier2b:
     build: tier2b/
@@ -132,7 +132,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 1000M
 
   tier2c:
     build: tier2c/
@@ -150,7 +150,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 600M
+          memory: 1000M
 
   tier2d:
     build: tier2d/
@@ -169,7 +169,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 1000M
 
   tier2e:
     build: tier2e/
@@ -188,7 +188,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 1000M
 
   tier3a:
     build: tier3a/
@@ -206,7 +206,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 1000M
 
   tier3b:
     build: tier3b/
@@ -224,7 +224,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 600M
+          memory: 1000M
 
   tier3c:
     build: tier3c/
@@ -242,4 +242,4 @@ services:
     deploy:
       resources:
         limits:
-          memory: 300M
+          memory: 1000M

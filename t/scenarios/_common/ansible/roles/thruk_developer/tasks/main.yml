@@ -2,10 +2,13 @@
   include_role:
     name: yum_apt_retry
   vars:
-    package:
+    rpm:
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
       - git-core
+    deb:
+      - git
+    package:
       - make
 
 - stat: path=/usr/lib/locale/en_US.utf8

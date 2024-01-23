@@ -2,7 +2,7 @@
   include_role:
     name: yum_apt_retry
   vars:
-    package:
+    rpm:
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
       - perl-File-Which
