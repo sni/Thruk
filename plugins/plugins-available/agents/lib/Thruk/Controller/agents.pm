@@ -109,6 +109,7 @@ sub _process_show {
             'build'            => '',
             'state'            => '',
             'plugin_output'    => '',
+            'last_state_change'=> '',
             'has_been_checked' => '',
             'inv_state'        => '',
             'inv_out'          => '',
@@ -150,10 +151,11 @@ sub _process_show {
                 $v =~ s/\s*\(.*\)//gmx;
                 $extra->{'version'} = $v;
             }
-            $extra->{'full_version'}     = $svc->{'plugin_output'};
-            $extra->{'state'}            = $svc->{'state'};
-            $extra->{'plugin_output'}    = $svc->{'plugin_output'};
-            $extra->{'has_been_checked'} = $svc->{'has_been_checked'};
+            $extra->{'full_version'}      = $svc->{'plugin_output'};
+            $extra->{'state'}             = $svc->{'state'};
+            $extra->{'plugin_output'}     = $svc->{'plugin_output'};
+            $extra->{'has_been_checked'}  = $svc->{'has_been_checked'};
+            $extra->{'last_state_change'} = $svc->{'last_state_change'};
         }
         if($svc->{'description'} eq 'agent inventory') {
             $extra->{'inv_state'}        = $svc->{'state'};
