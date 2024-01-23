@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # read rc files if exist
 unset PROFILEDOTD

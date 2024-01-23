@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script exports a pnp graph and stores it in a temp file.
 #

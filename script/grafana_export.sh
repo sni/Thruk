@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script exports a grafana graph and stores it in a temp file.
 #

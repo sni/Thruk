@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # config_tool_git_checkin - save hook for thruk config tool to commit changes to git repository
 #
