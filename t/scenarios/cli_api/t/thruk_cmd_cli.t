@@ -108,6 +108,7 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => '/usr/bin/env thruk plugin enable core_scheduling',
     like => ['/enabled plugin core_scheduling/'],
+    errlike => ['/source installation detected/'],
 });
 
 ###########################################################
