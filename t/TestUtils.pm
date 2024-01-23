@@ -431,8 +431,12 @@ sub test_page {
     if($got_length && $is_length != $got_length) {
         fail("Content-Length did not match, $is_length != $got_length");
     }
+    my $got_chunked = $request->header('client-transfer-encoding') // $request->header('transfer-encoding');
     if(!$got_length && ($content_type =~ m|text/html| || $content_type =~ m|application/json|)) {
-        fail("no Content-Length set");
+        # traefik alters the response and remove the content-length in favor of chunked encoding
+        if(!$got_chunked || $got_chunked ne 'chunked') {
+            fail("no Content-Length set");
+        }
     }
 
     SKIP: {
