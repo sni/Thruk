@@ -1,6 +1,6 @@
 - name: "yum install npm / chrome"
   include_role:
-    name: yum_retry
+    name: yum_apt_retry
   vars:
     package:
       - npm

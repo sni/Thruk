@@ -2143,7 +2143,7 @@ t/scenarios/_common/ansible/roles/thruk_logcache_mysql/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_logcache_mysql/vars/main.yml
 t/scenarios/_common/ansible/roles/thruk_plugin_editor/tasks/main.yml
 t/scenarios/_common/ansible/roles/thruk_plugin_editor/vars/main.yml
-t/scenarios/_common/ansible/roles/yum_retry/tasks/main.yml
+t/scenarios/_common/ansible/roles/yum_apt_retry/tasks/main.yml
 t/scenarios/_common/base_images/rocky-nightly/Dockerfile
 t/scenarios/_common/docker-compose.yml
 t/scenarios/_common/Makefile

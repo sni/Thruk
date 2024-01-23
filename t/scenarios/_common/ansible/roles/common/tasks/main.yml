@@ -1,5 +1,7 @@
 - name: "yum clean all"
   shell: "yum clean all || :"
+- name: "apt update"
+  shell: "apt update || :"
 - name: "run set_admin_password"
   shell: "! test -x /omd/sites/{{site}}/bin/set_admin_password || sudo su - {{ site }} -c 'set_admin_password omd'"
 - name: "stop site"

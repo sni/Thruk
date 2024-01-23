@@ -1,6 +1,6 @@
 - name: "yum install local test perl depdendencies"
   include_role:
-    name: yum_retry
+    name: yum_apt_retry
   vars:
     package:
       - perl-Test-Harness
@@ -17,4 +17,3 @@
     src: "{{ role_path }}/files/local_test.sh"
     dest: "/usr/local/bin/local_test.sh"
     mode: "755"
-

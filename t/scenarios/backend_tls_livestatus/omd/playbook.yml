@@ -10,7 +10,7 @@
       group: "demo"
   - name: install stunnel
     include_role:
-      name: yum_retry
+      name: yum_apt_retry
     vars:
       package:
         - stunnel

@@ -6,7 +6,7 @@
   tasks:
   - name: "install nagios4 / livestatus build dependencies"
     include_role:
-      name: yum_retry
+      name: yum_apt_retry
     vars:
       package:
         - wget

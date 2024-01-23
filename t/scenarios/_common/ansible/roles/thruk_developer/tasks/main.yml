@@ -1,6 +1,6 @@
 - name: "install perl / git dependencies"
   include_role:
-    name: yum_retry
+    name: yum_apt_retry
   vars:
     package:
       - perl-ExtUtils-Manifest
@@ -12,7 +12,7 @@
   register: locale_path
 - name: "glibc-langpack-en when rhel >= 8"
   include_role:
-    name: yum_retry
+    name: yum_apt_retry
   vars:
     package:
       - glibc-langpack-en

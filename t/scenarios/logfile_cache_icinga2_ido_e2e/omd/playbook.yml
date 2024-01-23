@@ -5,7 +5,7 @@
   tasks:
   - name: "yum install postgresql"
     include_role:
-      name: yum_retry
+      name: yum_apt_retry
     vars:
       package:
         - postgresql

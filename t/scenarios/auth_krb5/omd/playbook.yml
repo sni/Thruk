@@ -7,7 +7,7 @@
   tasks:
   - name: "yum install krb5 dependencies"
     include_role:
-      name: yum_retry
+      name: yum_apt_retry
     vars:
       package:
         - mod_auth_gssapi

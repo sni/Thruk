@@ -15,7 +15,7 @@
       creates: "/etc/yum.repos.d/labs-consol-testing.repo"
   - name: "yum install snclient"
     include_role:
-      name: yum_retry
+      name: yum_apt_retry
     vars:
       package:
         - snclient

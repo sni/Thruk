@@ -1,0 +1,14 @@
+---
+- name: "package yum/apt retry installer: {{ package }}"
+  shell: "if test -f /usr/bin/apt; then apt install -y {{ package | join(' ') }}; else yum install -y {{ package | join(' ') }}; fi"
+  register: install_result
+  ignore_errors: yes
+  failed_when: install_result.rc != 0
+  retries: "{{ retries | default(3) }}"
+  delay: "{{ delay | default(30) }}"
+  until: install_result is succeeded
+
+- name: Verify installation
+  fail:
+    msg: package installation failed
+  when: install_result.rc != 0

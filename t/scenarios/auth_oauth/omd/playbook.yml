@@ -6,7 +6,7 @@
   tasks:
   - name: "yum install perl depdendencies of Dancer2::Plugin::OAuth2::Server"
     include_role:
-      name: yum_retry
+      name: yum_apt_retry
     vars:
       package:
         - gcc

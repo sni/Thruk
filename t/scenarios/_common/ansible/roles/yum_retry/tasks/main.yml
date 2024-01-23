@@ -1,9 +1,0 @@
----
-- name: "yum retry installer: {{ package }}"
-  command: "yum install -y {{ package | join(' ') }}"
-  register: yum_result
-  ignore_errors: yes
-  failed_when: yum_result.rc != 0
-  retries: "{{ retries | default(3) }}"
-  delay: "{{ delay | default(30) }}"
-  until: yum_result is succeeded
