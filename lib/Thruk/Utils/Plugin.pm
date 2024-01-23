@@ -234,8 +234,9 @@ sub enable_plugin {
         elsif($ENV{'OMD_ROOT'}) {
             if(-d $plugin_enabled_dir.'/../plugins-available/'.$dir) {
                 $plugin_src_dir = '../plugins-available/'.$dir;
-            } elsif(-d $plugin_available_dir.'/../../.git') {
+            } elsif(-d $plugin_available_dir.'/../../.git' && -d $plugin_available_dir.'/../plugins-available/'.$dir) {
                 # keep
+                _info("source installation detected, using %s", $plugin_src_dir);
             } else {
                 $plugin_src_dir = '../../../share/thruk/plugins/plugins-available/'.$dir;
             }
