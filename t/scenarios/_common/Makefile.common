@@ -26,8 +26,14 @@ wait_start:
 	$(THRUK) -l
 	$(MAKE) extra_wait_start
 
-wait_start_failed: non_interactive_only
+wait_start_failed: wait_start_short_errors non_interactive_only
 	$(MAKE) wait_start_info
+
+wait_start_short_errors:
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	-echo "ERROR: startup failed"
+	-docker-compose logs | grep "| ERROR"
+	-docker-compose logs | grep "failed=" | grep -v "failed=0"
 
 wait_start_info:
 	@echo "### $@: $$(date "+%FT%T.%N")"
