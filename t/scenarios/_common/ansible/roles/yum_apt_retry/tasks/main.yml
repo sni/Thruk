@@ -1,5 +1,5 @@
 ---
-- name: "package yum/apt retry installer: {{ package }}"
+- name: "package yum/apt retry installer: {{ package }} {{ rpm | join(' ') }} {{ deb | join(' ') }}"
   shell: |
       if test -f /usr/bin/apt; then
         apt-get install -y {{ package | join(' ') }} {{ deb | join(' ') }}
