@@ -57,8 +57,8 @@ _test_filter('host_name = "localhost" AND time > 1 AND time < 10',
 _test_filter('host_name = "localhost" AND (time > 1 AND time < 10)',
              "Filter: host_name = localhost\nFilter: time > 1\nFilter: time < 10\nAnd: 2\nAnd: 2",
              "host_name = 'localhost' and (time > 1 and time < 10)");
-_test_filter('last_check <= "-7d"', 'Filter: last_check <= '.(time() - 86400*7));
-_test_filter('last_check <= "now + 2h"', 'Filter: last_check <= '.(time() + 7200));
+_test_filter('last_check <= "-7d"', sub { return('Filter: last_check <= '.(time() - 86400*7)); });
+_test_filter('last_check <= "now + 2h"', sub { return('Filter: last_check <= '.(time() + 7200)); });
 _test_filter('last_check <= "lastyear"', 'Filter: last_check <= '.Thruk::Utils::_expand_timestring("lastyear"));
 _test_filter('(host_groups ~~ "g1" AND host_groups ~~ "g2")  OR (host_name = "h1" and display_name ~~ ".*dn.*")',
              "Filter: host_groups ~~ g1\nFilter: host_groups ~~ g2\nAnd: 2\nFilter: host_name = h1\nFilter: display_name ~~ .*dn.*\nAnd: 2\nOr: 2",
@@ -69,21 +69,25 @@ _test_filter('(host_name = 1) or (host_name = 2) or (host_name = 3)',
 
 sub _test_filter {
     my($filter, $expect, $exp_ftext) = @_;
-    my($f, $s);
+    my($f, $s, $exp);
     # add retry, check depends on time
     for(1..3) {
         $f = Thruk::Utils::Status::parse_lexical_filter($filter);
         $s = Monitoring::Livestatus::Class::Lite->new('test.sock')->table('hosts')->filter($f)->statement(1);
         $s = join("\n", @{$s});
+        $exp = $expect;
+        if(ref $exp) {
+            $exp = &{$expect}();
+        }
         $s =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
-        $expect =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
-        if($s eq $expect) {
+        $exp =~ s/(\d{10})/&_round_timestamps($1)/gemxs;
+        if($s eq $exp) {
             last;
         }
         sleep(1);
     }
 
-    is($s, $expect, 'got correct statement');
+    is($s, $exp, 'got correct statement');
 
     my $txt = Thruk::Utils::Status::filter2text($c, "service", $f);
     is($txt, $exp_ftext//$filter, "filter text is fine") if $filter !~ m/last_check/mx;
