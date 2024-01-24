@@ -1618,7 +1618,7 @@ sub _get_userdata {
 sub _fill_locked_users {
     my($c) = @_;
     my $locked = {};
-    my $out = Thruk::Utils::IO::cmd($c, 'grep -lr \'"locked" : 1\' "'.$c->config->{'var_path'}.'/users/"');
+    my $out = Thruk::Utils::IO::cmd($c, 'grep -lr \'"locked" : 1\' "'.$c->config->{'var_path'}.'/users/" 2>/dev/null');
     for my $row (split/\n/mx, $out) {
         next unless $row;
         my $name     = Thruk::Base::basename($row);
