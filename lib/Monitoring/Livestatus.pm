@@ -150,8 +150,8 @@ sub new {
       'errors_are_fatal'            => 1,       # die on errors
       'backend'                     => undef,   # should be keept undef, used internally
       'timeout'                     => undef,   # timeout for tcp connections
-      'query_timeout'               => 60,      # query timeout for tcp connections
-      'connect_timeout'             => 5,       # connect timeout for tcp connections
+      'query_timeout'               => undef,   # query timeout for tcp connections
+      'connect_timeout'             => 30,      # connect timeout for tcp connections
       'warnings'                    => 1,       # show warnings, for example on querys without Column: Header
       'logger'                      => undef,   # logger object used for statistical informations and errors / warnings
       'deepcopy'                    => undef,   # copy result set to avoid errors with tied structures
@@ -1171,16 +1171,24 @@ sub _read_socket_do {
         return('200', $self->_get_error(200), undef);
     }
 
-    # status requests should not take longer than 20 seconds
-    if($statement && $statement =~ m/^GET\s+status/mx) {
-        if(!$s->can_read(20)) {
-            return($self->_socket_error($statement, 'cannot read from socket socket'.($! ? ': '.$! : '')));
-        }
-    } else {
-        if(!$s->can_read($self->{'query_timeout'} // 180)) {
-            return($self->_socket_error($statement, 'cannot read from socket socket'.($! ? ': '.$! : '')));
-        }
+    my $timeout = 180;
+    if($statement) {
+        # status requests should not take longer than 20 seconds
+        $timeout = 20  if($statement =~ m/^GET\s+status/mx);
+        $timeout = 300 if($statement =~ m/^GET\s+log/mx);
     }
+    $timeout = $self->{'query_timeout'} if $self->{'query_timeout'};
+
+    $! = undef;
+    my @ready = $s->can_read($timeout);
+    if(scalar @ready == 0) {
+        my $err = $!;
+        if($err) {
+            return($self->_socket_error($statement, 'socket error '.$err));
+        }
+        return($self->_socket_error($statement, 'timeout ('.$timeout.'s) while waiting for socket'));
+    }
+
     $sock->read($header, 16) || return($self->_socket_error($statement, 'reading header from socket failed'.($! ? ': '.$! : '')));
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
     my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
