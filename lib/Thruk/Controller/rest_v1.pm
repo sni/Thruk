@@ -1542,6 +1542,10 @@ sub _rest_get_thruk_users {
         $c->db->fill_get_can_submit_commands_cache();
         $c->db->fill_get_contactgroups_by_contact_cache();
     }
+    my $locked_users = {};
+    if($statsonly) {
+        $locked_users = _fill_locked_users($c);
+    }
 
     my $total_number = 0;
     my $total_locked = 0;
@@ -1554,8 +1558,7 @@ sub _rest_get_thruk_users {
         next unless($is_admin || $name eq $c->stash->{"remote_user"});
         next if(defined $id && $id ne $name);
         if($statsonly) {
-            my $userdata = Thruk::Utils::get_user_data($c, $name);
-            $total_locked++ if(defined $userdata->{'locked'} && $userdata->{'locked'} == Cpanel::JSON::XS::true);
+            $total_locked++ if $locked_users->{$name};
             $total_number++;
             next;
         }
@@ -1609,6 +1612,20 @@ sub _get_userdata {
         }
     }
     return($userdata);
+}
+
+##########################################################
+sub _fill_locked_users {
+    my($c) = @_;
+    my $locked = {};
+    my $out = Thruk::Utils::IO::cmd($c, 'grep -lr \'"locked" : 1\' "'.$c->config->{'var_path'}.'/users/"');
+    for my $row (split/\n/mx, $out) {
+        next unless $row;
+        my $name     = Thruk::Base::basename($row);
+        my $profile  = Thruk::Utils::get_user_data($c, $name);
+        $locked->{$name} = 1 if $profile->{'login'}->{'locked'};
+    }
+    return($locked);
 }
 
 ##########################################################
