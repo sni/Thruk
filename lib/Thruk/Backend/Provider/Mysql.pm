@@ -2009,15 +2009,11 @@ sub _import_peer_logfiles {
 
     # get start / end timestamp
     my($mstart, $mend);
-    my $filter = [];
-    if($mode eq 'update') {
+    if($mode eq 'update' && !$forcestart) {
         $c->stats->profile(begin => "get last mysql timestamp");
         # get last timestamp from Mysql
         ($mstart, $mend) = @{$peer->logcache->get_logs_start_end(collection => $prefix)};
-        if(defined $mend) {
-            _debug("latest entry in logcache: ".(scalar localtime $mend));
-            push @{$filter}, {time => { '>=' => $mend }};
-        }
+        _debug("last entry from logcache: ".(scalar localtime $mend)) if $mend;
         $c->stats->profile(end => "get last mysql timestamp");
     }
 
@@ -2025,9 +2021,9 @@ sub _import_peer_logfiles {
     my($start, $end);
     if($forcestart) {
         $start = $forcestart;
-    }
-    elsif(scalar @{$filter} == 0) {
-        my $mend;
+    } elsif($mend) {
+        $start = $mend;
+    } else {
         if($mode eq 'import') {
             # it does not make sense to import more than we would clean immediatly again
             $mend = Thruk::Utils::get_expanded_start_date($c, $c->config->{'logcache_clean_duration'});
@@ -2039,13 +2035,6 @@ sub _import_peer_logfiles {
             $start = $mend;
         }
         $c->stats->profile(end => "get livestatus timestamp no filter");
-    } else {
-        $c->stats->profile(begin => "get livestatus timestamp");
-        ($start, $end) = @{$peer->{'class'}->get_logs_start_end(filter => $filter, nocache => 1)};
-        $c->stats->profile(end => "get livestatus timestamp");
-        if(defined $mend && $start < $mend) {
-            $start = $mend;
-        }
     }
     if(!$start) {
         die("something went wrong, cannot get start from logfiles (".(defined $start ? $start : "undef").")\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
