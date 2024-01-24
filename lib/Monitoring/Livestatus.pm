@@ -1179,7 +1179,7 @@ sub _read_socket_do {
     }
     $timeout = $self->{'query_timeout'} if $self->{'query_timeout'};
 
-    $! = undef;
+    local $! = undef;
     my @ready = $s->can_read($timeout);
     if(scalar @ready == 0) {
         my $err = $!;
