@@ -9902,7 +9902,8 @@ function prefSubmitCounter(url, value) {
 
 /* handle list wizard dialog */
 var available_members = new Array();
-var selected_members  = new Array();
+var selected_members   = new Array();
+var selected_members_h = new Object();
 var init_tool_list_wizard_initialized = {};
 function init_tool_list_wizard(id, args) {
     id = id.substr(0, id.length -3);
@@ -10037,8 +10038,8 @@ function init_filter_list_wizard(prefix, input_id, search_type, search_options) 
 
 function list_wizard_init_selected(input_id, id, aggregate) {
     // initialize selected members
-    selected_members       = new Array();
-    var selected_members_h = new Object();
+    selected_members   = new Array();
+    selected_members_h = new Object();
     var options = [];
     var list = jQuery('#'+input_id).val().split(/\s*,\s*/);
     for(var x=0; x<list.length;x+=aggregate) {
