@@ -50,7 +50,7 @@ sub index {
 
     # time filter
     push @{$filter}, { time => { '>=' => $start }};
-    push @{$filter}, { time => { '<=' => $end }};
+    push @{$filter}, { time => { '<'  => $end }};
 
     # host filter
     $host = '' if $host eq 'all';
