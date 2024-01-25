@@ -36,9 +36,9 @@ type npm >/dev/null 2>&1 || (
     exit 1
 )
 
-NODE_VERSION=$(node -v 2>/dev/null | sed -e 's/^v//' -e 's/\..*$//g')
+NODE_VERSION=$(PATH=$DEST/node/bin:$PATH node -v 2>/dev/null | sed -e 's/^v//' -e 's/\..*$//g')
 if [ -z $NODE_VERSION ]; then
-    echo "ERROR: failed to detect node version: $(node -v)"
+    echo "ERROR: failed to detect node version: $(PATH=$DEST/node/bin:$PATH node -v)"
     exit 1
 fi
 
@@ -64,19 +64,22 @@ echo "module.exports = {}" > .puppeteerrc.cjs
 mkdir -p node_modules
 
 if [ $INSTALL_NODE = "1" ]; then
+    test -f $DEST/package.json || echo "{}" > $DEST/package.json
     npm i n
     ./node_modules/.bin/n $USE_NODE
     NPM="./node_modules/.bin/n exec $USE_NODE npm"
 fi
 
+export PATH=$DEST/node/bin:$PATH
 $NPM i progress puppeteer
-set +e
 
 if [ $INSTALL_NODE = "1" ]; then
     # install again, somehow previous module install removes it
     npm i n
     ./node_modules/.bin/n $USE_NODE
 fi
+
+set +e
 
 if [ -n "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" ]; then
     echo ""
