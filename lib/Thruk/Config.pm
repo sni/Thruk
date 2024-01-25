@@ -506,7 +506,7 @@ sub set_default_config {
 
     if(Thruk::Base->mode eq 'CLI_SETUID') {
         if(defined $uid && $> == 0) {
-            switch_user($uid, $groups);
+            switch_user($uid, $groups, $var_path);
             _fatal("re-exec with uid $uid did not work");
         }
     }
@@ -1151,14 +1151,14 @@ sub _parse_rows {
 
 =head2 switch_user
 
-  switch_user($uid, $groups)
+  switch_user($uid, $groups, [$home])
 
 switch user and groups
 
 =cut
 
 sub switch_user {
-    my($uid, $groups) = @_;
+    my($uid, $groups, $home) = @_;
     if(scalar @{$groups} > 0) {
         POSIX::setgid($groups->[0]) || confess("setgid failed: ".$!);
         ## no critic
@@ -1182,6 +1182,14 @@ sub switch_user {
         $ENV{'PERL5LIB'} = join(':', @clean);
         ## use critic
     }
+
+	# update home folder to avoid permission errors
+    if($home && $ENV{'HOME'}) {
+        ## no critic
+        $ENV{'HOME'} = $home;
+        ## use critic
+    }
+
     exec(@cmd) || confess("exec (".'"'.join('" "', @cmd).'"'.") failed: ".$!);
 }
 
