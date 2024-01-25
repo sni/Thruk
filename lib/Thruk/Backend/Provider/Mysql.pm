@@ -1036,6 +1036,7 @@ sub _log_stats {
 
     ($backends) = $c->db->select_backends('get_logs') unless defined $backends;
     $backends  = Thruk::Base::list($backends);
+    push @{$backends}, keys %{$c->stash->{'failed_backends'}} if $c->stash->{'failed_backends'};
 
     my @result;
     for my $key (@{$backends}) {
@@ -1385,7 +1386,7 @@ sub _update_logcache {
     };
     my $error = $@ || '';
 
-    _finish_update($c, $dbh, $prefix, time() - $start, $mode) or $error .= $dbh->errstr;
+    _finish_update($c, $dbh, $prefix, time() - $start) or $error .= $dbh->errstr;
 
     if($error) {
         my($short_err, undef) = Thruk::Utils::extract_connection_error($error);
@@ -2059,6 +2060,8 @@ sub _import_peer_logfiles {
     my $alertstore = {};
     my $last_day = "";
     my $consecutive_errors = 0;
+    my $good               = 0;
+    my $err;
 
     my @columns = qw/class time type state host_name service_description message state_type contact_name/;
     my $reordered = 0;
@@ -2101,12 +2104,16 @@ sub _import_peer_logfiles {
             _infoc(":");
         };
         if($@) {
-            my $err = $@;
+            $err = $@;
             chomp($err);
             if($mode eq 'import') {
                 die($err);
             } else {
-                print($err);
+                _debug($err);
+                my $short;
+                ($short, $err) = Thruk::Utils::extract_connection_error($err);
+                $err = $short if $short;
+                _infoc(" %s", $err);
                 $consecutive_errors++;
                 if($consecutive_errors >= 3) {
                     die("failed to update 3 times in a row, bailing out: ".$err);
@@ -2114,6 +2121,7 @@ sub _import_peer_logfiles {
             }
         } else {
             $consecutive_errors = 0;
+            $good++;
         }
 
         $time = $time + $blocksize;
@@ -2127,6 +2135,11 @@ sub _import_peer_logfiles {
         }
 
         $c->stats->profile(end => $stime);
+    }
+
+	# all blocks failed
+    if($err && $good == 0) {
+        die($err);
     }
 
     if($mode eq 'import') {

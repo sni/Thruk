@@ -157,6 +157,7 @@ sub cmd {
     }
 
     my($backends) = $c->db->select_backends('get_logs');
+    push @{$backends}, keys %{$c->stash->{'failed_backends'}} if $c->stash->{'failed_backends'};
     if(scalar @{$backends} > 1 && scalar @{$opt->{'files'}} > 0) {
         _error("you must specify a backend (-b) when importing files.");
         return("", 1);

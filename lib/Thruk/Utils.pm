@@ -3926,6 +3926,10 @@ sub extract_connection_error {
         return($1, $err);
     }
 
+    if($err =~ m|^(OMD:.*?)\s+at\s+|smx) {
+        return($1, $err);
+    }
+
     return(undef, $err);
 }
 
