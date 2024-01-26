@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
+use Cwd ();
 use Data::Dumper qw/Dumper/;
 use Encode qw(encode_utf8);
 use File::Copy qw/move copy/;
@@ -732,7 +733,14 @@ sub _task_upload {
     }
 
     my $upload = $c->req->uploads->{$type};
-    my $folder = $c->stash->{'usercontent_folder'}.'/'.$location;
+    my $folder = Cwd::abs_path($c->stash->{'usercontent_folder'}.'/'.$location);
+
+    # make sure requested folder is below the usercontent folder
+    if(CORE::index(Cwd::abs_path($c->stash->{'usercontent_folder'}), $folder) != 0) {
+        # must be text/html result, otherwise extjs form result handler dies
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload contains illegal folder.', success => Cpanel::JSON::XS::false });
+        return;
+    }
 
     if(!-w $folder.'/.') {
         # must be text/html result, otherwise extjs form result handler dies
