@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+3.12     Fri Jan 26 18:41:38 CET 2024
           - add config option 'admin_role_from_system_and_conf'
           - add options status column: last state change
           - fix exposing check_command via rest api
