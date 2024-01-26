@@ -8,7 +8,7 @@ use Thruk::Config 'noautoload';
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 559;
+    plan tests => 570;
 }
 
 BEGIN {
@@ -111,8 +111,8 @@ $pages = [
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore_list', post => { nr => '__DASHBOARD__' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_restore', post => { nr => '__DASHBOARD__', timestamp => '__TIMESTAMP__', mode => 'a' } },
     { url => '/thruk/cgi-bin/panorama.cgi?task=dashboard_save_states', post => { nr => '__DASHBOARD__', states => '{}' } },
-    { url => '/thruk/cgi-bin/panorama.cgi?task=upload', like => 'missing properties in fileupload.', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
-    { url => '/thruk/cgi-bin/panorama.cgi?task=upload', like => 'missing properties in fileupload.', , post => { "type" => "image", "location" => "../../test", "filename" => "test.png" }, content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
+    { url => '/thruk/cgi-bin/panorama.cgi?task=upload', like => 'missing properties in fileupload', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
+    { url => '/thruk/cgi-bin/panorama.cgi?task=upload', like => 'fileupload contains illegal folder', post => { "type" => "image", "location" => "../../test" }, post_file => [{'name' => 'image', 'filename' => 'test.png', 'data' => 'test123', 'content_type' => 'image/png'}], content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
     { url => '/thruk/cgi-bin/panorama.cgi?task=uploadecho', like => 'missing file in fileupload.', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
     { url => '/thruk/cgi-bin/panorama.cgi?task=save_dashboard&nr=__DASHBOARD__', like => ['Thruk Panorama Dashboard Export:','End Export'], content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},
     { url => '/thruk/cgi-bin/panorama.cgi?task=load_dashboard', like => 'missing file in fileupload', content_type => "text/html; charset=utf-8", skip_html_lint => 1, skip_doctype => 1},

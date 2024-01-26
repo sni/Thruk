@@ -738,19 +738,19 @@ sub _task_upload {
     # make sure requested folder is below the usercontent folder
     if(CORE::index(Cwd::abs_path($c->stash->{'usercontent_folder'}), $folder) != 0) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload contains illegal folder.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'fileupload contains illegal folder.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     if(!-w $folder.'/.') {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload must use existing and writable folder.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'fileupload must use existing and writable folder.', success => Cpanel::JSON::XS::false });
         return;
     }
 
     if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -758,7 +758,7 @@ sub _task_upload {
     $filename =~ s|^/||gmx;
     if($filename !~ m/^[a-z0-9_\- ]+\.(jpeg|jpg|gif|png|svg)$/mxi) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload contains invalid characters (a-z0-9_- ) in filename.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'fileupload contains invalid characters (a-z0-9_- ) in filename.', success => Cpanel::JSON::XS::false });
         return;
     }
 
@@ -798,7 +798,7 @@ sub _task_uploadecho {
     my $upload = $c->req->uploads->{'file'};
     if($upload->{'size'} > (50*1024*1024)) { # not more than 50MB
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'fileupload exceeds the allowed filesize of 50MB.', success => Cpanel::JSON::XS::false });
         return;
     }
 
