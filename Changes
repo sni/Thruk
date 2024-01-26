@@ -17,6 +17,8 @@ next:
             - cleanup /tmp/puppeteer_dev_profile-... folders
           - Rest:
             - add host/service columns to comments/downtimes
+          - Panorama:
+            - fix folder input validation for image uploads
 
 3.10     Sun Nov  5 16:24:33 CET 2023
           - add new agents plugin
