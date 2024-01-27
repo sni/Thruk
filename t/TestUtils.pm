@@ -916,32 +916,7 @@ sub _request {
         $post->{'CSRFtoken'} = $test_token if $test_token;
         $request = POST($url, {});
         $request->method(uc($method));
-        if($file_upload) {
-            # construct a multipart/form-data request
-            my $boundary = "--".Thruk::Utils::Crypt::random_uuid([time()]);
-            $request->content_type('multipart/form-data; boundary='.$boundary);
-            my $content = "";
-            for my $key (sort keys %{$post}) {
-                $content .= sprintf("--%s\nContent-Disposition: form-data; name=\"%s\"\n\n%s\n", $boundary, $key, $post->{$key});
-            }
-            for my $file (@{$file_upload}) {
-                $content .= sprintf("--%s\nContent-Disposition: form-data; name=\"%s\"; filename=\"%s\"\nContent-Type: %s\n\n%s\n",
-                    $boundary,
-                    $file->{'name'},
-                    $file->{'filename'},
-                    $file->{'content_type'},
-                    $file->{'data'},
-                );
-            }
-            $content .= sprintf("--%s--\n", $boundary);
-            # HTML/4.01 says that line breaks are represented as "CR LF" pairs (i.e., `%0D%0A')
-            $content =~ s/\n/\x0D\x0A/g;
-            $request->content($content);
-        } else {
-            $request->content_type('application/json; charset=utf-8');
-            $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
-        }
-        $request->header('Content-Length' => undef);
+        $request = _build_post_request($request, $post, $file_upload);
     } else {
         $method = 'GET' unless $method;
         $method = uc($method);
@@ -957,7 +932,7 @@ sub _request {
 
 #########################
 sub _external_request {
-    my($url, $start_to, $post, $agent, $method, $retry) = @_;
+    my($url, $start_to, $post, $agent, $method, $file_upload, $retry) = @_;
     confess("no url") unless $url;
     $retry = 1 unless defined $retry;
 
@@ -993,9 +968,7 @@ sub _external_request {
         $method = 'POST' unless $method;
         my $request = POST($url, {});
         $request->method(uc($method));
-        $request->content_type('application/json; charset=utf-8');
-        $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
-        $request->header('Content-Length' => undef);
+        $request = _build_post_request($request, $post, $file_upload);
         $request->header('X-Thruk-Auth-Key'  => $ENV{'THRUK_TEST_AUTH_KEY'})  if $ENV{'THRUK_TEST_AUTH_KEY'};
         $request->header('X-Thruk-Auth-User' => $ENV{'THRUK_TEST_AUTH_USER'}) if $ENV{'THRUK_TEST_AUTH_USER'};
         $cookie_jar->add_cookie_header($request) if $cookie_jar;
@@ -1017,10 +990,43 @@ sub _external_request {
         my $login_page = $req->{'_headers'}->{'location'};
         my $r = _external_request($login_page, undef, undef, $agent);
         $login_page =~ s/nocookie&//gmx;
-           $r = _external_request($login_page, undef, { password => $pass, login => $user, submit => 'login', referer => $referer }, $agent, undef, 0);
-        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, undef, 0);
+           $r = _external_request($login_page, undef, { password => $pass, login => $user, submit => 'login', referer => $referer }, $agent, undef, undef, 0);
+        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, undef, undef, 0);
     }
     return $req;
+}
+
+#########################
+sub _build_post_request {
+    my($request, $post, $file_upload) = @_;
+    if($file_upload) {
+        # construct a multipart/form-data request
+        my $boundary = "--".Thruk::Utils::Crypt::random_uuid([time()]);
+        $request->content_type('multipart/form-data; boundary='.$boundary);
+        my $content = "";
+        for my $key (sort keys %{$post}) {
+            $content .= sprintf("--%s\nContent-Disposition: form-data; name=\"%s\"\n\n%s\n", $boundary, $key, $post->{$key});
+        }
+        for my $file (@{$file_upload}) {
+            $content .= sprintf("--%s\nContent-Disposition: form-data; name=\"%s\"; filename=\"%s\"\nContent-Type: %s\n\n%s\n",
+                $boundary,
+                $file->{'name'},
+                $file->{'filename'},
+                $file->{'content_type'},
+                $file->{'data'},
+            );
+        }
+        $content .= sprintf("--%s--\n", $boundary);
+        # HTML/4.01 says that line breaks are represented as "CR LF" pairs (i.e., `%0D%0A')
+        $content =~ s/\n/\x0D\x0A/g;
+        $request->content($content);
+    } else {
+        $request->content_type('application/json; charset=utf-8');
+        $request->content(Cpanel::JSON::XS->new->encode($post)); # using ->utf8 here would end in double encoding
+    }
+    $request->header('Content-Length' => undef);
+
+    return($request);
 }
 
 #########################
