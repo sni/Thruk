@@ -45,6 +45,11 @@
   <div class="my-2 flex gap-1">
     [% PROCESS _add_bookmark.tt %]
     [% PROCESS _show_link.tt %]
+    [% IF hostgroup != '' && hostgroup != 'all' %]
+      <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
+    [% ELSIF servicegroup != '' && servicegroup != 'all' %]
+      <a class="button round small" href="extinfo.cgi?type=8&amp;servicegroup=[% servicegroup | uri %]" title="send servicegroup commands"><i class="uil uil-icons"></i></a>
+    [% END %]
   </div>
 
   <div class="card w-full min-w-[420px]">
@@ -53,6 +58,11 @@
         <div class="flex flex-nowrap gap-x-1 items-center">
           [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" %]
           [% PROCESS _status_filter.tt %]
+          [% IF hostgroup != '' && hostgroup != 'all' %]
+            <a class="button round small text-sm display-filter" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
+          [% ELSIF servicegroup != '' && servicegroup != 'all' %]
+            <a class="button round small text-sm display-filter" href="extinfo.cgi?type=8&amp;servicegroup=[% servicegroup | uri %]" title="send servicegroup commands"><i class="uil uil-icons"></i></a>
+          [% END %]
         </div>
       </div>
       <div>
@@ -68,14 +78,14 @@
         <div>
           <div class="p-2">
             [% IF substyle == 'host' %]
-                <h3>
+                <h3 class="flexrow flex-nowrap">
                   <a href="status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %] ([% g.name | html %])</a>
-                  <a href="extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]"><i class="uil uil-sliders-v"></i></a>
+                  <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]"><i class="uil uil-icons"></i></a>
                 </h3>
               [% ELSIF substyle == 'service' %]
-                <h3>
+                <h3 class="flexrow flex-nowrap">
                   <a href="status.cgi?servicegroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %] ([% g.name | html %])</a>
-                  <a href="extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]"><i class="uil uil-sliders-v"></i></a>
+                  <a class="button round small" href="extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]"><i class="uil uil-icons"></i></a>
                 </h3>
               [% END %]
           </div>

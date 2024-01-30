@@ -46,6 +46,11 @@
   <div class="my-2 flex gap-1">
     [% PROCESS _add_bookmark.tt %]
     [% PROCESS _show_link.tt %]
+    [% IF hostgroup != '' && hostgroup != 'all' %]
+      <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
+    [% ELSIF servicegroup != '' && servicegroup != 'all' %]
+      <a class="button round small" href="extinfo.cgi?type=8&amp;servicegroup=[% servicegroup | uri %]" title="send servicegroup commands"><i class="uil uil-icons"></i></a>
+    [% END %]
   </div>
 
   <div class="card w-full min-w-[420px]">
@@ -80,14 +85,14 @@
         <div>
           <div class="p-2">
             [% IF substyle == 'host' %]
-              <h3>
+              <h3 class="flexrow flex-nowrap">
                 <a class="link" href="status.cgi?hostgroup=[% group.name | uri %]&amp;style=overview">[% group.alias | html %] ([% group.name | html %])</a>
-                <a class="" href="extinfo.cgi?type=5&amp;hostgroup=[% group.name | uri %]"><i class="uil uil-sliders-v"></i></a>
+                <a class="button round small text-sm display-filter" href="extinfo.cgi?type=5&amp;hostgroup=[% group.name | uri %]"><i class="uil uil-icons"></i></a>
               </h3>
             [% ELSIF substyle == 'service' %]
-              <h3>
+              <h3 class="flexrow flex-nowrap">
                 <a class="link" href="status.cgi?servicegroup=[% group.name | uri %]&amp;style=overview">[% group.alias | html %] ([% group.name | html %])</a>
-                <a href="extinfo.cgi?type=8&amp;servicegroup=[% group.name | uri %]"><i class="uil uil-sliders-v"></i></a>
+                <a class="button round small text-sm display-filter" href="extinfo.cgi?type=8&amp;servicegroup=[% group.name | uri %]"><i class="uil uil-icons"></i></a>
               </h3>
             [% END %]
           </div>

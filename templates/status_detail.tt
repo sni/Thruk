@@ -73,6 +73,11 @@
         [% PROCESS _json_export.tt %]
         [% columns=[ 'Site:0', 'Hostname', 'Hostdisplayname:0', 'IP', 'Host Alias:0', 'Host Parents:0', 'Host Groups:0', 'Host Acknowledged', 'Host Downtime', 'Host Notifications', 'Host Active Checks', 'Host Flapping', 'Service', 'Displayname:0', 'Status', 'Last Check', 'Duration', 'Attempt', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Status Information', 'Extra Status Information', 'Comments:0' ] %]
         [% PROCESS _excel_export.tt columns=columns with_custom_vars=1 %]
+        [% IF hostgroup != '' && hostgroup != 'all' %]
+          <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
+        [% ELSIF servicegroup != '' && servicegroup != 'all' %]
+          <a class="button round small" href="extinfo.cgi?type=8&amp;servicegroup=[% servicegroup | uri %]" title="send servicegroup commands"><i class="uil uil-icons"></i></a>
+        [% END %]
     </div>
     <div class="basis-1/3">
       [% UNLESS authorized_for_read_only %]
