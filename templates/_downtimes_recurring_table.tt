@@ -43,11 +43,11 @@
                 [% END %]
               [% ELSIF d.target == 'hostgroup' %]
                 [% FOREACH grp = d.hostgroup %]
-                    <a class="link" href="status.cgi?hostgroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
+                    <a class="link" href="status.cgi?hostgroup=[% grp | uri %]&amp;style=hostdetail">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
                 [% END %]
               [% ELSIF d.target == 'servicegroup' %]
                 [% FOREACH grp = d.servicegroup %]
-                    <a class="link" href="status.cgi?servicegroup=[% grp | uri %]&amp;style=overview">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
+                    <a class="link" href="status.cgi?servicegroup=[% grp | uri %]&amp;style=detail">[% grp | html %]</a>[% UNLESS loop.last %], [% END %]
                 [% END %]
               [% END %]
             </div>
