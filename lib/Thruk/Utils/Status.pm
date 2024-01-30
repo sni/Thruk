@@ -2145,7 +2145,8 @@ sub get_service_matrix {
 
     my $uniq_hosts = {};
 
-    if(defined $servicefilter) {
+    # since we page by hosts, we might miss some hosts if a user is only authorized for the service, but not the host
+    if(defined $servicefilter || !$c->check_user_roles('authorized_for_all_hosts')) {
         # fetch hostnames first
         my $hostnames = $c->db->get_hosts_by_servicequery( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => ['host_name'] );
         for my $svc (@{$hostnames}) {
