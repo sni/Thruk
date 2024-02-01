@@ -404,10 +404,18 @@ sub get_logs {
         $orderby = ' ORDER BY l.time ASC';
         $sorted  = 1;
     }
+
     my $limit = '';
+    my $pager_limit;
     if(defined $options{'options'} && $options{'options'}->{'limit'}) {
         $limit = ' LIMIT '.$options{'options'}->{'limit'};
+    } else {
+        if($options{'pager'}) {
+            $pager_limit = $options{'pager'}->{'entries'} * $options{'pager'}->{'page'};
+            $limit = ' LIMIT '.$pager_limit;
+        }
     }
+    $limit = ' LIMIT 10000000' unless $limit; # not using a limit makes mysql not use an index
 
     my $prefix = $options{'collection'};
     $prefix    =~ s/^logs_//gmx;
@@ -547,6 +555,35 @@ sub get_logs {
         }
     }
 
+    my $total_size;
+    if($pager_limit && scalar @{$data} >= $pager_limit) {
+        # fetch real number of entries here
+        my $sql = '
+        SELECT
+            count(*),
+            l.time as time,
+            l.class as class,
+            l.type as type,
+            l.state as state,
+            l.state_type as state_type,
+            IFNULL(h.host_name, "") as host_name,
+            IFNULL(s.service_description, "") as service_description,
+            IFNULL(c.name, "") as contact_name,
+            l.message as message,
+            "'.$prefix.'" as peer_key
+            '.$extra_columns.'
+        FROM
+            `'.$prefix.'_log` l
+            LEFT JOIN `'.$prefix.'_host` h ON l.host_id = h.host_id
+            LEFT JOIN `'.$prefix.'_service` s ON l.service_id = s.service_id
+            LEFT JOIN `'.$prefix.'_contact` c ON l.contact_id = c.contact_id
+        '.$where.'
+        '.$limit.'
+        ';
+        my $counts = $dbh->selectall_arrayref($sql);
+        $total_size = $counts->[0]->[0];
+    }
+
     if($fh) {
         my $rc = Thruk::Utils::IO::close($fh, $filename);
         if(!$rc) {
@@ -555,7 +592,7 @@ sub get_logs {
         }
         return($filename, 'file');
     } else {
-        return($data, ($sorted ? 'sorted' : ''));
+        return($data, ($sorted ? 'sorted' : ''), $total_size);
     }
 }
 

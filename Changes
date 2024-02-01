@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - improve logs performance when using logcache
           - fix minemap missing services if user is only authorized for service but not the host
 
 3.12     Fri Jan 26 18:41:38 CET 2024

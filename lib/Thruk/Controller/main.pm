@@ -433,7 +433,6 @@ sub _notifications_update_cache {
                       class => 3,
                   ],
         columns    => [qw/time host_name/],
-        limit      => 1000000, # not using a limit here, makes mysql not use an index
         backends   => ['ALL'],
         debug_hint => 'notifications',
     );
