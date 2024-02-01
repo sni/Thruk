@@ -1356,16 +1356,20 @@ sub _update_logcache {
     }
 
     return(-1) unless _check_lock($dbh, $prefix, $c, $mode);
+    my $start = time();
 
     if($mode eq 'clean') {
-        return(_update_logcache_clean($c, $dbh, $prefix, $blocksize));
+        my $res = _update_logcache_clean($c, $dbh, $prefix, $blocksize);
+        _finish_update($c, $dbh, $prefix, time() - $start);
+        return($res);
     }
     if($mode eq 'compact') {
-        return($self->_update_logcache_compact($c, $dbh, $prefix, $blocksize, $force));
+        my $res = $self->_update_logcache_compact($c, $dbh, $prefix, $blocksize, $force);
+        _finish_update($c, $dbh, $prefix, time() - $start);
+        return($res);
     }
 
     $mode = 'import' if $fresh_created;
-    my $start = time();
 
     my $log_count = 0;
     eval {
