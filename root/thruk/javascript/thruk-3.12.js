@@ -1940,11 +1940,13 @@ function setInnerHTMLWithScripts(el, html) {
     el.innerHTML = html;
     jQuery(el).find("script").each(function(i, oldScript) {
         var newScript = document.createElement("script");
-        jQuery(oldScript.attributes).each(function(k, attr) {
-             newScript.setAttribute(attr.name, attr.value);
-        });
-        oldScript.parentNode.replaceChild(newScript, oldScript);
-        newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+        try {
+            jQuery(oldScript.attributes).each(function(k, attr) {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+        } catch(err) { console.log(err) }
     });
 }
 
