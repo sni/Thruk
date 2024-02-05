@@ -15,6 +15,7 @@ dailyversion: newversion
 dailydist: cleandist
 	# run in own make process, otherwise VERSION variable would not be updated
 	$(MAKE) newversion
+	${SED} -s 's/GIT_HASH = ""/GIT_HASH = "$(shell git describe --always 2>&1)"/' -i lib/Thruk/Config.pm
 	$(MAKE) dist > /dev/null
 	$(MAKE) remove_npm_dependency
 	$(MAKE) resetdaily
@@ -30,7 +31,7 @@ remove_npm_dependency:
 	test -f themes/themes-available/Light/stylesheets/Light.css
 	test -f themes/themes-available/Dark/stylesheets/Dark.css
 	tar xf thruk-$(VERSION).tar.gz
-	sed -s 's/, npm//' \
+	${SED} -s 's/, npm//' \
 		-i thruk-$(VERSION)/support/thruk.spec \
 		-i thruk-$(VERSION)/debian/thruk.dsc \
 		-i thruk-$(VERSION)/debian/control

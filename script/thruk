@@ -99,7 +99,11 @@ if($options->{'help'}) {
 }
 if($options->{'version'}) {
     require Thruk::Config;
-    print "thruk v", Thruk::Config::get_thruk_version(), "\n"; exit 0;
+    printf("thruk v%s%s\n",
+        Thruk::Config::get_thruk_version(),
+        ($Thruk::Config::GIT_HASH ? " (".$Thruk::Config::GIT_HASH.")" : ""),
+    );
+    exit 0;
 }
 if(!$options->{'action'} and scalar @{$options->{'commandoptions'}} == 0 and !$options->{'listbackends'} and !$options->{'listcommands'}) {
     print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";

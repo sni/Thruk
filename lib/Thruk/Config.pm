@@ -27,6 +27,7 @@ Generic Access to Thruks Config
 ######################################
 
 our $VERSION = '3.12';
+our $GIT_HASH = ""; # set by dailydist make target
 
 our $config;
 my $project_root = home() || confess('could not determine project_root from inc.');
