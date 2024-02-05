@@ -8216,11 +8216,12 @@ function show_cal(ev) {
     }
 
     var id1       = ev.target.id;
-    var hasClear  = ev.target.className.match(/cal_popup_clear/)       ? true : false;
-    var hasRange  = ev.target.className.match(/cal_popup_range/)       ? true : false;
-    var hasSelect = ev.target.className.match(/cal_popup_select/)      ? true : false;
-    var hasSubmit = ev.target.className.match(/cal_popup_auto_submit/) ? true : false;
-    var hasCustom = ev.target.className.match(/cal_custom/)            ? true : false;
+    var hasClear  = ev.target.className.match(/cal_popup_clear/)         ? true : false;
+    var hasRange  = ev.target.className.match(/cal_popup_range/)         ? true : false;
+    var hasSelect = ev.target.className.match(/cal_popup_select/)        ? true : false;
+    var hasSelFut = ev.target.className.match(/cal_popup_select_future/) ? true : false;
+    var hasSubmit = ev.target.className.match(/cal_popup_auto_submit/)   ? true : false;
+    var hasCustom = ev.target.className.match(/cal_custom/)              ? true : false;
 
     if(document.getElementById(id1).picker) {
         return;
@@ -8301,6 +8302,7 @@ function show_cal(ev) {
         "linkedCalendars": false,
         "autoUpdateInput": false,
         "alwaysShowCalendars": true,
+        "showCustomRangeLabel": false,
         "locale": {
             "format": "YYYY-MM-DD hh:mm:ss",
             "firstDay": 1
@@ -8318,15 +8320,28 @@ function show_cal(ev) {
         options.endDate = moment(date2);
     }
     if(hasSelect) {
-        var today = _parseDate((new Date).strftime("%Y-%m-%d"));
-        options.ranges = {
-            'Today':        [moment().startOf('day'),                        moment(today).add(1, 'days')],
-            'Yesterday':    [moment(today).subtract(1, 'days'),              moment(today)],
-            'Last 7 Days':  [moment(today).subtract(7, 'days'),              moment(today).add(1, 'days')],
-            'Last 30 Days': [moment(today).subtract(30, 'days'),             moment(today).add(1, 'days')],
-            'This Month':   [moment().startOf('month'),                      moment().startOf('month').add(1, 'month')],
-            'Last Month':   [moment().subtract(1, 'month').startOf('month'), moment().startOf('month')]
-        };
+        if(hasSelFut) {
+            var now = _parseDate((new Date).strftime("%Y-%m-%d %H:%M:00"));
+            options.ranges = {
+                '30 Minutes':   [moment(now), moment(now).add(30,'minutes')],
+                '1 Hour':       [moment(now), moment(now).add(1, 'hours')],
+                '2 Hours':      [moment(now), moment(now).add(2, 'hours')],
+                '1 Day':        [moment(now), moment(now).add(1, 'days')],
+                '3 Day':        [moment(now), moment(now).add(3, 'days')],
+                '1 Week':       [moment(now), moment(now).add(7, 'days')],
+                '2 Weeks':      [moment(now), moment(now).add(14,'days')],
+            };
+        } else {
+            var today = _parseDate((new Date).strftime("%Y-%m-%d"));
+            options.ranges = {
+                'Today':        [moment().startOf('day'),                        moment(today).add(1, 'days')],
+                'Yesterday':    [moment(today).subtract(1, 'days'),              moment(today)],
+                'Last 7 Days':  [moment(today).subtract(7, 'days'),              moment(today).add(1, 'days')],
+                'Last 30 Days': [moment(today).subtract(30, 'days'),             moment(today).add(1, 'days')],
+                'This Month':   [moment().startOf('month'),                      moment().startOf('month').add(1, 'month')],
+                'Last Month':   [moment().subtract(1, 'month').startOf('month'), moment().startOf('month')]
+            };
+        }
     }
 
     var _onKeyUp = function(ev) {

@@ -73,7 +73,7 @@
   <th class='w-1/4'>Start Time</th>
   <td>
     <div class="flex flex-nowrap gap-1">
-      <input type='text' name='start_time' id="start_time" value="[% start_time | html %]" class="date_input cal_popup[% IF range %]_range[% END %] cal_popup_select w-36" required onkeyup="verify_time(this)">
+      <input type='text' name='start_time' id="start_time" value="[% start_time | html %]" class="date_input cal_popup[% IF range %]_range[% END %] cal_popup_select cal_popup_select_future w-36" required onkeyup="verify_time(this)">
       <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_start_time" title="pick date"></i></div>
     </div>
   </td>
@@ -85,7 +85,7 @@
   <th class='w-1/4'>End Time</th>
   <td>
     <div class="flex flex-nowrap gap-1">
-      <input type='text' name='end_time' id="end_time" value="[% end_time | html %]" class="date_input cal_popup_range cal_popup_select w-36" required onkeyup="verify_time(this)">
+      <input type='text' name='end_time' id="end_time" value="[% end_time | html %]" class="date_input cal_popup_range cal_popup_select cal_popup_select_future w-36" required onkeyup="verify_time(this)">
       <div><i class="uil uil-schedule text-lg cal_icon cal_popup for_end_time" title="pick date"></i></div>
     </div>
   </td>
