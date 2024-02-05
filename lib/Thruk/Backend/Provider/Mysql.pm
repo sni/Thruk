@@ -2049,6 +2049,11 @@ sub _import_peer_logfiles {
 
     return(-1) unless _tables_exist($dbh, $prefix);
 
+    if($blocksize > 86400) {
+        _warn("logcache blocksize too long, reduced to 1 day");
+        $blocksize = 86400;
+    }
+
     # get start / end timestamp
     my($mstart, $mend);
     if($mode eq 'update' && !$forcestart) {
@@ -2117,9 +2122,15 @@ sub _import_peer_logfiles {
             $alertstore = {};
             $last_day = $today;
         }
+        my $block_end = $time + $blocksize - 1;
+        # round block end by days to avoid requesting multiple log files
+        my $endday = POSIX::strftime("%Y-%m-%d", localtime($block_end));
+        if($today ne $endday) {
+            $block_end = Thruk::Utils::_parse_date($endday." 00:00:00") - 1;
+        }
 
         my $import_compacted = 0;
-        if(($time + $blocksize - 1) < $compact_start_data) {
+        if(($block_end) < $compact_start_data) {
             $import_compacted = 1;
         }
 
@@ -2131,7 +2142,7 @@ sub _import_peer_logfiles {
             ($logs) = $peer->{'class'}->get_logs(nocache => 1,
                                                  filter  => [{ '-and' => [
                                                                     { time => { '>=' => $time } },
-                                                                    { time => { '<=' => ($time + $blocksize - 1) } },
+                                                                    { time => { '<=' => $block_end } },
                                                             ]}, @{$import_filter} ],
                                                  columns => \@columns,
                                                  file => $file,
@@ -2139,7 +2150,7 @@ sub _import_peer_logfiles {
             &timing_breakpoint('_get_logs done');
             if($mode eq 'update') {
                 # get already stored logs to filter duplicates
-                $duplicate_lookup = $self->_fill_lookup_logs($prefix,$time,($time+$blocksize));
+                $duplicate_lookup = $self->_fill_lookup_logs($prefix,$time,$block_end);
                 &timing_breakpoint('_fill_lookup_logs_logs done');
             }
             _infoc(":");
@@ -2165,7 +2176,7 @@ sub _import_peer_logfiles {
             $good++;
         }
 
-        $time = $time + $blocksize;
+        $time = $block_end + 1;
 
         if($file) {
             $file = $logs;
