@@ -2126,7 +2126,7 @@ sub _import_peer_logfiles {
         # round block end by days to avoid requesting multiple log files
         my $endday = POSIX::strftime("%Y-%m-%d", localtime($block_end));
         if($today ne $endday) {
-            $block_end = Thruk::Utils::_parse_date($endday." 00:00:00") - 1;
+            $block_end = Thruk::Utils::parse_date_string($endday." 00:00:00") - 1;
         }
 
         my $import_compacted = 0;

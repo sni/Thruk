@@ -3041,6 +3041,20 @@ sub backends_hash_to_list {
 }
 
 ##############################################
+
+=head2 parse_date_string
+
+  my $timestamp = parse_date_string($string)
+
+Format: 2010-03-02 00:00:00
+parse given date and return timestamp
+
+=cut
+sub parse_date_string {
+    return(_parse_date(@_));
+}
+
+##############################################
 sub _parse_date {
     my($string) = @_;
 
