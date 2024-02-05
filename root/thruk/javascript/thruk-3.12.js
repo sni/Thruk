@@ -8329,7 +8329,7 @@ function show_cal(ev) {
                 '1 Day':        [moment(now), moment(now).add(1, 'days')],
                 '3 Day':        [moment(now), moment(now).add(3, 'days')],
                 '1 Week':       [moment(now), moment(now).add(7, 'days')],
-                '2 Weeks':      [moment(now), moment(now).add(14,'days')],
+                '2 Weeks':      [moment(now), moment(now).add(14,'days')]
             };
         } else {
             var today = _parseDate((new Date).strftime("%Y-%m-%d"));
