@@ -74,7 +74,7 @@ if(!$options->{'force'}) {
 }
 
 while(1) {
-  my $file = $options->{'output_dir'}.'/'.strftime("%d-%m-%Y", localtime($start)).".log";
+  my $file = $options->{'output_dir'}.'/fake.log-'.strftime("%Y%m%d", localtime($start));
   my $ts_daystart = Thruk::Utils::DateTime::start_of_day($start);
   my $ts_dayend   = Thruk::Utils::DateTime::start_of_day($ts_daystart+(26*3600)); # add 26 hours to compensate daylight saving timeshift
   my $daylength = $ts_dayend - $ts_daystart;
