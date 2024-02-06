@@ -1793,6 +1793,7 @@ sub _update_logcache_optimize {
     if($disk_space_ok) {
         my $t1 = [gettimeofday];
         _infos("update %s logs table order...", $prefix);
+        $dbh = $peer->logcache->_dbh; # reconnect
         $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
         $dbh->commit || confess $dbh->errstr;
         _info("done. (duration: %s)", Thruk::Utils::Filter::duration(tv_interval($t1), 6));
@@ -1805,13 +1806,19 @@ sub _update_logcache_optimize {
         _debug("optimizing / repairing tables");
         for my $table (@Thruk::Backend::Provider::Mysql::tables) {
             my $t1 = [gettimeofday];
-            _infos('maintain table %s...', $table);
-            $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
-            if($disk_space_ok) {
+            _infos('maintain table %20s...', $table);
+            _infos(', check...');
+            my $res = $dbh->selectall_arrayref("CHECK TABLE `".$prefix."_".$table.'`', { Slice => {} });
+            if(!$res || !$res->[0] || $res->[0]->{"Msg_text"} ne 'OK') {
+                _infos('running repair, check returned: %s', $res->[0]->{"Msg_text"});
+                $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
+            }
+            if($disk_space_ok && $table ne 'log') { # log table is optimized by the alter alter tyle order by... already
+                _infos(', optimize...');
                 $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
             }
+            _infos(', analyze...');
             $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
-            $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
             _info("OK. (duration: %s)", Thruk::Utils::Filter::duration(tv_interval($t1), 6));
         }
     }
@@ -2199,12 +2206,12 @@ sub _import_peer_logfiles {
     }
 
     if($mode eq 'import') {
-        _debugs("creating index...");
+        _infos("creating index...");
         _enable_index($dbh, $prefix);
         if($reordered) {
             $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(3,'last_reorder',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
         }
-        _debug("done");
+        _info("done");
         &timing_breakpoint('_import_peer_logfiles enable index done');
     }
 
@@ -2752,7 +2759,7 @@ sub _check_db_fs {
         return;
     }
 
-    _debug("[%s] disk space sufficient for table optimization: required: %5.1f %2s, available: %5.1f %2s", $prefix, Thruk::Utils::reduce_number($required, "B"), Thruk::Utils::reduce_number($disk_available, "B"));
+    _info("[%s] disk space sufficient for table optimization: required: %5.1f %2s, available: %5.1f %2s", $prefix, Thruk::Utils::reduce_number($required, "B"), Thruk::Utils::reduce_number($disk_available, "B"));
     return 1;
 }
 
