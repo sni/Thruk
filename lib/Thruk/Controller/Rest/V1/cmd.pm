@@ -211,6 +211,9 @@ sub _rest_get_external_command {
     }
 
     my($backends) = $c->db->select_backends('send_command');
+    if(scalar @{$backends} == 0) {
+        die("backend error, no backends available");
+    }
     if(scalar @{$backends} > 1) {
         my $error;
         ($backends, $error) = Thruk::Controller::cmd::get_affected_backends($c, $required_fields, $backends);

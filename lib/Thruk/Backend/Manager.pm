@@ -1556,6 +1556,7 @@ sub _do_on_peers {
         }
         my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
         _debug($err);
+        _debug2(Carp::longmess("backend error"));
         $err = $short_err if $short_err;
         $c->stash->{'backend_error'} = 1;
         if($function eq 'send_command' || $c->stash->{backend_errors_handling} == DIE) {
