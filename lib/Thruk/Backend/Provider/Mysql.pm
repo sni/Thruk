@@ -6,6 +6,7 @@ use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
 use POSIX ();
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
@@ -1788,27 +1789,30 @@ sub _update_logcache_optimize {
     }
     my $start = time();
 
-    _infos("update logs table order...");
-    $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
-    $dbh->commit || confess $dbh->errstr;
-    _info("done");
+    my $disk_space_ok = $self->_check_db_fs($c, $peer, $prefix);
+    if($disk_space_ok) {
+        my $t1 = [gettimeofday];
+        _infos("update %s logs table order...", $prefix);
+        $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
+        $dbh->commit || confess $dbh->errstr;
+        _info("done. (duration: %s)", Thruk::Utils::Filter::duration(tv_interval($t1), 6));
+    }
 
-    unless ($c->config->{'logcache_pxc_strict_mode'}) {
+    unless($c->config->{'logcache_pxc_strict_mode'}) {
         # repair / optimize tables
-
-        my $optimize = $self->_check_db_fs($c, $peer, $prefix);
         $dbh = $peer->logcache->_dbh; # reconnect
 
         _debug("optimizing / repairing tables");
         for my $table (@Thruk::Backend::Provider::Mysql::tables) {
-            _infos($table.'...');
+            my $t1 = [gettimeofday];
+            _infos('maintain table %s...', $table);
             $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
-            if($optimize) {
+            if($disk_space_ok) {
                 $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
             }
             $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
             $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
-            _info("OK");
+            _info("OK. (duration: %s)", Thruk::Utils::Filter::duration(tv_interval($t1), 6));
         }
     }
 
@@ -2741,8 +2745,8 @@ sub _check_db_fs {
         return 1;
     }
 
-    # add 20% safety
-    my $required = 1.2 * ($stats[0]->{'data_size'} + $stats[0]->{'index_size'});
+    # add 10% safety
+    my $required = 1.1 * ($stats[0]->{'data_size'} + $stats[0]->{'index_size'});
     if($required > $disk_available) {
         _warn("[%s] not enough disk space for table optimization: required: %5.1f %2s, available: %5.1f %2s", $prefix, Thruk::Utils::reduce_number($required, "B"), Thruk::Utils::reduce_number($disk_available, "B"));
         return;
