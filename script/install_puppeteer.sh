@@ -8,6 +8,7 @@
 ###########################################################
 # node version to use
 USE_NODE=16
+PUPPETEER_VERSION=21.11.0 # the last one with node 16 support
 
 # target folder
 DEST=$1
@@ -71,7 +72,7 @@ if [ $INSTALL_NODE = "1" ]; then
 fi
 
 export PATH=$DEST/node/bin:$PATH
-$NPM i progress puppeteer
+$NPM i progress puppeteer@$PUPPETEER_VERSION
 
 if [ $INSTALL_NODE = "1" ]; then
     # install again, somehow previous module install removes it
@@ -85,6 +86,12 @@ if [ -n "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" ]; then
     echo ""
     echo "puppeteer successfully installed in $DEST"
     exit 0
+fi
+
+if [ $(ls -1 $DEST/chromium/chrome/*/chrome-*/chrome 2>/dev/null | wc -l) -eq 0 ]; then
+    echo ""
+    echo "puppeteer failed to  install"
+    exit 1
 fi
 
 MISSING=$(ldd $DEST/chromium/chrome/*/chrome-*/chrome | grep "=> not found")
