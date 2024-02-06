@@ -52,7 +52,7 @@ $Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
     in_check_period in_notification_period
 /];
 $Thruk::Backend::Provider::Livestatus::extra_host_columns = [qw/
-    contacts contact_groups long_plugin_output services comments_with_info downtimes_with_info
+    contacts contact_groups long_plugin_output services comments_with_info downtimes_with_info last_update
 /];
 $Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns = [qw/
     num_hosts
@@ -90,7 +90,7 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
     in_check_period in_notification_period host_parents
 /];
 $Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
-    contacts contact_groups long_plugin_output comments_with_info downtimes_with_info host_contacts host_contact_groups
+    contacts contact_groups long_plugin_output comments_with_info downtimes_with_info host_contacts host_contact_groups last_update
 /];
 $Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns = [qw/
     num_services
@@ -107,7 +107,7 @@ $Thruk::Backend::Provider::Livestatus::extra_contact_columns = [qw/
     host_notifications_enabled service_notifications_enabled
     host_notification_commands service_notification_commands
     in_host_notification_period in_service_notification_period
-    address1 address2 address3 address4 address5
+    address1 address2 address3 address4 address5 last_update
 /];
 
 $Thruk::Backend::Provider::Livestatus::default_logs_columns = [qw/
