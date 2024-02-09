@@ -195,7 +195,7 @@ for my $type (@{$Monitoring::Config::Object::Types}) {
     if($type eq 'hostextinfo' or $type eq 'hostextinfo' or $type eq 'hostdependency' or $type eq 'hostescalation' or $type eq 'serviceextinfo' or $type eq 'servicedependency' or $type eq 'serviceescalation') {
         $min = 0;
     }
-    ok(scalar @{$data->[0]->{'data'}} >= $min, "json result for ".$type." has data ( >= $min )");
+    ok(scalar @{$data->[0]->{'data'}} >= $min, "json result for ".$type." has data ( >= $min )") or TestUtils::bail_out_req("json list is empty", $page->{'response'});
 
     $data->[0]->{'data'}->[0] = "none" unless defined $data->[0]->{'data'}->[0];
     $data->[0]->{'data'}->[0] = encode_utf8($data->[0]->{'data'}->[0]);
