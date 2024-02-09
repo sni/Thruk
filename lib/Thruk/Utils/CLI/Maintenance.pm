@@ -97,7 +97,7 @@ sub clean_old_user_files {
     my $old_timeout    = time() - (86400 * 365); # remove unused logins after one year
 
     my $sdir = $c->config->{'var_path'}.'/users';
-    return unless -d $sdir."/.";
+    return($total, $removed) unless -d $sdir."/.";
     opendir(my $dh, $sdir) or die "can't opendir '$sdir': $!";
     for my $entry (readdir($dh)) {
         next if $entry eq '.' or $entry eq '..';
