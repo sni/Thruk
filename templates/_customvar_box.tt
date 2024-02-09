@@ -1,14 +1,14 @@
 ﻿[% IF custom_vars.size > 0 %]
-  <div class="card mt-5 min-w-[350px] overflow-hidden">
-    <table class="body">
+  <div class="card mt-5 w-[350px] overflow-hidden">
+    <table class="w-[350px] pl-0">
       [% FOREACH cust = custom_vars %]
       <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
-        <td class="align-top">
-          <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]" class="link block hoverable py-1">
+        <td class="align-top w-0">
+          <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&dfl_s0_type=custom+variable&dfl_s0_val_pre=[% cust.0 | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% cust.1 | uri %]&title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]" class="link block hoverable py-1 px-2">
             [% cust.0 | html %]
           </a>
         </td>
-        <td>[% cust.1 | replace_links %]</td>
+        <td class="text-ellipsis overflow-hidden max-w-0">[% cust.1 | replace_links %]</td>
       </tr>
       [% END %]
     </table>
