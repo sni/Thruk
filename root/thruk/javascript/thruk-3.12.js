@@ -220,7 +220,7 @@ function init_page() {
         }
         if(link && link.href) {
             e.preventDefault();
-            redirect_url(url_prefix+"#"+link.href);
+            open_url(url_prefix+"#"+link.href);
         }
     });
 
@@ -1953,6 +1953,7 @@ function setInnerHTMLWithScripts(el, html) {
 /* wrapper for window.location which results in
  * Uncaught TypeError: Illegal invocation
  * otherwise. (At least in chrome)
+ * Note: will replace the current page in the history
  */
 function redirect_url(url) {
     return(window_location_replace(url));
@@ -1960,6 +1961,16 @@ function redirect_url(url) {
 function window_location_replace(url) {
     try {
         window.location.replace(url);
+    } catch(err) { console.log(err) }
+}
+
+// just like redirect_url / location.replace but will add an entry to the history
+function open_url(url) {
+    return(window_location_assign(url));
+}
+function window_location_assign(url) {
+    try {
+        window.location.assign(url);
     } catch(err) { console.log(err) }
 }
 
