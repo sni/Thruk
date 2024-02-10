@@ -93,6 +93,9 @@ sub _run {
     ok(1, "$dir: running make $step");
     my($rc, $out) = Thruk::Utils::IO::cmd(undef, [$make, $step], undef, ($verbose ? '## ' : undef));
     is($rc, 0, sprintf("step %s complete, rc=%d duration=%.1fsec", $step, $rc, tv_interval ($t0)));
+    if($out =~ m/^(FROM.*version:.*)$/mx) {
+        diag($1);
+    }
     push @{$archive}, [$step, $rc, $out];
     # already printed in verbose mode
     if(!$verbose && $rc != 0) {
