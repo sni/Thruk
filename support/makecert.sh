@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # call this script with an email address (valid or not).
 # like:
 # ./makecert.sh <common name> <email>

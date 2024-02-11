@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 INSTANCE_ID=${INSTANCE_ID:-1}
 

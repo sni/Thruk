@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ "x$1" = "x" -o ! -d "$1" ]; then
   echo "usage: $0 <extjsfolder>"

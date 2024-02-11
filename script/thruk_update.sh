@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #export PERL_AUTOINSTALL_PREFER_CPAN=1
 export PERL_MM_USE_DEFAULT=1

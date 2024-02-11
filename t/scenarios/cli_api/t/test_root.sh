@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 VERBOSE=$1
 if [ "x$VERBOSE" = "x" ]; then

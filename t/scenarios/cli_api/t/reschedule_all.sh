@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 thruk host list | \
   while read host; do

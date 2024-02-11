@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 for x in $(seq 100); do
     yes omd | kinit -f omdadmin >/dev/null 2>&1

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ $(whoami) != "naemon" ]; then
     exec sudo su naemon -c "$0 $*"

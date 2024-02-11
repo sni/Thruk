@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 FLAGS=""
 if [ ! -t 0 ]; then

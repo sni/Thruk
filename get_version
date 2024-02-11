@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ ! -e .git ]; then
   echo "not in an development environment, no .git directory found" >&2

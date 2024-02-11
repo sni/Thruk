@@ -333,7 +333,7 @@ $dashboard->{'tab'}->{'xdata'}->{'refresh'} = 10;
 This example is a simple shell script which has label with the current time.
 
 ------
-#!/bin/bash
+#!/usr/bin/env bash
 # title:  Scripted Bash
 # user:   thrukadmin
 # groups: [{"*" : "read-only"}]

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 `which asciidoc > /dev/null 2>&1`;
 if [ "$?" -ne "0" ]; then

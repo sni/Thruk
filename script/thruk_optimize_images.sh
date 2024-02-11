@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # usage: ./script/thruk_optimize_images.sh [<image>]
 #
