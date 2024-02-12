@@ -736,7 +736,7 @@ sub _task_upload {
     my $folder = Cwd::abs_path($c->stash->{'usercontent_folder'}.'/'.$location);
 
     # make sure requested folder is below the usercontent folder
-    if(CORE::index(Cwd::abs_path($c->stash->{'usercontent_folder'}), $folder) != 0) {
+    if(CORE::index($folder, Cwd::abs_path($c->stash->{'usercontent_folder'})) != 0) {
         # must be text/html result, otherwise extjs form result handler dies
         $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'fileupload contains illegal folder.', success => Cpanel::JSON::XS::false });
         return;
@@ -769,12 +769,22 @@ sub _task_upload {
         return;
     }
 
+    my $rc = 0;
     eval {
-        move($upload->{'tempname'}, $newlocation);
+        $rc = move($upload->{'tempname'}, $newlocation);
     };
-    if($@) {
+    my $err = $@;
+    if($err) {
         # must be text/html result, otherwise extjs form result handler dies
-        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => $@, success => Cpanel::JSON::XS::false });
+        _error("panorama media upload failed: move %s %s: %s", $upload->{'tempname'}, $newlocation, $err);
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => "media upload failed: ".$err, success => Cpanel::JSON::XS::false });
+        return;
+    }
+    if(!$rc) {
+        # must be text/html result, otherwise extjs form result handler dies
+        my $err = $! // 'unknown error';
+        _error("panorama media upload failed: move %s %s: %s", $upload->{'tempname'}, $newlocation, $err);
+        $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => "upload failed: ".$err, success => Cpanel::JSON::XS::false });
         return;
     }
 
