@@ -164,9 +164,17 @@ sub index {
             if($rc != 0) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command failed\n".$msg });
             } else {
-                # check if new objects really exits
-                my $services = $c->db->get_services( filter => [ { 'host_name' => $bp->{'name'} } ], columns => [qw/description/] );
-                if(!$services || scalar @{$services} == 0) {
+                # check if new objects really exits (wait up to 10seconds)
+                my $success;
+                for (1..5) {
+                    my $services = $c->db->get_services( filter => [ { 'host_name' => $bp->{'name'} } ], columns => [qw/description/] );
+                    if($services && scalar @{$services} > 0) {
+                        $success = 1;
+                        last;
+                    }
+                    sleep(2);
+                }
+                if(!$success) {
                     Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command succeeded, but services are missing" });
                 } else {
                     Thruk::BP::Utils::update_cron_file($c); # check cronjob
