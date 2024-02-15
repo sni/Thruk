@@ -386,14 +386,14 @@ sub test_page {
         for my $like (@{_list($opts->{'like'})}) {
             use Carp;
             my $regex = ref $like ? $like : qr/$like/;
-            like($return->{'content'}, $regex, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($regex)) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string());
+            like($return->{'content'}, $regex, "Content should contain: ".Thruk::Utils::Encode::encode_utf8($regex)) || bail_out_req("failed content like match", $request, 1);
         }
     }
 
     # text that shouldn't appear
     if(defined $opts->{'unlike'}) {
         for my $unlike (@{_list($opts->{'unlike'})}) {
-            unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string());
+            unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) || bail_out_req("failed content unlike match", $request, 1);
         }
     }
 
@@ -401,7 +401,7 @@ sub test_page {
     $return->{'content_type'} = $request->header('content-type');
     my $content_type = $request->header('content-type') || '';
     if(defined $opts->{'content_type'}) {
-        is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'}) || die("failed in ".Carp::longmess($opts->{'url'})."\nRequest:\n".$request->request->as_string());
+        is($return->{'content_type'}, $opts->{'content_type'}, 'Content-Type should be: '.$opts->{'content_type'}) || bail_out_req("failed content-type match", $request, 1);
     }
 
 
@@ -746,7 +746,8 @@ sub test_command {
     }
 
     my($prg,$arg) = split(/\s+/, $test->{'cmd'}, 2);
-    my $t = Test::Cmd->new(prog => $prg, workdir => '') or die($!);
+    my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, $!);
+    $test->{'test_cmd'} = $t;
 
     # wait for something?
     if(defined $test->{'waitfor'}) {
@@ -789,9 +790,7 @@ sub test_command {
         }
         if(!$found) {
             fail("content ".$expr." did not occur within ".$duration." seconds");
-            diag("command waitfor failed:\n".$stdout."\n"._caller_info());
-            &{$test->{'diag'}}($test) if $test->{'diag'};
-            BAIL_OUT("waitfor failed, bailing out");
+            bail_out_cmd($test, "waitfor failed");
         }
     }
 
@@ -812,20 +811,20 @@ sub test_command {
     # exit code?
     $test->{'exit'} = 0 unless exists $test->{'exit'};
     if(defined $test->{'exit'} and $test->{'exit'} != -1) {
-        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) or do { diag("command failed with rc: ".$rc." - ".($stdout//'')."\n"._caller_info()); $return = 0 };
+        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) || do { bail_out_cmd($test, "command failed with rc: ".$rc, 2); $return = 0 };
     }
 
     # matches on stdout?
     if(defined $test->{'like'}) {
         for my $expr (ref $test->{'like'} eq 'ARRAY' ? @{$test->{'like'}} : $test->{'like'} ) {
-            like($stdout, $expr, "stdout like ".Thruk::Utils::Encode::encode_utf8($expr)) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
+            like($stdout, $expr, "stdout like ".Thruk::Utils::Encode::encode_utf8($expr)) || do { bail_out_cmd($test, "content like failed", 2); $return = 0 };
         }
     }
 
     # unlike matches on stdout?
     if(defined $test->{'unlike'}) {
         for my $expr (ref $test->{'unlike'} eq 'ARRAY' ? @{$test->{'unlike'}} : $test->{'unlike'} ) {
-            unlike($stdout, $expr, "stdout unlike ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
+            unlike($stdout, $expr, "stdout unlike ".$expr) || do { bail_out_cmd($test, "content unlike failed", 2); $return = 0 };
         }
     }
 
@@ -833,13 +832,13 @@ sub test_command {
     $test->{'errlike'} = '/^\s*$/' unless exists $test->{'errlike'};
     if(defined $test->{'errlike'}) {
         for my $expr (@{_list($test->{'errlike'})}) {
-            like($stderr, $expr, "stderr like ".$expr) or do { diag("\ncmd: '".$test->{'cmd'}."' failed\n"._caller_info()); $return = 0 };
+            like($stderr, $expr, "stderr like ".$expr) || do { bail_out_cmd($test, "content errlike failed", 2); $return = 0 };
         }
     }
 
     # sleep after the command?
     if(defined $test->{'sleep'}) {
-        ok(sleep($test->{'sleep'}), "slept $test->{'sleep'} seconds") or do { $return = 0 };
+        ok(sleep($test->{'sleep'}), "slept $test->{'sleep'} seconds");
     }
 
     # set some values
@@ -1041,6 +1040,8 @@ sub _set_test_page_defaults {
 #########################
 sub bail_out_req {
     my($msg, $res, $die) = @_;
+    $die = 0 if $ENV{'THRUK_TEST_BAIL_OUT'};
+
     my $page    = $res->content;
     my $error   = "";
     if($page =~ m/<!--error:(.*?):error-->/smx) {
@@ -1067,17 +1068,47 @@ sub bail_out_req {
         BAIL_OUT($0.': '.$res->code.' '.$msg.' - '.$error);
     }
     diag("\n######################################################\n");
-    diag("bail_out_req:\n");
-    diag(ref $msg ? Dumper($msg) : $msg);
+    diag("request diagnostics:");
+    diag("error: '".(ref $msg ? Dumper($msg) : $msg)."'\n");
     diag("request:\n");
     diag($res->request->as_string());
     diag("\n\nresponse:\n");
     diag($res->as_string());
     diag("\n\norigin:\n");
-    diag(Carp::longmess());
+    diag(Carp::longmess("started here:"));
     diag("\n######################################################\n");
     die($0.': '.$msg) if $die;
     BAIL_OUT($0.': '.$msg);
+    return;
+}
+
+#########################
+
+=head2 bail_out_cmd
+
+  print diagnostic output for failed commands
+
+=cut
+sub bail_out_cmd {
+    my($test, $msg, $die) = @_;
+    $die = 0 if $ENV{'THRUK_TEST_BAIL_OUT'};
+
+    # command provides diag callback
+    &{$test->{'diag'}}($test) if $test->{'diag'};
+
+    diag("\n######################################################\n");
+    diag("cmd diagnostics:");
+    diag("error:  '".(ref $msg ? Dumper($msg) : $msg)."'\n");
+    my $cmd = $test->{'test_cmd'};
+    diag("cmd:    '".$test->{'cmd'}."' failed\n");
+    diag("stdout: '".($cmd->stdout // '')."'\n");
+    diag("stderr: '".($cmd->stderr // '')."'\n");
+    diag("exit:   '".($test->{'exit'} // '(none)')."'\n");
+
+    diag(Carp::longmess("started here:"));
+    diag("\n######################################################\n");
+    BAIL_OUT($msg) unless $die;
+    die($msg) if $die == 1;
     return;
 }
 
@@ -1201,12 +1232,6 @@ sub _check_marker {
         }
     }
     $errors_js = 0;
-}
-
-#################################################
-sub _caller_info {
-    my @caller = caller(1);
-    return(sprintf("%s() in %s:%i", $caller[0], $caller[1], $caller[2]));
 }
 
 #################################################

@@ -8,6 +8,7 @@ BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
+    plan skip_all => 'skipped by THRUK_SKIP_DOCKER' if $ENV{'THRUK_SKIP_DOCKER'};
     plan skip_all => 'docker required' unless TestUtils::has_util('docker');
     plan skip_all => 'docker-compose required' unless TestUtils::has_util('docker-compose');
 }
@@ -48,6 +49,7 @@ for my $dir (@{$scenarios}) {
         for my $step (qw/prepare wait_start test_verbose clean/) {
             my($rc,$out) = _run($dir, $step, $archive);
             if($rc != 0) {
+                BAIL_OUT("step $step failed") if $ENV{'THRUK_TEST_BAIL_OUT'};
                 _run($dir, "clean", $archive);
                 last;
             }
