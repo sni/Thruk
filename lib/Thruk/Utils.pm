@@ -2415,7 +2415,7 @@ sub wait_after_reload {
                     _debug($msg);
                 }
                 # assume reload worked if last restart is exactly the time we started to wait
-                if(int($procinfo->{$pkey}->{'program_start'}) == int($last_reload) && $start <= (time() - 3)) {
+                if(int($procinfo->{$pkey}->{'program_start'}) == int($start) && $start <= (time() - 3)) {
                     $done = 1;
                     _debug('core reloaded after '.(time()-$start).'s, last program_start: '.(scalar localtime($procinfo->{$pkey}->{'program_start'})));
                     last;
