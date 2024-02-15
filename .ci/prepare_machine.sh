@@ -17,6 +17,7 @@ apt-get -y install \
     libperl-dev \
     cpanminus \
     tofrodos \
+    poppler-utils \
     apache2 \
     apache2-utils \
     libmariadb-dev \
