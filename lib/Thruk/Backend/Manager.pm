@@ -958,6 +958,38 @@ sub logcache_stats {
 
 ########################################
 
+=head2 logcache_existing_caches
+
+  logcache_existing_caches($c)
+
+return peer ids of existing log caches
+
+=cut
+sub logcache_existing_caches {
+    my($self, $c) = @_;
+
+    my $type = '';
+    $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    my $stats;
+    if($type eq 'mysql') {
+        if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
+            require Thruk::Backend::Provider::Mysql;
+            Thruk::Backend::Provider::Mysql->import;
+            $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
+        }
+        $stats = Thruk::Backend::Provider::Mysql->get_existing_caches($c);
+    } else {
+        die("unknown type: ".$type);
+    }
+
+    # clean up connections
+    close_logcache_connections($c);
+
+    return($stats);
+}
+
+########################################
+
 =head2 get_logs
 
   get_logs(@args)
@@ -1078,12 +1110,14 @@ sub _renew_logcache {
     return 1 unless $check;
 
     $c->stash->{'backends'} = $get_results_for;
-    my $stats = $self->logcache_stats($c);
+    my $exists = $self->logcache_existing_caches($c) // [];
+    $exists = Thruk::Base::array2hash($exists);
+
     my $backends2import = [];
     for my $key (@{$get_results_for}) {
         my $peer = $c->db->get_peer_by_key($key);
-        next unless($peer && $peer->{'logcache'});
-        push @{$backends2import}, $key unless(defined $stats->{$key} && $stats->{$key}->{'cache_version'});
+        next if($peer && $exists->{$key});
+        push @{$backends2import}, $key;
     }
 
     if($c->config->{'logcache_import_command'}) {

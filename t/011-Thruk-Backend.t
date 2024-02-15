@@ -29,6 +29,7 @@ sub get_subs {
             next if $func eq 'check_global_lock';            # only available on mysql
             next if $func eq 'can_use_logcache';             # use from Base.pm
             next if $func eq 'get_logs_start_end_no_filter'; # use from Base.pm
+            next if $func eq 'get_existing_caches';          # only available on mysql
             push @subs, $func;
         }
     }

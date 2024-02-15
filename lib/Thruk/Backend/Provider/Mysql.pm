@@ -1059,6 +1059,41 @@ sub _get_logs_start_end {
 
 ##########################################################
 
+=head2 get_existing_caches
+
+  get_existing_caches
+
+returns list of already created caches
+
+=cut
+sub get_existing_caches {
+    my($self, $c) = @_;
+
+    # use first logcache connection
+    my $dbh;
+    for my $peer ( @{ $c->db->get_peers() } ) {
+        next unless $peer->{'logcache'};
+        $peer->logcache->reconnect();
+        $dbh = $peer->logcache->_dbh();
+        last;
+    }
+
+    return unless $dbh;
+
+    my @list;
+    # check if our tables exist
+    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES')};
+    for my $table (@tables) {
+        if($table =~ m/^(.*?)_log$/mx) {
+            push @list, $1;
+        }
+    }
+
+    return(\@list);
+}
+
+##########################################################
+
 =head2 _log_stats
 
   _log_stats
