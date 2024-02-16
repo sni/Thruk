@@ -442,6 +442,9 @@ sub _extract_checks {
             $command  = 'check_thruk_agents!agents check inventory \'$HOSTNAME$\'';
             $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
         }
+        if($chk->{'check'} eq 'check_os_updates') {
+            $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'os_updates_interval'} // 60;
+        }
         if($chk->{'args'}) {
             if(ref $chk->{'args'} eq 'ARRAY') {
                 for my $arg (@{$chk->{'args'}}) {

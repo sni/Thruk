@@ -40,6 +40,9 @@ For example:
         # override inventory interval
         inventory_interval = 60
 
+        # override os updates interval
+        os_updates_interval = 60
+
         # set default contact(s)
         #default_contacts = admin, other
 
