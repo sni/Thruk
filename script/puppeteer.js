@@ -15,6 +15,7 @@ var width     = process.argv[4];
 var height    = process.argv[5];
 var sessionid = process.argv[6];
 var is_report = process.argv[7];
+var waitTimeout = 20000;
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -50,62 +51,75 @@ var is_report = process.argv[7];
       }),
       page.waitForSelector('div.alert-error', {timeout: 0}).then(async () => {
         console.error("alert message found, export failed");
-        console.error("alert message found, export failed:");
         let element = await page.$('div.alert-error')
         let value = await page.evaluate(el => el.textContent, element)
         console.error(value);
         process.exit(2);
       }),
-      page.waitForSelector('DIV.flot-text, p.panel-text-content, DIV.uplot', {timeout: 20000}).then(() => {
+      page.waitForSelector('DIV.markdown-html H1', {timeout: 0}).then(async () => {
+        console.error("alert message found, export failed:");
+        let element = await page.$('DIV.markdown-html H1')
+        let value = await page.evaluate(el => el.textContent, element)
+        console.error(value);
+        process.exit(2);
+      }),
+      page.waitForSelector('DIV.flot-text, p.panel-text-content, DIV.uplot', {timeout: waitTimeout}).then(() => {
         console.log("chart panel found, export OK");
-      }, () => {
+      }, async () => {
         console.error("timeout while waiting for chart, export failed");
         process.exit(2);
       })
     ]);
   }
-  //console.debug("creating screenshot");
-  if(output.match(/\.pdf$/)) {
-    // pdf reports in din a4 format
-    if(is_report == 1) {
-      await page.emulateMediaType("print");
-      await page.pdf({
-        timeout: 600000, // se timeout to 10min
-        format: 'A4',
-        width: '210mm',
-        height: '297mm',
-        preferCSSPageSize: true,
-        displayHeaderFooter: true,
-        printBackground: true,
-        margin: {
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0
-        },
-        path: output
-      });
+
+
+  await createScreenshot(output, page);
+  await browser.close();
+  process.exit(0);
+
+  async function createScreenshot(output, page) {
+    //console.debug("creating screenshot");
+    if(output.match(/\.pdf$/)) {
+      // pdf reports in din a4 format
+      if(is_report == 1) {
+        await page.emulateMediaType("print");
+        await page.pdf({
+          timeout: 600000, // se timeout to 10min
+          format: 'A4',
+          width: '210mm',
+          height: '297mm',
+          preferCSSPageSize: true,
+          displayHeaderFooter: true,
+          printBackground: true,
+          margin: {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0
+          },
+          path: output
+        });
+      } else {
+        // other pages
+        await page.emulateMediaType("screen");
+        await page.pdf({
+          timeout: 600000, // se timeout to 10min
+          width: '1600px',
+          height: '1200px',
+          displayHeaderFooter: true,
+          printBackground: true,
+          margin: {
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0
+          },
+          path: output
+        });
+      }
     } else {
-      // other pages
-      await page.emulateMediaType("screen");
-      await page.pdf({
-        timeout: 600000, // se timeout to 10min
-        width: '1600px',
-        height: '1200px',
-        displayHeaderFooter: true,
-        printBackground: true,
-        margin: {
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0
-        },
-        path: output
-      });
+      await page.screenshot({path: output});
     }
-  } else {
-    await page.screenshot({path: output});
   }
 
-  await browser.close();
 })();
