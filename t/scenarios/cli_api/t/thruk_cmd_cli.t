@@ -68,7 +68,7 @@ TestUtils::test_command({
 ###########################################################
 # some tests require non-pending services
 TestUtils::test_command({
-    cmd     => '/test/t/reschedule_all.sh',
+    cmd     => '/thruk/support/reschedule_all_checks.sh',
     like    => ['/OK/', '/cmd: COMMAND/', '/SCHEDULE_FORCED_HOST_CHECK/', '/SCHEDULE_FORCED_SVC_CHECK/'],
 });
 TestUtils::test_command({

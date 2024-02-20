@@ -1906,6 +1906,7 @@ support/menu_local.conf
 support/naglint.conf.example
 support/panorama2img
 support/panorama2img.js
+support/reschedule_all_checks.sh
 support/standard_script_header
 support/thruk.init
 support/thruk.logrotate
@@ -2359,7 +2360,6 @@ t/scenarios/cli_api/omd/1.tbp
 t/scenarios/cli_api/omd/1.tsk
 t/scenarios/cli_api/omd/Dockerfile
 t/scenarios/cli_api/omd/playbook.yml
-t/scenarios/cli_api/t/reschedule_all.sh
 t/scenarios/cli_api/t/test.sh
 t/scenarios/cli_api/t/test_root.sh
 t/scenarios/cli_api/t/thruk.troot
