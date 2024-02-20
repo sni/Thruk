@@ -867,7 +867,7 @@ sub _send {
         # surrogate pair expected
         if($@) {
             # replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
-            $body =~ s/\\ud[89a-f]\w{2}/\\ufffd/gmxi;
+            $body =~ s/[\x{D800}-\x{DFFF}]/\x{fffd}/gmxi;
             eval {
                 $result = $json_decoder->decode($body);
             };
@@ -1206,7 +1206,7 @@ sub _read_socket_do {
             if($remaining < $length) { $length = $remaining; }
             while($length > 0 && $sock->read(my $buf, $length)) {
                 # replace u+D800 to u+DFFF (reserved utf-16 low/high surrogates)
-                $buf =~ s/\\ud[89a-f]\w{2}/\\ufffd/gmxio;
+                $buf =~ s/[\x{D800}-\x{DFFF}]/\x{fffd}/gmxi;
                 $json_decoder->incr_parse($buf);
                 $remaining = $remaining -$length;
                 if($remaining < $length) { $length = $remaining; }
