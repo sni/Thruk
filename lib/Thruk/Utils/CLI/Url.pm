@@ -65,36 +65,44 @@ sub cmd {
         return({output => "all-inclusive options requires the reports plugin to be enabled", rc => 1});
     }
 
-    my $url = shift @{$commandoptions};
-    if(!$url) {
+    if(!$commandoptions || scalar @{$commandoptions} == 0) {
         $c->stats->profile(end => "_cmd_url($action)");
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
+    my $num_urls = scalar @{$commandoptions};
 
-    if($url =~ m|^\w+\.cgi|gmx) {
-        my $product = $c->config->{'product_prefix'} || 'thruk';
-        $url = '/'.$product.'/cgi-bin/'.$url;
-    }
-    my @res = Thruk::Utils::CLI::request_url($c, $url);
+    my($output, $overall_rc) = ("", 0);
+    for my $url (@{$commandoptions}) {
+        if($url =~ m|^\w+\.cgi|gmx) {
+            my $product = $c->config->{'product_prefix'} || 'thruk';
+            $url = '/'.$product.'/cgi-bin/'.$url;
+        }
+        my @res = Thruk::Utils::CLI::request_url($c, $url);
 
-    # All Inclusive?
-    if($res[0] == 200 && $res[1]->{'result'} && $opt->{'all_inclusive'}) {
-        require Thruk::Utils::Reports::Render;
-        $res[1]->{'result'} = Thruk::Utils::Reports::Render::html_all_inclusive($c, $url, $res[1]->{'result'}, 1);
-    }
+        # All Inclusive?
+        if($res[0] == 200 && $res[1]->{'result'} && $opt->{'all_inclusive'}) {
+            require Thruk::Utils::Reports::Render;
+            $res[1]->{'result'} = Thruk::Utils::Reports::Render::html_all_inclusive($c, $url, $res[1]->{'result'}, 1);
+        }
 
-    my $content_type;
-    if($res[1] && $res[1]->{'headers'}) {
-        $content_type = $res[1]->{'headers'}->{'content-type'};
-    }
+        my $content_type;
+        if($res[1] && $res[1]->{'headers'}) {
+            $content_type = $res[1]->{'headers'}->{'content-type'};
+        }
 
-    $c->stats->profile(end => "_cmd_url($action)");
-    my $rc = $res[0] >= 400 ? 1 : 0;
-    return({output => $res[2], rc => $rc, 'content_type' => $content_type}) if $res[2];
-    if($res[1]->{'result'} =~ m/\Qyour command request was successfully\E/gmxi) {
-        return({output => "Your command request was successfully submitted to the backend for processing\n", rc => $rc});
+        $c->stats->profile(end => "_cmd_url($action)");
+        my $rc = $res[0] >= 400 ? 1 : 0;
+        if($res[1]->{'result'} =~ m/\Qyour command request was successfully\E/gmxi) {
+            $res[1]->{'result'} = "Your command request was successfully submitted to the backend for processing\n";
+        }
+        if($num_urls == 1) {
+            return({output => $res[2], rc => $rc, 'content_type' => $content_type}) if $res[2];
+            return({output => $res[1]->{'result'}, rc => $rc, 'content_type' => $content_type});
+        }
+        $overall_rc += $rc;
+        $output     .= $res[2] || $res[1]->{'result'};
     }
-    return({output => $res[1]->{'result'}, rc => $rc, 'content_type' => $content_type});
+    return({output => $output, rc => $overall_rc});
 }
 
 ##############################################
