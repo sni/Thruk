@@ -442,6 +442,11 @@ sub redirect_or_success {
         $wait = 0;
     }
 
+    # skip wait by request parameter
+    if(defined $c->req->parameters->{'wait'} && !$c->req->parameters->{'wait'}) {
+        $wait = 0;
+    }
+
     # only wait if we got original backends
     my $backends = Thruk::Base::list($c->req->parameters->{'backend'});
     if($wait and defined $c->req->parameters->{'backend.orig'}) {
