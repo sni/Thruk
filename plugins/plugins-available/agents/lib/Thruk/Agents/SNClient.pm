@@ -180,11 +180,11 @@ sub get_config_objects {
                 # these are obsolete services, just keep them as is
                 next;
             }
-            my $extra = _get_extra_opts_svc($c, $svc->{'conf'}->{'service_description'}, $hostname, $section);
             $settings->{'disabled'} = Thruk::Base::array_remove($settings->{'disabled'}, $id);
             $svc->{'conf'} = $chk->{'svc_conf'};
             $svc->{'conf'}->{'use'} = \@templates;
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
+            my $extra = _get_extra_opts_svc($c, $svc->{'conf'}->{'service_description'}, $hostname, $section);
             if($args) { # user supplied manual overrides
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
                 $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
