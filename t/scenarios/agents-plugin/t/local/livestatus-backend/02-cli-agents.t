@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 85;
+plan tests => 93;
 
 ###########################################################
 # test thruks script path
@@ -30,6 +30,7 @@ TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -I host-ls', like =>
 TestUtils::test_page( url => '/thruk/cgi-bin/status.cgi', like => ['agent inventory', 'agent version', 'net eth0'] );
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['host-ls'] );
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -l', like => ['/host-ls/'] });
+TestUtils::test_command({ cmd => '/usr/bin/env grep -r testpattern123 etc/naemon/conf.d/agents/', like => ['/check_command/', '/host-ls/'] });
 
 ###########################################################
 # clean up again
