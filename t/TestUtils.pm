@@ -144,7 +144,7 @@ sub get_current_user_token {
 #########################
 sub get_test_service {
     my $backend = shift;
-    my $request = _request('/thruk/r/services?columns=host_name,description&limit=1'.(defined $backend ? '&backend='.$backend : ''));
+    my $request = _request('/thruk/r/services?columns=host_name,description&description[nregex]=Business&limit=1'.(defined $backend ? '&backend='.$backend : ''));
     ok( $request->is_success, 'get_test_service() request succeeded' ) or diag(Dumper($request));
     my $data    = decode_json($request->decoded_content || $request->content);
     my $host    = $data->[0]->{'host_name'};
