@@ -4,6 +4,7 @@
     - role: common
     - role: local_tests
     - role: thruk_developer
+    - role: naemon_debug_log
   tasks:
   - name: "yum install krb5 dependencies"
     include_role:

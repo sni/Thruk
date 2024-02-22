@@ -1,0 +1,17 @@
+- name: "make sure site {{ site }} is stopped"
+  shell: "sudo su - {{ site }} -c 'omd stop'"
+- name: "enable naemon.cfg debug_level"
+  lineinfile:
+    dest: /opt/omd/sites/{{ site }}/etc/naemon/naemon.cfg
+    line: "debug_level=-1"
+    regexp: '^debug_level'
+- name: "enable naemon.cfg debug_verbosity"
+  lineinfile:
+    dest: /opt/omd/sites/{{ site }}/etc/naemon/naemon.cfg
+    line: "debug_verbosity=2"
+    regexp: '^debug_verbosity'
+- name: "increase naemon.cfg max_debug_file_size"
+  lineinfile:
+    dest: /opt/omd/sites/{{ site }}/etc/naemon/naemon.cfg
+    line: "max_debug_file_size=100000000"
+    regexp: '^max_debug_file_size'
