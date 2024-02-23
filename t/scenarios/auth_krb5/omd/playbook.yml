@@ -4,7 +4,7 @@
     - role: common
     - role: local_tests
     - role: thruk_developer
-    - role: naemon_debug_log
+    #- role: naemon_debug_log
   tasks:
   - name: "yum install krb5 dependencies"
     include_role:
@@ -28,10 +28,18 @@
       path: /omd/sites/demo/etc/mod-gearman/server.cfg
       regexp: '^perfdata='
       line: 'perfdata=nagflux'
+  #- lineinfile:
+  #    path: /omd/sites/demo/etc/mod-gearman/server.cfg
+  #    regexp: '^debug='
+  #    line: 'debug=2'
   - lineinfile:
       path: /omd/sites/demo/etc/nagflux/config.gcfg
       regexp: '^\s*Queue\s*='
       line: '        Queue = "nagflux"'
+  #- lineinfile:
+  #    path: /omd/sites/demo/etc/nagflux/config.gcfg
+  #    regexp: '^\s*MinSeverity\s*='
+  #    line: '        MinSeverity = "TRACE"'
   - replace:
       dest=/omd/sites/demo/etc/nagflux/config.gcfg
       regexp='(ModGearman "example".*)Enabled = \w'
