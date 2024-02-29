@@ -32,22 +32,23 @@
   #    path: /omd/sites/demo/etc/mod-gearman/server.cfg
   #    regexp: '^debug='
   #    line: 'debug=2'
-  - lineinfile:
-      path: /omd/sites/demo/etc/nagflux/config.gcfg
-      regexp: '^\s*Queue\s*='
-      line: '        Queue = "nagflux"'
   #- lineinfile:
   #    path: /omd/sites/demo/etc/nagflux/config.gcfg
   #    regexp: '^\s*MinSeverity\s*='
   #    line: '        MinSeverity = "TRACE"'
   - replace:
       dest=/omd/sites/demo/etc/nagflux/config.gcfg
-      regexp='(ModGearman "example".*)Enabled = \w'
-      replace='\1        Enabled = true'
+      after='ModGearman "example"'
+      before='Worker'
+      regexp='.*Enabled = \w+'
+      replace='       Enabled = true'
   - lineinfile:
       path: /omd/sites/demo/etc/nagflux/config.gcfg
       regexp: '^\s*Queue\s*='
-      line: '        Enabled = true'
+      line: '        Queue = "nagflux"'
+  - copy:
+      dest: /omd/sites/demo/etc/nagflux/nagios_nagflux.cfg
+      content: ""
   - copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
