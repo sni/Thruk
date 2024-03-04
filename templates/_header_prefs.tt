@@ -19,7 +19,6 @@
     <td class="flex gap-x-1">
       [% IF c.config.themes.size > 4 %]
         <select name="theme" id="pref_theme" class="w-40" onchange="switchTheme(this)">
-          <option value="">default</option>
           [% FOR t = c.config.themes %]
           <option value="[% t | html %]"[% IF cookie_theme && t == theme %] selected[% END %]>[% t | html %]</option>
           [% END %]
@@ -31,7 +30,7 @@
         [% END %]
       </div>
       [% END %]
-      <button class="iconOnly" onclick="cookieRemove('thruk_theme'); reloadPage(50, true); return false;" title="use default theme">
+      <button class="iconOnly" onclick="cookieRemove('thruk_theme'); reloadPage(50, true); return false;" title="use system default theme">
         <i class="uil uil-cloud-times"></i>
       </button>
     </td>
