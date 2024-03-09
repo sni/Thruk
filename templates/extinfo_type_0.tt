@@ -53,111 +53,111 @@
         <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=13'><i class="uil uil-sync round small"></i>Restart the Backend process</a></div>
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.enable_notifications != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.enable_notifications != 0 %]
           [% IF !command_disabled(c, '11') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=11'><i class="fa-solid fa-xmark round small red"></i>Disable notifications</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.enable_notifications != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.enable_notifications != 1 %]
           [% IF !command_disabled(c, '12') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=12'><i class="fa-solid fa-check round small green"></i>Enable notifications</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.execute_service_checks != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.execute_service_checks != 0 %]
           [% IF !command_disabled(c, '36') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=36'><i class="fa-solid fa-xmark round small red"></i>Stop executing service checks</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.execute_service_checks != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.execute_service_checks != 1 %]
           [% IF !command_disabled(c, '35') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=35'><i class="fa-solid fa-check round small green"></i>Start executing service checks</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.accept_passive_service_checks != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.accept_passive_service_checks != 0 %]
           [% IF !command_disabled(c, '38') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=38'><i class="fa-solid fa-xmark round small red"></i>Stop accepting passive service checks</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.accept_passive_service_checks != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.accept_passive_service_checks != 1 %]
           [% IF !command_disabled(c, '37') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=37'><i class="fa-solid fa-check round small green"></i>Start accepting passive service checks</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.execute_host_checks != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.execute_host_checks != 0 %]
           [% IF !command_disabled(c, '89') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=89'><i class="fa-solid fa-xmark round small red"></i>Stop executing host checks</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.execute_host_checks != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.execute_host_checks != 1 %]
           [% IF !command_disabled(c, '88') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=88'><i class="fa-solid fa-check round small green"></i>Start executing host checks</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.accept_passive_host_checks != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.accept_passive_host_checks != 0 %]
           [% IF !command_disabled(c, '91') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=91'><i class="fa-solid fa-xmark round small red"></i>Stop accepting passive host checks</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.accept_passive_host_checks != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.accept_passive_host_checks != 1 %]
           [% IF !command_disabled(c, '90') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=90'><i class="fa-solid fa-check round small green"></i>Start accepting passive host checks</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.enable_event_handlers != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.enable_event_handlers != 0 %]
           [% IF !command_disabled(c, '42') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=42'><i class="fa-solid fa-xmark round small red"></i>Disable event handlers</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.enable_event_handlers != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.enable_event_handlers != 1 %]
           [% IF !command_disabled(c, '41') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=41'><i class="fa-solid fa-check round small green"></i>Enable event handlers</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.obsess_over_services != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.obsess_over_services != 0 %]
           [% IF !command_disabled(c, '50') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=50'><i class="fa-solid fa-xmark round small red"></i>Stop obsessing over services</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.obsess_over_services != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.obsess_over_services != 1 %]
           [% IF !command_disabled(c, '49') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=49'><i class="fa-solid fa-check round small green"></i>Start obsessing over services</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.obsess_over_hosts != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.obsess_over_hosts != 0 %]
           [% IF !command_disabled(c, '95') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=95'><i class="fa-solid fa-xmark round small red"></i>Stop obsessing over hosts</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.obsess_over_hosts != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.obsess_over_hosts != 1 %]
           [% IF !command_disabled(c, '94') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=94'><i class="fa-solid fa-check round small green"></i>Start obsessing over hosts</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.enable_flap_detection != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.enable_flap_detection != 0 %]
           [% IF !command_disabled(c, '62') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=62'><i class="fa-solid fa-xmark round small red"></i>Disable flap detection</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.enable_flap_detection != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.enable_flap_detection != 1 %]
           [% IF !command_disabled(c, '61') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=61'><i class="fa-solid fa-check round small green"></i>Enable flap detection</a></div>
           [% END %]
         [% END %]
 
-        [% IF pi.keys.size > 0 && pi.process_performance_data != 0 %]
+        [% IF has_proc_info && pi.keys.size > 0 && pi.process_performance_data != 0 %]
           [% IF !command_disabled(c, '83') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=83'><i class="fa-solid fa-xmark round small red"></i>Disable performance data</a></div>
           [% END %]
         [% END %]
-        [% IF pi.keys.size == 0 || pi.process_performance_data != 1 %]
+        [% IF !has_proc_info || pi.keys.size == 0 || pi.process_performance_data != 1 %]
           [% IF !command_disabled(c, '82') %]
           <div><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=82'><i class="fa-solid fa-check round small green"></i>Enable performance data</a></div>
           [% END %]
