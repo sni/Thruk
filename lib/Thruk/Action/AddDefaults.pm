@@ -514,6 +514,7 @@ sub add_defaults {
 
     ###############################
     my $safe_defaults_added_already;
+    $c->stash->{'data_source_error'} = "";
     if(!$c->config->{'_lmd_federation_checked'} && ($ENV{'THRUK_USE_LMD'} || $c->config->{'lmd_remote'})) {
         # required on first run to expand federation peers
         eval {
@@ -521,6 +522,7 @@ sub add_defaults {
             set_processinfo($c, ADD_SAFE_DEFAULTS, $cached_data);
             $safe_defaults_added_already = 1;
         };
+        $c->stash->{'data_source_error'} = $@ if $@;
     }
     my $disabled_backends = set_enabled_backends($c);
 
@@ -552,6 +554,7 @@ sub add_defaults {
             sleep 1;
         }
         if($err) {
+            $c->stash->{'data_source_error'} = $err;
             # index.html and some other pages should not be redirect to the error page on backend errors
             set_possible_backends($c, $disabled_backends);
             if(Thruk::Base->debug) {
@@ -559,6 +562,8 @@ sub add_defaults {
             } else {
                 _debug("data source error: $err");
             }
+        } else {
+            $c->stash->{'data_source_error'} = "";
         }
         $c->stash->{'last_program_restart'} = $last_program_restart;
 
@@ -912,6 +917,10 @@ sub _calculate_section_totals {
             }
             if($backend_detail->{$pd}->{'last_error'}) {
                 $last_error = $backend_detail->{$pd}->{'last_error'};
+            }
+            if($last_error eq 'OK' && $class eq 'DOWN' && $c->stash->{'data_source_error'}) {
+                # might happen on global internal Manager.pm errors
+                $last_error = $c->stash->{'data_source_error'};
             }
             $initial_backends->{$pd}->{'last_error'} = $last_error;
         }
