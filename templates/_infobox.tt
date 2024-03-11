@@ -35,12 +35,12 @@
       [% IF has_proc_info %]
       <tr>
         <td colspan="2">
-          [% IF pi.keys.size > 0 && pi.enable_notifications == 0 %]<div class='textALERT'> - Notifications are disabled</div>[% END %]
-          [% IF pi.keys.size > 0 && pi.enable_notifications == -1 %]<div class='textALERT'> - Notifications are partially disabled</div>[% END %]
-          [% IF pi.keys.size > 0 && pi.execute_service_checks == 0 %]<div class='textALERT'> - Service checks are disabled </div>[% END %]
-          [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<div class='textALERT'> - Service checks are partially disabled </div>[% END %]
-          [% IF pi.keys.size > 0 && pi.execute_host_checks == 0 %]<div class='textALERT'> - Host checks are disabled </div>[% END %]
-          [% IF pi.keys.size > 0 && pi.execute_host_checks == -1 %]<div class='textALERT'> - Host checks are partially disabled </div>[% END %]
+          [% IF pi.keys.size > 0 && pi.enable_notifications == 0    %]<a href='extinfo.cgi?type=0'><div class='textALERT'> - Notifications are disabled</div></a>[% END %]
+          [% IF pi.keys.size > 0 && pi.enable_notifications == -1   %]<a href='extinfo.cgi?type=0'><div class='textALERT'> - Notifications are partially disabled</div></a>[% END %]
+          [% IF pi.keys.size > 0 && pi.execute_service_checks == 0  %]<a href='extinfo.cgi?type=0'><div class='textALERT'> - Service checks are disabled </div></a>[% END %]
+          [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<a href='extinfo.cgi?type=0'><div class='textALERT'> - Service checks are partially disabled </div></a>[% END %]
+          [% IF pi.keys.size > 0 && pi.execute_host_checks == 0     %]<a href='extinfo.cgi?type=0'><div class='textALERT'> - Host checks are disabled </div></a>[% END %]
+          [% IF pi.keys.size > 0 && pi.execute_host_checks == -1    %]<a href='extinfo.cgi?type=0'><div class='textALERT'> - Host checks are partially disabled </div></a>[% END %]
         </td>
       </tr>
       [% END %]
