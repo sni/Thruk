@@ -584,8 +584,19 @@ sub _check_inventory {
     }
 
     my $t1 = [gettimeofday];
+    my($checks, $checks_num, $hst, $hostobj);
 
-    my($checks, $checks_num, $hst, $hostobj) = _get_checks($c, $hostname, $opt, 1);
+    eval {
+        ($checks, $checks_num, $hst, $hostobj) = _get_checks($c, $hostname, $opt, 1);
+    };
+    my $err = $@;
+    if($err) {
+        _debug("inventory failed: %s", $err);
+        $err =~ s/^UNKNOWN\ \-\ //gmx;
+        $err =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
+        $err =~ s/("https?:\/\/.*?)\/[^"]*"/$1\/..."/gmx;
+        return(sprintf("UNKNOWN - %s", $err), 3);
+    }
     return(sprintf("UNKNOWN - no host found with enabled agent and name: %s\n", $hostname), 3) unless $hst;
     return(sprintf("UNKNOWN - no host found by name: %s\n", $hostname), 3) unless $hostobj;
 
@@ -720,7 +731,7 @@ sub _get_checks {
             my($inv, $err) = Thruk::Utils::Agents::update_inventory($c, $hostname, $hostobj, $data);
             die($err) if $err;
         } else {
-            my $err     = Thruk::Utils::Agents::scan_agent($c, $data);
+            my $err = Thruk::Utils::Agents::scan_agent($c, $data);
             die($err) if $err;
         }
     }
