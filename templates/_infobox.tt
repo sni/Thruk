@@ -34,12 +34,13 @@
     [% IF has_proc_info %]
     <tr>
       <td colspan="2">
-        [% IF pi.keys.size > 0 && pi.enable_notifications == 0    %]<a class="" href='extinfo.cgi?type=0'><div class='textALERT hoverable px-2 pb-1'> - Notifications are disabled</div></a>[% END %]
-        [% IF pi.keys.size > 0 && pi.enable_notifications == -1   %]<a class="" href='extinfo.cgi?type=0'><div class='textALERT hoverable px-2 pb-1'> - Notifications are partially disabled</div></a>[% END %]
-        [% IF pi.keys.size > 0 && pi.execute_service_checks == 0  %]<a class="" href='extinfo.cgi?type=0'><div class='textALERT hoverable px-2 pb-1'> - Service checks are disabled </div></a>[% END %]
-        [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %]<a class="" href='extinfo.cgi?type=0'><div class='textALERT hoverable px-2 pb-1'> - Service checks are partially disabled </div></a>[% END %]
-        [% IF pi.keys.size > 0 && pi.execute_host_checks == 0     %]<a class="" href='extinfo.cgi?type=0'><div class='textALERT hoverable px-2 pb-1'> - Host checks are disabled </div></a>[% END %]
-        [% IF pi.keys.size > 0 && pi.execute_host_checks == -1    %]<a class="" href='extinfo.cgi?type=0'><div class='textALERT hoverable px-2 pb-1'> - Host checks are partially disabled </div></a>[% END %]
+        [% hasCmd = c.check_cmd_permissions('system') %]
+        [% IF pi.keys.size > 0 && pi.enable_notifications == 0    %][% IF hasCmd %]<a class="js-modal-command-link" href="cmd.cgi?cmd_typ=12">[% END %]<div class='textALERT hoverable px-2 pb-1'> - Notifications are disabled</div>[% IF hasCmd %]</a>[% END %][% END %]
+        [% IF pi.keys.size > 0 && pi.enable_notifications == -1   %][% IF hasCmd %]<a class="js-modal-command-link" href="cmd.cgi?cmd_typ=12">[% END %]<div class='textALERT hoverable px-2 pb-1'> - Notifications are partially disabled</div>[% IF hasCmd %]</a>[% END %][% END %]
+        [% IF pi.keys.size > 0 && pi.execute_service_checks == 0  %][% IF hasCmd %]<a class="js-modal-command-link" href="cmd.cgi?cmd_typ=35">[% END %]<div class='textALERT hoverable px-2 pb-1'> - Service checks are disabled </div>[% IF hasCmd %]</a>[% END %][% END %]
+        [% IF pi.keys.size > 0 && pi.execute_service_checks == -1 %][% IF hasCmd %]<a class="js-modal-command-link" href="cmd.cgi?cmd_typ=35">[% END %]<div class='textALERT hoverable px-2 pb-1'> - Service checks are partially disabled </div>[% IF hasCmd %]</a>[% END %][% END %]
+        [% IF pi.keys.size > 0 && pi.execute_host_checks == 0     %][% IF hasCmd %]<a class="js-modal-command-link" href="cmd.cgi?cmd_typ=88">[% END %]<div class='textALERT hoverable px-2 pb-1'> - Host checks are disabled </div>[% IF hasCmd %]</a>[% END %][% END %]
+        [% IF pi.keys.size > 0 && pi.execute_host_checks == -1    %][% IF hasCmd %]<a class="js-modal-command-link" href="cmd.cgi?cmd_typ=88">[% END %]<div class='textALERT hoverable px-2 pb-1'> - Host checks are partially disabled </div>[% IF hasCmd %]</a>[% END %][% END %]
       </td>
     </tr>
     [% END %]
