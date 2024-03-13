@@ -436,8 +436,9 @@ sub _extract_checks {
         }
         my $proto = "https";
         $proto = "http" if($mode && $mode eq 'http');
-        my $command = sprintf("check_snclient!%s -p '%s' -u '%s://%s:%s' '%s'",
+        my $command = sprintf("check_snclient!%s %s -p '%s' -u '%s://%s:%s' '%s'",
                 _check_nsc_web_extra_options($c, $mode),
+                ($chk->{'nscweb'} // ''),
                 $svc_password,
                 $proto,
                 '$HOSTADDRESS$',
