@@ -39,7 +39,7 @@ sub get_checks {
         'id'        => 'version',
         'name'      => 'agent version',
         'check'     => 'check_snclient_version',
-        'nscweb'    => '-e CRITICAL',
+        'nscweb'    => '-e CRITICAL -t 10:CRITICAL',
     };
 
     if($inventory->{'uptime'}) {
