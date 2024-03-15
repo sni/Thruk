@@ -236,6 +236,20 @@ function init_page() {
         }
     });
 
+    // jump into search bar with / key
+    jQuery(document).off("keydown").on("keydown", function (e) {
+        if(e.target.tagName != "BODY") {
+            return;
+        }
+        if(e.which === 111 || (e.which == 55 && e.shiftKey)) {
+            var searchBar = jQuery("#header-search");
+            if(searchBar) {
+                e.preventDefault();
+                searchBar.click().focus();
+            }
+        }
+    });
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
