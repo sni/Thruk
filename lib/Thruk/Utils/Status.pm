@@ -1101,29 +1101,41 @@ sub single_search {
                 $dateop = '=';
                 $date   = '-1';
             }
-            push @hostfilter,    { next_check => { $dateop => $date } };
-            push @servicefilter, { next_check => { $dateop => $date } };
+            push @hostfilter,          { next_check => { $dateop => $date } };
+            push @hosttotalsfilter,    { next_check => { $dateop => $date } };
+            push @servicefilter,       { next_check => { $dateop => $date } };
+            push @servicetotalsfilter, { next_check => { $dateop => $date } };
         }
         elsif ( $filter->{'type'} eq 'number of services' ) {
-            push @hostfilter,    { num_services => { $op => $value } };
-            push @servicefilter, { host_num_services => { $op => $value } };
+            push @hostfilter,          { num_services => { $op => $value } };
+            push @hosttotalsfilter,    { num_services => { $op => $value } };
+            push @servicefilter,       { host_num_services => { $op => $value } };
+            push @servicetotalsfilter, { host_num_services => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'latency' ) {
-            push @hostfilter,    { latency => { $op => $value } };
-            push @servicefilter, { latency => { $op => $value } };
+            push @hostfilter,          { latency => { $op => $value } };
+            push @hosttotalsfilter,    { latency => { $op => $value } };
+            push @servicefilter,       { latency => { $op => $value } };
+            push @servicetotalsfilter, { latency => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'execution time' ) {
             $value = Thruk::Utils::expand_duration($value);
-            push @hostfilter,    { execution_time => { $op => $value } };
-            push @servicefilter, { execution_time => { $op => $value } };
+            push @hostfilter,          { execution_time => { $op => $value } };
+            push @hosttotalsfilter,    { execution_time => { $op => $value } };
+            push @servicefilter,       { execution_time => { $op => $value } };
+            push @servicetotalsfilter, { execution_time => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq '% state change' ) {
-            push @hostfilter,    { percent_state_change => { $op => $value } };
-            push @servicefilter, { percent_state_change => { $op => $value } };
+            push @hostfilter,          { percent_state_change => { $op => $value } };
+            push @hosttotalsfilter,    { percent_state_change => { $op => $value } };
+            push @servicefilter,       { percent_state_change => { $op => $value } };
+            push @servicetotalsfilter, { percent_state_change => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'current attempt' ) {
-            push @hostfilter,    { current_attempt => { $op => $value } };
-            push @servicefilter, { current_attempt => { $op => $value } };
+            push @hostfilter,          { current_attempt => { $op => $value } };
+            push @hosttotalsfilter,    { current_attempt => { $op => $value } };
+            push @servicefilter,       { current_attempt => { $op => $value } };
+            push @servicetotalsfilter, { current_attempt => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'last check' ) {
             my $date;
@@ -1136,8 +1148,10 @@ sub single_search {
                 $dateop = '=';
                 $date   = '-1';
             }
-            push @hostfilter,    { last_check => { $dateop => $date } };
-            push @servicefilter, { last_check => { $dateop => $date } };
+            push @hostfilter,          { last_check => { $dateop => $date } };
+            push @hosttotalsfilter,    { last_check => { $dateop => $date } };
+            push @servicefilter,       { last_check => { $dateop => $date } };
+            push @servicetotalsfilter, { last_check => { $dateop => $date } };
         }
         elsif ( $filter->{'type'} eq 'parent' ) {
             push @hostfilter,          { parents      => { $listop => $value } };
@@ -1155,12 +1169,16 @@ sub single_search {
         elsif ( $filter->{'type'} eq 'plugin output' ) {
             my $cop = '-or';
             if($op eq '!=' or $op eq '!~~') { $cop = '-and' }
-            push @hostfilter,    { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
-            push @servicefilter, { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+            push @hostfilter,          { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+            push @hosttotalsfilter,    { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+            push @servicefilter,       { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
+            push @servicetotalsfilter, { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
         }
         elsif ( $filter->{'type'} eq 'event handler' ) {
-            push @hostfilter,    { event_handler => { $op => $value } };
-            push @servicefilter, { event_handler => { $op => $value } };
+            push @hostfilter,          { event_handler => { $op => $value } };
+            push @hosttotalsfilter,    { event_handler => { $op => $value } };
+            push @servicefilter,       { event_handler => { $op => $value } };
+            push @servicetotalsfilter, { event_handler => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'command' ) {
             # convert equal filter to regex, because check_command looks like: check-host-alive!args...
@@ -1172,8 +1190,10 @@ sub single_search {
                 $op = '!~';
                 $value = '^'.$value.'\!';
             }
-            push @hostfilter,    { check_command => { $op => $value } };
-            push @servicefilter, { check_command => { $op => $value } };
+            push @hostfilter,          { check_command => { $op => $value } };
+            push @hosttotalsfilter,    { check_command => { $op => $value } };
+            push @servicefilter,       { check_command => { $op => $value } };
+            push @servicetotalsfilter, { check_command => { $op => $value } };
         }
         # Root Problems are only available in Shinken
         elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
@@ -1196,8 +1216,10 @@ sub single_search {
             next unless $c->stash->{'enable_shinken_features'};
             # value has to be numeric, otherwise shinken breaks
             $value =~ s/[^\d]//gmx; $value = 0 unless $value;
-            push @hostfilter,    { criticity => { $op => $value } };
-            push @servicefilter, { criticity => { $op => $value } };
+            push @hostfilter,          { criticity => { $op => $value } };
+            push @hosttotalsfilter,    { criticity => { $op => $value } };
+            push @servicefilter,       { criticity => { $op => $value } };
+            push @servicetotalsfilter, { criticity => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'comment' ) {
             my($hfilter, $sfilter, $num) = get_comments_filter($c, $op, $value);
@@ -1206,39 +1228,54 @@ sub single_search {
                 Thruk::Utils::set_message($c, 'fail_message', "filter found too many comments/downtimes, be more specific.");
             } else {
                 push @hostfilter,          $hfilter;
+                push @hosttotalsfilter,    $hfilter;
                 push @servicefilter,       $sfilter;
+                push @servicetotalsfilter, $sfilter;
             }
         }
         elsif ( $filter->{'type'} eq 'check period' ) {
-            push @hostfilter,    { check_period => { $op => $value } };
-            push @servicefilter, { check_period => { $op => $value } };
+            push @hostfilter,          { check_period => { $op => $value } };
+            push @hosttotalsfilter,    { check_period => { $op => $value } };
+            push @servicefilter,       { check_period => { $op => $value } };
+            push @servicetotalsfilter, { check_period => { $op => $value } };
         }
         # Filter on the downtime duration
         elsif ( $filter->{'type'} eq 'downtime duration' ) {
             $value                 = Thruk::Utils::expand_duration($value);
             my($hfilter, $sfilter) = get_downtimes_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
+            push @hosttotalsfilter,    $hfilter;
             push @servicefilter,       $sfilter;
+            push @servicetotalsfilter, $sfilter;
         }
         elsif ( $filter->{'type'} eq 'duration' ) {
             my($tmp_hostf, $tmp_svcf) = _expand_duration_filter($op, $value);
-            push @hostfilter,    @{$tmp_hostf} if $tmp_hostf;
-            push @servicefilter, @{$tmp_svcf}  if $tmp_svcf;
+            push @hostfilter,          @{$tmp_hostf} if $tmp_hostf;
+            push @hosttotalsfilter,    @{$tmp_hostf} if $tmp_hostf;
+            push @servicefilter,       @{$tmp_svcf}  if $tmp_svcf;
+            push @servicetotalsfilter, @{$tmp_svcf}  if $tmp_svcf;
         }
         elsif ( $filter->{'type'} eq 'notification period' ) {
-            push @hostfilter,    { notification_period => { $op => $value } };
-            push @servicefilter, { notification_period => { $op => $value } };
+            push @hostfilter,          { notification_period => { $op => $value } };
+            push @hosttotalsfilter,    { notification_period => { $op => $value } };
+            push @servicefilter,       { notification_period => { $op => $value } };
+            push @servicetotalsfilter, { notification_period => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'custom variable' ) {
             my $pre = uc($filter->{'val_pre'});
             if(substr($pre, 0, 1) eq '_') { $pre = substr($pre, 1); }
-            push @hostfilter,    { custom_variables => { $op => $pre." ".$value } };
+            push @hostfilter,       { custom_variables => { $op => $pre." ".$value } };
+            push @hosttotalsfilter, { custom_variables => { $op => $pre." ".$value } };
             my $cop = '-or';
             if($op eq '!=')  { $cop = '-and' }
             if($op eq '!~~') { $cop = '-and' }
             if($op eq '='  && $value eq '') { $cop = '-and' }
             if($op eq '!=' && $value eq '') { $cop = '-or' }
             push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
+                                                  custom_variables => { $op => $pre." ".$value },
+                                          ],
+                                 };
+            push @servicetotalsfilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
                                                   custom_variables => { $op => $pre." ".$value },
                                           ],
                                  };

@@ -6,6 +6,7 @@ next:
           - add config option default_theme_dark
           - fix minemap missing services if user is only authorized for service but not the host
           - fix back button for embedded links, like pnp or grafana
+          - fix status totals not matching service list
           - Panorama:
             - fix media upload
 
