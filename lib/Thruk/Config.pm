@@ -76,6 +76,7 @@ my $base_defaults = {
     'group_paging_grid'                     => '*5, 10, 50, all',
     'group_paging_summary'                  => '*10, 50, 100, all',
     'default_theme'                         => 'Light',
+    'default_theme_dark'                    => 'Dark',
     'datetime_format'                       => '%Y-%m-%d  %H:%M:%S',
     'datetime_format_long'                  => '%a %b %e %H:%M:%S %Z %Y',
     'datetime_format_today'                 => '%H:%M:%S',

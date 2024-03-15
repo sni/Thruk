@@ -267,11 +267,20 @@ ex.:
 === default_theme
 
 Default theme to use for all users. Must be a valid sub directory in
-the themes folder.
+the `themes_path` folder.
 
 ex.:
 
-  default_theme = Thruk
+  default_theme = Light
+
+
+=== default_theme_dark
+
+Default theme to use for if the user prefers a dark theme.
+
+ex.:
+
+  default_theme_dark = Dark
 
 
 === first_day_of_week

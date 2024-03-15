@@ -79,23 +79,24 @@ sub begin {
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
 
+    ###############################
     # which theme?
     my $available_themes = Thruk::Base::array2hash($c->config->{'themes'});
-    my($param_theme, $cookie_theme);
-    if( $c->req->parameters->{'theme'} ) {
-        $param_theme = $c->req->parameters->{'theme'};
+    my $theme            = $c->req->parameters->{'theme'} || $c->cookies('thruk_theme') || 'auto:';
+    if($theme =~ m/^auto:(.*)/mx) {
+        if($1 eq 'dark') {
+            $theme = $c->config->{'default_theme_dark'};
+        } else {
+            $theme = $c->config->{'default_theme'};
+        }
     }
-    elsif($c->cookies('thruk_theme') ) {
-        my $theme_cookie = $c->cookies('thruk_theme');
-        $cookie_theme = $theme_cookie if(defined $theme_cookie && defined $available_themes->{$theme_cookie});
-    }
-    my $theme = $param_theme || $cookie_theme || $c->config->{'default_theme'};
     $theme = $c->config->{'default_theme'} unless defined $available_themes->{$theme};
     $theme = 'Light'                       unless defined $available_themes->{$theme};
     $theme = $c->config->{'themes'}->[0]   unless defined $available_themes->{$theme};
-    $c->stash->{'theme'} = $theme || 'None';
-    $c->stash->{'cookie_theme'} = $cookie_theme // '';
+    $c->stash->{'theme'}        = $theme || 'Broken';
+    $c->stash->{'cookie_theme'} = $c->cookies('thruk_theme') // '';
 
+    ###############################
     if(exists $c->req->parameters->{'noheader'}) {
         $c->req->parameters->{'hidetop'}  = 1;
     }

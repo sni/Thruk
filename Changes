@@ -2,6 +2,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - improve logs performance when using logcache
+          - improve switching light/dark mode automatically
+          - add config option default_theme_dark
           - fix minemap missing services if user is only authorized for service but not the host
           - fix back button for embedded links, like pnp or grafana
           - Panorama:

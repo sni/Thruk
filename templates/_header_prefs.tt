@@ -17,22 +17,21 @@
     <th class="align-middle"><i class="uil uil-brush-alt"></i></th>
     <th class="align-middle">Theme</th>
     <td class="flex gap-x-1">
-      [% IF c.config.themes.size > 4 %]
+      [% IF c.config.themes.size > 1 %]
         <select name="theme" id="pref_theme" class="w-40" onchange="switchTheme(this)">
+          <option value="auto:"[% IF !cookie_theme || cookie_theme.match('/^auto:/') %] selected[% END %]>system default (auto.)</option>
           [% FOR t = c.config.themes %]
-          <option value="[% t | html %]"[% IF cookie_theme && t == theme %] selected[% END %]>[% t | html %]</option>
+          <option value="[% t | html %]"[% IF cookie_theme && t == cookie_theme %] selected[% END %]>[% t | html %]</option>
           [% END %]
         </select>
       [% ELSE %]
       <div class="radiogroup min-w-[18rem]">
+        <input type="radio" name="theme" value="auto:" id="theme-auto" onchange="switchTheme('auto:')" [% IF !cookie_theme || cookie_theme.match('/^auto:/') %]checked[% END %]><label for="theme-auto" title="Use system default theme.&#013;Switches automatically between light/dark theme based on desktop preferences.">auto.</label>
         [% FOR t = c.config.themes %]
-        <input type="radio" name="theme" value="[% t | html %]" id="theme-[% t | html %]" onchange="switchTheme('[% t | html %]')" [% IF cookie_theme && t == theme %]checked[% END %]><label for="theme-[% t | html %]">[% t | html %]</label>
+        <input type="radio" name="theme" value="[% t | html %]" id="theme-[% t | html %]" onchange="switchTheme('[% t | html %]')" [% IF cookie_theme && t == cookie_theme %]checked[% END %]><label for="theme-[% t | html %]">[% t | html %]</label>
         [% END %]
       </div>
       [% END %]
-      <button class="iconOnly" onclick="cookieRemove('thruk_theme'); reloadPage(50, true); return false;" title="use system default theme">
-        <i class="uil uil-cloud-times"></i>
-      </button>
     </td>
   </tr>
   [% IF show_sounds %]

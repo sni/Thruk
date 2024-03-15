@@ -1077,20 +1077,34 @@ function preventDblEvents(el) {
     return false;
 }
 
-function switchTheme(sel, store) {
-    theme = sel;
+function switchTheme(sel) {
     if(sel && sel.tagName) {
-        theme = jQuery(sel).val();
+        sel = jQuery(sel).val();
     }
-    if(is_array(theme)) {
-        theme = theme[0];
+    if(is_array(sel)) {
+        sel = sel[0];
     }
+
+    var auto = "";
+    if(sel.match(/^auto:/)) {
+        sel  = theme_default;
+        auto = "auto:light";
+        if(isDarkModeEnabled()) {
+            sel  = theme_default_dark;
+            auto = "auto:dark";
+        }
+        cookieSave('thruk_theme', auto);
+    }
+    if(theme == sel) {
+        return;
+    }
+    theme = sel;
     if(theme.match(/dark/i)) {
         jQuery("BODY").addClass("dark");
     } else {
         jQuery("BODY").removeClass("dark");
     }
-    if(store !== false) {
+    if(!auto) {
         cookieSave('thruk_theme', theme);
     }
     jQuery("LINK.maintheme").attr("href", url_prefix+"themes/"+theme+"/stylesheets/"+theme+".css");
