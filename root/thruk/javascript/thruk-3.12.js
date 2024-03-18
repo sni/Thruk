@@ -1092,7 +1092,10 @@ function preventDblEvents(el) {
 }
 
 function switchTheme(sel) {
-    if(sel && sel.tagName) {
+    if(!sel) {
+        sel = 'auto:light';
+    }
+    if(sel.tagName) {
         sel = jQuery(sel).val();
     }
     if(is_array(sel)) {
