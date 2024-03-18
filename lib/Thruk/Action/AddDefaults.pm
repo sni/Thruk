@@ -901,7 +901,7 @@ sub _calculate_section_totals {
             $class = 'DOWN' if $c->stash->{'failed_backends'}->{$pd};
             $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_USER;
             $class = 'HID'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_PARAM;
-            $class = 'HID'  if $c->stash->{'param_backend'} && !(grep {/\Q$pd\E/mx} @{Thruk::Base::list($c->stash->{'param_backend'})});
+            $class = 'HID'  if $c->stash->{'param_backend'} && ( !(grep {/\Q$pd\E/mx} @{Thruk::Base::list($c->stash->{'param_backend'})}) && !$c->stash->{'param_backend_expanded'}->{$pd});
             $class = 'DIS'  if $backend_detail->{$pd}->{'disabled'} == HIDDEN_CONF;
             $class = 'UP'   if($backend_detail->{$pd}->{'disabled'} == UP_CONF && $class ne 'DOWN');
             $backend_detail->{$pd}->{'class'} = $class;
@@ -1144,31 +1144,43 @@ sub set_enabled_backends {
         for my $peer (@{$c->db->get_peers()}) {
             $disabled_backends->{$peer->{'key'}} = HIDDEN_USER;  # set all hidden
         }
-        if($backend eq 'ALL') {
-            my @keys;
-            for my $peer (@{$c->db->get_peers()}) {
-                $disabled_backends->{$peer->{'key'}} = 0;
-                push @keys, $peer->{'key'};
+        for my $b (@{Thruk::Base::comma_separated_list($backend)}) {
+            if($b eq 'ALL') {
+                my @keys;
+                for my $peer (@{$c->db->get_peers()}) {
+                    $disabled_backends->{$peer->{'key'}} = 0;
+                    push @keys, $peer->{'key'};
+                }
             }
-            $c->stash->{'param_backend'} = join(",", @keys);
+            elsif($b eq 'LOCAL') {
+                my @keys;
+                for my $peer (@{$c->db->get_local_peers()}) {
+                    $disabled_backends->{$peer->{'key'}} = 0;
+                    push @keys, $peer->{'key'};
+                }
+            }
+            elsif($b =~ m|\/|mx) {
+                if(!_set_disabled_by_section($c, $b, $disabled_backends)) {
+                    _warn(sprintf("no backend found for section: %s", $b));
+                }
+            } else {
+                my $peer = $c->db->get_peer_by_key($b);
+                if($peer) {
+                    $disabled_backends->{$peer->{'key'}} = 0;
+                } else {
+                    if(!_set_disabled_by_section($c, $b, $disabled_backends)) {
+                        #_warn(sprintf("no backend found for: %s", $b));
+                    }
+                }
+            }
         }
-        elsif($backend eq 'LOCAL') {
-            my @keys;
-            for my $peer (@{$c->db->get_local_peers()}) {
-                $disabled_backends->{$peer->{'key'}} = 0;
-                push @keys, $peer->{'key'};
-            }
-            $c->stash->{'param_backend'} = join(",", @keys);
-        }
-        elsif($backend =~ m|\/|mx) {
-            if(!_set_disabled_by_section($c, $backend, $disabled_backends)) {
-                _warn(sprintf("no backend found for section: %s", $backend));
-            }
-        } else {
-            for my $b (ref $backend eq 'ARRAY' ? @{$backend} : split/,/mx, $backend) {
-                $disabled_backends->{$b} = 0;
+        my $expanded = {};
+        for my $key (sort keys %{$disabled_backends}) {
+            if($disabled_backends->{$key} == 0) {
+                $expanded->{$key} = 1;
             }
         }
+        $c->stash->{'param_backend_expanded'} = $expanded;
     }
 
     ###############################
@@ -1215,6 +1227,7 @@ sub set_enabled_backends {
     if(defined $backends) {
         set_possible_backends($c, $disabled_backends);
     }
+
     _debug('disabled_backends: '.Dumper($disabled_backends)) if Thruk::Base->debug;
     return($disabled_backends);
 }
@@ -1252,10 +1265,23 @@ sub has_backends_set {
 ########################################
 sub _set_disabled_by_section {
     my($c, $backend, $disabled_backends) = @_;
+    my $found = 0;
+
+    # expand wildcards
+    if($backend =~ m/\*/mx) {
+        for my $peer (@{$c->db->get_peers()}) {
+            if(Thruk::Base::wildcard_match($peer->{'name'}, $backend)) {
+                $disabled_backends->{$peer->{'key'}} = 0;
+                $found++;
+            }
+        }
+        return($found);
+    }
+
+    # expand sections
     $backend =~ s/\/$//gmx;
     $backend =~ s/^\///gmx;
     $backend = '/'.$backend.'/';
-    my $found;
     for my $peer (@{$c->db->get_peers()}) {
         my $test = '/'.$peer->{'section'}.'/';
         if($test =~ m|^\Q$backend\E|mx) {
