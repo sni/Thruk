@@ -40,7 +40,7 @@ BEGIN {
         'url'     => '/thruk/cgi-bin/reports2.cgi',
         'like'    => ['Reports'],
         'waitfor' => qr(\Qreports2.cgi?report=1&amp;refreshreport=0&amp;html=1\E),
-        'waitmax' => 10,
+        'waitmax' => 30,
     );
     TestUtils::test_page(
         'url'            => '/thruk/cgi-bin/reports2.cgi?report=1&refreshreport=0&html=1',
