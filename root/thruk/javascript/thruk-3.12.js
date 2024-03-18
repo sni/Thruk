@@ -386,7 +386,7 @@ function thruk_onerror(msg, url, line, col, error) {
     // skip some errors
     var skip = false;
     for(var nr = 0; nr < skip_js_errors.length; nr++) {
-        if(msg.match(skip_js_errors[nr])) { skip = true; }
+        if(matchOrIndex(msg, skip_js_errors[nr])) { skip = true; }
     }
     if(skip) { return; }
     error_count++;
@@ -3654,14 +3654,9 @@ function do_table_search_table(id, table, value) {
             var found = 0;
             jQuery.each(row.cells, function(nr, cell) {
                 /* if regex matching fails, use normal matching */
-                try {
-                    if(cell.innerHTML.toLowerCase().match(value)) {
-                        found = 1;
-                    }
-                } catch(err) {
-                    if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
-                        found = 1;
-                    }
+                if(matchOrIndex(cell.innerHTML.toLowerCase(), value)) {
+                    found = 1;
+                    return false;
                 }
             });
             if(found == 0) {
@@ -3700,18 +3695,8 @@ function do_table_search_div(id, div, value) {
         if(jQuery(row).hasClass('table_search_skip')) {
             return;
         }
-        var found = 0;
         /* if regex matching fails, use normal matching */
-        try {
-            if(row.innerHTML.toLowerCase().match(value)) {
-                found = 1;
-            }
-        } catch(err) {
-            if(row.innerHTML.toLowerCase().indexOf(value) != -1) {
-                found = 1;
-            }
-        }
-        if(found == 0) {
+        if(matchOrIndex(row.innerHTML.toLowerCase(), value)) {
             jQuery(row).addClass('filter_hidden');
         } else {
             jQuery(row).removeClass('filter_hidden');
@@ -5282,6 +5267,22 @@ function refresh_table_rows(url, extraData, selector) {
             }
         }
     });
+}
+
+/* if regex matching fails, use normal index search */
+function matchOrIndex(obj, pattern, reOpts) {
+    var found = false;
+    try {
+        var re = new RegExp(pattern, reOpts);
+        if(obj.match(re)) {
+            found = true;
+        }
+    } catch(err) {
+        if(obj.indexOf(pattern) != -1) {
+            found = true;
+        }
+    }
+    return(found);
 }
 
 /*******************************************************************************
@@ -9220,7 +9221,7 @@ var ajax_search = {
                       }
                   });
                 }
-                if(ajax_search.initialized_q && !orig_search_pattern.match(ajax_search.initialized_q) && orig_search_pattern != ajax_search.initialized_q) {
+                if(ajax_search.initialized_q && !matchOrIndex(orig_search_pattern, ajax_search.initialized_q) && orig_search_pattern != ajax_search.initialized_q) {
                     // filter does not match our data base
                     needs_refresh = true;
                 }
@@ -9313,15 +9314,21 @@ var ajax_search = {
                         if(!ajax_search.regex_matching && sub_pattern != "*") {
                             sub_pattern = escapeRegex(sub_pattern);
                         }
-                        var re = new RegExp('('+sub_pattern+')', "gi");
-                        // only replace parts of the string which are not bold yet
-                        var parts = name.split(/(<b[^>]*>.*?<\/b>)/);
-                        jQuery.each(parts, function(index2, part) {
-                            if(!part.match(/^<b class='hint'>/)) {
-                                parts[index2] = part.replace(re, "<b class='hint'>$1<\/b>");
-                            }
-                        });
-                        name = parts.join("");
+                        var re;
+                        try {
+                            re = new RegExp('('+sub_pattern+')', "gi");
+                        } catch(e) {
+                        }
+                        if(re) {
+                            // only replace parts of the string which are not bold yet
+                            var parts = name.split(/(<b[^>]*>.*?<\/b>)/);
+                            jQuery.each(parts, function(index2, part) {
+                                if(!part.match(/^<b class='hint'>/)) {
+                                    parts[index2] = part.replace(re, "<b class='hint'>$1<\/b>");
+                                }
+                            });
+                            name = parts.join("");
+                        }
                     });
                     var classname = "";
                     if(selected != -1 && selected == x) {
