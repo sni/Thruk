@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 46;
+plan tests => 62;
 
 ###########################################################
 # test thruks script path
@@ -19,12 +19,19 @@ TestUtils::test_command({
 
 ###########################################################
 # schedule at least one check
-{
-    TestUtils::test_command({
-        cmd     => "/usr/bin/env thruk r -d '' /services/localhost/Http/cmd/schedule_forced_svc_check",
-        like    => ['/Command successfully submitted/'],
-    });
-}
+TestUtils::test_command({
+    cmd     => '/thruk/support/reschedule_all_checks.sh',
+    like    => ['/successfully submitted/'],
+});
+# then disable checks to avoid log changes that break tests
+TestUtils::test_command({
+    cmd     => "/usr/bin/env thruk r -d '' /system/cmd/stop_executing_host_checks",
+    like    => ['/Command successfully submitted/'],
+});
+TestUtils::test_command({
+    cmd     => "/usr/bin/env thruk r -d '' /system/cmd/stop_executing_svc_checks",
+    like    => ['/Command successfully submitted/'],
+});
 
 ###########################################################
 # test thruk logcache example
@@ -75,3 +82,15 @@ TestUtils::test_command({
         like => ['/command_name/', '/plugin_output/'],
     });
 };
+
+###########################################################
+# be nice and enable checks again
+TestUtils::test_command({
+    cmd     => "/usr/bin/env thruk r -d '' /system/cmd/start_executing_host_checks",
+    like    => ['/Command successfully submitted/'],
+});
+TestUtils::test_command({
+    cmd     => "/usr/bin/env thruk r -d '' /system/cmd/start_executing_svc_checks",
+    like    => ['/Command successfully submitted/'],
+});
+
