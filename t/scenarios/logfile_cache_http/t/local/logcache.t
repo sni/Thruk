@@ -93,4 +93,3 @@ TestUtils::test_command({
     cmd     => "/usr/bin/env thruk r -d '' /system/cmd/start_executing_svc_checks",
     like    => ['/Command successfully submitted/'],
 });
-
