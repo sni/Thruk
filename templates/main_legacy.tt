@@ -50,6 +50,8 @@
     }
     return(true);
   }
+
+/*
   if(!redirect_legacy_hash_url()) {
     [% IF c.config.start_page != '' %]
       window.location.hash = '[% c.config.start_page %]';
@@ -64,6 +66,7 @@
     }
     redirect_legacy_hash_url();
   }
+  */
 -->
 </script>
 
@@ -100,13 +103,6 @@
         </td>
       </tr>
     </table>
-  </div>
-</div>
-
-<div class="logos">
-  <div class="flexrow place-content-center gap-12 mt-10">
-    <a href="http://www.thruk.org" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" title="Thruk" alt="Thruk"></a>
-    <a href="http://github.com/sni/Thruk" target="_blank"><img class="w-32 h-auto" src="[% url_prefix %]themes/[% theme %]/images/GitHub_Logo.png" alt="Github.com Logo"></a>
   </div>
 </div>
 
