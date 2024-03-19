@@ -8,6 +8,7 @@ next:
           - fix minemap missing services if user is only authorized for service but not the host
           - fix back button for embedded links, like pnp or grafana
           - fix status totals not matching service list
+          - fix xss issue (#1343)
           - Panorama:
             - fix media upload
 

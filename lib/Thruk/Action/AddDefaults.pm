@@ -74,7 +74,7 @@ sub begin {
     weaken($c->stash->{'c'});
 
     $c->stash->{'show_sounds'}        = 0;
-    $c->stash->{'has_debug_options'}  = $c->req->parameters->{'debug'} || 0;
+    $c->stash->{'has_debug_options'}  = $c->req->parameters->{'debug'} ? 1 : 0;
 
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
