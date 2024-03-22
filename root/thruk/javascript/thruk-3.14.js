@@ -3697,9 +3697,9 @@ function do_table_search_div(id, div, value) {
         }
         /* if regex matching fails, use normal matching */
         if(matchOrIndex(row.innerHTML.toLowerCase(), value)) {
-            jQuery(row).addClass('filter_hidden');
-        } else {
             jQuery(row).removeClass('filter_hidden');
+        } else {
+            jQuery(row).addClass('filter_hidden');
         }
     });
 }
@@ -5271,6 +5271,9 @@ function refresh_table_rows(url, extraData, selector) {
 
 /* if regex matching fails, use normal index search */
 function matchOrIndex(obj, pattern, reOpts) {
+    if(pattern === "") {
+        return true;
+    }
     var found = false;
     try {
         var re = new RegExp(pattern, reOpts);
