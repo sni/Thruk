@@ -95,3 +95,20 @@ decode and validate the attribute assertions.
   </provider>
 </auth_oauth>
 ```
+
+=== Microsoft Azure ID
+
+```
+<auth_oauth>
+  <provider name>
+    login         = "Login with $COMPANY SSO"
+    icon          = "uil uil-enter"
+    client_id     = $APPLICATIONID
+    client_secret = $SECRET
+    scopes        = openid profile email
+    auth_url      = https://login.microsoftonline.com/$TENANTID/oauth2/v2.0/authorize
+    token_url     = https://login.microsoftonline.com/$TENANTID/oauth2/v2.0/token
+    login_field   = preferred_username
+  </provider>
+</auth_oauth>
+```
