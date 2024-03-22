@@ -2173,6 +2173,7 @@ t/scenarios/agents-plugin/README
 t/scenarios/agents-plugin/t/controller_agents.t
 t/scenarios/agents-plugin/t/local/livestatus-backend/01-controller-agents.t
 t/scenarios/agents-plugin/t/local/livestatus-backend/02-cli-agents.t
+t/scenarios/agents-plugin/t/local/livestatus-backend/03-check_nsc_web.t
 t/scenarios/agents-plugin/t/local/omd/omd.t
 t/scenarios/auth/docker-compose.yml
 t/scenarios/auth/Makefile

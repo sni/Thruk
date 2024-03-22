@@ -30,6 +30,10 @@
       src: "/root/snclient_local.ini"
       dest: "/etc/snclient/snclient_local.ini"
   - shell: "snclient &"
+  - name: make snclient.ini readable
+    file:
+      path: /etc/snclient/snclient.ini
+      mode: "0644"
 
   - name: add user macro
     lineinfile:
