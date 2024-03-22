@@ -511,7 +511,12 @@ sub html_escape_recursive {
     }
     elsif(ref $data eq "HASH") {
         for my $key (keys %{$data}) {
-            $data->{$key} = html_escape_recursive($data->{$key});
+            if(ref $data->{$key} eq 'HTTP::Response') {
+                $data->{"req"} = html_escape_recursive($data->{$key}->request->as_string) unless $data->{"req"};
+                $data->{$key} = html_escape_recursive($data->{$key}->as_string);
+            } else {
+                $data->{$key} = html_escape_recursive($data->{$key});
+            }
         }
     }
     else {

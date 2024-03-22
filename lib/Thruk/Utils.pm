@@ -3487,7 +3487,8 @@ sub dump_params {
     $max_length = 250 unless defined $max_length;
     $flat       = 1   unless defined $flat;
     $params = Thruk::Utils::IO::dclone($params) if ref $params;
-    local $Data::Dumper::Indent = 0 if $flat;
+    local $Data::Dumper::Indent  = 1;
+    local $Data::Dumper::Indent  = 0 if $flat;
     my $dump = ref $params ? Dumper($params) : $params;
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
     $dump    = Thruk::Base::clean_credentials_from_string($dump);
