@@ -26,7 +26,7 @@
       [% PROCESS _table_search_field.tt ids=["iconsBox"] %]
     </div>
     <div class="actionbox" id="iconsBox">
-      <!-- icons are updated automatically by running ./script/theme-icons-update.pl (do not change manually) -->
+      <!-- icons are updated automatically by running ./script/theme-icons-update.pl (do not change manually) icons:-->
       <div><a class="flex" href="#"><i class="fa-solid fa-align-center"></i>fa-solid fa-align-center</a></div>
       <div><a class="flex" href="#"><i class="fa-solid fa-angle-right"></i>fa-solid fa-angle-right</a></div>
       <div><a class="flex" href="#"><i class="fa-solid fa-arrow-left"></i>fa-solid fa-arrow-left</a></div>
@@ -172,7 +172,7 @@
       <div><a class="flex" href="#"><i class="uil uil-volume"></i>uil uil-volume</a></div>
       <div><a class="flex" href="#"><i class="uil uil-volume-mute"></i>uil uil-volume-mute</a></div>
       <div><a class="flex" href="#"><i class="uil uil-web-section-alt"></i>uil uil-web-section-alt</a></div>
-<!-- end of "do not change manually" -->
+<!--icons: end of "do not change manually" -->
       <div>
         <a>
         <div class="spinner mr-2"></div>Spinner

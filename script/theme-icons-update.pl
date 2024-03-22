@@ -114,6 +114,6 @@ if(!$options->{'dry'}) {
         push @newicons, '      <div><a class="flex" href="#"><i class="'.$icons->{$class}->{'class'}.'"></i>'.$icons->{$class}->{'class'}.'</a></div>';
     }
     my $newicons = join("\n", @newicons);
-    $content =~ s/-->.*?<\!--/-->\n$newicons\n<!--/gmxs;
+    $content =~ s/icons:-->.*?<\!--icons:/icons:-->\n$newicons\n<!--icons:/gmxs;
     Thruk::Utils::IO::write($target, $content);
 }
