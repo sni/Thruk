@@ -1698,6 +1698,7 @@ sub _is_frame_url_allowed {
 
     # relative links are allowed
     return 1 unless $url->scheme;
+    return 1 unless $url->host;
 
     # same origin is allowed
     if($req->host eq $url->host) {
