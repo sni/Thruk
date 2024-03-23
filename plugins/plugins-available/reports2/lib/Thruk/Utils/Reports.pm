@@ -241,6 +241,8 @@ sub report_send {
         return $c->detach('/error/index/13');
     }
     $mailtext = Thruk::Base::trim_whitespace($mailtext);
+    # remove empty lines from the end
+    $mailtext =~ s/\n+\Z/\n/sgmx;
 
     # extract mail header
     my $mailbody    = "";
