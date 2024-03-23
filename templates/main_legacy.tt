@@ -51,7 +51,6 @@
     return(true);
   }
 
-/*
   if(!redirect_legacy_hash_url()) {
     [% IF c.config.start_page != '' %]
       window.location.hash = '[% c.config.start_page %]';
@@ -66,7 +65,6 @@
     }
     redirect_legacy_hash_url();
   }
-  */
 -->
 </script>
 
