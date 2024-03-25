@@ -55,6 +55,8 @@ The bp command provides all business process related cli commands.
 
 use warnings;
 use strict;
+use Fcntl qw/:DEFAULT/;
+use File::Temp ();
 use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -190,6 +192,24 @@ sub cmd {
 
     _debug("calculating business process with ".$worker_num." workers") if $worker_num > 1;
 
+	# use a single spool file for each worker
+    my $spoolfile;
+    if(!$c->config->{'Thruk::Plugin::BP'}->{'result_backend'} && $c->config->{'Thruk::Plugin::BP'}->{'spool_dir'}) {
+        my $spool = $c->config->{'Thruk::Plugin::BP'}->{'spool_dir'};
+        die("spool folder does not exist ".$spool.": ".$!) unless -d $spool;
+        my $fh = File::Temp->new(
+            TEMPLATE => "cXXXXXX",
+            DIR      => $spool,
+        );
+        $fh->unlink_on_destroy(0); # do not remove file
+        $spoolfile = $fh->filename;
+        print $fh "### Active Check Result File ###\n";
+        print $fh sprintf("file_time=%d\n\n",time);
+        Thruk::Utils::IO::close($fh, $fh->filename);
+        chmod(0664, $fh->filename); # make sure the core can read it
+    }
+    local $ENV{"THRUK_BP_SPOOLFILE"} = $spoolfile;
+
     my $numsize = length("$num_bp");
     my $nr      = 0;
     my $rc      = 0;
@@ -229,6 +249,21 @@ sub cmd {
             ));
         },
     );
+
+    # merge spool files into one file
+    if($spoolfile) {
+        my @files = glob($spoolfile.".*");
+        if(scalar @files > 0) {
+            for my $file (@files) {
+                my $cont = Thruk::Utils::IO::read($file);
+                Thruk::Utils::IO::write($spoolfile, $cont, undef, 1);
+            }
+            unlink(@files);
+        }
+        my $file = $spoolfile.'.ok';
+        sysopen(my $t,$file,O_WRONLY|O_CREAT|O_NONBLOCK|O_NOCTTY) || die("cannot create $file: $!");
+        Thruk::Utils::IO::close($t, $file);
+    }
 
     my $elapsed = tv_interval($t0);
     if($id eq 'all') {

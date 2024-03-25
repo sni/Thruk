@@ -900,24 +900,41 @@ sub _submit_results_to_core_spool {
     my $spool = $c->config->{'Thruk::Plugin::BP'}->{'spool_dir'};
     if($spool) {
         die("spool folder does not exist ".$spool.": ".$!) unless -d $spool;
-        my $fh = File::Temp->new(
-            TEMPLATE => "cXXXXXX",
-            DIR      => $spool,
-        );
-        $fh->unlink_on_destroy(0);
+        my $spoolfile = $ENV{"THRUK_BP_SPOOLFILE"};
+        my($fh, $shared);
+        if($spoolfile) {
+            $spoolfile = $spoolfile.".".$ENV{'THRUK_WORKER_NUM'} if($ENV{'THRUK_WORKER_NUM'} && $ENV{'THRUK_WORKER_NUM'} ne "1");
+            $shared = 1;
+            open($fh, ">>", $spoolfile) or die(sprintf("cannot write to %s: %s", $spoolfile, $!));
+        } else {
+            $fh = File::Temp->new(
+                TEMPLATE => "cXXXXXX",
+                DIR      => $spool,
+            );
+            $fh->unlink_on_destroy(0); # do not remove file
+        }
         binmode($fh, ":encoding(UTF-8)");
-        print $fh "### Active Check Result File ###\n";
-        print $fh sprintf("file_time=%d\n\n",time);
+
+        # write file header
+        if(!$shared) {
+            print $fh "### Active Check Result File ###\n";
+            print $fh sprintf("file_time=%d\n\n",time);
+        }
+
+        # write all results
         for my $r (@{$results_str}) {
             print $fh $r,"\n";
         }
-        Thruk::Utils::IO::close($fh, $fh->filename);
-        chmod(0664, $fh->filename); # make sure the core can read it
 
-        my $file = $fh->filename.'.ok';
-        sysopen my $t,$file,O_WRONLY|O_CREAT|O_NONBLOCK|O_NOCTTY
-            or croak("Can't create $file : $!");
-        Thruk::Utils::IO::close($t, $file);
+        # create ready file for the core
+        if(!$shared) {
+            Thruk::Utils::IO::close($fh, $fh->filename);
+            chmod(0664, $fh->filename); # make sure the core can read it
+
+            my $file = $fh->filename.'.ok';
+            sysopen(my $t,$file,O_WRONLY|O_CREAT|O_NONBLOCK|O_NOCTTY) || die("cannot create $file: $!");
+            Thruk::Utils::IO::close($t, $file);
+        }
     }
 
     return;

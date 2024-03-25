@@ -23,8 +23,8 @@ sub new {
     $self->{num}   = 0;
     bless $self, $class;
 
-    for(1..$self->{'size'}) {
-        threads->create('_handle_work', $self);
+    for my $num (1..$self->{'size'}) {
+        threads->create('_handle_work', $self, $num);
     }
     &timing_breakpoint('Pool::Simple::new '.$self->{'size'}.' threads created');
     return $self;
@@ -78,9 +78,10 @@ END {
 }
 
 sub _handle_work {
-    my($self) = @_;
+    my($self, $workernum) = @_;
     local $SIG{'KILL'} = sub { exit; };
     local $SIG{'INT'} = sub { exit; };
+    local $ENV{'THRUK_WORKER_NUM'} = $workernum;
     while(my $job = $self->{workq}->dequeue()) {
         &timing_breakpoint('Pool::Simple::_handle_work waited');
         my @res;
