@@ -14,9 +14,11 @@
 <div class="flexrow flex-nowrap w-full h-full [% IF minimal %]minimal[% END %]">
   <div class="card flexcol flex-nowrap gap-0 w-full h-full">
     <div class="head justify-between">
-      <div class="w-32">
-        <a href="bp.cgi" class="button header-button rounded w-[70px]" title="Go back to business process list"><i class="uil uil-angle-double-left"></i>Back</a>
-      </div>
+      [% IF !minimal %]
+        <div class="w-32">
+          <a href="bp.cgi" class="button header-button rounded w-[70px]" title="Go back to business process list"><i class="uil uil-angle-double-left"></i>Back</a>
+        </div>
+      [% END %]
       <h3 id="subtitle">
         [% subtitle | html %]
         [% IF editmode %]
