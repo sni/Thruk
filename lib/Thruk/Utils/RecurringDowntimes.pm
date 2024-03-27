@@ -224,6 +224,16 @@ sub fix_downtime {
 
     $rd = read_downtime($c, $dfile);
     check_downtime($c, $rd, $dfile);
+
+    # remove downtime if its empty now
+    if((  scalar @{Thruk::Base::list($rd->{'host'})}
+        + scalar @{Thruk::Base::list($rd->{'service'})}
+        + scalar @{Thruk::Base::list($rd->{'hostgroup'})}
+        + scalar @{Thruk::Base::list($rd->{'servicegroup'})}
+       ) == 0) {
+        unlink($dfile);
+    }
+
     return 1;
 }
 
