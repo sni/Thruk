@@ -1115,14 +1115,22 @@ function switchTheme(sel) {
     if(theme == sel) {
         return;
     }
+    if(!auto) {
+        cookieSave('thruk_theme', theme);
+    }
     theme = sel;
+    applyTheme(theme);
+    // apply again once the document is ready
+    jQuery(document).ready(function() {
+        applyTheme(theme);
+    });
+}
+
+function applyTheme(theme) {
     if(theme.match(/dark/i)) {
         jQuery("BODY").addClass("dark");
     } else {
         jQuery("BODY").removeClass("dark");
-    }
-    if(!auto) {
-        cookieSave('thruk_theme', theme);
     }
     jQuery("LINK.maintheme").attr("href", url_prefix+"themes/"+theme+"/stylesheets/"+theme+".css");
     jQuery("IMG").each(function() {
