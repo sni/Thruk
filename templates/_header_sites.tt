@@ -64,7 +64,7 @@
             <span>Toogle:</span>
             <button class="w-10" onclick="toggleAllSections(true, true);">Local</button>
             <button class="w-10" onclick="toggleAllSections(true);">All</button>
-            <input type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections();">
+            <input class="clickable" type="checkbox" id="all_backends" value="" name="all_backends" onclick="toggleAllSections(true);">
           </div>
         [% END %]
         [% IF show_sitepanel == 'tree' %]
