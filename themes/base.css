@@ -1294,6 +1294,9 @@ INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA
 .required {
   @apply textALERT;
 }
+INPUT::placeholder {
+  @apply opacity-60 italic;
+}
 
 .daterangepicker {
   DIV.drp-buttons {

@@ -289,8 +289,8 @@ sub check_for_check_commands {
 
     $agent_cmds = [] unless defined $agent_cmds;
     push @{$agent_cmds}, {
-        command_name => 'check_thruk_agents',
-        command_line => '$USER4$/bin/thruk $ARG1$',
+        command_name => 'check_thruk_agent',
+        command_line => '$ARG1$',
     };
 
     my $changed = 0;

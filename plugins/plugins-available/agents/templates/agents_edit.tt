@@ -160,7 +160,7 @@
                     <button class="js-ip-wzd-button" title="autofill address from hostname ip lookup."><i class="uil uil-lightbulb mr-0"></i></button>
                   </div>
                   <span class="ml-2 text-right w-14 textTH font-semibold self-center">Mode:</span>
-                  <select name="mode">
+                  <select name="mode" class="w-36">
                     <option value="https"[% IF agent.mode == "https" %] selected[% END %]>https</option>
                     <option value="insecure"[% IF agent.mode == "insecure" %] selected[% END %]>https (no verification)</option>
                     <option value="http"[% IF agent.mode == "http" %] selected[% END %]>plain http</option>
@@ -171,7 +171,7 @@
               </td>
             </tr>
             <tr>
-              <th>Password</th>
+              <th class="align-top"><div class="mt-1">Password</div></th>
               <td>
                 <div class="flexrow flex-nowrap gap-x-1">
                   <div class="js-toggle-password relative flex-grow">
@@ -181,7 +181,16 @@
                   [% IF has_multiple_backends %]
                   <span class="ml-2 text-right w-14 textTH font-semibold self-center">Site:</span>
                   <input type="text" name="backend" value="[% peer_name(agent) | html %]" class="w-36" onfocus="this.click()" onclick="ajax_search.init(this, 'site', { url: 'agents.cgi?action=json&amp;type=site', emptymsg:'select an existing site', autosubmit:false })" required>
+                  <span class="text-right w-14"></span>
                   [% END %]
+                  <button class="ml-2 pr-1 w-fit" onclick="jQuery('#advanced-options').toggleClass('hidden'); return false;">Advanded Options <i class="uil uil-angle-down mr-0"></i></button>
+                </div>
+                [% has_options = 0; opts = BLOCK %]
+                  <span class="text-right w-fit textTH font-semibold self-center" title="if set, device can be offline for given duration, ex: 1d">Offline Threshold:</span>
+                  <input type="text" name="options.offline" placeholder="1d" value="[% IF agent.exists("settings") && agent.settings.exists("options") && agent.settings.options.exists("offline"); has_options = 1 %][% agent.settings.options.offline | html %][% END %]" class="w-16">
+                [% END %]
+                <div class="flexrow flex-nowrap gap-x-1[% IF !has_options %] hidden[% END %]" id="advanced-options">
+                  [% opts %]
                 </div>
               </td>
             </tr>

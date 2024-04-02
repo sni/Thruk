@@ -134,6 +134,16 @@ sub get_config_objects {
         $hostdata->{'_AGENT_MODE'} = $mode;
     }
     my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
+    for my $key (sort keys %{$checks_config}) {
+        if($key =~ /^options\.(.*)$/mx) {
+            my $opt_name = $1;
+            if($checks_config->{$key} ne '') {
+                $settings->{'options'}->{$opt_name} = $checks_config->{$key};
+            } else {
+                delete $settings->{'options'}->{$opt_name};
+            }
+        }
+    }
 
     my $template = $section ? _make_section_template("service", $section) : 'generic-thruk-agent-service';
 
@@ -237,9 +247,9 @@ sub get_config_objects {
             delete $settings->{'disabled'};
         }
     }
-    $settings = $json->encode($settings);
-    if($settings ne ($hostdata->{'_AGENT_CONFIG'}//"")) {
-        $hostdata->{'_AGENT_CONFIG'} = $settings;
+    my $settings_str = $json->encode($settings);
+    if($settings_str ne ($hostdata->{'_AGENT_CONFIG'}//"")) {
+        $hostdata->{'_AGENT_CONFIG'} = $settings_str;
     }
 
     # set extra host options
@@ -253,6 +263,17 @@ sub get_config_objects {
             next if $key eq 'name';
             $hostdata->{$key} = $ex->{$key};
         }
+    }
+
+    my $proxy_cmd = _check_proxy_command($c, $settings->{'options'});
+    # if there is a proxy command, we have to set a check_command for hosts
+    if($proxy_cmd) {
+        $hostdata->{'check_command'} = "\$USER1\$/check_icmp -H \$HOSTADDRESS\$ -w 3000.0,80% -c 5000.0,100% -p 5" unless $hostdata->{'check_command'};
+        $hostdata->{'check_command'} =
+            sprintf("check_thruk_agent!%s%s",
+                $proxy_cmd,
+                $hostdata->{'check_command'},
+            );
     }
     $hostobj->{'conf'} = $hostdata;
 
@@ -323,7 +344,20 @@ sub get_services_checks {
     my $checks = [];
     if(-r $datafile) {
         my $data = Thruk::Utils::IO::json_lock_retrieve($datafile);
-        $checks = _extract_checks($c, $data->{'inventory'}, $hostname, $password, $fresh, $section, $mode) if $data->{'inventory'};
+        my $options = {};
+        if($hostobj && $hostobj->{'conf'}->{'_AGENT_CONFIG'}) {
+            $options = decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'});
+        }
+        $checks = _extract_checks(
+                        $c,
+                        $data->{'inventory'},
+                        $hostname,
+                        $password,
+                        $fresh,
+                        $section,
+                        $mode,
+                        $options->{'options'} // {},
+                    ) if $data->{'inventory'};
     }
     return($checks);
 }
@@ -403,7 +437,7 @@ sub get_inventory {
 
 ##########################################################
 sub _extract_checks {
-    my($c, $inventory, $hostname, $password, $fresh, $section, $mode) = @_;
+    my($c, $inventory, $hostname, $password, $fresh, $section, $mode, $options) = @_;
     my $checks = [];
 
     # get available modules
@@ -416,6 +450,8 @@ sub _extract_checks {
         my $add = $mod->get_checks($c, $inventory, $hostname, $password, $section);
         push @{$checks}, @{$add} if $add;
     }
+
+    my $proxy_cmd = _check_proxy_command($c, $options);
 
     # compute host configuration
     my $hostdata = {};
@@ -436,7 +472,9 @@ sub _extract_checks {
         }
         my $proto = "https";
         $proto = "http" if($mode && $mode eq 'http');
-        my $command = sprintf("check_snclient!%s %s -p '%s' -u '%s://%s:%s' '%s'",
+        my $command = sprintf(
+                "check_thruk_agent!%s\$USER1\$/check_nsc_web %s %s -p '%s' -u '%s://%s:%s' '%s'",
+                $proxy_cmd,
                 _check_nsc_web_extra_options($c, $mode),
                 ($chk->{'nscweb'} // ''),
                 $svc_password,
@@ -447,7 +485,7 @@ sub _extract_checks {
         );
         my $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_interval'} // 1;
         if($chk->{'check'} eq 'inventory') {
-            $command  = 'check_thruk_agents!agents check inventory \'$HOSTNAME$\'';
+            $command  = 'check_thruk_agent!'.$proxy_cmd.'$USER4$/bin/thruk agents check inventory \'$HOSTNAME$\'';
             $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
         }
         if($chk->{'check'} eq 'check_os_updates') {
@@ -569,6 +607,16 @@ sub _check_nsc_web_extra_options {
             // $settings->{'check_nsc_web_extra_options'};
     $options = $options." -k " if($mode && $mode eq 'insecure');
     return($options);
+}
+
+##########################################################
+sub _check_proxy_command {
+    my($c, $options) = @_;
+    my $proxy = "";
+    if($options->{'offline'}) {
+        $proxy = sprintf("\$USER4\$/share/thruk/script/maybe_offline -H '\$HOSTNAME\$' -s '\$SERVICEDESC\$' -o '%s' -- ", $options->{'offline'});
+    }
+    return $proxy;
 }
 
 ##########################################################

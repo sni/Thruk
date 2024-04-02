@@ -1,0 +1,248 @@
+#!/bin/bash
+
+# read rc files if exist
+unset PROFILEDOTD
+[ -e /etc/thruk/thruk.env  ] && . /etc/thruk/thruk.env
+[ -e ~/etc/thruk/thruk.env ] && . ~/etc/thruk/thruk.env
+[ -e ~/.thruk              ] && . ~/.thruk
+[ -e ~/.profile            ] && . ~/.profile
+
+BASEDIR=$(dirname $0)/..
+
+# git version
+if [ -d $BASEDIR/.git -a -e $BASEDIR/lib/Thruk.pm ]; then
+  export PERL5LIB="$BASEDIR/lib:$PERL5LIB";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$BASEDIR/"; fi
+
+# omd
+elif [ "$OMD_ROOT" != "" ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+
+# pkg installation
+else
+  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+
+#! -*- perl -*-
+# vim: expandtab:ts=4:sw=4:syntax=perl
+#line 35
+
+##############################################
+use strict;
+use warnings;
+use utf8;
+use Pod::Usage;
+use Getopt::Long;
+use Thruk::Utils ();
+use Thruk::Utils::IO ();
+
+##############################################
+exit(main());
+
+##############################################
+sub main {
+    my $opt ={
+        'help'    => 0,
+        'host'    => "",
+        'service' => "",
+        'offline' => "1d",
+        'timeout' => "30s",
+    };
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    GetOptions (
+    "h|help"      => \$opt->{'help'},
+    "H|host=s"    => \$opt->{'host'},
+    "s|service=s" => \$opt->{'service'},
+    "o|offline=s" => \$opt->{'offline'},
+    "t|timeout=i" => \$opt->{'timeout'},
+    ) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
+    pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
+
+    _check_opts($opt);
+
+    # run the check
+    my($rc,$out) = Thruk::Utils::IO::cmd(undef, \@ARGV, undef, undef, undef, undef, $opt->{'timeout'});
+
+    my $data = _read_data($opt);
+    _save_result($opt, $rc, $out, $data);
+
+    my $hostdata = $data->{'_HOST_'};
+    my $svcdata  = $data->{$opt->{'service'}};
+
+    # the host itself
+    if($opt->{'service'} eq "") {
+        # ok or no data
+        if($rc < 2 || !$hostdata || !$hostdata->{'out'}) {
+            print $out;
+            return $rc;
+        }
+        # offline for too long
+        if(!$hostdata->{'last_ok'} || time() - $hostdata->{'last_ok'} >= $opt->{'offline'}) {
+            print $out;
+            return $rc;
+        }
+        # offline within thresholds
+        print $hostdata->{'out'};
+        return $hostdata->{'last_rc'};
+    }
+
+    # ok / warning are everyting fine (or no data yet)
+    if($rc < 2 || !$hostdata || !$svcdata || !$svcdata->{'out'}) {
+        print $out;
+        return $rc;
+    }
+
+    # host is down for too long
+    if(!$hostdata->{'last_ok'} || time() - $hostdata->{'last_ok'} >= $opt->{'offline'}) {
+        print $out;
+        return $rc;
+    }
+
+    # host is ok and service problem started before last host check
+    if($hostdata->{'rc'} < 2 && $svcdata->{'last_down'} && $svcdata->{'last_down'} < $hostdata->{'time'}) {
+        print $out;
+        return $rc;
+    }
+
+    # host is down within thresholds
+    print $svcdata->{'out'};
+    return $svcdata->{'last_rc'};
+}
+
+##############################################
+sub _read_data {
+    my($opt) = @_;
+    return(Thruk::Utils::IO::json_lock_retrieve(_filename($opt)));
+}
+
+##############################################
+sub _save_result {
+    my($opt, $rc, $out, $prev) = @_;
+
+    my $key = $opt->{'service'} || '_HOST_';
+    my $data = {
+        'rc'   => $rc,
+        'time' => time(),
+    };
+    if($rc < 2) {
+        $data->{'last_ok'} = time();
+        $data->{'last_rc'} = $rc;
+        $data->{'out'}     = $out;
+        delete $data->{'last_down'};
+    } else {
+        if($prev && $prev->{$key} && $prev->{$key}->{'rc'} < 2) {
+            $data->{'last_down'} = time();
+        }
+        delete $data->{'last_ok'};
+        delete $data->{'last_rc'};
+        delete $data->{'out'};
+    }
+    Thruk::Utils::IO::json_lock_patch(
+        _filename($opt),
+        { $key => $data },
+        { pretty => 1, skip_config => 1, allow_empty => 1 },
+    );
+}
+
+##############################################
+sub _filename {
+    my($opt) = @_;
+
+    my $folder = sprintf("%s/var/tmp/offline", $ENV{'OMD_ROOT'});
+    Thruk::Utils::IO::mkdir_r($folder);
+    return(sprintf("%s/%s.json", $folder, $opt->{'host'}));
+}
+
+##############################################
+sub _check_opts {
+    my($opt) = @_;
+
+    if(!$opt->{'host'}) { print STDERR "ERROR: no host given\n"; exit 3; }
+
+    # if the service starts with a dollar sign, means this is the host check itself and the service macro has not been replaced
+    $opt->{'service'} = "" if($opt->{'service'} =~ m/^\$/mx);
+
+    # expand durations
+    $opt->{'timeout'} = Thruk::Utils::expand_duration($opt->{'timeout'});
+    $opt->{'offline'} = Thruk::Utils::expand_duration($opt->{'offline'});
+}
+
+##############################################
+
+=head1 NAME
+
+maybe_offline - naemon plugin status wrapper for offline devices
+
+=head1 SYNOPSIS
+
+Usage: ./maybe_offline <options> -- <real command with options>
+
+=head1 DESCRIPTION
+
+maybe_offline is a wrapper for naemon plugin which retains the status for some
+time for devices which are offline from time to time. It will return the last
+known status as long as the device comes back online within the given duration.
+
+Why not use first_notification_delay and such things? This wrapper keeps the
+host/service in OK state so it does not show up as problem until it is down
+for a certain duration.
+
+=head1 OPTIONS
+
+script has the following arguments:
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-o> , B<--offline>
+
+    maximum offline duration within the device should be back online. Default: 1d
+
+=item B<-s> , B<--service>
+
+    service description of this check.
+
+=item B<-H> , B<--host>
+
+    host name of this check.
+
+=item B<-t> , B<--timeout>
+
+    timeout for the check. Default: 30s
+
+=back
+
+=head1 EXAMPLE
+
+try from command line:
+
+    OMD[test]:~$ ./examples/maybe_offline -H localhost -s Ping -o 2h -- .../check_icmp -H 127.0.0.1
+
+or as naemon config:
+
+    defined command {
+        command_name   maybe_offline
+        command_line   $USER4$/share/thruk/script/maybe_offline $ARG1$
+    }
+    define host {
+        host_name      localhost
+        address        127.0.0.1
+        use            generic-host
+        check_command  maybe_offline!-H '$HOSTNAME$' -s '$SERVICEDESC$' -o '3m' -- $USER1$/check_icmp -H $HOSTADDRESS$ -w 3000.0,80% -c 5000.0,100% -p 5
+    }
+
+=head1 AUTHOR
+
+2024, Sven Nierlein, <sven@nierlein.de>
+
+=cut
