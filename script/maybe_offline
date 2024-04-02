@@ -34,13 +34,13 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 #line 35
 
 ##############################################
-use strict;
 use warnings;
-use utf8;
-use Pod::Usage;
+use strict;
 use Getopt::Long;
+use Pod::Usage;
+use utf8;
+
 use Thruk::Utils ();
-use Thruk::Utils::IO ();
 
 ##############################################
 exit(main());
