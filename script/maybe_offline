@@ -41,6 +41,7 @@ use Pod::Usage;
 use utf8;
 
 use Thruk::Utils ();
+use Thruk::Utils::Log qw/:all/;
 
 ##############################################
 exit(main());
@@ -50,6 +51,7 @@ sub main {
     Thruk::Config::set_config_env();
     my $opt ={
         'help'    => 0,
+        'verbose' => 0,
         'host'    => "",
         'service' => "",
         'offline' => "1d",
@@ -59,6 +61,7 @@ sub main {
     Getopt::Long::Configure('bundling');
     GetOptions (
     "h|help"      => \$opt->{'help'},
+    "v|verbose"   => sub { $opt->{'verbose'}++ },
     "H|host=s"    => \$opt->{'host'},
     "s|service=s" => \$opt->{'service'},
     "o|offline=s" => \$opt->{'offline'},
@@ -66,55 +69,101 @@ sub main {
     ) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
     pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
 
+    # check options
     _check_opts($opt);
+    $ENV{'THRUK_VERBOSE'} = $opt->{'verbose'};
+    _debug("options: %s", Thruk::Utils::dump_params($opt)) if $opt->{'verbose'};
 
     # run the check
     my($rc,$out) = Thruk::Utils::IO::cmd(undef, \@ARGV, undef, undef, undef, undef, $opt->{'timeout'});
+    _debug("command returned with exit code: %d", $rc);
+    if($rc < 0 || $rc > 3) {
+        $rc = 3;
+        $out =~ s/^open3:\s*//gmx;
+        $out =~ s/\s+at\s+.*\s+line\s+\d+\.?//gmx;
+    }
 
     my $data = _read_data($opt);
     _save_result($opt, $rc, $out, $data);
 
     my $hostdata = $data->{'_HOST_'};
     my $svcdata  = $data->{$opt->{'service'}};
+    if(!$hostdata) {
+        _debug("no host data available");
+    } else {
+        _debug("host status: rc: %d (last ok: %s | threshold: %s)",
+                    $hostdata->{'rc'},
+                    $hostdata->{'last_up'} ? Thruk::Utils::Filter::duration(time() - $hostdata->{'last_up'}, 6) : 'never',
+                    Thruk::Utils::Filter::duration($opt->{'offline'}, 6) ,
+        );
+    }
+
+    # no data yet
+    if(!$hostdata || !$hostdata->{'up_out'}) {
+        _debug("no host data available yet, using actual output");
+        print $out;
+        return $rc;
+    }
 
     # the host itself
     if($opt->{'service'} eq "") {
-        # ok or no data
-        if($rc < 2 || !$hostdata || !$hostdata->{'out'}) {
+        # ok
+        if($rc < 2) {
+            _debug("host is up, using actual output");
             print $out;
             return $rc;
         }
         # offline for too long
-        if(!$hostdata->{'last_ok'} || time() - $hostdata->{'last_ok'} >= $opt->{'offline'}) {
+        if(!$hostdata->{'last_up'} || time() - $hostdata->{'last_up'} >= $opt->{'offline'}) {
+            _debug("offline threshold exceeded, using actual output");
             print $out;
             return $rc;
         }
         # offline within thresholds
-        print $hostdata->{'out'};
-        return $hostdata->{'ok_rc'};
+        _debug("host down, but threshold not yet exceeded, using last ok output");
+        print $hostdata->{'up_out'};
+        return $hostdata->{'up_rc'};
     }
 
-    # ok / warning are everyting fine (or no data yet)
-    if($rc < 2 || !$hostdata || !$svcdata || !$svcdata->{'out'}) {
+    # ok / warning are everyting fine
+    if($rc < 2) {
+        _debug("service is up, using actual output");
+        print $out;
+        return $rc;
+    }
+
+    # no data yet
+    if(!$svcdata) {
+        _debug("no service data available yet, using actual output");
+        print $out;
+        return $rc;
+    }
+
+    # service has never been up
+    if(!$svcdata->{'up_out'}) {
+        _debug("service has never been up, using actual output");
         print $out;
         return $rc;
     }
 
     # host is down for too long
-    if(!$hostdata->{'last_ok'} || time() - $hostdata->{'last_ok'} >= $opt->{'offline'}) {
+    if(!$hostdata->{'last_up'} || time() - $hostdata->{'last_up'} >= $opt->{'offline'}) {
+        _debug("offline threshold exceeded, using actual output");
         print $out;
         return $rc;
     }
 
     # host is ok and service problem started before last host check
     if($hostdata->{'rc'} < 2 && $svcdata->{'down_since'} && $svcdata->{'down_since'} < $hostdata->{'time'}) {
-        print $out;
-        return $rc;
+        _debug("host is up, service fails, but service failed right now and no host check has been done since, using last ok output");
+        print $svcdata->{'up_out'};
+        return $svcdata->{'up_rc'};
     }
 
     # host is down within thresholds
-    print $svcdata->{'out'};
-    return $svcdata->{'ok_rc'};
+    _debug("host down, but threshold not yet exceeded, using last ok output");
+    print $svcdata->{'up_out'};
+    return $svcdata->{'up_rc'};
 }
 
 ##############################################
@@ -133,17 +182,23 @@ sub _save_result {
         'time' => time(),
     };
     if($rc < 2) {
-        $data->{'last_ok'} = time();
-        $data->{'ok_rc'}   = $rc;
-        $data->{'out'}     = $out;
-        delete $data->{'down_since'};
+        $data->{'last_up'} = time();
+        $data->{'up_rc'}   = $rc;
+        $data->{'up_out'}  = $out;
+        $data->{'down_since'} = undef;
     } else {
         if($prev && $prev->{$key} && $prev->{$key}->{'rc'} < 2) {
             $data->{'down_since'} = time();
         }
     }
+
+    my $file = _filename($opt);
+    if($opt->{'verbose'}) {
+        _debug("retention file: %s", $file);
+        _debug("saving update: %s", Thruk::Utils::dump_params({ $key => $data }));
+    }
     Thruk::Utils::IO::json_lock_patch(
-        _filename($opt),
+        $file,
         { $key => $data },
         { pretty => 1, skip_config => 1, allow_empty => 1 },
     );
