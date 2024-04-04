@@ -28,7 +28,7 @@ fi
 
 eval 'exec perl -x $0 ${1+"$@"} ;'
     if 0;
-
+# / this slash makes vscode syntax highlighting work
 #! -*- perl -*-
 # vim: expandtab:ts=4:sw=4:syntax=perl
 #line 35
