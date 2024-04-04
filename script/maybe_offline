@@ -47,6 +47,7 @@ exit(main());
 
 ##############################################
 sub main {
+    Thruk::Config::set_config_env();
     my $opt ={
         'help'    => 0,
         'host'    => "",
@@ -155,7 +156,7 @@ sub _save_result {
 sub _filename {
     my($opt) = @_;
 
-    my $folder = sprintf("%s/var/tmp/offline", $ENV{'OMD_ROOT'});
+    my $folder = sprintf("%s/var/tmp/offline", ($ENV{'OMD_ROOT'} // ''));
     Thruk::Utils::IO::mkdir_r($folder);
     return(sprintf("%s/%s.json", $folder, $opt->{'host'}));
 }
