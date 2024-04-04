@@ -91,7 +91,7 @@ sub main {
         }
         # offline within thresholds
         print $hostdata->{'out'};
-        return $hostdata->{'last_rc'};
+        return $hostdata->{'ok_rc'};
     }
 
     # ok / warning are everyting fine (or no data yet)
@@ -107,14 +107,14 @@ sub main {
     }
 
     # host is ok and service problem started before last host check
-    if($hostdata->{'rc'} < 2 && $svcdata->{'last_down'} && $svcdata->{'last_down'} < $hostdata->{'time'}) {
+    if($hostdata->{'rc'} < 2 && $svcdata->{'down_since'} && $svcdata->{'down_since'} < $hostdata->{'time'}) {
         print $out;
         return $rc;
     }
 
     # host is down within thresholds
     print $svcdata->{'out'};
-    return $svcdata->{'last_rc'};
+    return $svcdata->{'ok_rc'};
 }
 
 ##############################################
@@ -134,16 +134,13 @@ sub _save_result {
     };
     if($rc < 2) {
         $data->{'last_ok'} = time();
-        $data->{'last_rc'} = $rc;
+        $data->{'ok_rc'}   = $rc;
         $data->{'out'}     = $out;
-        delete $data->{'last_down'};
+        delete $data->{'down_since'};
     } else {
         if($prev && $prev->{$key} && $prev->{$key}->{'rc'} < 2) {
-            $data->{'last_down'} = time();
+            $data->{'down_since'} = time();
         }
-        delete $data->{'last_ok'};
-        delete $data->{'last_rc'};
-        delete $data->{'out'};
     }
     Thruk::Utils::IO::json_lock_patch(
         _filename($opt),
