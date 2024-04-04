@@ -254,6 +254,7 @@ sub get_config_objects {
 
     # set extra host options
     my $extra = _get_extra_opts_hst($c, $hostname, $section);
+    my $host_check;
     for my $ex (@{$extra}) {
         for my $key (sort keys %{$ex}) {
             next if $key eq 'host';
@@ -262,13 +263,15 @@ sub get_config_objects {
             next if $key eq 'host_name';
             next if $key eq 'name';
             $hostdata->{$key} = $ex->{$key};
+            $host_check = $ex->{$key} if $key eq 'check_command';
         }
     }
 
     my $proxy_cmd = _check_proxy_command($c, $settings->{'options'});
     # if there is a proxy command, we have to set a check_command for hosts
     if($proxy_cmd) {
-        $hostdata->{'check_command'} = "\$USER1\$/check_icmp -H \$HOSTADDRESS\$ -w 3000.0,80% -c 5000.0,100% -p 5" unless $hostdata->{'check_command'};
+        $hostdata->{'check_command'} = $host_check || $c->config->{'Thruk::Agents'}->{'snclient'}->{'host_check'} ||
+                                       "\$USER1\$/check_icmp -H \$HOSTADDRESS\$ -w 3000.0,80% -c 5000.0,100% -p 5";
         $hostdata->{'check_command'} =
             sprintf("check_thruk_agent!%s%s",
                 $proxy_cmd,
