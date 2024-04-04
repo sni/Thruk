@@ -711,12 +711,18 @@ sub cmd {
             @res = cmd($c, $cmd, $stdin, $print_prefix, $detached, $no_decode);
         };
         my $err = $@;
-        alarm(0);
+        my $remain = alarm(0);
         if($err) {
-            _warn(longmess("command timed out after ".$timeout." seconds")) if $c;
-            local $SIG{INT}  = 'IGNORE';
+            if($c) {
+                if($remain <= 0 || $err =~ m/timeout/mx) {
+                    _warn(longmess("command timed out after ".$timeout." seconds"));
+                } else {
+                    _warn(longmess("command errror: ".$err));
+                }
+            }
+            local $SIG{INT} = 'IGNORE';
             kill("-INT", $$);
-            return;
+            return(-1, $err);
         }
         return(@res);
     }
