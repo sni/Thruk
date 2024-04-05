@@ -91,8 +91,8 @@ sub update_inventory {
     } else {
         if($data) {
             # save scan results
-            Thruk::Utils::IO::mkdir_r($c->config->{'tmp_path'}.'/agents/hosts');
-            Thruk::Utils::IO::json_lock_store($c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json', $data, { pretty => 1 });
+            Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/agents/hosts');
+            Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json', $data, { pretty => 1 });
         }
     }
 
@@ -461,7 +461,7 @@ sub remove_host {
         }
 
         # remove inventory files
-        unlink($c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json');
+        unlink($c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json');
     }
 
     if($c->{'obj_db'}->commit($c)) {
@@ -577,8 +577,8 @@ sub scan_agent {
         return($err);
     } else {
         # save scan results
-        Thruk::Utils::IO::mkdir_r($c->config->{'tmp_path'}.'/agents/hosts');
-        Thruk::Utils::IO::json_lock_store($c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json', $data, { pretty => 1 });
+        Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/agents/hosts');
+        Thruk::Utils::IO::json_lock_store($c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json', $data, { pretty => 1 });
     }
 
     return;
@@ -759,8 +759,8 @@ sub migrate_hostname {
     }
 
     # rename data file
-    my $df1 = $c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json';
-    my $df2 = $c->config->{'tmp_path'}.'/agents/hosts/'.$old_host.'.json';
+    my $df1 = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
+    my $df2 = $c->config->{'var_path'}.'/agents/hosts/'.$old_host.'.json';
     if(-f $df2 && !-f $df1) {
         move($df2, $df1);
     }

@@ -347,7 +347,7 @@ returns list of Monitoring::Objects for the host / services
 =cut
 sub get_services_checks {
     my($self, $c, $hostname, $hostobj, $password, $fresh, $section, $mode) = @_;
-    my $datafile = $c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json';
+    my $datafile = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
     if(!-r $datafile) {
         return([]);
     }
