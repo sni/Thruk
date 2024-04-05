@@ -361,6 +361,10 @@ sub _process_save {
     my $class   = Thruk::Utils::Agents::get_agent_class($type);
     my $agent   = $class->new();
     my($objects, $remove) = $agent->get_config_objects($c, $data, $c->req->parameters);
+    if(!defined $objects) {
+        Thruk::Utils::set_message( $c, 'fail_message', "failed to build services");
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$old_host."&backend=".$backend);
+    }
     for my $obj (@{$objects}) {
         my $file = Thruk::Controller::conf::get_context_file($c, $obj, $obj->{'_filename'});
         my $oldfile = $obj->{'file'};

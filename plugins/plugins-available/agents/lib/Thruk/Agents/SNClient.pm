@@ -122,6 +122,10 @@ sub get_config_objects {
     my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section, $mode);
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
+    if(!$checks || scalar @{$checks} == 0) {
+        return;
+    }
+
     confess("missing host config") unless $checks_hash->{'_host'};
     for my $key (sort keys %{$checks_hash->{'_host'}->{'conf'}}) {
         $hostdata->{$key} = $checks_hash->{'_host'}->{'conf'}->{$key};
@@ -344,24 +348,27 @@ returns list of Monitoring::Objects for the host / services
 sub get_services_checks {
     my($self, $c, $hostname, $hostobj, $password, $fresh, $section, $mode) = @_;
     my $datafile = $c->config->{'tmp_path'}.'/agents/hosts/'.$hostname.'.json';
-    my $checks = [];
-    if(-r $datafile) {
-        my $data = Thruk::Utils::IO::json_lock_retrieve($datafile);
-        my $options = {};
-        if($hostobj && $hostobj->{'conf'}->{'_AGENT_CONFIG'}) {
-            $options = decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'});
-        }
-        $checks = _extract_checks(
-                        $c,
-                        $data->{'inventory'},
-                        $hostname,
-                        $password,
-                        $fresh,
-                        $section,
-                        $mode,
-                        $options->{'options'} // {},
-                    ) if $data->{'inventory'};
+    if(!-r $datafile) {
+        return([]);
     }
+
+    my $checks  = [];
+    my $data    = Thruk::Utils::IO::json_lock_retrieve($datafile);
+    my $options = {};
+    if($hostobj && $hostobj->{'conf'}->{'_AGENT_CONFIG'}) {
+        $options = decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'});
+    }
+    $checks = _extract_checks(
+                    $c,
+                    $data->{'inventory'},
+                    $hostname,
+                    $password,
+                    $fresh,
+                    $section,
+                    $mode,
+                    $options->{'options'} // {},
+                ) if $data->{'inventory'};
+
     return($checks);
 }
 
