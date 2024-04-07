@@ -118,8 +118,20 @@ sub get_config_objects {
     my $services       = Thruk::Utils::Agents::get_host_agent_services($c, $hostobj);
     my $services_by_id = Thruk::Utils::Agents::get_host_agent_services_by_id($services);
 
+    my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
+    for my $key (sort keys %{$checks_config}) {
+        if($key =~ /^options\.(.*)$/mx) {
+            my $opt_name = $1;
+            if($checks_config->{$key} ne '') {
+                $settings->{'options'}->{$opt_name} = $checks_config->{$key};
+            } else {
+                delete $settings->{'options'}->{$opt_name};
+            }
+        }
+    }
+
     # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section, $mode);
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section, $mode, $settings->{'options'});
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
     if(!$checks || scalar @{$checks} == 0) {
@@ -136,17 +148,6 @@ sub get_config_objects {
     delete $hostdata->{'_AGENT_MODE'};
     if($mode && $mode ne 'https') {
         $hostdata->{'_AGENT_MODE'} = $mode;
-    }
-    my $settings = $hostdata->{'_AGENT_CONFIG'} ? decode_json($hostdata->{'_AGENT_CONFIG'}) : {};
-    for my $key (sort keys %{$checks_config}) {
-        if($key =~ /^options\.(.*)$/mx) {
-            my $opt_name = $1;
-            if($checks_config->{$key} ne '') {
-                $settings->{'options'}->{$opt_name} = $checks_config->{$key};
-            } else {
-                delete $settings->{'options'}->{$opt_name};
-            }
-        }
     }
 
     my $template = $section ? _make_section_template("service", $section) : 'generic-thruk-agent-service';
@@ -340,13 +341,13 @@ sub _add_templates {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode)
+    get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options)
 
 returns list of Monitoring::Objects for the host / services
 
 =cut
 sub get_services_checks {
-    my($self, $c, $hostname, $hostobj, $password, $fresh, $section, $mode) = @_;
+    my($self, $c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options) = @_;
     my $datafile = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
     if(!-r $datafile) {
         return([]);
@@ -354,9 +355,9 @@ sub get_services_checks {
 
     my $checks  = [];
     my $data    = Thruk::Utils::IO::json_lock_retrieve($datafile);
-    my $options = {};
+    $settings = {};
     if($hostobj && $hostobj->{'conf'}->{'_AGENT_CONFIG'}) {
-        $options = decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'});
+        $settings = decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'});
     }
     $checks = _extract_checks(
                     $c,
@@ -366,7 +367,7 @@ sub get_services_checks {
                     $fresh,
                     $section,
                     $mode,
-                    $options->{'options'} // {},
+                    $options // $settings->{'options'} // {},
                 ) if $data->{'inventory'};
 
     return($checks);
