@@ -10,7 +10,6 @@ BEGIN {
     import TestUtils;
     plan skip_all => 'skipped by THRUK_SKIP_DOCKER' if $ENV{'THRUK_SKIP_DOCKER'};
     plan skip_all => 'docker required' unless TestUtils::has_util('docker');
-    plan skip_all => 'docker-compose required' unless TestUtils::has_util('docker-compose');
 }
 
 my $filter;

@@ -9,9 +9,9 @@ use_ok("Thruk::Utils::IO");
 
 # get running container
 chdir($ENV{'THRUK_CONFIG'});
-my($rc, $services) = Thruk::Utils::IO::cmd("docker-compose config --services");
+my($rc, $services) = Thruk::Utils::IO::cmd("docker compose config --services");
 for my $svc (split/\n/mx, $services) {
-    my($rc, $container) = Thruk::Utils::IO::cmd("docker-compose ps -q $svc");
+    my($rc, $container) = Thruk::Utils::IO::cmd("docker compose ps -q $svc");
     my $index = 0;
     for my $cont (split/\n/mx, $container) {
         $index++;

@@ -5,7 +5,7 @@ export PLACK_TEST_EXTERNALSERVER_URI = http://127.0.0.3:60080/demo/
 
 wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
-	   if [ $$(docker-compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
+	   if [ $$(docker compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	   if [ $$(curl -s http://127.0.0.3:60080/demo/thruk/cgi-bin/login.cgi | grep -c loginuser) -gt 0 ]; then break; else sleep 1; fi; \
 	   if [ $$x -eq $(STARTUPWAIT) ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	done
@@ -17,7 +17,7 @@ extra_clean:
 	rm -f ../../../var/obj_retention.test.*
 
 extra_test:
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root site sudo -iu demo /usr/local/bin/local_test.sh 0
+	docker compose exec $(DOCKER_COMPOSE_TTY) --user root site sudo -iu demo /usr/local/bin/local_test.sh 0
 
 extra_test_verbose:
-	docker-compose exec $(DOCKER_COMPOSE_TTY) --user root site sudo -iu demo /usr/local/bin/local_test.sh 1
+	docker compose exec $(DOCKER_COMPOSE_TTY) --user root site sudo -iu demo /usr/local/bin/local_test.sh 1

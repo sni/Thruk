@@ -1,5 +1,3 @@
-version: '2'
-
 networks:
   tier1.test.local:
   tier2.test.local:

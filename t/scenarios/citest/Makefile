@@ -12,9 +12,9 @@ extra_prepare:
 
 wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
-	   if [ $$(docker-compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
-	   if [ $$(docker-compose logs | grep "| ERROR" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
-	   if [ $$(docker-compose logs | grep "ci container ready" | wc -l) -eq 1 ]; then break; else sleep 1; fi; \
+	   if [ $$(docker compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
+	   if [ $$(docker compose logs | grep "| ERROR" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
+	   if [ $$(docker compose logs | grep "ci container ready" | wc -l) -eq 1 ]; then break; else sleep 1; fi; \
 	   if [ $$x -eq $(STARTUPWAIT) ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	done
 	docker ps

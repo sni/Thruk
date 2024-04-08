@@ -5,4 +5,4 @@ if [ "x$1" = "x" ]; then
   exit 2
 fi
 
-docker-compose up -d --scale=thruk=$1
+docker compose up -d --scale=thruk=$1

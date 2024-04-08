@@ -18,8 +18,8 @@ export COMPOSE_HTTP_TIMEOUT=180
 wait_start:
 	$(THRUK) cache clean
 	for x in $$(seq $(STARTUPWAIT)); do \
-	   if [ $$(docker-compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
-	   if [ $$(docker-compose logs | grep "| ERROR" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
+	   if [ $$(docker compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
+	   if [ $$(docker compose logs | grep "| ERROR" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	   if [ $$($(THRUK) -l 2>&1 | grep -v ^Def | grep -v ^- | grep -v ERROR | grep OK | wc -l) -eq $(EXPECTED_BACKENDS) ]; then break; else sleep 1; fi; \
 	   if [ $$x -eq $(STARTUPWAIT) ]; then $(MAKE) wait_start_failed; exit 1; fi; \
 	done
@@ -32,15 +32,15 @@ wait_start_failed: wait_start_short_errors non_interactive_only
 wait_start_short_errors:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: startup failed"
-	-docker-compose logs | grep "| ERROR"
-	-docker-compose logs | grep "failed=" | grep -v "failed=0"
+	-docker compose logs | grep "| ERROR"
+	-docker compose logs | grep "failed=" | grep -v "failed=0"
 
 wait_start_info:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: startup failed"
 	-test -e thruk.conf && $(THRUK) -vvv -l
 	-docker ps
-	-docker-compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
+	-docker compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
 	$(MAKE) wait_start_failed_extra
 
 wait_start_failed_extra:
@@ -80,10 +80,10 @@ failed_test_info:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: test failed"
 	-docker ps
-	-docker-compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
-	for svc in $$(docker-compose config --services | sort); do \
+	-docker compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
+	for svc in $$(docker compose config --services | sort); do \
 		index=0; \
-		for container in $$(docker-compose ps -q $$svc); do \
+		for container in $$(docker compose ps -q $$svc); do \
 			index=$$(( index + 1 )); \
 			echo "*** $${svc}_$${index}"; \
 			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
@@ -129,15 +129,15 @@ preprepare:
 prepare: base_images
 	$(MAKE) preprepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	docker-compose build
-	docker-compose up --remove-orphans -d
+	docker compose build
+	docker compose up --remove-orphans -d
 	docker ps
-	@docker-compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
+	@docker compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
 		echo "$${LOGLINE}"; \
-		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ docker-compose && exit 0; \
-		[[ "$${LOGLINE}" == *"ci container ready"* ]]         && pkill -P $$$$ docker-compose -9 && exit 0; \
-		[[ "$${LOGLINE}" == *"ERROR"* ]]                      && pkill -P $$$$ docker-compose && exit 1; \
-		[[ "$${LOGLINE}" == *"exited with code"* ]]           && pkill -P $$$$ docker-compose && exit 1; \
+		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ "docker"    && exit 0; \
+		[[ "$${LOGLINE}" == *"ci container ready"* ]]         && pkill -P $$$$ "docker" -9 && exit 0; \
+		[[ "$${LOGLINE}" == *"ERROR"* ]]                      && pkill -P $$$$ "docker"    && exit 1; \
+		[[ "$${LOGLINE}" == *"exited with code"* ]]           && pkill -P $$$$ "docker"    && exit 1; \
 	done
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare
@@ -145,10 +145,10 @@ prepare: base_images
 
 clean:
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	docker-compose down -v --rmi all
-	docker-compose kill -s INT
-	docker-compose kill
-	docker-compose rm -f
+	docker compose down -v --rmi all
+	docker compose kill -s INT
+	docker compose kill
+	docker compose rm -f
 	-test -e thruk.conf && $(THRUK) cache clean all
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_clean
@@ -163,7 +163,7 @@ base_images:
 
 update:
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	docker-compose pull
+	docker compose pull
 	for IMG in $$(grep FROM */Dockerfile | awk '{ print $$2 }' | grep -v local/ | sort -u); do docker pull $$IMG; done
 	if $$(grep FROM */Dockerfile | awk '{ print $$2 }' | grep local/ >/dev/null); then make -C ../_common update; fi
 	@echo "### $@: $$(date "+%FT%T.%N")"
