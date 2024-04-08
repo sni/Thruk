@@ -112,8 +112,19 @@ extra_failed_test:
 ifdef INTERACTIVE
 non_interactive_only:
 	exit 1
+remove_interactive_only_reload_file:
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	@for svc in $$(docker compose config --services | sort); do \
+		index=0; \
+		for container in $$(docker compose ps -q $$svc); do \
+			index=$$(( index + 1 )); \
+			docker exec -t --user root $$container rm -f /opt/omd/sites/demo/.THRUK_RESTARTER_DISABLED; \
+		done; \
+	done
 else
 non_interactive_only:
+	:
+remove_interactive_only_reload_file:
 	:
 endif
 
@@ -124,10 +135,10 @@ server:
 web:
 	@python3 -m webbrowser ${PLACK_TEST_EXTERNALSERVER_URI}thruk/
 
-preprepare:
+preparepre:
 
 prepare: base_images
-	$(MAKE) preprepare
+	$(MAKE) preparepre
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	docker compose build
 	docker compose up --remove-orphans -d
@@ -142,6 +153,7 @@ prepare: base_images
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
+	$(MAKE) remove_interactive_only_reload_file
 
 clean:
 	@echo "### $@: $$(date "+%FT%T.%N")"

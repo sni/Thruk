@@ -1,6 +1,6 @@
 include ../_common/Makefile.common
 
-preprepare:
+preparepre:
 	cp -p ../../../.ci/prepare_machine.sh citest/
 	wget https://raw.githubusercontent.com/abbbi/github-actions-tune/master/speedup.sh -O citest/speedup.sh
 	chmod 755 citest/speedup.sh
