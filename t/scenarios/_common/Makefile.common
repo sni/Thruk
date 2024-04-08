@@ -149,7 +149,7 @@ clean:
 	docker compose kill -s INT
 	docker compose kill
 	docker compose rm -f
-	-test -e thruk.conf && $(THRUK) cache clean all
+	-if test -e thruk.conf; then $(THRUK) cache clean all; fi || :
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_clean
 	@echo "### $@: $$(date "+%FT%T.%N")"
@@ -163,7 +163,7 @@ base_images:
 
 update:
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	docker compose pull
+	docker compose pull --ignore-buildable --include-deps
 	for IMG in $$(grep FROM */Dockerfile | awk '{ print $$2 }' | grep -v local/ | sort -u); do docker pull $$IMG; done
 	if $$(grep FROM */Dockerfile | awk '{ print $$2 }' | grep local/ >/dev/null); then make -C ../_common update; fi
 	@echo "### $@: $$(date "+%FT%T.%N")"

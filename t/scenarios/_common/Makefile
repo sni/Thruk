@@ -7,8 +7,8 @@ prepare: build
 	docker ps
 
 update:
-	docker compose pull
-	for IMG in $$(grep FROM */*/Dockerfile | awk '{ print $$2 }' | sort -u); do docker pull $$IMG; done
+	docker compose pull --ignore-buildable --include-deps
+	for IMG in $$(grep FROM */*/Dockerfile | awk '{ print $$2 }' | grep -v local/ | sort -u); do docker pull $$IMG; done
 
 clean:
 	docker compose down -v --rmi all
