@@ -1,4 +1,5 @@
-site:
+services:
+  site:
     build: citest/
     volumes:
         - "/etc/timezone:/etc/timezone:ro"
