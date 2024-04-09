@@ -14,7 +14,7 @@ BEGIN {
 {
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/login.cgi?logout',
-        'like'   => ['logout successful', 'Password'],
+        'like'   => ['logout successful', 'password'],
         'follow' => 1,
         'code'   => 401,
     );
@@ -109,7 +109,7 @@ BEGIN {
 {
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/login.cgi?logout',
-        'like'   => ['logout successful', 'Password'],
+        'like'   => ['logout successful', 'password'],
         'follow' => 1,
         'code'   => 401,
     );
