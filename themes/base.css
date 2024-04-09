@@ -1297,6 +1297,11 @@ INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA
 INPUT::placeholder {
   @apply opacity-60 italic;
 }
+BODY.loginpage {
+  INPUT::placeholder {
+    @apply opacity-50 not-italic;
+  }
+}
 
 .daterangepicker {
   DIV.drp-buttons {
