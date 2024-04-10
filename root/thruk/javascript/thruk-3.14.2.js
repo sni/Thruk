@@ -250,6 +250,28 @@ function init_page() {
         }
     });
 
+    jQuery(".js-copy-to-clipboard").each(function(i, el) {
+        jQuery(el)
+            .addClass("clickable relative")
+            .attr("title", "click to copy to clipboard")
+            .on("mouseover", function(e) {
+                if(jQuery(el).find("I").length == 0) {
+                    jQuery(el).append(jQuery('<i class="uil uil-copy absolute right-0 hoverBG bg-opacity-75 rounded"></i>'));
+                } else {
+                    jQuery(el).find("I").removeClass("hidden");
+                }
+            })
+            .on("mouseout", function(e) {
+                jQuery(el).find("I").addClass("hidden");
+            })
+            .on("click", function(e) {
+                var text = el.innerHTML;
+                text = text.replace(/<i class.*/, '');
+                copyCode(e, text);
+                return false;
+            })
+    });
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {

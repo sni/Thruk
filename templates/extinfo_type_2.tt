@@ -61,7 +61,7 @@
   <div class="flexcol flex-grow order-1 min-[1700px]:order-2">
     <div class="card w-full">
       <div class="head justify-between">
-        <h3>Service [% _service(service) | html %] on <a class="link" href="extinfo.cgi?type=1&amp;host=[% service.host_name | uri %]">[% _shost(service) | html %]</a></h3>
+        <h3>Service <span class="js-copy-to-clipboard">[% _service(service) | html %]</span> on <span class="js-copy-to-clipboard">[% _shost(service) | html %]</span></h3>
         <div class="flex gap-x-3 items-center">
           [% cust_vars = get_custom_vars(c, service); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <div>

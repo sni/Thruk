@@ -57,7 +57,7 @@
   <div class="flexcol flex-grow order-1 min-[1700px]:order-2">
     <div class="card w-full">
       <div class="head justify-between">
-        <h3>Host: [% _host(host) | html %]</h3>
+        <h3>Host: <span class="js-copy-to-clipboard">[% _host(host) | html %]</span></h3>
         <div class="flex gap-x-3 items-center">
           [% cust_vars = get_custom_vars(c, host); IF cust_vars.exists('THRUK_ACTION_MENU') %]
             <div>

@@ -107,9 +107,9 @@ END
       <div class="flex gap-x-2">
         <div>
           [% IF svc_name != "" %]
-            [% PROCESS parent_obj color=1 parent=hst_name %] ([% obj.host_address %])
+            [% PROCESS parent_obj color=1 parent=hst_name %] (<span class="js-copy-to-clipboard">[% obj.host_address %]</span>)
           [% ELSE %]
-            <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% _host(obj) | html %]</a> ([% obj.address %])
+            <a class="link" href="extinfo.cgi?type=1&amp;host=[% hst_name | uri %]">[% _host(obj) | html %]</a> (<span class="js-copy-to-clipboard">[% obj.address %]</span>)
           [% END %]
         </div>
         [% IF type == "host" %]
