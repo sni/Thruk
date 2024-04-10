@@ -1137,10 +1137,10 @@ function switchTheme(sel) {
     if(theme == sel) {
         return;
     }
+    theme = sel;
     if(!auto) {
         cookieSave('thruk_theme', theme);
     }
-    theme = sel;
     applyTheme(theme);
     // apply again once the document is ready
     jQuery(document).ready(function() {
