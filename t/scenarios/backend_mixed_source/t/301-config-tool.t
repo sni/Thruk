@@ -4,7 +4,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 use Test::More;
 
 BEGIN {
-    plan tests => 247;
+    plan tests => 250;
 
     use lib('t');
     require TestUtils;
@@ -32,6 +32,10 @@ _test_page({
 });
 _test_page({
 # verify configuration from config tool
+    url     => 'GET /hosts/<name>/config',
+    waitfor => 'example.cfg',
+});
+_test_page({
     url     => 'GET /hosts/<name>/config',
     like    => ['"alias" : "localhost",', '"address" : "127.0.0.1",', '/omd/sites/demo/etc/naemon/conf.d/example.cfg:1'],
 });
