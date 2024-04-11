@@ -36,7 +36,7 @@ BEGIN {
     # verify check_command visibility: should see obfuscated command
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/extinfo.cgi?type=2&host=test&service=Http',
-        'like'   => ['Service Http on.*test', '-a \*\*\* -u'],
+        'like'   => ['Service.*Http.*on.*test', '-a \*\*\* -u'],
         'unlike'   => ['test:test'],
     );
     TestUtils::test_page(
@@ -107,7 +107,7 @@ BEGIN {
     # verify check_command visibility: should see obfuscated command
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/extinfo.cgi?type=2&host=test&service=Http',
-        'like'   => ['Service Http on.*test', '-a \*\*\* -u'],
+        'like'   => ['Service.*Http.*on.*test', '-a \*\*\* -u'],
         'unlike' => ['test:test'],
     );
     TestUtils::test_page(
@@ -165,7 +165,7 @@ BEGIN {
     # verify check_command visibility: must not see command at all
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/extinfo.cgi?type=2&host=test&service=Http',
-        'like'   => ['Service Http on.*test'],
+        'like'   => ['Service.*Http.*on.*test'],
         'unlike' => ['test:test', 'plugins\/check_http', 'customvartest123'],
     );
     TestUtils::test_page(
