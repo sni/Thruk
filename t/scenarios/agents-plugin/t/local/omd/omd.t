@@ -70,7 +70,7 @@ TestUtils::test_page( url     => '/thruk/r/services/host-http/agent%20inventory/
         like    => ['Command successfully submitted'],
 );
 TestUtils::test_page( url     => '/thruk/cgi-bin/extinfo.cgi?type=2&host=host-http&service=agent+inventory',
-        like    => ['Service agent inventory on'],
+        like    => ['Service.*agent inventory.*on'],
         waitfor => 'inventory unchanged',
 );
 
