@@ -725,6 +725,7 @@ sub wait_for_job {
     sleep   => time to wait after executing the command
     env     => hash with extra environment variables
     waitfor => wait till regex occurs (max 120sec)
+    maxwait => how long should be waited (default 30sec)
   }
 
 =cut
@@ -751,7 +752,7 @@ sub test_command {
 
     # wait for something?
     if(defined $test->{'waitfor'}) {
-        my $duration = 30;
+        my $duration = $test->{'maxwait'} // 30;
         my $start    = time();
         my $now      = time();
         my $waitfor  = $test->{'waitfor'};
