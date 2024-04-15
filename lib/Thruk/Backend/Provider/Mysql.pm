@@ -561,18 +561,7 @@ sub get_logs {
         # fetch real number of entries here
         my $sql = '
         SELECT
-            count(*),
-            l.time as time,
-            l.class as class,
-            l.type as type,
-            l.state as state,
-            l.state_type as state_type,
-            IFNULL(h.host_name, "") as host_name,
-            IFNULL(s.service_description, "") as service_description,
-            IFNULL(c.name, "") as contact_name,
-            l.message as message,
-            "'.$prefix.'" as peer_key
-            '.$extra_columns.'
+            count(*)
         FROM
             `'.$prefix.'_log` l
             LEFT JOIN `'.$prefix.'_host` h ON l.host_id = h.host_id
