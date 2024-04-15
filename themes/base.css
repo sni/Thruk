@@ -1282,6 +1282,12 @@ SELECT {
 OPTION {
   @apply text-[color:var(--forms-fg)] bg-[color:var(--forms-bg)];
 }
+OPTION:checked {
+  @apply bg-[color:var(--border-active)] text-[color:var(--forms-bg)] opacity-80;
+}
+SELECT:focus OPTION {
+  @apply opacity-100;
+}
 INPUT:disabled,BUTTON:disabled {
   @apply bg-[color:var(--button-disabled-bg)] !cursor-auto hover:bg-[color:var(--button-disabled-bg)] text-[color:var(--button-disabled-fg)] hover:text-[color:var(--button-disabled-fg)];
 }
