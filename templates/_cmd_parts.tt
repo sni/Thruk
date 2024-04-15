@@ -198,7 +198,7 @@
   [% IF c.stash.require_comments_for_disable_cmds %]
   <tr>
     <th class='w-1/4'>Comment</th>
-    <td><input type='text' name='com_data_disable_cmd' required></td>
+    <td><input type='text' name='com_data_disable_cmd' class="w-full" required></td>
   </tr>
   [% END %]
 [% END %]

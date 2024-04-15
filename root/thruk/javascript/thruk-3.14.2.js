@@ -7372,6 +7372,9 @@ function check_selected_command() {
     if(value == 12) { /* submit passive check result */
         enableFormElement('row_submit_options');
     }
+    if(value == 16) { /* disable eventhandler */
+        enableFormElement('row_comment_disable_cmd');
+    }
 }
 
 /* hide all form element rows */
