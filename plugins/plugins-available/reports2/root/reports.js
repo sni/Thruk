@@ -96,7 +96,7 @@ function reports_update_affected_sla_objects(input) {
     var span2 = form.find('TR.report_type_affected_sla_objects SPAN.value');
     var backends = form.find('SELECT[name=report_backends]').val();
     try {
-        // only get all backends if using the _backend_select_multi.tt
+        // only get all backends if using the _backends_select_multi.tt
         if(document.getElementById('available_backends') != undefined) {
             var options = jQuery('#report_backends option');
             var backends = jQuery.map(options ,function(option) {
