@@ -57,7 +57,7 @@ if(scalar @ARGV > 0) {
     }
 }
 else {
-    my $dirs = [ 'lib', glob("plugins/plugins-enabled/*/lib") ];
+    my $dirs = [ 'lib', glob("plugins/plugins-*/*/lib") ];
     my @files = Perl::Critic::Utils::all_perl_files(@{$dirs});
     plan( tests => scalar @files);
     for my $file (sort @files) {
