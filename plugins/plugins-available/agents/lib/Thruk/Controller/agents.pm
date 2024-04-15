@@ -191,7 +191,7 @@ sub _process_show {
                 $extra->{'cpu_cores'}  = $1;
             }
         }
-        if($svc->{'description'} =~ /^disk\s(.*)$/) {
+        if($svc->{'description'} =~ /^disk\s(.*)$/mx) {
             my $disk = lc($1);
             if($disk eq '/' || $disk eq 'c:') {
                 if($svc->{'perf_data'} =~ m/'.* used'=(\d+)B;\d+;\d+;\d+;(\d+)/mx) {
