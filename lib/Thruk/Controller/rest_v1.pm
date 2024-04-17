@@ -205,6 +205,22 @@ sub process_rest_request {
         }
     }
 
+    # add columns meta data, ex.: used in the thruk grafana datasource
+    my $wrapped;
+    $wrapped = 1 if($c->req->header("x-thruk-outputformat") && $c->req->header("x-thruk-outputformat") eq 'wrapped_json');
+    $wrapped = 1 if(defined $c->req->parameters->{'headers'} && $c->req->parameters->{'headers'} eq 'wrapped_json');
+    if($wrapped) {
+        # wrap data along with column meta data
+        my $request_method = $method || $c->req->method;
+        my $columns = _get_columns_meta_for_path($c, $path_info, $request_method);
+        my $meta = {};
+        $meta->{"columns"} = $columns if $columns;
+        $data = {
+            'meta' => $meta,
+            'data' => $data,
+        };
+    }
+
     if(!$data) {
         $data = { 'message' => sprintf("unknown rest path %s '%s'", $c->req->method, $path_info), code => 404 };
     }
@@ -1227,6 +1243,30 @@ sub _get_help_for_path {
 }
 
 ##########################################################
+sub _get_columns_meta_for_path {
+    my($c, $path_info, $method) = @_;
+    require Thruk::Controller::Rest::V1::docs;
+    my $keys = Thruk::Controller::Rest::V1::docs::keys();
+    for my $path (reverse sort { length $a <=> length $b } keys %{$keys}) {
+        my $p = $path;
+        $p =~ s%<[^>]+>%[^/]*%gmx;
+        if($path_info =~ qr/$p/mx) {
+            if($keys->{$path}->{$method}) {
+                my $columns = [];
+                for my $d (@{$keys->{$path}->{$method}->{'columns'}}) {
+                    my $col = { 'name' => $d->{'name'} };
+                    $col->{'type'} = $d->{'type'} if $d->{'type'};
+                    $col->{'config'} = { 'unit' => $d->{'unit'} } if $d->{'unit'};
+                    push @{$columns}, $col;
+                }
+                return($columns);
+            }
+        }
+    }
+    return;
+}
+
+##########################################################
 
 =head2 register_rest_path_v1
 
@@ -1379,7 +1419,7 @@ sub _rest_get_index {
     my($c) = @_;
     my($paths, $keys, $docs) = get_rest_paths($c);
     my $data = [];
-    for my $path (sort keys %{$paths}) {
+    for my $path (sort _sort_by_proto (keys %{$paths})) {
         for my $proto (sort keys %{$paths->{$path}}) {
             push @{$data}, {
                 url         => $path,
@@ -1389,6 +1429,17 @@ sub _rest_get_index {
         }
     }
     return($data);
+}
+
+################################################################################
+sub _sort_by_proto {
+    my $weight = {
+        'GET'    => 1,
+        'POST'   => 2,
+        'PATCH'  => 3,
+        'DELETE' => 4,
+    };
+    return(($weight->{$a}//99) <=> ($weight->{$b}//99));
 }
 
 ##########################################################

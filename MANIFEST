@@ -89,6 +89,7 @@ lib/Thruk/Controller/Rest/V1/api_keys.pm
 lib/Thruk/Controller/Rest/V1/broadcast.pm
 lib/Thruk/Controller/Rest/V1/cluster.pm
 lib/Thruk/Controller/Rest/V1/cmd.pm
+lib/Thruk/Controller/Rest/V1/docs.pm
 lib/Thruk/Controller/Rest/V1/logcache.pm
 lib/Thruk/Controller/Rest/V1/outages.pm
 lib/Thruk/Controller/Rest/V1/recurring_downtimes.pm

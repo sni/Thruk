@@ -34,7 +34,7 @@ my $service_group       = $test_svc->{'groups'}->[0];
 
 
 my $cmds = _update_cmds($c);
-_update_docs($c, "docs/documentation/rest.asciidoc");
+_update_docs($c, "docs/documentation/rest.asciidoc", "lib/Thruk/Controller/Rest/V1/docs.pm");
 _update_docs($c, "docs/documentation/rest_commands.asciidoc");
 _update_cmds_list($c, "docs/documentation/commands.html", $cmds);
 unlink('var/cluster/nodes');
@@ -302,7 +302,7 @@ sub _update_cmds {
 
 ################################################################################
 sub _update_docs {
-    my($c, $output_file) = @_;
+    my($c, $output_file, $json_file) = @_;
 
     if($ENV{'THRUK_USE_LMD'}) {
         require Thruk::Utils::LMD;
@@ -360,6 +360,7 @@ sub _update_docs {
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
     # add generic cmd url with cross links to command page
+    my $raw_json = {};
     my $command_urls = {};
     for my $url (sort keys %{$paths}) {
         next if $url !~ m%/cmd/%mx;
@@ -403,25 +404,31 @@ sub _update_docs {
             if(!$keys->{$url}->{$proto} && $attributes->{$url}->{$proto}) {
                 $keys->{$url}->{$proto} = [];
                 for my $key (sort keys %{$attributes->{$url}->{$proto}}) {
-                    push @{$keys->{$url}->{$proto}}, [$key, $attributes->{$url}->{$proto}->{$key}];
+                    push @{$keys->{$url}->{$proto}}, [$key, @{$attributes->{$url}->{$proto}->{$key}}];
                 }
             }
             if($keys->{$url}->{$proto}) {
+                $raw_json->{$url}->{$proto} = { columns => [] };
                 $content .= '[options="header"]'."\n";
                 $content .= "|===========================================\n";
-                $content .= sprintf("|%-33s | %s\n", 'Attribute', 'Description');
+                $content .= sprintf("|%-33s | %-10s | %-8s | %s\n", 'Attribute', 'Type', 'Unit', 'Description');
                 for my $doc (@{$keys->{$url}->{$proto}}) {
-                    my $desc = ($doc->[1] || $attributes->{$url}->{$proto}->{$doc->[0]} || '' );
-                    if(!$desc && $doc->[0] eq 'peer_key') {
+                    my $name =  $doc->[0];
+                    my $typ  = Thruk::Base::trim_whitespace($doc->[1] || $attributes->{$url}->{$proto}->{$name}->[0] || '' );
+                    my $unit = Thruk::Base::trim_whitespace($doc->[2] || $attributes->{$url}->{$proto}->{$name}->[1] || '' );
+                    my $desc = Thruk::Base::trim_whitespace($doc->[3] || $attributes->{$url}->{$proto}->{$name}->[2] || '' );
+
+                    if(!$desc && $name eq 'peer_key') {
                         $desc = "backend id when having multiple sites connected";
                     }
                     if($url eq '/thruk/stats') {
                         my $help = Thruk::Utils::IO::json_lock_retrieve($c->{'config'}->{'var_path'}.'/thruk.stats.help');
-                        $desc = $help->{$doc->[0]};
+                        $desc = $help->{$name};
                     }
-                    next if $doc->[0] eq 'page_profiles';
-                    _warn("no documentation on url %s for attribute %s\n", $url, $doc->[0]) unless $desc;
-                    $content .= sprintf("|%-33s | %s\n", $doc->[0], $desc);
+                    next if $name eq 'page_profiles';
+                    _warn("no documentation on url %s for attribute %s\n", $url, $name) unless $desc;
+                    $content .= sprintf("|%-33s | %-10s | %-8s | %s\n", $name, $typ, $unit, $desc);
+                    push @{$raw_json->{$url}->{$proto}->{'columns'}}, { 'type' => $typ, 'unit' => $unit, 'name' => $name, 'description' => $desc };
                 }
                 $content .= "|===========================================\n\n\n";
             }
@@ -435,6 +442,16 @@ sub _update_docs {
     open(my $fh, '>', $output_file) or die("cannot write to ".$output_file.': '.$@);
     print $fh $content;
     close($fh);
+
+    if($json_file && !$ENV{'TEST_MODE'}) {
+        my $content = Thruk::Utils::IO::read($json_file);
+        $content =~ s/^__DATA__\n.*$/__DATA__\n/gsmx;
+        open(my $fh, '>', $json_file) or die("cannot write to ".$json_file.': '.$@);
+        my $raw_dump = Cpanel::JSON::XS->new->utf8->canonical->pretty->indent_length(1)->space_before(0)->encode($raw_json);
+        print $fh $content;
+        print $fh $raw_dump;
+        close($fh);
+    }
 
     unlink('bp/9999.tbp');
     unlink('panorama/9999.tab');
@@ -538,7 +555,7 @@ sub _fetch_keys {
     }
     my $list = [];
     for my $k (sort keys %{$keys}) {
-        push @{$list}, [$k, ""];
+        push @{$list}, [$k, "", "", ""];
     }
     return $list;
 }
@@ -567,9 +584,13 @@ sub _parse_attribute_docs {
             $proto = $1;
             $url   = $2;
         }
-        if($url && $line =~ m%^\|([^\|]+?)\s*\|\s*(.*)$%mx) {
+        if($url && $line =~ m%^\|([^\|]+?)\s*\|([^\|]+?)\s*\|([^\|]+?)\s*\|\s*(.*)$%mx) {
             next if $1 eq 'Attribute';
-            $attributes->{$url}->{$proto}->{$1} = $2;
+            $attributes->{$url}->{$proto}->{$1} = [$2, $3, $4];
+        }
+        elsif($url && $line =~ m%^\|([^\|]+?)\s*\|\s*(.*)$%mx) {
+            next if $1 eq 'Attribute';
+            $attributes->{$url}->{$proto}->{$1} = ["", "", $2];
         }
     }
     return $attributes;

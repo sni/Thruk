@@ -589,83 +589,83 @@ lists host / service check statistics.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|hosts_active_15_perc              | percent of active hosts during the last 15 minutes
-|hosts_active_15_sum               | amount of active hosts during the last 15 minutes
-|hosts_active_1_perc               | same for last minute
-|hosts_active_1_sum                | same for last minute
-|hosts_active_5_perc               | same for last 5 minutes
-|hosts_active_5_sum                | same for last 5 minutes
-|hosts_active_60_perc              | same for last 60 minutes
-|hosts_active_60_sum               | same for last 60 minutes
-|hosts_active_all_perc             | percent of total active hosts
-|hosts_active_all_sum              | amount of total active hosts
-|hosts_active_state_change_avg     | average percent state change
-|hosts_active_state_change_max     | maximum state change over all active hosts
-|hosts_active_state_change_min     | minimum state change over all active hosts
-|hosts_active_state_change_sum     | sum state change over all hosts
-|hosts_active_sum                  | number of active hosts
-|hosts_execution_time_avg          | average execution time over all hosts
-|hosts_execution_time_max          | maximum execution time over all hosts
-|hosts_execution_time_min          | minimum execution time over all hosts
-|hosts_execution_time_sum          | sum execution time over all hosts
-|hosts_latency_avg                 | host latency average
-|hosts_latency_max                 | minimum host latency
-|hosts_latency_min                 | minimum host latency
-|hosts_latency_sum                 | sum latency over all hosts
-|hosts_passive_15_perc             | percent of passive hosts during the last 15 minutes
-|hosts_passive_15_sum              | amount of passive hosts during the last 15 minutes
-|hosts_passive_1_perc              | same for last minute
-|hosts_passive_1_sum               | same for last minute
-|hosts_passive_5_perc              | same for last 5 minutes
-|hosts_passive_5_sum               | same for last 5 minutes
-|hosts_passive_60_perc             | same for last 60 minutes
-|hosts_passive_60_sum              | same for last 60 minutes
-|hosts_passive_all_perc            | percent of total passive hosts
-|hosts_passive_all_sum             | amount of total passive hosts
-|hosts_passive_state_change_avg    | average percent state change for passive hosts
-|hosts_passive_state_change_max    | maximum state change over all passive hosts
-|hosts_passive_state_change_min    | minimum state change over all passive hosts
-|hosts_passive_state_change_sum    | sum state change over all passive hosts
-|hosts_passive_sum                 | number of passive hosts
-|services_active_15_perc           | percent of active services during the last 15 minutes
-|services_active_15_sum            | amount of active services during the last 15 minutes
-|services_active_1_perc            | same for last minute
-|services_active_1_sum             | same for last minute
-|services_active_5_perc            | same for last 5 minutes
-|services_active_5_sum             | same for last 5 minutes
-|services_active_60_perc           | same for last 60 minutes
-|services_active_60_sum            | same for last 60 minutes
-|services_active_all_perc          | percent of total active services
-|services_active_all_sum           | amount of total active services
-|services_active_state_change_avg  | average percent state change
-|services_active_state_change_max  | maximum state change over all active services
-|services_active_state_change_min  | minimum state change over all active services
-|services_active_state_change_sum  | sum state change over all services
-|services_active_sum               | number of active services
-|services_execution_time_avg       | average execution time over all services
-|services_execution_time_max       | maximum execution time over all services
-|services_execution_time_min       | minimum execution time over all services
-|services_execution_time_sum       | sum execution time over all services
-|services_latency_avg              | services latency average
-|services_latency_max              | minimum services latency
-|services_latency_min              | minimum services latency
-|services_latency_sum              | sum latency over all services
-|services_passive_15_perc          | percent of passive services during the last 15 minutes
-|services_passive_15_sum           | amount of passive services during the last 15 minutes
-|services_passive_1_perc           | same for last minute
-|services_passive_1_sum            | same for last minute
-|services_passive_5_perc           | same for last 5 minutes
-|services_passive_5_sum            | same for last 5 minutes
-|services_passive_60_perc          | same for last 60 minutes
-|services_passive_60_sum           | same for last 60 minutes
-|services_passive_all_perc         | percent of total passive services
-|services_passive_all_sum          | amount of total passive services
-|services_passive_state_change_avg | average percent state change for passive services
-|services_passive_state_change_max | maximum state change over all passive services
-|services_passive_state_change_min | minimum state change over all passive services
-|services_passive_state_change_sum | sum state change over all passive services
-|services_passive_sum              | number of passive services
+|Attribute                         | Type       | Unit     | Description
+|hosts_active_15_perc              |            |          | percent of active hosts during the last 15 minutes
+|hosts_active_15_sum               |            |          | amount of active hosts during the last 15 minutes
+|hosts_active_1_perc               |            |          | same for last minute
+|hosts_active_1_sum                |            |          | same for last minute
+|hosts_active_5_perc               |            |          | same for last 5 minutes
+|hosts_active_5_sum                |            |          | same for last 5 minutes
+|hosts_active_60_perc              |            |          | same for last 60 minutes
+|hosts_active_60_sum               |            |          | same for last 60 minutes
+|hosts_active_all_perc             |            |          | percent of total active hosts
+|hosts_active_all_sum              |            |          | amount of total active hosts
+|hosts_active_state_change_avg     |            |          | average percent state change
+|hosts_active_state_change_max     |            |          | maximum state change over all active hosts
+|hosts_active_state_change_min     |            |          | minimum state change over all active hosts
+|hosts_active_state_change_sum     |            |          | sum state change over all hosts
+|hosts_active_sum                  |            |          | number of active hosts
+|hosts_execution_time_avg          |            |          | average execution time over all hosts
+|hosts_execution_time_max          |            |          | maximum execution time over all hosts
+|hosts_execution_time_min          |            |          | minimum execution time over all hosts
+|hosts_execution_time_sum          |            |          | sum execution time over all hosts
+|hosts_latency_avg                 |            |          | host latency average
+|hosts_latency_max                 |            |          | minimum host latency
+|hosts_latency_min                 |            |          | minimum host latency
+|hosts_latency_sum                 |            |          | sum latency over all hosts
+|hosts_passive_15_perc             |            |          | percent of passive hosts during the last 15 minutes
+|hosts_passive_15_sum              |            |          | amount of passive hosts during the last 15 minutes
+|hosts_passive_1_perc              |            |          | same for last minute
+|hosts_passive_1_sum               |            |          | same for last minute
+|hosts_passive_5_perc              |            |          | same for last 5 minutes
+|hosts_passive_5_sum               |            |          | same for last 5 minutes
+|hosts_passive_60_perc             |            |          | same for last 60 minutes
+|hosts_passive_60_sum              |            |          | same for last 60 minutes
+|hosts_passive_all_perc            |            |          | percent of total passive hosts
+|hosts_passive_all_sum             |            |          | amount of total passive hosts
+|hosts_passive_state_change_avg    |            |          | average percent state change for passive hosts
+|hosts_passive_state_change_max    |            |          | maximum state change over all passive hosts
+|hosts_passive_state_change_min    |            |          | minimum state change over all passive hosts
+|hosts_passive_state_change_sum    |            |          | sum state change over all passive hosts
+|hosts_passive_sum                 |            |          | number of passive hosts
+|services_active_15_perc           |            |          | percent of active services during the last 15 minutes
+|services_active_15_sum            |            |          | amount of active services during the last 15 minutes
+|services_active_1_perc            |            |          | same for last minute
+|services_active_1_sum             |            |          | same for last minute
+|services_active_5_perc            |            |          | same for last 5 minutes
+|services_active_5_sum             |            |          | same for last 5 minutes
+|services_active_60_perc           |            |          | same for last 60 minutes
+|services_active_60_sum            |            |          | same for last 60 minutes
+|services_active_all_perc          |            |          | percent of total active services
+|services_active_all_sum           |            |          | amount of total active services
+|services_active_state_change_avg  |            |          | average percent state change
+|services_active_state_change_max  |            |          | maximum state change over all active services
+|services_active_state_change_min  |            |          | minimum state change over all active services
+|services_active_state_change_sum  |            |          | sum state change over all services
+|services_active_sum               |            |          | number of active services
+|services_execution_time_avg       |            |          | average execution time over all services
+|services_execution_time_max       |            |          | maximum execution time over all services
+|services_execution_time_min       |            |          | minimum execution time over all services
+|services_execution_time_sum       |            |          | sum execution time over all services
+|services_latency_avg              |            |          | services latency average
+|services_latency_max              |            |          | minimum services latency
+|services_latency_min              |            |          | minimum services latency
+|services_latency_sum              |            |          | sum latency over all services
+|services_passive_15_perc          |            |          | percent of passive services during the last 15 minutes
+|services_passive_15_sum           |            |          | amount of passive services during the last 15 minutes
+|services_passive_1_perc           |            |          | same for last minute
+|services_passive_1_sum            |            |          | same for last minute
+|services_passive_5_perc           |            |          | same for last 5 minutes
+|services_passive_5_sum            |            |          | same for last 5 minutes
+|services_passive_60_perc          |            |          | same for last 60 minutes
+|services_passive_60_sum           |            |          | same for last 60 minutes
+|services_passive_all_perc         |            |          | percent of total passive services
+|services_passive_all_sum          |            |          | amount of total passive services
+|services_passive_state_change_avg |            |          | average percent state change for passive services
+|services_passive_state_change_max |            |          | maximum state change over all passive services
+|services_passive_state_change_min |            |          | minimum state change over all passive services
+|services_passive_state_change_sum |            |          | sum state change over all passive services
+|services_passive_sum              |            |          | number of passive services
 |===========================================
 
 
@@ -738,10 +738,10 @@ Returns differences between filesystem and stashed config changes.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|file                              | file name of changed file
-|output                            | diff output
-|peer_key                          | backend id when having multiple sites connected
+|Attribute                         | Type       | Unit     | Description
+|file                              |            |          | file name of changed file
+|output                            |            |          | diff output
+|peer_key                          |            |          | backend id when having multiple sites connected
 |===========================================
 
 
@@ -756,13 +756,13 @@ returns all config files
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|content                           | raw file content
-|hex                               | hex sum for this file
-|mtime                             | unix timestamp of last modification
-|path                              | filesystem path
-|peer_key                          | backend id when having multiple sites connected
-|readonly                          | readonly flag
+|Attribute                         | Type       | Unit     | Description
+|content                           |            |          | raw file content
+|hex                               |            |          | hex sum for this file
+|mtime                             |            |          | unix timestamp of last modification
+|path                              |            |          | filesystem path
+|peer_key                          |            |          | backend id when having multiple sites connected
+|readonly                          |            |          | readonly flag
 |===========================================
 
 
@@ -773,15 +773,15 @@ Used templates are saved to the :TEMPLATES attribute
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|...                               | object attributes like defined in the source config files
-|:FILE                             | filename and line number
-|:ID                               | internal uniq id
-|:PEER_KEY                         | id of remote site
-|:PEER_NAME                        | name of remote site
-|:READONLY                         | flag whether file is readonly
-|:TEMPLATES                        | list of used template
-|:TYPE                             | object type, ex.: host
+|Attribute                         | Type       | Unit     | Description
+|...                               |            |          | object attributes like defined in the source config files
+|:FILE                             |            |          | filename and line number
+|:ID                               |            |          | internal uniq id
+|:PEER_KEY                         |            |          | id of remote site
+|:PEER_NAME                        |            |          | name of remote site
+|:READONLY                         |            |          | flag whether file is readonly
+|:TEMPLATES                        |            |          | list of used template
+|:TYPE                             |            |          | object type, ex.: host
 |===========================================
 
 
@@ -792,14 +792,14 @@ Use /config/fullobjects to get the full expanded config.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|...                               | object attributes like defined in the source config files
-|:FILE                             | filename and line number
-|:ID                               | internal uniq id
-|:PEER_KEY                         | id of remote site
-|:PEER_NAME                        | name of remote site
-|:READONLY                         | flag whether file is readonly
-|:TYPE                             | object type, ex.: host
+|Attribute                         | Type       | Unit     | Description
+|...                               |            |          | object attributes like defined in the source config files
+|:FILE                             |            |          | filename and line number
+|:ID                               |            |          | internal uniq id
+|:PEER_KEY                         |            |          | id of remote site
+|:PEER_NAME                        |            |          | name of remote site
+|:READONLY                         |            |          | flag whether file is readonly
+|:TYPE                             |            |          | object type, ex.: host
 |===========================================
 
 
@@ -842,10 +842,10 @@ Returns result from Thruks config precheck. The precheck does not require change
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|errors                            | list of errors encountered
-|failed                            | boolean flag wether configuration check has failed or not
-|peer_key                          | backend id when having multiple sites connected
+|Attribute                         | Type       | Unit     | Description
+|errors                            |            |          | list of errors encountered
+|failed                            |            |          | boolean flag wether configuration check has failed or not
+|peer_key                          |            |          | backend id when having multiple sites connected
 |===========================================
 
 
@@ -1010,16 +1010,16 @@ Optional arguments:
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|class                             | host/service status
-|duration                          | outage duration in seconds
-|end                               | unix timestamp of outage end
-|host                              | host name
-|in_downtime                       | 0/1 flag wether this outage is in a downtime
-|plugin_output                     | last plugin output during outage
-|service                           | service description (only for service outages)
-|start                             | unix timestamp of outage start
-|type                              | log entry type
+|Attribute                         | Type       | Unit     | Description
+|class                             |            |          | host/service status
+|duration                          |            |          | outage duration in seconds
+|end                               |            |          | unix timestamp of outage end
+|host                              |            |          | host name
+|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
+|plugin_output                     |            |          | last plugin output during outage
+|service                           |            |          | service description (only for service outages)
+|start                             |            |          | unix timestamp of outage start
+|type                              |            |          | log entry type
 |===========================================
 
 
@@ -1057,17 +1057,17 @@ Optional arguments:
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|scheduled_time_down               | total seconds in state down (during downtimes)
-|scheduled_time_indeterminate      | total seconds unknown (during downtimes)
-|scheduled_time_unreachable        | total seconds in state unreachable (during downtimes)
-|scheduled_time_up                 | total seconds in state up (during downtimes)
-|time_down                         | total seconds in state down
-|time_indeterminate_nodata         | total seconds without any data
-|time_indeterminate_notrunning     | total seconds during core not running
-|time_indeterminate_outside_timeperiod | total seconds outside the given timeperiod
-|time_unreachable                  | total seconds in state unreachable
-|time_up                           | total seconds in state up
+|Attribute                         | Type       | Unit     | Description
+|scheduled_time_down               |            |          | total seconds in state down (during downtimes)
+|scheduled_time_indeterminate      |            |          | total seconds unknown (during downtimes)
+|scheduled_time_unreachable        |            |          | total seconds in state unreachable (during downtimes)
+|scheduled_time_up                 |            |          | total seconds in state up (during downtimes)
+|time_down                         |            |          | total seconds in state down
+|time_indeterminate_nodata         |            |          | total seconds without any data
+|time_indeterminate_notrunning     |            |          | total seconds during core not running
+|time_indeterminate_outside_timeperiod |            |          | total seconds outside the given timeperiod
+|time_unreachable                  |            |          | total seconds in state unreachable
+|time_up                           |            |          | total seconds in state up
 |===========================================
 
 
@@ -1130,12 +1130,12 @@ displays commandline for check command of given hosts.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|check_command                     | name of the check_command including arguments
-|command_line                      | full expanded command line (if possible)
-|error                             | contains the error if expanding failed for some reason
-|host_name                         | host name
-|peer_key                          | backend id when having multiple sites connected
+|Attribute                         | Type       | Unit     | Description
+|check_command                     |            |          | name of the check_command including arguments
+|command_line                      |            |          | full expanded command line (if possible)
+|error                             |            |          | contains the error if expanding failed for some reason
+|host_name                         |            |          | host name
+|peer_key                          |            |          | backend id when having multiple sites connected
 |===========================================
 
 
@@ -1176,15 +1176,15 @@ Optional arguments:
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|class                             | host/service status
-|duration                          | outage duration in seconds
-|end                               | unix timestamp of outage end
-|host                              | host name
-|in_downtime                       | 0/1 flag wether this outage is in a downtime
-|plugin_output                     | last plugin output during outage
-|start                             | unix timestamp of outage start
-|type                              | log entry type
+|Attribute                         | Type       | Unit     | Description
+|class                             |            |          | host/service status
+|duration                          |            |          | outage duration in seconds
+|end                               |            |          | unix timestamp of outage end
+|host                              |            |          | host name
+|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
+|plugin_output                     |            |          | last plugin output during outage
+|start                             |            |          | unix timestamp of outage start
+|type                              |            |          | log entry type
 |===========================================
 
 
@@ -1208,15 +1208,15 @@ Optional arguments:
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|class                             | host/service status
-|duration                          | outage duration in seconds
-|end                               | unix timestamp of outage end
-|host                              | host name
-|in_downtime                       | 0/1 flag wether this outage is in a downtime
-|plugin_output                     | last plugin output during outage
-|start                             | unix timestamp of outage start
-|type                              | log entry type
+|Attribute                         | Type       | Unit     | Description
+|class                             |            |          | host/service status
+|duration                          |            |          | outage duration in seconds
+|end                               |            |          | unix timestamp of outage end
+|host                              |            |          | host name
+|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
+|plugin_output                     |            |          | last plugin output during outage
+|start                             |            |          | unix timestamp of outage start
+|type                              |            |          | log entry type
 |===========================================
 
 
@@ -1226,41 +1226,41 @@ hash of livestatus host statistics.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|active_checks_disabled_active     | number of active hosts which have active checks disabled
-|active_checks_disabled_passive    | number of passive hosts which have active checks disabled
-|down                              | number of down hosts
-|down_and_ack                      | number of down hosts which are acknowledged
-|down_and_disabled_active          | number of active down hosts which have active checks disabled
-|down_and_disabled_passive         | number of passive down hosts which have active checks disabled
-|down_and_scheduled                | number of down hosts which are in a scheduled downtime
-|down_and_unhandled                | number of unhandled down hosts
-|eventhandler_disabled             | number of hosts with eventhandlers disabled
-|flapping                          | number of flapping hosts
-|flapping_disabled                 | number of hosts with flapping detection disabled
-|notifications_disabled            | number of hosts with notifications disabled
-|outages                           | number of network outages
-|passive_checks_disabled           | number of hosts which do not accept passive check results
-|pending                           | number of pending hosts
-|pending_and_disabled              | number of pending hosts with active checks disabled
-|pending_and_scheduled             | number of pending hosts which are in a scheduled downtime
-|plain_down                        | number of down hosts which are not acknowleded or in a downtime
-|plain_pending                     | number of pending hosts which are not acknowleded or in a downtime
-|plain_unreachable                 | number of unreachable hosts which are not acknowleded or in a downtime
-|plain_up                          | number of up hosts which are not acknowleded or in a downtime
-|total                             | total number of hosts
-|total_active                      | total number of active hosts
-|total_passive                     | total number of passive hosts
-|unreachable                       | number of unreachable hosts
-|unreachable_and_ack               | number of unreachable hosts which are acknowledged
-|unreachable_and_disabled_active   | number of active unreachable hosts which have active checks disabled
-|unreachable_and_disabled_passive  | number of passive unreachable hosts which have active checks disabled
-|unreachable_and_scheduled         | number of unreachable hosts which are in a scheduled downtime
-|unreachable_and_unhandled         | number of unhandled unreachable hosts
-|up                                | number of up hosts
-|up_and_disabled_active            | number of active up hosts which have active checks disabled
-|up_and_disabled_passive           | number of passive up hosts which have active checks disabled
-|up_and_scheduled                  | number of up hosts which are in a scheduled downtime
+|Attribute                         | Type       | Unit     | Description
+|active_checks_disabled_active     |            |          | number of active hosts which have active checks disabled
+|active_checks_disabled_passive    |            |          | number of passive hosts which have active checks disabled
+|down                              |            |          | number of down hosts
+|down_and_ack                      |            |          | number of down hosts which are acknowledged
+|down_and_disabled_active          |            |          | number of active down hosts which have active checks disabled
+|down_and_disabled_passive         |            |          | number of passive down hosts which have active checks disabled
+|down_and_scheduled                |            |          | number of down hosts which are in a scheduled downtime
+|down_and_unhandled                |            |          | number of unhandled down hosts
+|eventhandler_disabled             |            |          | number of hosts with eventhandlers disabled
+|flapping                          |            |          | number of flapping hosts
+|flapping_disabled                 |            |          | number of hosts with flapping detection disabled
+|notifications_disabled            |            |          | number of hosts with notifications disabled
+|outages                           |            |          | number of network outages
+|passive_checks_disabled           |            |          | number of hosts which do not accept passive check results
+|pending                           |            |          | number of pending hosts
+|pending_and_disabled              |            |          | number of pending hosts with active checks disabled
+|pending_and_scheduled             |            |          | number of pending hosts which are in a scheduled downtime
+|plain_down                        |            |          | number of down hosts which are not acknowleded or in a downtime
+|plain_pending                     |            |          | number of pending hosts which are not acknowleded or in a downtime
+|plain_unreachable                 |            |          | number of unreachable hosts which are not acknowleded or in a downtime
+|plain_up                          |            |          | number of up hosts which are not acknowleded or in a downtime
+|total                             |            |          | total number of hosts
+|total_active                      |            |          | total number of active hosts
+|total_passive                     |            |          | total number of passive hosts
+|unreachable                       |            |          | number of unreachable hosts
+|unreachable_and_ack               |            |          | number of unreachable hosts which are acknowledged
+|unreachable_and_disabled_active   |            |          | number of active unreachable hosts which have active checks disabled
+|unreachable_and_disabled_passive  |            |          | number of passive unreachable hosts which have active checks disabled
+|unreachable_and_scheduled         |            |          | number of unreachable hosts which are in a scheduled downtime
+|unreachable_and_unhandled         |            |          | number of unhandled unreachable hosts
+|up                                |            |          | number of up hosts
+|up_and_disabled_active            |            |          | number of active up hosts which have active checks disabled
+|up_and_disabled_passive           |            |          | number of passive up hosts which have active checks disabled
+|up_and_scheduled                  |            |          | number of up hosts which are in a scheduled downtime
 |===========================================
 
 
@@ -1271,14 +1271,14 @@ its basically a reduced set of /hosts/stats.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|down                              | number of down hosts
-|down_and_unhandled                | number of down hosts which are neither acknowledged nor in scheduled downtime
-|pending                           | number of pending hosts
-|total                             | total number of hosts
-|unreachable                       | number of unreachable hosts
-|unreachable_and_unhandled         | number of unreachable hosts which are neither acknowledged nor in scheduled downtime
-|up                                | number of up hosts
+|Attribute                         | Type       | Unit     | Description
+|down                              |            |          | number of down hosts
+|down_and_unhandled                |            |          | number of down hosts which are neither acknowledged nor in scheduled downtime
+|pending                           |            |          | number of pending hosts
+|total                             |            |          | total number of hosts
+|unreachable                       |            |          | number of unreachable hosts
+|unreachable_and_unhandled         |            |          | number of unreachable hosts which are neither acknowledged nor in scheduled downtime
+|up                                |            |          | number of up hosts
 |===========================================
 
 
@@ -1288,10 +1288,10 @@ lists all available rest urls.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|description                       | description of the url
-|protocol                          | protocol to use for this url
-|url                               | the rest url
+|Attribute                         | Type       | Unit     | Description
+|description                       |            |          | description of the url
+|protocol                          |            |          | protocol to use for this url
+|url                               |            |          | the rest url
 |===========================================
 
 
@@ -1301,29 +1301,29 @@ lists connected sites. Only available if LMD (`use_lmd`) is enabled.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|addr                              | address of the remote site
-|bytes_received                    | total bytes received from this site
-|bytes_send                        | total bytes send to this site
-|federation_addr                   | contains the real address if using federation
-|federation_key                    | contains the real peer key if using federation
-|federation_name                   | contains the real name if using federation
-|federation_type                   | contains the real backend type if using federation
-|idling                            | flag if the connection is in idle mode
-|key                               | primary id of this site
-|last_error                        | last error message
-|last_online                       | timestamp when the site was last time online
-|last_query                        | timestamp of the last received query for this site
-|last_update                       | timestamp of the last update
-|lmd_last_cache_update             | same as last_update
-|name                              | name of the site
-|parent                            | parent id for lmd federation setups
-|peer_key                          | same as `key`
-|peer_name                         | same as `name`
-|queries                           | number of queries received
-|response_time                     | response time in seconds
-|section                           | thruks section
-|status                            | connection status of this site
+|Attribute                         | Type       | Unit     | Description
+|addr                              |            |          | address of the remote site
+|bytes_received                    |            |          | total bytes received from this site
+|bytes_send                        |            |          | total bytes send to this site
+|federation_addr                   |            |          | contains the real address if using federation
+|federation_key                    |            |          | contains the real peer key if using federation
+|federation_name                   |            |          | contains the real name if using federation
+|federation_type                   |            |          | contains the real backend type if using federation
+|idling                            |            |          | flag if the connection is in idle mode
+|key                               |            |          | primary id of this site
+|last_error                        |            |          | last error message
+|last_online                       |            |          | timestamp when the site was last time online
+|last_query                        |            |          | timestamp of the last received query for this site
+|last_update                       |            |          | timestamp of the last update
+|lmd_last_cache_update             |            |          | same as last_update
+|name                              |            |          | name of the site
+|parent                            |            |          | parent id for lmd federation setups
+|peer_key                          |            |          | same as `key`
+|peer_name                         |            |          | same as `name`
+|queries                           |            |          | number of queries received
+|response_time                     |            |          | response time in seconds
+|section                           |            |          | thruks section
+|status                            |            |          | connection status of this site
 |===========================================
 
 
@@ -1409,16 +1409,16 @@ Optional arguments:
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|class                             | host/service status
-|duration                          | outage duration in seconds
-|end                               | unix timestamp of outage end
-|host                              | host name
-|in_downtime                       | 0/1 flag wether this outage is in a downtime
-|plugin_output                     | last plugin output during outage
-|service                           | service description (only for service outages)
-|start                             | unix timestamp of outage start
-|type                              | log entry type
+|Attribute                         | Type       | Unit     | Description
+|class                             |            |          | host/service status
+|duration                          |            |          | outage duration in seconds
+|end                               |            |          | unix timestamp of outage end
+|host                              |            |          | host name
+|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
+|plugin_output                     |            |          | last plugin output during outage
+|service                           |            |          | service description (only for service outages)
+|start                             |            |          | unix timestamp of outage start
+|type                              |            |          | log entry type
 |===========================================
 
 
@@ -1453,19 +1453,19 @@ Optional arguments:
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|scheduled_time_critical           | total seconds in state critical (during downtimes)
-|scheduled_time_indeterminate      | total seconds unknown (during downtimes)
-|scheduled_time_ok                 | total seconds in state ok (during downtimes)
-|scheduled_time_unknown            | total seconds in state unknown (during downtimes)
-|scheduled_time_warning            | total seconds in state warning (during downtimes)
-|time_critical                     | total seconds in state critical
-|time_indeterminate_nodata         | total seconds without any data
-|time_indeterminate_notrunning     | total seconds during core not running
-|time_indeterminate_outside_timeperiod | total seconds outside the given timeperiod
-|time_ok                           | total seconds in state ok
-|time_unknown                      | total seconds in state unknown
-|time_warning                      | total seconds in state warning
+|Attribute                         | Type       | Unit     | Description
+|scheduled_time_critical           |            |          | total seconds in state critical (during downtimes)
+|scheduled_time_indeterminate      |            |          | total seconds unknown (during downtimes)
+|scheduled_time_ok                 |            |          | total seconds in state ok (during downtimes)
+|scheduled_time_unknown            |            |          | total seconds in state unknown (during downtimes)
+|scheduled_time_warning            |            |          | total seconds in state warning (during downtimes)
+|time_critical                     |            |          | total seconds in state critical
+|time_indeterminate_nodata         |            |          | total seconds without any data
+|time_indeterminate_notrunning     |            |          | total seconds during core not running
+|time_indeterminate_outside_timeperiod |            |          | total seconds outside the given timeperiod
+|time_ok                           |            |          | total seconds in state ok
+|time_unknown                      |            |          | total seconds in state unknown
+|time_warning                      |            |          | total seconds in state warning
 |===========================================
 
 
@@ -1515,13 +1515,13 @@ displays commandline for check command of given services.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|check_command                     | name of the check_command including arguments
-|command_line                      | full expanded command line (if possible)
-|error                             | contains the error if expanding failed for some reason
-|host_name                         | host name
-|peer_key                          | backend id when having multiple sites connected
-|service_description               | service name
+|Attribute                         | Type       | Unit     | Description
+|check_command                     |            |          | name of the check_command including arguments
+|command_line                      |            |          | full expanded command line (if possible)
+|error                             |            |          | contains the error if expanding failed for some reason
+|host_name                         |            |          | host name
+|peer_key                          |            |          | backend id when having multiple sites connected
+|service_description               |            |          | service name
 |===========================================
 
 
@@ -1557,16 +1557,16 @@ Optional arguments:
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|class                             | host/service status
-|duration                          | outage duration in seconds
-|end                               | unix timestamp of outage end
-|host                              | host name
-|in_downtime                       | 0/1 flag wether this outage is in a downtime
-|plugin_output                     | last plugin output during outage
-|service                           | service description (only for service outages)
-|start                             | unix timestamp of outage start
-|type                              | log entry type
+|Attribute                         | Type       | Unit     | Description
+|class                             |            |          | host/service status
+|duration                          |            |          | outage duration in seconds
+|end                               |            |          | unix timestamp of outage end
+|host                              |            |          | host name
+|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
+|plugin_output                     |            |          | last plugin output during outage
+|service                           |            |          | service description (only for service outages)
+|start                             |            |          | unix timestamp of outage start
+|type                              |            |          | log entry type
 |===========================================
 
 
@@ -1585,16 +1585,16 @@ Optional arguments:
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|class                             | host/service status
-|duration                          | outage duration in seconds
-|end                               | unix timestamp of outage end
-|host                              | host name
-|in_downtime                       | 0/1 flag wether this outage is in a downtime
-|plugin_output                     | last plugin output during outage
-|service                           | service description (only for service outages)
-|start                             | unix timestamp of outage start
-|type                              | log entry type
+|Attribute                         | Type       | Unit     | Description
+|class                             |            |          | host/service status
+|duration                          |            |          | outage duration in seconds
+|end                               |            |          | unix timestamp of outage end
+|host                              |            |          | host name
+|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
+|plugin_output                     |            |          | last plugin output during outage
+|service                           |            |          | service description (only for service outages)
+|start                             |            |          | unix timestamp of outage start
+|type                              |            |          | log entry type
 |===========================================
 
 
@@ -1604,50 +1604,50 @@ livestatus service statistics.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|active_checks_disabled_active     | number of active services which have active checks disabled
-|active_checks_disabled_passive    | number of passive services which have active checks disabled
-|critical                          | number of critical services
-|critical_and_ack                  | number of critical services which are acknowledged
-|critical_and_disabled_active      | number of active critical services which have active checks disabled
-|critical_and_disabled_passive     | number of passive critical services which have active checks disabled
-|critical_and_scheduled            | number of critical services which are in a scheduled downtime
-|critical_and_unhandled            | number of unhandled critical services
-|critical_on_down_host             | number of unhandled critical services on down hosts
-|eventhandler_disabled             | number of services with eventhandlers disabled
-|flapping                          | number of flapping services
-|flapping_disabled                 | number of services with flapping detection disabled
-|notifications_disabled            | number of services with notifications disabled
-|ok                                | number of ok services
-|ok_and_disabled_active            | number of active ok services which have active checks disabled
-|ok_and_disabled_passive           | number of passive ok services which have active checks disabled
-|ok_and_scheduled                  | number of ok services which are in a scheduled downtime
-|passive_checks_disabled           | number of services which do not accept passive check results
-|pending                           | number of pending services
-|pending_and_disabled              | number of pending services with active checks disabled
-|pending_and_scheduled             | number of pending services which are in a scheduled downtime
-|plain_critical                    | number of critical services which are not acknowleded or in a downtime
-|plain_ok                          | number of ok services which are not acknowleded or in a downtime
-|plain_pending                     | number of pending services which are not acknowleded or in a downtime
-|plain_unknown                     | number of unknown services which are not acknowleded or in a downtime
-|plain_warning                     | number of warning services which are not acknowleded or in a downtime
-|total                             | total number of services
-|total_active                      | total number of active services
-|total_passive                     | total number of passive services
-|unknown                           | number of unknown services
-|unknown_and_ack                   | number of unknown services which are acknowledged
-|unknown_and_disabled_active       | number of active unknown services which have active checks disabled
-|unknown_and_disabled_passive      | number of passive unknown services which have active checks disabled
-|unknown_and_scheduled             | number of unknown services which are in a scheduled downtime
-|unknown_and_unhandled             | number of unhandled unknown services
-|unknown_on_down_host              | number of unhandled unknown services on down hosts
-|warning                           | number of warning services
-|warning_and_ack                   | number of warning services which are acknowledged
-|warning_and_disabled_active       | number of active warning services which have active checks disabled
-|warning_and_disabled_passive      | number of passive warning services which have active checks disabled
-|warning_and_scheduled             | number of warning services which are in a scheduled downtime
-|warning_and_unhandled             | number of unhandled warning services
-|warning_on_down_host              | number of unhandled warning services on down hosts
+|Attribute                         | Type       | Unit     | Description
+|active_checks_disabled_active     |            |          | number of active services which have active checks disabled
+|active_checks_disabled_passive    |            |          | number of passive services which have active checks disabled
+|critical                          |            |          | number of critical services
+|critical_and_ack                  |            |          | number of critical services which are acknowledged
+|critical_and_disabled_active      |            |          | number of active critical services which have active checks disabled
+|critical_and_disabled_passive     |            |          | number of passive critical services which have active checks disabled
+|critical_and_scheduled            |            |          | number of critical services which are in a scheduled downtime
+|critical_and_unhandled            |            |          | number of unhandled critical services
+|critical_on_down_host             |            |          | number of unhandled critical services on down hosts
+|eventhandler_disabled             |            |          | number of services with eventhandlers disabled
+|flapping                          |            |          | number of flapping services
+|flapping_disabled                 |            |          | number of services with flapping detection disabled
+|notifications_disabled            |            |          | number of services with notifications disabled
+|ok                                |            |          | number of ok services
+|ok_and_disabled_active            |            |          | number of active ok services which have active checks disabled
+|ok_and_disabled_passive           |            |          | number of passive ok services which have active checks disabled
+|ok_and_scheduled                  |            |          | number of ok services which are in a scheduled downtime
+|passive_checks_disabled           |            |          | number of services which do not accept passive check results
+|pending                           |            |          | number of pending services
+|pending_and_disabled              |            |          | number of pending services with active checks disabled
+|pending_and_scheduled             |            |          | number of pending services which are in a scheduled downtime
+|plain_critical                    |            |          | number of critical services which are not acknowleded or in a downtime
+|plain_ok                          |            |          | number of ok services which are not acknowleded or in a downtime
+|plain_pending                     |            |          | number of pending services which are not acknowleded or in a downtime
+|plain_unknown                     |            |          | number of unknown services which are not acknowleded or in a downtime
+|plain_warning                     |            |          | number of warning services which are not acknowleded or in a downtime
+|total                             |            |          | total number of services
+|total_active                      |            |          | total number of active services
+|total_passive                     |            |          | total number of passive services
+|unknown                           |            |          | number of unknown services
+|unknown_and_ack                   |            |          | number of unknown services which are acknowledged
+|unknown_and_disabled_active       |            |          | number of active unknown services which have active checks disabled
+|unknown_and_disabled_passive      |            |          | number of passive unknown services which have active checks disabled
+|unknown_and_scheduled             |            |          | number of unknown services which are in a scheduled downtime
+|unknown_and_unhandled             |            |          | number of unhandled unknown services
+|unknown_on_down_host              |            |          | number of unhandled unknown services on down hosts
+|warning                           |            |          | number of warning services
+|warning_and_ack                   |            |          | number of warning services which are acknowledged
+|warning_and_disabled_active       |            |          | number of active warning services which have active checks disabled
+|warning_and_disabled_passive      |            |          | number of passive warning services which have active checks disabled
+|warning_and_scheduled             |            |          | number of warning services which are in a scheduled downtime
+|warning_and_unhandled             |            |          | number of unhandled warning services
+|warning_on_down_host              |            |          | number of unhandled warning services on down hosts
 |===========================================
 
 
@@ -1658,16 +1658,16 @@ its basically a reduced set of /services/stats.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|critical                          | number of critical services
-|critical_and_unhandled            | number of critical services which are neither acknowledged nor in scheduled downtime
-|ok                                | number of ok services
-|pending                           | number of pending services
-|total                             | total number of services
-|unknown                           | number of unknown services
-|unknown_and_unhandled             | number of unknown services which are neither acknowledged nor in scheduled downtime
-|warning                           | number of warning services
-|warning_and_unhandled             | number of warning services which are neither acknowledged nor in scheduled downtime
+|Attribute                         | Type       | Unit     | Description
+|critical                          |            |          | number of critical services
+|critical_and_unhandled            |            |          | number of critical services which are neither acknowledged nor in scheduled downtime
+|ok                                |            |          | number of ok services
+|pending                           |            |          | number of pending services
+|total                             |            |          | total number of services
+|unknown                           |            |          | number of unknown services
+|unknown_and_unhandled             |            |          | number of unknown services which are neither acknowledged nor in scheduled downtime
+|warning                           |            |          | number of warning services
+|warning_and_unhandled             |            |          | number of warning services which are neither acknowledged nor in scheduled downtime
 |===========================================
 
 
@@ -1677,20 +1677,20 @@ lists configured backends
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|addr                              | address for this connection
-|connected                         | flag wether sites is connected (1) or not (0)
-|federation_addr                   | contains the real address if using federation
-|federation_key                    | contains the real peer key if using federation
-|federation_name                   | contains the real name if using federation
-|federation_type                   | contains the real backend type if using federation
-|id                                | id for this backend
-|last_error                        | error message if backend is not connected
-|localtime                         | current local unix timestamp of thruk host
-|name                              | name of the backend
-|section                           | section name
-|status                            | 0 (OK), 1 (DOWN)
-|type                              | type of the backend
+|Attribute                         | Type       | Unit     | Description
+|addr                              |            |          | address for this connection
+|connected                         |            |          | flag wether sites is connected (1) or not (0)
+|federation_addr                   |            |          | contains the real address if using federation
+|federation_key                    |            |          | contains the real peer key if using federation
+|federation_name                   |            |          | contains the real name if using federation
+|federation_type                   |            |          | contains the real backend type if using federation
+|id                                |            |          | id for this backend
+|last_error                        |            |          | error message if backend is not connected
+|localtime                         |            |          | current local unix timestamp of thruk host
+|name                              |            |          | name of the backend
+|section                           |            |          | section name
+|status                            |            |          | 0 (OK), 1 (DOWN)
+|type                              |            |          | type of the backend
 |===========================================
 
 
@@ -1745,16 +1745,16 @@ hash of basic information about this thruk instance
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|rest_version                      | rest api version
-|thruk_version                     | thruk version
-|thruk_release_date                | thruk release date
-|localtime                         | current server unix timestamp / epoch
-|project_root                      | thruk root folder
-|etc_path                          | configuration folder
-|var_path                          | variable data folder
-|extra_version                     | might contain omd version
-|extra_link                        | contains link from extra_versions product
+|Attribute                         | Type       | Unit     | Description
+|rest_version                      | rest api version |          | rest api version
+|thruk_version                     | thruk version |          | thruk version
+|thruk_release_date                | thruk release date |          | thruk release date
+|localtime                         | current server unix timestamp / epoch |          | current server unix timestamp / epoch
+|project_root                      | thruk root folder |          | thruk root folder
+|etc_path                          | configuration folder |          | configuration folder
+|var_path                          | variable data folder |          | variable data folder
+|extra_version                     | might contain omd version |          | might contain omd version
+|extra_link                        | contains link from extra_versions product |          | contains link from extra_versions product
 |===========================================
 
 
@@ -1764,18 +1764,18 @@ lists api keys
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|comment                           | comment of this api key
-|created                           | unixtimestamp of when the key was created
-|digest                            | used hash algorithm
-|file                              | path to stored file
-|force_user                        | super user keys can enforce a specific user
-|hashed_key                        | hashed private key
-|last_from                         | ip address of last usage
-|last_used                         | unixtimestamp of last usage
-|roles                             | list of roles this key is limited too
-|superuser                         | flag wether this a global superuser key and not bound to a specific user
-|user                              | username of key owner
+|Attribute                         | Type       | Unit     | Description
+|comment                           |            |          | comment of this api key
+|created                           |            |          | unixtimestamp of when the key was created
+|digest                            |            |          | used hash algorithm
+|file                              |            |          | path to stored file
+|force_user                        |            |          | super user keys can enforce a specific user
+|hashed_key                        |            |          | hashed private key
+|last_from                         |            |          | ip address of last usage
+|last_used                         |            |          | unixtimestamp of last usage
+|roles                             |            |          | list of roles this key is limited too
+|superuser                         |            |          | flag wether this a global superuser key and not bound to a specific user
+|user                              |            |          | username of key owner
 |===========================================
 
 
@@ -1805,23 +1805,23 @@ lists business processes.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|affected_peers                    | list of backend ids used for the last calculation
-|bp_backend                        | id of backend which hosts the business process
-|create_host_object                | 0 - do no create a host object, 1 - create naemon host object
-|draft                             | flag wether this is a draft only
-|filter                            | list of enabled filters
-|id                                | primary id
-|last_check                        | timestamp of last check result submited
-|last_state_change                 | timestamp of last state change
-|name                              | name of this business proces
-|nodes                             | all nodes of this business process
-|rankDir                           | flag wheter this business process is horizontal or vertical
-|state_type                        | flag if this business process uses hard or soft state types
-|status                            | current status
-|status_text                       | current status text
-|template                          | naemon template used for the generated object
-|time                              | calculation duration
+|Attribute                         | Type       | Unit     | Description
+|affected_peers                    |            |          | list of backend ids used for the last calculation
+|bp_backend                        |            |          | id of backend which hosts the business process
+|create_host_object                |            |          | 0 - do no create a host object, 1 - create naemon host object
+|draft                             |            |          | flag wether this is a draft only
+|filter                            |            |          | list of enabled filters
+|id                                |            |          | primary id
+|last_check                        |            |          | timestamp of last check result submited
+|last_state_change                 |            |          | timestamp of last state change
+|name                              |            |          | name of this business proces
+|nodes                             |            |          | all nodes of this business process
+|rankDir                           |            |          | flag wheter this business process is horizontal or vertical
+|state_type                        |            |          | flag if this business process uses hard or soft state types
+|status                            |            |          | current status
+|status_text                       |            |          | current status text
+|template                          |            |          | naemon template used for the generated object
+|time                              |            |          | calculation duration
 |===========================================
 
 
@@ -1852,25 +1852,25 @@ lists broadcasts
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|annotation                        | annotation icon for this broadcast
-|author                            | author of the broadcast
-|authoremail                       | authors E-Mail address, mainly used as macro
-|contactgroups                     | list of contactgroups if broadcast should be limited to specific groups
-|contacts                          | list of contacts if broadcast should be limited to specific contacts
-|expires                           | expire date after which the broadcast won't be displayed anymore
-|expires_ts                        | expire data as unix timestamp
-|file                              | filename
-|frontmatter                       | hash list of extraceted frontmatter variables
-|hide_before                       | do not show broadcast before this date
-|hide_before_ts                    | hide_before as unix timestamp
-|loginpage                         | flag wether broadcast should be displayed on the loginpage as well
-|macros                            | hash list of macros
-|name                              | name of this broadcast, mostly used for templates
-|panorama                          | flag wether broadcast should be displayed on panorama dashboards
-|raw_text                          | raw broadcast text
-|template                          | flag wether this broadcast is a template
-|text                              | processed broadcast message
+|Attribute                         | Type       | Unit     | Description
+|annotation                        |            |          | annotation icon for this broadcast
+|author                            |            |          | author of the broadcast
+|authoremail                       |            |          | authors E-Mail address, mainly used as macro
+|contactgroups                     |            |          | list of contactgroups if broadcast should be limited to specific groups
+|contacts                          |            |          | list of contacts if broadcast should be limited to specific contacts
+|expires                           |            |          | expire date after which the broadcast won't be displayed anymore
+|expires_ts                        |            |          | expire data as unix timestamp
+|file                              |            |          | filename
+|frontmatter                       |            |          | hash list of extraceted frontmatter variables
+|hide_before                       |            |          | do not show broadcast before this date
+|hide_before_ts                    |            |          | hide_before as unix timestamp
+|loginpage                         |            |          | flag wether broadcast should be displayed on the loginpage as well
+|macros                            |            |          | hash list of macros
+|name                              |            |          | name of this broadcast, mostly used for templates
+|panorama                          |            |          | flag wether broadcast should be displayed on panorama dashboards
+|raw_text                          |            |          | raw broadcast text
+|template                          |            |          | flag wether this broadcast is a template
+|text                              |            |          | processed broadcast message
 |===========================================
 
 
@@ -1900,16 +1900,16 @@ lists cluster nodes
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|hostname                          | host name of the cluster node
-|last_contact                      | timestamp of last successful contact
-|last_error                        | text of last error message
-|maintenance                       | Flag whether this node is in maintenance mode
-|node_id                           | internal id for this node
-|node_url                          | url to access this node directly
-|pids                              | list of current process ids of this node
-|response_time                     | response time in seconds
-|version                           | version information of this node
+|Attribute                         | Type       | Unit     | Description
+|hostname                          |            |          | host name of the cluster node
+|last_contact                      |            |          | timestamp of last successful contact
+|last_error                        |            |          | text of last error message
+|maintenance                       |            |          | Flag whether this node is in maintenance mode
+|node_id                           |            |          | internal id for this node
+|node_url                          |            |          | url to access this node directly
+|pids                              |            |          | list of current process ids of this node
+|response_time                     |            |          | response time in seconds
+|version                           |            |          | version information of this node
 |===========================================
 
 
@@ -1941,26 +1941,26 @@ lists thruk jobs.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|cmd                               | the executed command line or perl code
-|end                               | timestamp when the job finished
-|forward                           | url to forward when the job is done
-|host_id                           | thruk node id this job is run on
-|host_name                         | hostname of the node
-|id                                | job id
-|is_running                        | flag whether the job is still running
-|message                           | current status text
-|percent                           | percent of completion
-|perl_res                          | contains the perl result in case this was a perl job
-|pid                               | process id
-|rc                                | return code
-|remaining                         | remaining seconds for the job to complete
-|show_output                       | flag whether output console will be displayed
-|start                             | timestamp when the job started
-|stderr                            | stderr output
-|stdout                            | stdout output
-|time                              | duration in seconds
-|user                              | username of the owner
+|Attribute                         | Type       | Unit     | Description
+|cmd                               |            |          | the executed command line or perl code
+|end                               |            |          | timestamp when the job finished
+|forward                           |            |          | url to forward when the job is done
+|host_id                           |            |          | thruk node id this job is run on
+|host_name                         |            |          | hostname of the node
+|id                                |            |          | job id
+|is_running                        |            |          | flag whether the job is still running
+|message                           |            |          | current status text
+|percent                           |            |          | percent of completion
+|perl_res                          |            |          | contains the perl result in case this was a perl job
+|pid                               |            |          | process id
+|rc                                |            |          | return code
+|remaining                         |            |          | remaining seconds for the job to complete
+|show_output                       |            |          | flag whether output console will be displayed
+|start                             |            |          | timestamp when the job started
+|stderr                            |            |          | stderr output
+|stdout                            |            |          | stdout output
+|time                              |            |          | duration in seconds
+|user                              |            |          | username of the owner
 |===========================================
 
 
@@ -1975,24 +1975,24 @@ lists logcache statistics
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|cache_version                     | db schema version
-|compact_duration                  | duration of last compact run in seconds
-|compact_till                      | timestamp marker where last compact run finished
-|data_size                         | used size of data in bytes
-|enabled                           | flag wether logcache is enabled for this backend or not
-|index_size                        | used size of index in bytes
-|items                             | number of items/rows
-|key                               | peer key
-|last_compact                      | timestamp of last compact run
-|last_entry                        | timestamp of last log entry
-|last_reorder                      | timestamp of last optimize run
-|last_update                       | timestamp of last update run
-|mode                              | current lock mode
-|name                              | peer name
-|reorder_duration                  | duration of last reorder run in seconds
-|status                            | human readable status
-|update_duration                   | duration of last update run in seconds
+|Attribute                         | Type       | Unit     | Description
+|cache_version                     |            |          | db schema version
+|compact_duration                  |            |          | duration of last compact run in seconds
+|compact_till                      |            |          | timestamp marker where last compact run finished
+|data_size                         |            |          | used size of data in bytes
+|enabled                           |            |          | flag wether logcache is enabled for this backend or not
+|index_size                        |            |          | used size of index in bytes
+|items                             |            |          | number of items/rows
+|key                               |            |          | peer key
+|last_compact                      |            |          | timestamp of last compact run
+|last_entry                        |            |          | timestamp of last log entry
+|last_reorder                      |            |          | timestamp of last optimize run
+|last_update                       |            |          | timestamp of last update run
+|mode                              |            |          | current lock mode
+|name                              |            |          | peer name
+|reorder_duration                  |            |          | duration of last reorder run in seconds
+|status                            |            |          | human readable status
+|update_duration                   |            |          | duration of last update run in seconds
 |===========================================
 
 
@@ -2010,19 +2010,19 @@ lists all panorama dashboards.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|file                              | filename of the dashboard
-|file_version                      | version of dashboard format
-|id                                | internal id
-|maintenance                       | maintenance reason (only if in maintenance mode)
-|nr                                | number of the dashboard
-|objects                           | number of objects
-|panlet_<nr>                       | panlet definition
-|readonly                          | flag whether this dashboard is read-only
-|scripted                          | flag whether this is a scripted dashboard
-|tab                               | structure of global dashboard settings
-|ts                                | timestamp of last modification
-|user                              | owner of this dashboard
+|Attribute                         | Type       | Unit     | Description
+|file                              |            |          | filename of the dashboard
+|file_version                      |            |          | version of dashboard format
+|id                                |            |          | internal id
+|maintenance                       |            |          | maintenance reason (only if in maintenance mode)
+|nr                                |            |          | number of the dashboard
+|objects                           |            |          | number of objects
+|panlet_<nr>                       |            |          | panlet definition
+|readonly                          |            |          | flag whether this dashboard is read-only
+|scripted                          |            |          | flag whether this is a scripted dashboard
+|tab                               |            |          | structure of global dashboard settings
+|ts                                |            |          | timestamp of last modification
+|user                              |            |          | owner of this dashboard
 |===========================================
 
 
@@ -2049,24 +2049,24 @@ lists recurring downtimes.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|backends                          | list of backends this downtime is used for
-|childoptions                      | flag used for the downtime command
-|comment                           | comment used for the downtime command
-|created_by                        | username who created this downtime
-|duration                          | duration in minutes
-|edited_by                         | username who last edited this downtime
-|error                             | contains the error message if something got wrong with this downtime
-|file                              | file number
-|fixed                             | flag whether this should create a fixed downtime
-|flex_range                        | range in minutes for flexible downtimes
-|host                              | list of hostnames
-|hostgroup                         | list of hostgroups
-|last_changed                      | unix timestamp of last change
-|schedule                          | list of schedules
-|service                           | list of services
-|servicegroup                      | list of servicegroups
-|target                            | sets the type of the downtime, ex. host or hostgroup
+|Attribute                         | Type       | Unit     | Description
+|backends                          |            |          | list of backends this downtime is used for
+|childoptions                      |            |          | flag used for the downtime command
+|comment                           |            |          | comment used for the downtime command
+|created_by                        |            |          | username who created this downtime
+|duration                          |            |          | duration in minutes
+|edited_by                         |            |          | username who last edited this downtime
+|error                             |            |          | contains the error message if something got wrong with this downtime
+|file                              |            |          | file number
+|fixed                             |            |          | flag whether this should create a fixed downtime
+|flex_range                        |            |          | range in minutes for flexible downtimes
+|host                              |            |          | list of hostnames
+|hostgroup                         |            |          | list of hostgroups
+|last_changed                      |            |          | unix timestamp of last change
+|schedule                          |            |          | list of schedules
+|service                           |            |          | list of services
+|servicegroup                      |            |          | list of servicegroups
+|target                            |            |          | sets the type of the downtime, ex. host or hostgroup
 |===========================================
 
 
@@ -2096,22 +2096,22 @@ list of reports.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|backends                          | list of backends used in this report
-|cc                                | email cc address if this report is send by mail
-|desc                              | report description
-|error                             | contains error messages (optional)
-|failed                            | flag wheter the report failed to generate last time
-|is_public                         | flag wheter the report is public or not
-|name                              | name of the report
-|nr                                | number of the report
-|params                            | reporting parameters
-|permissions                       | user/group permission
-|readonly                          | flag wheter the report is read-only
-|send_types                        | list of cron entries
-|template                          | template of the report
-|to                                | email to address if this report is send by mail
-|user                              | owner
+|Attribute                         | Type       | Unit     | Description
+|backends                          |            |          | list of backends used in this report
+|cc                                |            |          | email cc address if this report is send by mail
+|desc                              |            |          | report description
+|error                             |            |          | contains error messages (optional)
+|failed                            |            |          | flag wheter the report failed to generate last time
+|is_public                         |            |          | flag wheter the report is public or not
+|name                              |            |          | name of the report
+|nr                                |            |          | number of the report
+|params                            |            |          | reporting parameters
+|permissions                       |            |          | user/group permission
+|readonly                          |            |          | flag wheter the report is read-only
+|send_types                        |            |          | list of cron entries
+|template                          |            |          | template of the report
+|to                                |            |          | email to address if this report is send by mail
+|user                              |            |          | owner
 |===========================================
 
 
@@ -2125,22 +2125,22 @@ report for given number.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|backends                          | list of selected backends.
-|cc                                | carbon-copy for report email.
-|desc                              | description.
-|error                             | contains error messages (optional)
-|failed                            | failed flag.
-|is_public                         | flag for public reports.
-|name                              | name of the report.
-|nr                                | primary id.
-|params                            | report parameters.
-|permissions                       | user/group permission
-|readonly                          | readonly flag.
-|send_types                        | list of crontab entries.
-|template                          | report template.
-|to                                | email address the report email.
-|user                              | owner of the report.
+|Attribute                         | Type       | Unit     | Description
+|backends                          |            |          | list of selected backends.
+|cc                                |            |          | carbon-copy for report email.
+|desc                              |            |          | description.
+|error                             |            |          | contains error messages (optional)
+|failed                            |            |          | failed flag.
+|is_public                         |            |          | flag for public reports.
+|name                              |            |          | name of the report.
+|nr                                |            |          | primary id.
+|params                            |            |          | report parameters.
+|permissions                       |            |          | user/group permission
+|readonly                          |            |          | readonly flag.
+|send_types                        |            |          | list of crontab entries.
+|template                          |            |          | report template.
+|to                                |            |          | email address the report email.
+|user                              |            |          | owner of the report.
 |===========================================
 
 
@@ -2170,15 +2170,15 @@ lists thruk sessions.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|active                            | timestamp when session was last time used
-|address                           | remote address of user
-|digest                            | used hash algorithm
-|fake                              | flag whether this is a fake session or not
-|file                              | file name the session data file
-|hashed_key                        | hashed session id
-|roles                             | extra session roles
-|username                          | username of this session
+|Attribute                         | Type       | Unit     | Description
+|active                            |            |          | timestamp when session was last time used
+|address                           |            |          | remote address of user
+|digest                            |            |          | used hash algorithm
+|fake                              |            |          | flag whether this is a fake session or not
+|file                              |            |          | file name the session data file
+|hashed_key                        |            |          | hashed session id
+|roles                             |            |          | extra session roles
+|username                          |            |          | username of this session
 |===========================================
 
 
@@ -2193,17 +2193,17 @@ lists thruk statistics.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|business_process_duration_seconds | business process calculation duration in seconds
-|business_process_last_update      | timestamp of last business process calculation
-|business_process_total            | total number of business processes
-|business_process_worker_total     | total number of worker processes used to calculate business processes
-|sessions_active_5min_total        | total number of active thruk sessions (active during the last 5 minutes)
-|sessions_total                    | total number of thruk sessions
-|sessions_uniq_user_5min_total     | total number of uniq users active during the last 5 minutes
-|sessions_uniq_user_total          | total number of uniq users
-|users_locked_total                | total number of locked thruk users
-|users_total                       | total number of thruk users
+|Attribute                         | Type       | Unit     | Description
+|business_process_duration_seconds |            |          | business process calculation duration in seconds
+|business_process_last_update      |            |          | timestamp of last business process calculation
+|business_process_total            |            |          | total number of business processes
+|business_process_worker_total     |            |          | total number of worker processes used to calculate business processes
+|sessions_active_5min_total        |            |          | total number of active thruk sessions (active during the last 5 minutes)
+|sessions_total                    |            |          | total number of thruk sessions
+|sessions_uniq_user_5min_total     |            |          | total number of uniq users active during the last 5 minutes
+|sessions_uniq_user_total          |            |          | total number of uniq users
+|users_locked_total                |            |          | total number of locked thruk users
+|users_total                       |            |          | total number of thruk users
 |===========================================
 
 
@@ -2213,17 +2213,17 @@ lists thruk user profiles.
 
 [options="header"]
 |===========================================
-|Attribute                         | Description
-|alias                             | alias name
-|can_submit_commands               | flag wether this account is allowed to submit commands
-|email                             | email address
-|groups                            | list of contactgroups
-|has_thruk_profile                 | flag wether this account has a thruk profile or not
-|id                                | username
-|last_login                        | timestamp of last successfull login
-|locked                            | flag wether account is locked or not
-|roles                             | list of roles for this user
-|tz                                | users selected timezone
+|Attribute                         | Type       | Unit     | Description
+|alias                             |            |          | alias name
+|can_submit_commands               |            |          | flag wether this account is allowed to submit commands
+|email                             |            |          | email address
+|groups                            |            |          | list of contactgroups
+|has_thruk_profile                 |            |          | flag wether this account has a thruk profile or not
+|id                                |            |          | username
+|last_login                        |            |          | timestamp of last successfull login
+|locked                            |            |          | flag wether account is locked or not
+|roles                             |            |          | list of roles for this user
+|tz                                |            |          | users selected timezone
 |===========================================
 
 
