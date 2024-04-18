@@ -70,12 +70,11 @@
       <td class='text-center'>[% IF d.fixed %][% duration(d.end_time - d.start_time) %][% ELSE%][% duration(d.duration) %][% END %]</td>
       <td class='text-center'>[% d.id %]</td>
       <td class='text-center'>[% IF d.triggered_by %][% d.triggered_by %][% ELSE %]N/A[% END %]</td>
-      [% IF type == 'host' %]
+      [% IF d.service_description == "" %]
         [% UNLESS command_disabled(c, 78) %]
         <td class='text-center'><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=78&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><i class="fa-solid fa-trash text-base" title='Delete This Downtime'></i></a></td>
         [% END %]
-      [% END %]
-      [% IF type == 'service' %]
+      [% ELSE %]
         [% UNLESS command_disabled(c, 79) %]
         <td class='text-center'><a class="js-modal-command-link" href='cmd.cgi?cmd_typ=79&amp;down_id=[% d.id %]&amp;backend=[% d.peer_key %]'><i class="fa-solid fa-trash text-base" title='Delete This Downtime'></i></a></td>
         [% END %]
