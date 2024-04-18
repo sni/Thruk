@@ -12,7 +12,10 @@ Bash completion for Thruk
 
 use warnings;
 use strict;
+use Encode qw(encode_utf8);
 
+use Thruk::Base ();
+use Thruk::Utils::Encode ();
 use Thruk::Utils::IO ();
 
 ##############################################
@@ -29,10 +32,14 @@ returns bash completion
 sub complete {
     my $comp_words = [split(/\s+/mx, $ENV{'COMP_WORD_JOINED'})];
     my $comp_cword = $ENV{'COMP_CWORD'};
+    return(0) unless defined $comp_cword;
     my $cur        = $comp_words->[$comp_cword] || ''; # word under the cursur
     my $result     = [];
-    $result = _complete_rest_path($comp_words, $comp_cword, $cur);
-    print join("\n", @{$result});
+    $result        = _complete_rest_path($comp_words, $comp_cword, $cur);
+    $result        = Thruk::Base::array_uniq($result);
+    my $output     = encode_utf8(Thruk::Utils::Encode::decode_any(join("\n", @{$result})));
+    binmode STDOUT;
+    print STDOUT $output;
     return(0);
 }
 
@@ -41,7 +48,8 @@ sub _complete_rest_path {
     my($comp_words, $comp_cword, $cur) = @_;
     my $result    = [];
     my $rest_tree = {};
-    for my $url (split(/\n/mx, Thruk::Utils::IO::cmd("$0 rest '/csv/index?columns=url&headers=0'"))) {
+    my $urls      = Thruk::Base::array_uniq([split(/\n/mx, Thruk::Utils::IO::cmd("$0 rest '/csv/index?columns=url&headers=0'"))]);
+    for my $url (@{$urls})  {
         _add_rest_tree($rest_tree, $url);
     }
 
