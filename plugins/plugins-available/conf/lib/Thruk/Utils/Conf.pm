@@ -1155,7 +1155,7 @@ sub config_reload {
     my $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
     if(!$last_reload) {
         my $processinfo = $c->db->get_processinfo(backends => $pkey);
-        $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
+        $last_reload = ($processinfo && ref $processinfo eq 'HASH' && $processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
     }
     sleep(1) if int($last_reload) == int(time());
 
