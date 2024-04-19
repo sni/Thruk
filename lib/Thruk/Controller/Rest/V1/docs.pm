@@ -50,457 +50,457 @@ __DATA__
     {
      "description": "percent of active hosts during the last 15 minutes",
      "name": "hosts_active_15_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "amount of active hosts during the last 15 minutes",
      "name": "hosts_active_15_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last minute",
      "name": "hosts_active_1_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last minute",
      "name": "hosts_active_1_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last 5 minutes",
      "name": "hosts_active_5_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last 5 minutes",
      "name": "hosts_active_5_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last 60 minutes",
      "name": "hosts_active_60_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last 60 minutes",
      "name": "hosts_active_60_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "percent of total active hosts",
      "name": "hosts_active_all_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "amount of total active hosts",
      "name": "hosts_active_all_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "average percent state change",
      "name": "hosts_active_state_change_avg",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "maximum state change over all active hosts",
      "name": "hosts_active_state_change_max",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "minimum state change over all active hosts",
      "name": "hosts_active_state_change_min",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "sum state change over all hosts",
      "name": "hosts_active_state_change_sum",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "number of active hosts",
      "name": "hosts_active_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "average execution time over all hosts",
      "name": "hosts_execution_time_avg",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "maximum execution time over all hosts",
      "name": "hosts_execution_time_max",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "minimum execution time over all hosts",
      "name": "hosts_execution_time_min",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "sum execution time over all hosts",
      "name": "hosts_execution_time_sum",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "host latency average",
      "name": "hosts_latency_avg",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "minimum host latency",
      "name": "hosts_latency_max",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "minimum host latency",
      "name": "hosts_latency_min",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "sum latency over all hosts",
      "name": "hosts_latency_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "percent of passive hosts during the last 15 minutes",
      "name": "hosts_passive_15_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "amount of passive hosts during the last 15 minutes",
      "name": "hosts_passive_15_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last minute",
      "name": "hosts_passive_1_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last minute",
      "name": "hosts_passive_1_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last 5 minutes",
      "name": "hosts_passive_5_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last 5 minutes",
      "name": "hosts_passive_5_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last 60 minutes",
      "name": "hosts_passive_60_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last 60 minutes",
      "name": "hosts_passive_60_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "percent of total passive hosts",
      "name": "hosts_passive_all_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "amount of total passive hosts",
      "name": "hosts_passive_all_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "average percent state change for passive hosts",
      "name": "hosts_passive_state_change_avg",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "maximum state change over all passive hosts",
      "name": "hosts_passive_state_change_max",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "minimum state change over all passive hosts",
      "name": "hosts_passive_state_change_min",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "sum state change over all passive hosts",
      "name": "hosts_passive_state_change_sum",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "number of passive hosts",
      "name": "hosts_passive_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "percent of active services during the last 15 minutes",
      "name": "services_active_15_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "amount of active services during the last 15 minutes",
      "name": "services_active_15_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last minute",
      "name": "services_active_1_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last minute",
      "name": "services_active_1_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last 5 minutes",
      "name": "services_active_5_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last 5 minutes",
      "name": "services_active_5_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last 60 minutes",
      "name": "services_active_60_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last 60 minutes",
      "name": "services_active_60_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "percent of total active services",
      "name": "services_active_all_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "amount of total active services",
      "name": "services_active_all_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "average percent state change",
      "name": "services_active_state_change_avg",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "maximum state change over all active services",
      "name": "services_active_state_change_max",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "minimum state change over all active services",
      "name": "services_active_state_change_min",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "sum state change over all services",
      "name": "services_active_state_change_sum",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "number of active services",
      "name": "services_active_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "average execution time over all services",
      "name": "services_execution_time_avg",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "maximum execution time over all services",
      "name": "services_execution_time_max",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "minimum execution time over all services",
      "name": "services_execution_time_min",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "sum execution time over all services",
      "name": "services_execution_time_sum",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "services latency average",
      "name": "services_latency_avg",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "minimum services latency",
      "name": "services_latency_max",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "minimum services latency",
      "name": "services_latency_min",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "sum latency over all services",
      "name": "services_latency_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "percent of passive services during the last 15 minutes",
      "name": "services_passive_15_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "amount of passive services during the last 15 minutes",
      "name": "services_passive_15_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last minute",
      "name": "services_passive_1_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last minute",
      "name": "services_passive_1_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last 5 minutes",
      "name": "services_passive_5_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last 5 minutes",
      "name": "services_passive_5_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "same for last 60 minutes",
      "name": "services_passive_60_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "same for last 60 minutes",
      "name": "services_passive_60_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "percent of total passive services",
      "name": "services_passive_all_perc",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "amount of total passive services",
      "name": "services_passive_all_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     },
     {
      "description": "average percent state change for passive services",
      "name": "services_passive_state_change_avg",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "maximum state change over all passive services",
      "name": "services_passive_state_change_max",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "minimum state change over all passive services",
      "name": "services_passive_state_change_min",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "sum state change over all passive services",
      "name": "services_passive_state_change_sum",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "number of passive services",
      "name": "services_passive_sum",
-     "type": "",
+     "type": "number",
      "unit": ""
     }
    ]
@@ -548,7 +548,7 @@ __DATA__
     {
      "description": "unix timestamp of last modification",
      "name": "mtime",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -710,13 +710,13 @@ __DATA__
     {
      "description": "outage duration in seconds",
      "name": "duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "unix timestamp of outage end",
      "name": "end",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -746,7 +746,7 @@ __DATA__
     {
      "description": "unix timestamp of outage start",
      "name": "start",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -764,62 +764,62 @@ __DATA__
     {
      "description": "total seconds in state down (during downtimes)",
      "name": "scheduled_time_down",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds unknown (during downtimes)",
      "name": "scheduled_time_indeterminate",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state unreachable (during downtimes)",
      "name": "scheduled_time_unreachable",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state up (during downtimes)",
      "name": "scheduled_time_up",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state down",
      "name": "time_down",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds without any data",
      "name": "time_indeterminate_nodata",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds during core not running",
      "name": "time_indeterminate_notrunning",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds outside the given timeperiod",
      "name": "time_indeterminate_outside_timeperiod",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state unreachable",
      "name": "time_unreachable",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state up",
      "name": "time_up",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     }
    ]
   }
@@ -872,13 +872,13 @@ __DATA__
     {
      "description": "outage duration in seconds",
      "name": "duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "unix timestamp of outage end",
      "name": "end",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -902,7 +902,7 @@ __DATA__
     {
      "description": "unix timestamp of outage start",
      "name": "start",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -926,13 +926,13 @@ __DATA__
     {
      "description": "outage duration in seconds",
      "name": "duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "unix timestamp of outage end",
      "name": "end",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -956,7 +956,7 @@ __DATA__
     {
      "description": "unix timestamp of outage start",
      "name": "start",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1262,14 +1262,14 @@ __DATA__
     {
      "description": "total bytes received from this site",
      "name": "bytes_received",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "bytes"
     },
     {
      "description": "total bytes send to this site",
      "name": "bytes_send",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "bytes"
     },
     {
      "description": "contains the real address if using federation",
@@ -1310,31 +1310,31 @@ __DATA__
     {
      "description": "last error message",
      "name": "last_error",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "timestamp when the site was last time online",
      "name": "last_online",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "timestamp of the last received query for this site",
      "name": "last_query",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "timestamp of the last update",
      "name": "last_update",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "same as last_update",
      "name": "lmd_last_cache_update",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1370,8 +1370,8 @@ __DATA__
     {
      "description": "response time in seconds",
      "name": "response_time",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "thruks section",
@@ -1400,13 +1400,13 @@ __DATA__
     {
      "description": "outage duration in seconds",
      "name": "duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "unix timestamp of outage end",
      "name": "end",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1436,7 +1436,7 @@ __DATA__
     {
      "description": "unix timestamp of outage start",
      "name": "start",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1454,74 +1454,74 @@ __DATA__
     {
      "description": "total seconds in state critical (during downtimes)",
      "name": "scheduled_time_critical",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds unknown (during downtimes)",
      "name": "scheduled_time_indeterminate",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state ok (during downtimes)",
      "name": "scheduled_time_ok",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state unknown (during downtimes)",
      "name": "scheduled_time_unknown",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state warning (during downtimes)",
      "name": "scheduled_time_warning",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state critical",
      "name": "time_critical",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds without any data",
      "name": "time_indeterminate_nodata",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds during core not running",
      "name": "time_indeterminate_notrunning",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds outside the given timeperiod",
      "name": "time_indeterminate_outside_timeperiod",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state ok",
      "name": "time_ok",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state unknown",
      "name": "time_unknown",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "total seconds in state warning",
      "name": "time_warning",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     }
    ]
   }
@@ -1580,13 +1580,13 @@ __DATA__
     {
      "description": "outage duration in seconds",
      "name": "duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "unix timestamp of outage end",
      "name": "end",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1616,7 +1616,7 @@ __DATA__
     {
      "description": "unix timestamp of outage start",
      "name": "start",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1640,13 +1640,13 @@ __DATA__
     {
      "description": "outage duration in seconds",
      "name": "duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "unix timestamp of outage end",
      "name": "end",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1676,7 +1676,7 @@ __DATA__
     {
      "description": "unix timestamp of outage start",
      "name": "start",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2060,13 +2060,13 @@ __DATA__
     {
      "description": "error message if backend is not connected",
      "name": "last_error",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "current local unix timestamp of thruk host",
      "name": "localtime",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2120,7 +2120,7 @@ __DATA__
     {
      "description": "current server unix timestamp / epoch",
      "name": "localtime",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2198,13 +2198,13 @@ __DATA__
     {
      "description": "ip address of last usage",
      "name": "last_from",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "unixtimestamp of last usage",
      "name": "last_used",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2270,13 +2270,13 @@ __DATA__
     {
      "description": "timestamp of last check result submited",
      "name": "last_check",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "timestamp of last state change",
      "name": "last_state_change",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2324,8 +2324,8 @@ __DATA__
     {
      "description": "calculation duration",
      "name": "time",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     }
    ]
   }
@@ -2372,7 +2372,7 @@ __DATA__
     {
      "description": "expire data as unix timestamp",
      "name": "expires_ts",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2396,7 +2396,7 @@ __DATA__
     {
      "description": "hide_before as unix timestamp",
      "name": "hide_before_ts",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2456,13 +2456,13 @@ __DATA__
     {
      "description": "timestamp of last successful contact",
      "name": "last_contact",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "text of last error message",
      "name": "last_error",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2492,8 +2492,8 @@ __DATA__
     {
      "description": "response time in seconds",
      "name": "response_time",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "version information of this node",
@@ -2516,7 +2516,7 @@ __DATA__
     {
      "description": "timestamp when the job finished",
      "name": "end",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2558,8 +2558,8 @@ __DATA__
     {
      "description": "percent of completion",
      "name": "percent",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "%"
     },
     {
      "description": "contains the perl result in case this was a perl job",
@@ -2594,7 +2594,7 @@ __DATA__
     {
      "description": "timestamp when the job started",
      "name": "start",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2612,8 +2612,8 @@ __DATA__
     {
      "description": "duration in seconds",
      "name": "time",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "username of the owner",
@@ -2636,20 +2636,20 @@ __DATA__
     {
      "description": "duration of last compact run in seconds",
      "name": "compact_duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "timestamp marker where last compact run finished",
      "name": "compact_till",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "used size of data in bytes",
      "name": "data_size",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "bytes"
     },
     {
      "description": "flag wether logcache is enabled for this backend or not",
@@ -2660,8 +2660,8 @@ __DATA__
     {
      "description": "used size of index in bytes",
      "name": "index_size",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "bytes"
     },
     {
      "description": "number of items/rows",
@@ -2678,25 +2678,25 @@ __DATA__
     {
      "description": "timestamp of last compact run",
      "name": "last_compact",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "timestamp of last log entry",
      "name": "last_entry",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "timestamp of last optimize run",
      "name": "last_reorder",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "timestamp of last update run",
      "name": "last_update",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2714,8 +2714,8 @@ __DATA__
     {
      "description": "duration of last reorder run in seconds",
      "name": "reorder_duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "human readable status",
@@ -2726,8 +2726,8 @@ __DATA__
     {
      "description": "duration of last update run in seconds",
      "name": "update_duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     }
    ]
   }
@@ -2798,7 +2798,7 @@ __DATA__
     {
      "description": "timestamp of last modification",
      "name": "ts",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2840,8 +2840,8 @@ __DATA__
     {
      "description": "duration in minutes",
      "name": "duration",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "minutes"
     },
     {
      "description": "username who last edited this downtime",
@@ -2870,8 +2870,8 @@ __DATA__
     {
      "description": "range in minutes for flexible downtimes",
      "name": "flex_range",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "minutes"
     },
     {
      "description": "list of hostnames",
@@ -2888,7 +2888,7 @@ __DATA__
     {
      "description": "unix timestamp of last change",
      "name": "last_changed",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -3116,7 +3116,7 @@ __DATA__
     {
      "description": "timestamp when session was last time used",
      "name": "active",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -3170,13 +3170,13 @@ __DATA__
     {
      "description": "business process calculation duration in seconds",
      "name": "business_process_duration_seconds",
-     "type": "",
-     "unit": ""
+     "type": "number",
+     "unit": "s"
     },
     {
      "description": "timestamp of last business process calculation",
      "name": "business_process_last_update",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
@@ -3272,7 +3272,7 @@ __DATA__
     {
      "description": "timestamp of last successfull login",
      "name": "last_login",
-     "type": "",
+     "type": "time",
      "unit": ""
     },
     {
