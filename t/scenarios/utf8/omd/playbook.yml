@@ -1,0 +1,37 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
+    - role: local_tests
+  tasks:
+  - name: "yum install libreoffix"
+    include_role:
+      name: yum_apt_retry
+    vars:
+      package:
+        - libreoffice-calc
+
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        LIVESTATUS_TCP=on
+
+  - name: "create secret.key"
+    shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - name: "set permissions on secret.key"
+    file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+
+  - name: "copy test.cfg"
+    copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+
