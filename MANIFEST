@@ -2048,6 +2048,7 @@ t/610-scenario-report_mails_e2e.t
 t/610-scenario-reports.t
 t/610-scenario-rest_api.t
 t/610-scenario-site_menu_multi_tier_e2e.t
+t/610-scenario-utf8.t
 t/700-naemon.t
 t/800-plugins.t
 t/900-javascript_syntax.t
