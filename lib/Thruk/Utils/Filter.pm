@@ -790,13 +790,12 @@ returns an escaped string for xml output
 =cut
 sub escape_xml {
     my($text) = @_;
-    $text =~ s/&/&amp;/gmx;
-    $text =~ s/</&lt;/gmx;
-    $text =~ s/>/&gt;/gmx;
-    $text =~ s/\\n\Z//gmx;
-    $text =~ s/\\n/\n/gmx;
-    $text =~ tr/\x80-\xFF//d;
-    $text =~ s/\p{Cc}//gmx;
+    $text =~ s/&/&amp;/gmx;   # escape ampersand
+    $text =~ s/</&lt;/gmx;    # escape lower than
+    $text =~ s/>/&gt;/gmx;    # escape greater than
+    $text =~ s/\\n\Z//gmx;    # remove newlines at end of file
+    $text =~ s/\\n/\n/gmx;    # replace newlines with actual newlines
+    $text =~ s/\p{Cc}//gmx;   # remove posix control characters
     return $text;
 }
 
