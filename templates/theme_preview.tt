@@ -438,6 +438,15 @@
               <td><input type="search" class="deletable" class="w-full"></td>
             </tr>
             <tr>
+              <th>Search II</th>
+              <td>
+                <div class="deleteicon ">
+                  <input type="search" name="v" class="deletable autosubmit headersearch js-autoexpand js-suggest-advanced expanded" id="header-search" placeholder="search..." autocomplete="off">
+                  <button type="reset" style="">×</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
               <th>Submit</th>
               <td>
                 <div class="flexrow gap-2 flex-nowrap">
