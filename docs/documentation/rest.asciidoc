@@ -1746,15 +1746,15 @@ hash of basic information about this thruk instance
 [options="header"]
 |===========================================
 |Attribute                         | Type       | Unit     | Description
-|rest_version                      | rest api version |          | rest api version
-|thruk_version                     | thruk version |          | thruk version
-|thruk_release_date                | thruk release date |          | thruk release date
-|localtime                         | current server unix timestamp / epoch |          | current server unix timestamp / epoch
-|project_root                      | thruk root folder |          | thruk root folder
-|etc_path                          | configuration folder |          | configuration folder
-|var_path                          | variable data folder |          | variable data folder
-|extra_version                     | might contain omd version |          | might contain omd version
-|extra_link                        | contains link from extra_versions product |          | contains link from extra_versions product
+|rest_version                      |  |         | rest api version
+|thruk_version                     |  |         | thruk version
+|thruk_release_date                |  |         | thruk release date
+|localtime                         |  |         | current server unix timestamp / epoch
+|project_root                      |  |         | thruk root folder
+|etc_path                          |  |         | configuration folder
+|var_path                          |  |         | variable data folder
+|extra_version                     |  |         | might contain omd version
+|extra_link                        |  |         | contains link from extra_versions product
 |===========================================
 
 
@@ -2263,4 +2263,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

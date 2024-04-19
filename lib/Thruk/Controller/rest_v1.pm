@@ -1338,7 +1338,7 @@ sub get_rest_paths {
             }
             elsif($last_path && $line =~ m%([\w\_]+)\s+=>\s+.*\#\s+(.*)$%mxo) {
                 $keys->{$last_path}->{$last_proto} = [] unless $keys->{$last_path}->{$last_proto};
-                push @{$keys->{$last_path}->{$last_proto}}, [$1, $2];
+                push @{$keys->{$last_path}->{$last_proto}}, [$1,'', '', $2];
                 $in_comment = 0;
             } else {
                 $in_comment = 0;

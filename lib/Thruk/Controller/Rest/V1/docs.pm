@@ -2102,55 +2102,55 @@ __DATA__
     {
      "description": "rest api version",
      "name": "rest_version",
-     "type": "rest api version",
+     "type": "",
      "unit": ""
     },
     {
      "description": "thruk version",
      "name": "thruk_version",
-     "type": "thruk version",
+     "type": "",
      "unit": ""
     },
     {
      "description": "thruk release date",
      "name": "thruk_release_date",
-     "type": "thruk release date",
+     "type": "",
      "unit": ""
     },
     {
      "description": "current server unix timestamp / epoch",
      "name": "localtime",
-     "type": "current server unix timestamp / epoch",
+     "type": "",
      "unit": ""
     },
     {
      "description": "thruk root folder",
      "name": "project_root",
-     "type": "thruk root folder",
+     "type": "",
      "unit": ""
     },
     {
      "description": "configuration folder",
      "name": "etc_path",
-     "type": "configuration folder",
+     "type": "",
      "unit": ""
     },
     {
      "description": "variable data folder",
      "name": "var_path",
-     "type": "variable data folder",
+     "type": "",
      "unit": ""
     },
     {
      "description": "might contain omd version",
      "name": "extra_version",
-     "type": "might contain omd version",
+     "type": "",
      "unit": ""
     },
     {
      "description": "contains link from extra_versions product",
      "name": "extra_link",
-     "type": "contains link from extra_versions product",
+     "type": "",
      "unit": ""
     }
    ]
