@@ -1419,8 +1419,8 @@ sub _rest_get_index {
     my($c) = @_;
     my($paths, $keys, $docs) = get_rest_paths($c);
     my $data = [];
-    for my $path (sort _sort_by_proto (keys %{$paths})) {
-        for my $proto (sort keys %{$paths->{$path}}) {
+    for my $path (sort keys %{$paths}) {
+        for my $proto (sort _sort_by_proto (keys %{$paths->{$path}})) {
             push @{$data}, {
                 url         => $path,
                 protocol    => $proto,
