@@ -1337,6 +1337,11 @@ DIV.deleteicon {
   INPUT {
     @apply pr-5;
   }
+  [type="reset"] {
+    -webkit-appearance: button;
+    background-color: transparent;
+    background-image: none;
+  }
 }
 
 .filter_hidden {
