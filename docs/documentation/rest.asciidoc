@@ -369,6 +369,25 @@ Those columns can be used for filtering or to only select specific custom values
 ]
 ------
 
+== Transformation Functions
+
+Transformation functions can be used to adjust result data.
+
+Available transformations functions are:
+
+  * `upper`: make column upper case
+  * `uc`: alias for upper
+  * `lower`: make column lower case
+  * `lc`: alias for lower
+  * `substr`: extract substring (substr(columnname, offset [, length]))
+
+ex.: return first 3 characters from upper case host name.
+
+------
+  %> thruk r '/hosts?columns=upper(substr(name, 0, 3)) as host'
+------
+
+
 == Aggregation Functions
 
 Aggregation functions can be used to get statistical information.
@@ -2263,4 +2282,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

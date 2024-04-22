@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 303;
+    plan tests => 327;
 
     use lib('t');
     require TestUtils;
@@ -211,3 +211,28 @@ for my $test (@{$pages}) {
         'like'         => ['localhost', 'Explore Services'],
     );
 };
+
+################################################################################
+# test query with tranformation functions
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/csv/hosts?columns=upper(name):HOST',
+        'content_type' => 'text/plain; charset=utf-8',
+        'method'       => 'GET',
+        'like'         => ['LOCALHOST'],
+    );
+    TestUtils::test_page(
+        'url'          => '/thruk/r/csv/hosts?columns=upper(substr(name, 0,3)) as HOST',
+        'content_type' => 'text/plain; charset=utf-8',
+        'method'       => 'GET',
+        'like'         => ['LOC\\n'],
+    );
+    TestUtils::test_page(
+        'url'          => '/thruk/r/csv/hosts?columns=lc(_WORKER)',
+        'content_type' => 'text/plain; charset=utf-8',
+        'method'       => 'GET',
+        'like'         => ['local\\n'],
+    );
+};
+
+################################################################################
