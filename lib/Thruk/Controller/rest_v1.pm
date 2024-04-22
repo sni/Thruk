@@ -212,8 +212,8 @@ sub process_rest_request {
     if($wrapped) {
         # wrap data along with column meta data
         my $request_method = $method || $c->req->method;
-        my $columns = _get_columns_meta_for_path($c, $path_info, $request_method);
-        my $meta = {};
+        my $columns        = _get_columns_meta_for_path($c, $path_info, $request_method, $data);
+        my $meta           = {};
         $meta->{"columns"} = $columns if $columns;
         $data = {
             'meta' => $meta,
@@ -427,7 +427,7 @@ sub _fetch {
             }
             delete $c->req->parameters->{'CSRFtoken'};
             delete $c->req->body_parameters->{'CSRFtoken'};
-            @matches = map { uri_unescape($_) } @matches;
+            @matches = map { uri_unescape($_, ) } @matches;
             $c->stats->profile(comment => $path);
             my $sub_name = Thruk::Base->verbose ? Thruk::Utils::code2name($function) : '';
             if($roles && !$c->user->check_user_roles($roles)) {
@@ -628,21 +628,26 @@ sub _apply_stats {
     my($c, $data) = @_;
     return($data) unless $c->req->parameters->{'columns'};
 
+    my $aggregation_functions = Thruk::Base::array2hash([qw/count sum avg min max/]);
     my $new_columns   = [];
     my $stats_columns = [];
     my $group_columns = [];
     my $group_column_name;
     for my $col (@{Thruk::Base::list($c->req->parameters->{'columns'})}) {
+        # TODO: check stats query with ... as alias
         for my $col (split(/\s*,\s*/mx, $col)) {
             if($col =~ m/^(.*)\(([^\)]+)\):?([^:]*)$/mx) {
-                push @{$stats_columns}, { op => $1, col => $2 };
-                push @{$new_columns}, $col;
-            } else {
-                my $alias;
-                ($col, $alias) = split(/:/mx, $col, 2);
-                $group_column_name = $alias if defined $alias;
-                push @{$group_columns}, $col;
+                my($op, $colname) = ($1, $2);
+                if($aggregation_functions->{$2}) {
+                    push @{$stats_columns}, { op => $op, col => $colname };
+                    push @{$new_columns}, $col;
+                    next;
+                }
             }
+
+            my($colname, $alias) = split(/:/mx, $col, 2);
+            $group_column_name = $alias if defined $alias;
+            push @{$group_columns}, $colname;
         }
     }
     $group_column_name = $group_column_name // join(';', @{$group_columns});
@@ -766,17 +771,30 @@ sub get_request_columns {
 
     my $columns = [];
     for my $col (@{Thruk::Base::list($c->req->parameters->{'columns'})}) {
-        push @{$columns}, split(/\s*,\s*/mx, $col);
+        push @{$columns}, _split_columns($col);
     }
+    for (@{$columns}) {
+        $_ =~ s/^\s+//gmx;
+        $_ =~ s/\s+$//gmx;
+    }
+
     $columns = Thruk::Base::array_uniq($columns);
     if($type == ALIAS) {
         for(@{$columns}) {
-            $_ =~ s/^[^:]+:(.*?)$/$1/gmx;
+            if($_ =~ m/\s+as\s+([^\s]+)\s*$/mx) {
+                $_ =~ s/^.*?\s+as\s+([^\s]+)\s*$/$1/mx; # strip "as alias" from column
+            } else {
+                $_ =~ s/^[^:]+:(.*?)$/$1/gmx; # strip alias
+            }
         }
     }
     if($type == NAMES) {
         for(@{$columns}) {
-            $_ =~ s/^([^:]+):.*?$/$1/gmx; # strip alias
+            if($_ =~ m/\s+as\s+([^\s]+)\s*$/mx) {
+                $_ =~ s/\s+as\s+([^\s]+)\s*$//mx; # strip "as alias" from column
+            } else {
+                $_ =~ s/^([^:]+):.*?$/$1/gmx; # strip alias
+            }
             $_ =~ s/^.*\(([^)]+)\)$/$1/gmx; # extract column name from aggregation function
         }
     }
@@ -799,7 +817,10 @@ sub get_aliased_columns {
     my $columns = get_request_columns($c, RAW);
     if($columns) {
         for my $col (@{$columns}) {
-            if($col =~ m/^([^:]+):(.*)$/mx) {
+            if($col =~ m/^([^:]+)\s+as\s+(.*)$/mx) {
+                $alias_columns->{$2} = $1;
+            }
+            elsif($col =~ m/^([^:]+):(.*)$/mx) {
                 $alias_columns->{$2} = $1;
             }
         }
@@ -901,23 +922,67 @@ sub _apply_columns {
     for my $c (@{get_request_columns($c, RAW)}) {
         my $name = $c;
         my $alias = $c;
-        if($c =~ m/^(.+):(.*?)$/gmx) {
+        if($c =~ m/^(.+)\s+as\s+(.*?)$/gmx) {
+            $name  = $1;
+            $alias = $2;
+        } elsif($c =~ m/^(.+):(.*?)$/gmx) {
             $name  = $1;
             $alias = $2;
         }
-        push @{$columns}, [$name, $alias];
+        # extract functions from name
+        my $functions = [];
+        while($name =~ m|^(\w+)\((.*)\)$|mx) {
+            my $f = $1;
+            $name = $2;
+            my @arg = _split_columns($name);
+            for (@arg) {
+                $_ =~ s/^\s+//gmx;
+                $_ =~ s/\s+$//gmx;
+            }
+            $name = shift @arg;
+            push(@{$functions}, [$f, \@arg]);
+        }
+        # functions must be applied in reverse order
+        @{$functions} = reverse @{$functions};
+        push @{$columns}, [$name, $alias, $functions];
     }
 
     my $res = [];
     for my $d (@{$data}) {
         my $row = {};
         for my $c (@{$columns}) {
-            $row->{$c->[1]} = $d->{$c->[0]};
+            my $val = $d->{$c->[0]};
+            for my $f (@{$c->[2]}) {
+                $val = _apply_data_function($f, $val);
+            }
+            $row->{$c->[1]} = $val;
         }
         push @{$res}, $row;
     }
 
     return $res;
+}
+
+##########################################################
+sub _apply_data_function {
+    my($f, $val) = @_;
+    my($name, $args) = @{$f};
+    if($name eq 'lower' || $name eq 'lc') {
+        return lc($val);
+    }
+    if($name eq 'upper' || $name eq 'uc') {
+        return uc($val);
+    }
+    if($name eq 'substr' || $name eq 'substring') {
+        if(defined $args->[1]) {
+            return(substr($val, $args->[0], $args->[1]));
+        }
+        if(defined $args->[0]) {
+            return(substr($val, $args->[0]));
+        }
+        die("usage: substr(value, start[, length])");
+    }
+    die("unknown function: ".$name);
 }
 
 ##########################################################
@@ -1244,26 +1309,38 @@ sub _get_help_for_path {
 
 ##########################################################
 sub _get_columns_meta_for_path {
-    my($c, $path_info, $method) = @_;
+    my($c, $path_info, $method, $data) = @_;
     require Thruk::Controller::Rest::V1::docs;
     my $keys = Thruk::Controller::Rest::V1::docs::keys();
+    my $alias_columns = get_aliased_columns($c);
+    my $req_columns   = get_request_columns($c, ALIAS) || ((ref $data eq 'ARRAY' && $data->[0]) ? [sort keys %{$data->[0]}] : []);
+    my $columns = {};
     for my $path (reverse sort { length $a <=> length $b } keys %{$keys}) {
         my $p = $path;
         $p =~ s%<[^>]+>%[^/]*%gmx;
-        if($path_info =~ qr/$p/mx) {
-            if($keys->{$path}->{$method}) {
-                my $columns = [];
-                for my $d (@{$keys->{$path}->{$method}->{'columns'}}) {
-                    my $col = { 'name' => $d->{'name'} };
-                    $col->{'type'} = $d->{'type'} if $d->{'type'};
-                    $col->{'config'} = { 'unit' => $d->{'unit'} } if $d->{'unit'};
-                    push @{$columns}, $col;
-                }
-                return($columns);
-            }
+        if($path_info !~ qr/$p/mx) {
+            next;
         }
+        next unless ($keys->{$path}->{$method});
+
+        for my $d (@{$keys->{$path}->{$method}->{'columns'}}) {
+            my $col = { 'name' => $d->{'name'} };
+            $col->{'type'} = $d->{'type'} if $d->{'type'};
+            $col->{'config'} = { 'unit' => $d->{'unit'} } if $d->{'unit'};
+            $columns->{$d->{'name'}} = $col;
+        }
+        last;
     }
-    return;
+
+    return unless scalar keys %{$columns} > 0;
+
+    my $meta = [];
+    for my $d (@{$req_columns}) {
+        my $col = $columns->{$alias_columns->{$d} // $d} // {};
+        $col->{'name'} = $d;
+        push @{$meta}, $col;
+    }
+    return $meta;
 }
 
 ##########################################################
@@ -2426,6 +2503,49 @@ sub _post_process_logs {
     }
 
     return($logs);
+}
+
+##########################################################
+# split columns by comma, but not when comma is in brackets or quotes
+sub _split_columns {
+    my($col) = @_;
+    my @res;
+    my $cur = "";
+    my($inBracket, $inSingle, $inDbl) = (0,0,0);
+    for my $chr (split//mx, $col) {
+        if($chr eq '(') {
+            $inBracket++;
+            $cur .= $chr;
+            next;
+        }
+        if($chr eq ')') {
+            $inBracket--;
+            $cur .= $chr;
+            next;
+        }
+        if($chr eq '"') {
+            $inDbl = !$inDbl;
+            $cur .= $chr;
+            next;
+        }
+        if($chr eq "'") {
+            $inSingle = !$inSingle;
+            $cur .= $chr;
+            next;
+        }
+        if($chr eq "," && !$inBracket && !$inSingle && !$inDbl) {
+            if($cur ne '') {
+                push @res, $cur;
+                $cur = '';
+            }
+            next;
+        }
+        $cur .= $chr;
+    }
+    if($cur ne '') {
+        push @res, $cur;
+    }
+    return @res;
 }
 
 ##########################################################
