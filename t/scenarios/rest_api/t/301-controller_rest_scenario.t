@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 295;
+    plan tests => 303;
 
     use lib('t');
     require TestUtils;
@@ -19,6 +19,10 @@ my($host,$service) = ('localhost', 'Users');
 
 my $pages = [{
         url          => '/services/localhost/Ping/cmd/schedule_forced_svc_check',
+        post         => { 'start_time' => 'now' },
+        like         => ['Command successfully submitted'],
+    }, {
+        url          => '/services/localhost/Disk%20%2F/cmd/schedule_forced_svc_check',
         post         => { 'start_time' => 'now' },
         like         => ['Command successfully submitted'],
     }, {

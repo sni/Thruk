@@ -59,7 +59,8 @@ sub new {
     if($env->{'PATH_TRANSLATED'} && $env->{'PATH_TRANSLATED'} =~ m%(/[^/]+/cgi\-bin/error\.cgi)%mx) {
         $env->{'REQUEST_URI'} = $1;
     }
-    my $path_info         = translate_request_path($env->{'REQUEST_URI'} || $env->{'PATH_INFO'}, $config, $env);
+    # get path from script url if possible, request uri gets encoding wrong: /Disk%20%252F/ vs. /Disk %2F/ for "Disk /" url part
+    my $path_info         = translate_request_path($env->{'SCRIPT_URL'} || $env->{'REQUEST_URI'} || $env->{'PATH_INFO'}, $config, $env);
     $env->{'PATH_INFO'}   = $path_info;
     $env->{'REQUEST_URI'} = $path_info;
 
