@@ -644,7 +644,6 @@ sub _apply_stats {
     my $all_columns   = _parse_columns_data(get_request_columns($c, RAW));
     for my $col (@{$all_columns}) {
         # check for aggregation function which must be the outer most one
-        # TODO: check, functions are in reverse order, why check for 0?
         if(scalar @{$col->{'func'}} > 0 && $aggregation_functions->{$col->{'func'}->[0]->[0]}) {
             push @{$stats_columns}, { op => $col->{'func'}->[0]->[0], col => $col->{'column'} };
             push @{$new_columns}, $col;
