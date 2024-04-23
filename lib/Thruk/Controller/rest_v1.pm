@@ -38,6 +38,10 @@ our $rest_paths = [];
 
 my $reserved_query_parameters  = [qw/limit offset sort columns headers backend backends q CSRFtoken/];
 my $aggregation_function_names = [qw/count sum avg min max/];
+my $disaggregation_function_names  = [qw/as_rows to_rows/];
+my $aggregation_functions      = Thruk::Base::array2hash($aggregation_function_names);
+my $disaggregation_functions   = Thruk::Base::array2hash($disaggregation_function_names);
+
 my $op_translation_words       = {
     'eq'     => '=',
     'ne'     => '!=',
@@ -484,6 +488,9 @@ sub _post_processing {
             $data = _apply_filter($c, $data, PRE_STATS);
             return($data) if _is_failed($data);
 
+            # expand rows (disaggregation functions)
+            $data = _apply_disaggregation($c, $data);
+
             # calculate statistics
             $data = _apply_stats($c, $data);
         }
@@ -631,13 +638,13 @@ sub _apply_stats {
     my($c, $data) = @_;
     return($data) unless $c->req->parameters->{'columns'};
 
-    my $aggregation_functions = Thruk::Base::array2hash($aggregation_function_names);
     my $new_columns   = [];
     my $stats_columns = [];
     my $group_columns = [];
     my $all_columns   = _parse_columns_data(get_request_columns($c, RAW));
     for my $col (@{$all_columns}) {
         # check for aggregation function which must be the outer most one
+        # TODO: check, functions are in reverse order, why check for 0?
         if(scalar @{$col->{'func'}} > 0 && $aggregation_functions->{$col->{'func'}->[0]->[0]}) {
             push @{$stats_columns}, { op => $col->{'func'}->[0]->[0], col => $col->{'column'} };
             push @{$new_columns}, $col;
@@ -757,6 +764,48 @@ sub _apply_stats {
     if(scalar @{$group_columns} == 0) {
         $data = $data->[0];
     }
+    return($data);
+}
+
+##########################################################
+sub _apply_disaggregation {
+    my($c, $data) = @_;
+    return($data) unless $c->req->parameters->{'columns'};
+
+    my $disaggregation_columns = [];
+    my $all_columns   = _parse_columns_data(get_request_columns($c, RAW));
+    for my $col (@{$all_columns}) {
+        # check for disaggregation function which must be the inner most one
+        if(scalar @{$col->{'func'}} > 0 && $disaggregation_functions->{$col->{'func'}->[0]->[0]}) {
+            push @{$disaggregation_columns}, $col;
+        }
+    }
+
+    return($data) unless scalar @{$disaggregation_columns} > 0;
+    die("too many disaggregation function, do not use more than 2") if scalar @{$disaggregation_columns} >= 2;
+
+    my $expanded_data = [];
+    for my $col (@{$disaggregation_columns}) {
+        for my $f (@{$col->{'func'}}) {
+            next unless $disaggregation_functions->{$f->[0]};
+            if($f->[0] eq 'to_rows' || $f->[0] eq 'as_rows') {
+                for my $d (@{$data}) {
+                    my $val = $d->{$col->{'column'}};
+                    if(ref $val eq 'ARRAY') {
+                        for my $s (@{$val}) {
+                            my $cloned_row = Thruk::Utils::IO::dclone($d);
+                            $cloned_row->{$col->{'column'}} = $s;
+                            push @{$expanded_data}, $cloned_row;
+                        }
+                    }
+                }
+            } else {
+                die("unsupported function: ".$f->[0]);
+            }
+        }
+        $data = $expanded_data;
+    }
+
     return($data);
 }
 
@@ -924,7 +973,6 @@ sub _apply_columns {
     my $columns = _parse_columns_data(get_request_columns($c, RAW));
 
     # remove aggregation functions
-    my $aggregation_functions = Thruk::Base::array2hash($aggregation_function_names);
     for my $col (@{$columns}) {
         if(scalar @{$col->{'func'}} > 0 && $aggregation_functions->{$col->{'func'}->[0]->[0]}) {
             $col->{'func'} = [];
@@ -1012,6 +1060,9 @@ sub _apply_data_function {
         $col->{'unit'} = _trim_quotes($args->[0]);
         return $val;
     }
+
+    return $val if $aggregation_functions->{$name};
+    return $val if $disaggregation_functions->{$name};
 
     die("unknown function: ".$name);
 }

@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Rest:
+            - add transformation and disaggregation functions
+
 3.14.2   Sat Mar 23 19:21:39 CET 2024
           - fix embedding 3rd party tools
           - fix inline search

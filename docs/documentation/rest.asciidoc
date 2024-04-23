@@ -269,6 +269,12 @@ Rename columns by appending `:name` like this:
   %> thruk r /hosts?columns=name:host_name,state:status
 ------
 
+or by adding `as aliasname`
+
+------
+  %> thruk r '/hosts?columns=name:host_name,state as status'
+------
+
 
 === Performance Data Columns
 
@@ -369,7 +375,9 @@ Those columns can be used for filtering or to only select specific custom values
 ]
 ------
 
-== Transformation Functions
+== Functions
+
+=== Transformation Functions
 
 Transformation functions can be used to adjust result data.
 
@@ -391,7 +399,7 @@ ex.: return first 3 characters from upper case host name.
 ------
 
 
-== Aggregation Functions
+=== Aggregation Functions
 
 Aggregation functions can be used to get statistical information.
 
@@ -438,6 +446,38 @@ Aggregation functions can be used in filter (alias cannot be used in filter):
 
 ------
   %> thruk r '/services?columns=avg(execution_time):exec_time&avg(execution_time)[gt]=0'
+------
+
+=== Disaggregation Functions
+
+Disaggregation functions create multiple result rows from a single attribute.
+
+Available disaggregation functions are:
+
+  * `to_rows`: allocate result rows from list column
+  * `as_rows`: alias for to_rows
+
+------
+  %> thruk r '/hosts?columns=name,to_rows(services) as services'
+------
+
+Of course, this example could be achieved easier but creating a query on the services
+table, but you get the idea.
+
+=== Mixing Functions
+
+When mixing aggregation and transformation functions, apply the aggregation function
+as the outer most function, as for example in:
+
+------
+  %> thruk r '/hosts/localhost?columns=avg(unit(calc(latency,/,1000), "ms"))'
+------
+
+When mixing disaggregation and transformation functions, apply the disaggregation function
+as the inner most function, as for example in:
+
+------
+  %> thruk r '/hosts/localhost?columns=upper(name),upper(to_rows(services))'
 ------
 
 == Backends / Sites

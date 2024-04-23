@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 20;
+plan tests => 40;
 
 ###########################################################
 # test thruks script path
@@ -34,5 +34,31 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r \'/hosts/localhost?columns=substr(name,0,3)\'',
         like => ['/"loc"/'],
+    });
+};
+
+###########################################################
+# mixed stats and transformation
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/hosts/localhost?columns=avg(unit(calc(last_check,/,1000), "ms")) as testcheck&headers=wrapped_json\'',
+        like => ['/"ms"/', '/"testcheck"/'],
+    });
+};
+
+###########################################################
+# disaggregation function
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/hosts?columns=to_rows(services) as service&headers=wrapped_json\'',
+        like => ['/"Users"/', '/"service"/'],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/hosts?columns=name,to_rows(services) as svc&headers=wrapped_json\'',
+        like => ['/"Users"/', '/"svc"/'],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/hosts?columns=name,upper(to_rows(services)) as svc&headers=wrapped_json\'',
+        like => ['/"USERS"/', '/"svc"/'],
     });
 };
