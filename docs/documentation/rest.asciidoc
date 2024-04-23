@@ -380,6 +380,9 @@ Available transformations functions are:
   * `lower`: make column lower case
   * `lc`: alias for lower
   * `substr`: extract substring (substr(columnname, offset [, length]))
+  * `calc`: apply mathematical operation (calc(column, op , value) ex.: calc(last_check, '*', 1000))
+  * `s`: apply regex replacement (s(column, regex, replace) ex.: s(host_name, '/\..*$/', '') Note: you cannot use backreferences like $1 in the replacement string for security reasons.
+  * `unit`: set the unit for this column (unit(column, unit) ex.: unit(calc(rta, "*", 1000), "s")
 
 ex.: return first 3 characters from upper case host name.
 

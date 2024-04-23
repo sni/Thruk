@@ -184,6 +184,11 @@ sub process_rest_request {
         }
     }
 
+    my $wrapped;
+    $wrapped = 1 if($c->req->header("x-thruk-outputformat") && $c->req->header("x-thruk-outputformat") eq 'wrapped_json');
+    $wrapped = 1 if(defined $c->req->parameters->{'headers'} && $c->req->parameters->{'headers'} eq 'wrapped_json');
+    $c->stash->{'meta_column_info'} = {};
+
     if(!$data) {
         eval {
             $data = _fetch($c, $path_info, $method);
@@ -207,9 +212,6 @@ sub process_rest_request {
     }
 
     # add columns meta data, ex.: used in the thruk grafana datasource
-    my $wrapped;
-    $wrapped = 1 if($c->req->header("x-thruk-outputformat") && $c->req->header("x-thruk-outputformat") eq 'wrapped_json');
-    $wrapped = 1 if(defined $c->req->parameters->{'headers'} && $c->req->parameters->{'headers'} eq 'wrapped_json');
     if($wrapped) {
         # wrap data along with column meta data
         my $request_method = $method || $c->req->method;
@@ -785,7 +787,7 @@ sub get_request_columns {
             if($_ =~ m/\s+as\s+([^\s]+)\s*$/mx) {
                 $_ =~ s/^.*?\s+as\s+([^\s]+)\s*$/$1/mx; # strip "as alias" from column
             } else {
-                $_ =~ s/^[^:]+:(.*?)$/$1/gmx; # strip alias
+                $_ =~ s/^[^:]+:([^"']*?)$/$1/gmx; # strip alias
             }
         }
     }
@@ -794,7 +796,7 @@ sub get_request_columns {
             if($_ =~ m/\s+as\s+([^\s]+)\s*$/mx) {
                 $_ =~ s/\s+as\s+([^\s]+)\s*$//mx; # strip "as alias" from column
             } else {
-                $_ =~ s/^([^:]+):.*?$/$1/gmx; # strip alias
+                $_ =~ s/^([^:]+):[^"']*?$/$1/gmx; # strip alias
             }
             $_ =~ s/^.*\(([^)]+)\)$/$1/gmx; # extract column name from aggregation function
         }
@@ -821,7 +823,7 @@ sub get_aliased_columns {
             if($col =~ m/^([^:]+)\s+as\s+(.*)$/mx) {
                 $alias_columns->{$2} = $1;
             }
-            elsif($col =~ m/^([^:]+):(.*)$/mx) {
+            elsif($col =~ m/^([^:]+):([^"']*)$/mx) {
                 $alias_columns->{$2} = $1;
             }
         }
@@ -929,15 +931,27 @@ sub _apply_columns {
         }
     }
 
+    # extract helpful meta information from data
+    my $firstrow;
+    if($data && $data->[0]) {
+        $firstrow = $data->[0];
+    }
+    for my $col (@{$columns}) {
+        $c->stash->{'meta_column_info'}->{$col->{'orig'}} = $col;
+        if($firstrow && $firstrow->{$col->{'column'}."_unit"}) {
+            $col->{'unit'} = $firstrow->{$col->{'column'}."_unit"};
+        }
+    }
+
     my $res = [];
     for my $d (@{$data}) {
         my $row = {};
-        for my $c (@{$columns}) {
-            my $val = $d->{$c->{'orig'}} // $d->{$c->{'column'}};
-            for my $f (@{$c->{'func'}}) {
-                $val = _apply_data_function($f, $val);
+        for my $col (@{$columns}) {
+            my $val = $d->{$col->{'orig'}} // $d->{$col->{'column'}};
+            for my $f (@{$col->{'func'}}) {
+                $val = _apply_data_function($col, $f, $val);
             }
-            $row->{$c->{'alias'}} = $val;
+            $row->{$col->{'alias'}} = $val;
         }
         push @{$res}, $row;
     }
@@ -947,7 +961,7 @@ sub _apply_columns {
 
 ##########################################################
 sub _apply_data_function {
-    my($f, $val) = @_;
+    my($col, $f, $val) = @_;
     my($name, $args) = @{$f};
     if($name eq 'lower' || $name eq 'lc') {
         return lc($val // '');
@@ -962,7 +976,41 @@ sub _apply_data_function {
         if(defined $args->[0]) {
             return(substr($val // '', $args->[0]));
         }
-        die("usage: substr(value, start[, length])");
+        die("usage: substr(column, start[, length])");
+    }
+    if($name eq 'calc') {
+        my $op = _trim_quotes($args->[0]);
+        my $v  = _trim_quotes($args->[1]);
+        die("usage: calc(column, 'operator', 'value')") if(!defined $op || !defined $v);
+        if($op eq '*') {
+            $val *= $v;
+        } elsif($op eq '/') {
+            $val = $val / $v;
+        } elsif($op eq '+' || $op eq ' ' || $op eq '') { # assume space as +, might have been url decoded
+            $val = $val + $v;
+        } elsif($op eq '-') {
+            $val = $val - $v;
+        } else {
+            die("unsupported operator, use one of: + - * /");
+        }
+        return $val;
+    }
+    if($name eq 's') {
+        my $regexp  = _trim_quotes($args->[0]);
+        my $replace = _trim_quotes($args->[1]);
+        die("usage: s(column, 'regexp', 'replacement')") if(!$regexp || !defined $replace);
+        $regexp = _trim_re($regexp);
+        ## no critic
+        my $re = qr($regexp);
+        $val =~ s/$re/$replace/g;
+        ## use critic
+        return $val;
+    }
+
+    # just set the unit, do not change the value
+    if($name eq 'unit') {
+        $col->{'unit'} = _trim_quotes($args->[0]);
+        return $val;
     }
 
     die("unknown function: ".$name);
@@ -1315,14 +1363,20 @@ sub _get_columns_meta_for_path {
         last;
     }
 
-    return unless scalar keys %{$columns} > 0;
-
     my $meta = [];
     for my $d (@{$req_columns}) {
         my $col = $columns->{$alias_columns->{$d} // $d} // {};
         $col->{'name'} = $d;
+        my $hint = $c->stash->{'meta_column_info'}->{$alias_columns->{$d} // $d} // $c->stash->{'meta_column_info'}->{$d};
+        if((!defined $col->{'config'} || !defined $col->{'config'}->{'unit'}) && $hint) {
+            if(defined $hint->{'unit'}) {
+                $col->{'config'}->{'unit'} = $hint->{'unit'};
+                $col->{'type'} = 'number' unless $col->{'type'};
+            }
+        }
         push @{$meta}, $col;
     }
+
     return $meta;
 }
 
@@ -2498,7 +2552,7 @@ sub _parse_columns_data {
         if($c =~ m/^(.+)\s+as\s+(.*?)$/gmx) {
             $name  = $1;
             $alias = $2;
-        } elsif($c =~ m/^(.+):(.*?)$/gmx) {
+        } elsif($c =~ m/^(.+):([^"']*?)$/gmx) {
             $name  = $1;
             $alias = $2;
         }
@@ -2584,6 +2638,31 @@ sub _split_by_comma {
         push @res, $cur;
     }
     return @res;
+}
+
+##########################################################
+# remove quotes from string
+sub _trim_quotes {
+    my($val) = @_;
+    return unless defined $val;
+    if($val =~ s/^'(.*)'$/$1/mx) {
+        return $val;
+    }
+    if($val =~ s/^"(.*)"$/$1/mx) {
+        return $val;
+    }
+    return $val;
+}
+
+##########################################################
+# remove slashes from string
+sub _trim_re {
+    my($val) = @_;
+    return unless defined $val;
+    if($val =~ s|^/(.*)/$|$1|mx) {
+        return $val;
+    }
+    return $val;
 }
 
 ##########################################################
