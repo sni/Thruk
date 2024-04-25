@@ -36,7 +36,7 @@ my $pages = [{
         content_type => 'text/plain; charset=utf-8',
     }, {
         url          => '/csv/services?columns=count(*):num,host_name&sort=-count(*)',
-        like         => ['localhost;8'],
+        like         => ['8;localhost'],
         content_type => 'text/plain; charset=utf-8',
     }, {
         url          => '/services/'.$host.'/'.$service.'/cmd/schedule_svc_downtime',

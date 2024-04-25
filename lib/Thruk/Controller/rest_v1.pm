@@ -638,38 +638,28 @@ sub _apply_stats {
     my($c, $data) = @_;
     return($data) unless $c->req->parameters->{'columns'};
 
-    my $new_columns   = [];
     my $stats_columns = [];
     my $group_columns = [];
     my $all_columns   = _parse_columns_data(get_request_columns($c, RAW));
-    for my $col (@{$all_columns}) {
+    my $column_keys   = [];
+    my $num_cols = scalar @{$all_columns};
+    for(my $x = 0; $x < $num_cols; $x++) {
+        my $col = $all_columns->[$x];
         # check for aggregation function which must be the outer most one
+        # TODO: check
+        push @{$column_keys}, $col->{'orig'};
         if(scalar @{$col->{'func'}} > 0 && $aggregation_functions->{$col->{'func'}->[0]->[0]}) {
-            push @{$stats_columns}, { op => $col->{'func'}->[0]->[0], col => $col->{'column'} };
-            push @{$new_columns}, $col;
+            my $stat_col = { op => $col->{'func'}->[0]->[0], col => $col->{'column'}, pos => $x };
+            push @{$stats_columns}, $stat_col;
+            $col->{'stat'} = $stat_col;
             next;
         }
 
+        # none stats columns set the uniq key for grouping results
         push @{$group_columns}, $col;
     }
 
-    my $group_column_name = "";
     return($data) unless scalar @{$stats_columns} > 0;
-    # grouped columns go first, so we need to update the columns request header
-    if(scalar @{$group_columns} > 0) {
-        my $combined = [];
-        for my $col (@{$group_columns}, @{$new_columns}) {
-            push @{$combined}, sprintf("%s as %s", $col->{'orig'}, $col->{'alias'});
-        }
-        $c->req->parameters->{'columns'} = join(",", @{$combined});
-
-        # build key for grouped stats
-        my $group_names = [];
-        for my $col (@{$group_columns}) {
-            push @{$group_names}, $col->{'alias'} // $col->{'column'};
-        }
-        $group_column_name = join(";", @{$group_names});
-    }
 
     my $result = {};
     my $num_stats = scalar @{$stats_columns};
@@ -680,9 +670,14 @@ sub _apply_stats {
             count   => 0,
             columns => [],
         };
-        for my $col (@{$stats_columns}) {
-            if($col->{'op'} eq 'sum') {
-                push @{$entry->{'columns'}}, 0;
+        for my $col (@{$all_columns}) {
+            if($col->{'stat'}) {
+                my $op = $col->{'stat'}->{'op'};
+                if($op eq 'sum' || $op eq 'count') {
+                    push @{$entry->{'columns'}}, 0;
+                } else {
+                    push @{$entry->{'columns'}}, undef;
+                }
             } else {
                 push @{$entry->{'columns'}}, undef;
             }
@@ -692,6 +687,7 @@ sub _apply_stats {
     for my $d (@{$data}) {
         my $key = "";
         for my $col (@{$group_columns}) {
+            # TODO: apply other transformation functions
             $key .= ';'.($d->{$col->{'column'}} // '');
         }
         my $entry = $result->{$key};
@@ -700,11 +696,16 @@ sub _apply_stats {
                 count   => 0,
                 columns => [],
             };
-            for my $col (@{$stats_columns}) {
-                if($col->{'op'} eq 'sum') {
-                    push @{$entry->{'columns'}}, 0;
+            for my $col (@{$all_columns}) {
+                if($col->{'stat'}) {
+                    my $op = $col->{'stat'}->{'op'};
+                    if($op eq 'sum' || $op eq 'count') {
+                        push @{$entry->{'columns'}}, 0;
+                    } else {
+                        push @{$entry->{'columns'}}, undef;
+                    }
                 } else {
-                    push @{$entry->{'columns'}}, undef;
+                    push @{$entry->{'columns'}}, $d->{$col->{'column'}} // '';
                 }
             }
             $result->{$key} = $entry;
@@ -712,21 +713,22 @@ sub _apply_stats {
         $entry->{'count'}++;
         for(my $x = 0; $x < $num_stats; $x++) {
             my $col = $stats_columns->[$x];
+            my $pos = $col->{'pos'};
             my $val = $d->{$col->{'col'}};
             if(!Thruk::Backend::Manager::looks_like_number($val)) {
                 next;
             }
             if($col->{'op'} eq 'sum' || $col->{'op'} eq 'avg') {
-                $entry->{'columns'}->[$x] += $val;
+                $entry->{'columns'}->[$pos] += $val;
             }
             elsif($col->{'op'} eq 'min') {
-                if(!defined $entry->{'columns'}->[$x] || $entry->{'columns'}->[$x] > $val) {
-                    $entry->{'columns'}->[$x] = $val;
+                if(!defined $entry->{'columns'}->[$pos] || $entry->{'columns'}->[$pos] > $val) {
+                    $entry->{'columns'}->[$pos] = $val;
                 }
             }
             elsif($col->{'op'} eq 'max') {
-                if(!defined $entry->{'columns'}->[$x] || $entry->{'columns'}->[$x] < $val) {
-                    $entry->{'columns'}->[$x] = $val;
+                if(!defined $entry->{'columns'}->[$pos] || $entry->{'columns'}->[$pos] < $val) {
+                    $entry->{'columns'}->[$pos] = $val;
                 }
             }
         }
@@ -734,28 +736,27 @@ sub _apply_stats {
     $data = [];
     for my $key (sort keys %{$result}) {
         my $result_row = $result->{$key};
-        my $row = {};
-        $key =~ s/^;//gmx;
-        $row->{$group_column_name} = $key;
         for(my $x = 0; $x < $num_stats; $x++) {
             my $col = $stats_columns->[$x];
-            my $result_key = $col->{'op'}.'('.$col->{'col'}.')';
+            my $pos = $col->{'pos'};
             my $val;
             if($col->{'op'} eq 'avg') {
-                if($result_row->{'count'} > 0 && defined $result_row->{'columns'}->[$x]) {
-                    $val = $result_row->{'columns'}->[$x] / $result_row->{'count'};
+                if($result_row->{'count'} > 0 && defined $result_row->{'columns'}->[$pos]) {
+                    $val = $result_row->{'columns'}->[$pos] / $result_row->{'count'};
                 }
             }
             elsif($col->{'op'} eq 'count') {
                 $val = $result_row->{'count'};
             }
             else {
-                $val = $result_row->{'columns'}->[$x];
+                $val = $result_row->{'columns'}->[$pos];
             }
-            $row->{$result_key} = $val;
+            $result_row->{'columns'}->[$pos] = $val;
         }
-        delete $row->{''} if defined $row->{''} && $row->{''} eq '';
-        push @{$data}, $row;
+        # create result row hash from column list
+        my %row;
+        @row{@{$column_keys}} = @{$result_row->{'columns'}};
+        push @{$data}, \%row;
     }
 
     $data = _apply_filter($c, $data, POST_STATS);
