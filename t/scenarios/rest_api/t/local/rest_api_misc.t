@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 52;
+plan tests => 57;
 
 ###########################################################
 # test thruks script path
@@ -43,6 +43,10 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r \'/hosts/localhost?columns=avg(unit(calc(last_check,/,1000), "ms")) as testcheck&headers=wrapped_json\'',
         like => ['/"ms"/', '/"testcheck"/'],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/csv/services?columns=avg(calc(state, "*", 10)):avgState,host_name\'',
+        like => ['/20;Test/', '/5;localhost/' ],
     });
 };
 

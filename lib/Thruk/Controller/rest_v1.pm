@@ -646,13 +646,15 @@ sub _apply_stats {
     for(my $x = 0; $x < $num_cols; $x++) {
         my $col = $all_columns->[$x];
         # check for aggregation function which must be the outer most one
-        # TODO: check
         push @{$column_keys}, $col->{'orig'};
-        if(scalar @{$col->{'func'}} > 0 && $aggregation_functions->{$col->{'func'}->[0]->[0]}) {
-            my $stat_col = { op => $col->{'func'}->[0]->[0], col => $col->{'column'}, pos => $x };
-            push @{$stats_columns}, $stat_col;
-            $col->{'stat'} = $stat_col;
-            next;
+        if(scalar @{$col->{'func'}} > 0) {
+            my $lst = scalar @{$col->{'func'}} -1;
+            if($aggregation_functions->{$col->{'func'}->[$lst]->[0]}) {
+                my $stat_col = { op => $col->{'func'}->[$lst]->[0], col => $col->{'column'}, pos => $x };
+                push @{$stats_columns}, $stat_col;
+                $col->{'stat'} = $stat_col;
+                next;
+            }
         }
 
         # none stats columns set the uniq key for grouping results
