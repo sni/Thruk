@@ -102,7 +102,7 @@
           [% IF empty || (service_stats.total-service_stats.pending) == 0 %]
             [% service_health = 0 %]
           [% ELSE %]
-            [% service_health = (service_stats.ok + service_stats.warning + service_stats.unknown) / ((service_stats.total-service_stats.pending)) * 100 %]
+            [% service_health = service_stats.ok / (service_stats.total-service_stats.pending) * 100 %]
           [% END %]
           [% service_health = sprintf('%i', service_health) %]
           [% service_perc   = service_health %]
