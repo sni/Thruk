@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 59;
+plan tests => 52;
 
 ###########################################################
 # test thruks script path
@@ -19,18 +19,6 @@ TestUtils::test_command({
 
 $ENV{'THRUK_TEST_AUTH_KEY'}  = "testkey";
 $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
-
-###########################################################
-# some tests require non-pending services
-TestUtils::test_command({
-    cmd     => '/thruk/support/reschedule_all_checks.sh',
-    like    => ['/OK/', '/successfully submitted/'],
-});
-TestUtils::test_command({
-    cmd     => '/usr/bin/env thruk -A omdadmin url "status.cgi?host=all&servicestatustypes=1&style=detail"',
-    like    => ['/Current Network Status/'],
-    waitfor => '0\ Items\ Displayed',
-});
 
 ###########################################################
 # rest api text transformation
@@ -88,4 +76,11 @@ TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r \'/csv/services?columns=host_name,state,count(*):num&sort=-count(*)\'',
         like => ['/localhost;0;/'],
     });
+    # count services by part of hostname and state
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/csv/services?columns=count(*):num,upper(substr(host_name, 0, 2)),state\'',
+        like => ['/;LO;0/'],
+    });
 }
+
+###########################################################

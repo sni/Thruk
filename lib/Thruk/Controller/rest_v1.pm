@@ -687,8 +687,8 @@ sub _apply_stats {
     for my $d (@{$data}) {
         my $key = "";
         for my $col (@{$group_columns}) {
-            # TODO: apply other transformation functions
-            $key .= ';'.($d->{$col->{'column'}} // '');
+            my $val = _get_transformed_row_value($d, $col);
+            $key .= ';'.($val // '');
         }
         my $entry = $result->{$key};
         if(!$entry) {
@@ -995,16 +995,24 @@ sub _apply_columns {
     for my $d (@{$data}) {
         my $row = {};
         for my $col (@{$columns}) {
-            my $val = $d->{$col->{'orig'}} // $d->{$col->{'column'}};
-            for my $f (@{$col->{'func'}}) {
-                $val = _apply_data_function($col, $f, $val);
-            }
-            $row->{$col->{'alias'}} = $val;
+            $row->{$col->{'alias'}} = _get_transformed_row_value($d, $col);
         }
         push @{$res}, $row;
     }
 
     return $res;
+}
+
+##########################################################
+sub _get_transformed_row_value {
+    my($row, $col) = @_;
+
+    my $val = $row->{$col->{'orig'}} // $row->{$col->{'column'}};
+    for my $f (@{$col->{'func'}}) {
+        $val = _apply_data_function($col, $f, $val);
+    }
+
+    return $val;
 }
 
 ##########################################################

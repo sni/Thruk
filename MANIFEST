@@ -2583,6 +2583,7 @@ t/scenarios/rest_api/t/301-controller_rest_recurring_downtimes.t
 t/scenarios/rest_api/t/301-controller_rest_reports.t
 t/scenarios/rest_api/t/301-controller_rest_scenario.t
 t/scenarios/rest_api/t/305-controller_rest_commands.t
+t/scenarios/rest_api/t/local/00_init.t
 t/scenarios/rest_api/t/local/rest.t
 t/scenarios/rest_api/t/local/rest_api_misc.t
 t/scenarios/rest_api/t/local/rest_check_thruk_rest.t
