@@ -275,6 +275,17 @@ or by adding `as aliasname`
   %> thruk r '/hosts?columns=name:host_name,state as status'
 ------
 
+Note: If the column contains special characters, use backticks to enclose the column name, ex.:
+------
+  %> thruk r '/hosts?columns=`Disk C:\`'
+------
+
+or:
+
+------
+  %> thruk r '/hosts?columns=`Disk C:\` as size'
+------
+
 
 === Performance Data Columns
 

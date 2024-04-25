@@ -35,6 +35,7 @@ for my $cmd (@{$cmds}) {
     next if $line =~ m%\Q`_log`\E%mx;
     next if $line =~ m%\Q`log`\E%mx;
     next if $line =~ m/Defaults\ to/mx;
+    next if $line =~ m/placeholder/mx;
     next if $line =~ m/Thruk\/Config.pm/mx;
     next if $line =~ m%Thruk/Controller/Rest/V1/docs.pm%mx;
     next unless $line =~ m/`/gmx;

@@ -45,7 +45,9 @@ my $disaggregation_functions   = Thruk::Base::array2hash($disaggregation_functio
 my $op_translation_words       = {
     'eq'     => '=',
     'ne'     => '!=',
+    'like'   => '~~',
     'regex'  => '~~',
+    'unlike' => '!~~',
     'nregex' => '!~~',
     'gt'     => '>',
     'gte'    => '>=',
@@ -61,6 +63,7 @@ use constant {
     ALIAS        =>  1,
     RAW          =>  2,
     NAMES        =>  3,
+    STRUCT       =>  4,
 };
 
 ##########################################################
@@ -640,7 +643,7 @@ sub _apply_stats {
 
     my $stats_columns = [];
     my $group_columns = [];
-    my $all_columns   = _parse_columns_data(get_request_columns($c, RAW));
+    my $all_columns   = get_request_columns($c, STRUCT);
     my $column_keys   = [];
     my $num_cols = scalar @{$all_columns};
     for(my $x = 0; $x < $num_cols; $x++) {
@@ -775,7 +778,7 @@ sub _apply_disaggregation {
     return($data) unless $c->req->parameters->{'columns'};
 
     my $disaggregation_columns = [];
-    my $all_columns   = _parse_columns_data(get_request_columns($c, RAW));
+    my $all_columns   = get_request_columns($c, STRUCT);
     for my $col (@{$all_columns}) {
         # check for disaggregation function which must be the inner most one
         if(scalar @{$col->{'func'}} > 0 && $disaggregation_functions->{$col->{'func'}->[0]->[0]}) {
@@ -818,9 +821,10 @@ sub _apply_disaggregation {
     get_request_columns($c, $type)
 
     $type can be:
-        - RAW   - returns columsn as is, alias definitions untouched
-        - NAMES - returns column name
-        - ALIAS - returns column alias or the name if none specified
+        - RAW    - returns columsn as is, alias definitions untouched
+        - NAMES  - returns column name
+        - ALIAS  - returns column alias or the name if none specified
+        - STRUCT - returns column as parsed structure
 
 returns list of requested columns or undef
 
@@ -832,28 +836,24 @@ sub get_request_columns {
 
     my $columns = _split_columns($c->req->parameters->{'columns'});
 
-    $columns = Thruk::Base::array_uniq($columns);
+    # column alias mode
     if($type == ALIAS) {
-        for(@{$columns}) {
-            if($_ =~ m/\s+as\s+([^\s]+)\s*$/mx) {
-                $_ =~ s/^.*?\s+as\s+([^\s]+)\s*$/$1/mx; # strip "as alias" from column
-            } else {
-                $_ =~ s/^[^:]+:([^"']*?)$/$1/gmx; # strip alias
-            }
-        }
+        return(_parse_columns_data_alias($columns));
     }
+
+    # column name mode (alias removed)
     if($type == NAMES) {
-        for(@{$columns}) {
-            if($_ =~ m/\s+as\s+([^\s]+)\s*$/mx) {
-                $_ =~ s/\s+as\s+([^\s]+)\s*$//mx; # strip "as alias" from column
-            } else {
-                $_ =~ s/^([^:]+):[^"']*?$/$1/gmx; # strip alias
-            }
-            $_ =~ s/^.*\(([^)]+)\)$/$1/gmx; # extract column name from aggregation function
-        }
+        return(_parse_columns_data_names($columns));
     }
+
+    # as parsed structure
+    if($type == STRUCT) {
+        return(_parse_columns_data($columns));
+    }
+
     return($columns);
 }
+
 
 ##########################################################
 
@@ -868,15 +868,10 @@ sub get_aliased_columns {
     my($c) = @_;
 
     my $alias_columns = {};
-    my $columns = get_request_columns($c, RAW);
+    my $columns = get_request_columns($c, STRUCT);
     if($columns) {
         for my $col (@{$columns}) {
-            if($col =~ m/^([^:]+)\s+as\s+(.*)$/mx) {
-                $alias_columns->{$2} = $1;
-            }
-            elsif($col =~ m/^([^:]+):([^"']*)$/mx) {
-                $alias_columns->{$2} = $1;
-            }
+            $alias_columns->{$col->{'alias'}} = $col->{'orig'};
         }
     }
     return($alias_columns);
@@ -972,7 +967,7 @@ sub _apply_columns {
     my($c, $data) = @_;
 
     return $data unless $c->req->parameters->{'columns'};
-    my $columns = _parse_columns_data(get_request_columns($c, RAW));
+    my $columns = get_request_columns($c, STRUCT);
 
     # remove aggregation functions
     for my $col (@{$columns}) {
@@ -1434,6 +1429,10 @@ sub _get_columns_meta_for_path {
                 $col->{'config'}->{'unit'} = $hint->{'unit'};
                 $col->{'type'} = 'number' unless $col->{'type'};
             }
+        }
+        # rewrite some known units to make them work with grafana automatically
+        if($col->{'config'} && $col->{'config'}->{'unit'}) {
+            $col->{'config'}->{'unit'} = 'bytes' if $col->{'config'}->{'unit'} eq 'B';
         }
         push @{$meta}, $col;
     }
@@ -2604,20 +2603,82 @@ sub _post_process_logs {
 }
 
 ##########################################################
+# _parse_columns_data_alias parses list of columns into their aliases
+sub _parse_columns_data_alias {
+    my($raw) = @_;
+    my $num_cols = scalar @{$raw};
+    my $columns = [];
+    for(my $x = 0; $x < $num_cols; $x++) {
+        my $name = $raw->[$x];
+        my $realcol;
+        # don't confuse alias extraction by backticks enclosed column names
+        if($name =~ s/^`([^`]+)`/placeholder/mx) {
+            $realcol = $1;
+        }
+        if($name =~ m/\s+as\s+([^\s]+)\s*$/mx) {
+            $name =~ s/^.*?\s+as\s+([^\s]+)\s*$/$1/mx; # strip "as alias" from column
+        } else {
+            $name =~ s/^[^:]+:([^"']*?)$/$1/gmx; # strip alias
+        }
+        push @{$columns}, $name;
+        if($realcol && $name eq 'placeholder') {
+            $columns->[$x] = $realcol;
+        }
+    }
+    return($columns);
+}
+
+##########################################################
+# _parse_columns_data_names parses list of columns into their names (without alias and functions)
+sub _parse_columns_data_names {
+    my($raw, $keep_functions) = @_;
+    my $columns = [];
+    my $num_cols = scalar @{$raw};
+    for(my $x = 0; $x < $num_cols; $x++) {
+        my $name = $raw->[$x];
+        my $realcol;
+        if($name =~ s/^`([^`]+)`/placeholder/mx) {
+            $realcol = $1;
+        }
+        if($name =~ m/\s+as\s+([^\s]+)\s*$/mx) {
+            $name =~ s/\s+as\s+([^\s]+)\s*$//mx; # strip "as alias" from column
+        } else {
+            $name =~ s/^([^:]+):[^"']*?$/$1/gmx; # strip alias
+        }
+        if(!$keep_functions) {
+            $name =~ s/^.*\(([^)]+)\)$/$1/gmx; # extract column name from aggregation function
+        }
+        push @{$columns}, ($realcol // $name);
+    }
+    return($columns);
+}
+
+##########################################################
+# _parse_columns_data parses list ofs columns into structured data:
+#
+# [
+#   {
+#   'alias'  => '', # alias or column name
+#   'column' => '', # the actual column name (without alias or functions)
+#   'func'   => [   # list of functions to apply
+#         [ function_name, [args...] ],
+#   ],
+#   'orig'   => '', # the original column definition (without alias)
+#   },
+#   { ...  }
+# ];
 sub _parse_columns_data {
     my($raw) = @_;
     my $columns = [];
-    for my $c (@{$raw}) {
-        my $name = $c;
-        my $alias = $c;
-        if($c =~ m/^(.+)\s+as\s+(.*?)$/gmx) {
-            $name  = $1;
-            $alias = $2;
-        } elsif($c =~ m/^(.+):([^"']*?)$/gmx) {
-            $name  = $1;
-            $alias = $2;
-        }
-        my $orig = $name;
+
+    my $alias = _parse_columns_data_alias($raw);
+    my $names = _parse_columns_data_names($raw, 1);
+
+    my $num_cols = scalar @{$raw};
+    for(my $x = 0; $x < $num_cols; $x++) {
+        my $name  = $names->[$x];
+        my $alias = $alias->[$x];
+        my $orig  = $name;
 
         # extract functions from name
         my $functions = [];
@@ -2659,12 +2720,12 @@ sub _split_columns {
 }
 
 ##########################################################
-# split columns by comma, but not when comma is in brackets or quotes
+# split columns by comma, but not when comma is in brackets, quotes or backticks
 sub _split_by_comma {
     my($col) = @_;
     my @res;
     my $cur = "";
-    my($inBracket, $inSingle, $inDbl) = (0,0,0);
+    my($inBracket, $inSingle, $inDbl, $inBackticks) = (0,0,0);
     for my $chr (split//mx, $col) {
         if($chr eq '(') {
             $inBracket++;
@@ -2686,7 +2747,12 @@ sub _split_by_comma {
             $cur .= $chr;
             next;
         }
-        if($chr eq "," && !$inBracket && !$inSingle && !$inDbl) {
+        if($chr eq '`') {
+            $inBackticks = !$inBackticks;
+            $cur .= $chr;
+            next;
+        }
+        if($chr eq "," && !$inBracket && !$inSingle && !$inDbl && !$inBackticks) {
             if($cur ne '') {
                 push @res, $cur;
                 $cur = '';
