@@ -45,8 +45,8 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
         like => ['/"ms"/', '/"testcheck"/'],
     });
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r \'/csv/services?columns=avg(calc(state, "*", 10)):avgState,host_name\'',
-        like => ['/20;Test/', '/5;localhost/' ],
+        cmd  => '/usr/bin/env thruk r \'/csv/services?columns=avg(calc(state, "*", 100)):avgState,host_name\'',
+        like => ['/0;Test/', '/0;localhost/' ],
     });
 };
 

@@ -1174,7 +1174,9 @@ sub _livestatus_options {
                 for my $col (@{$columns}) {
                     $col = "comments_with_info"  if $col eq 'comments_info';
                     $col = "downtimes_with_info" if $col eq 'downtimes_info';
+                    $col = "custom_variables"    if $col =~ m/^_/mx;
                     if(!$ref_columns->{$col}) {
+                        _debug("unknown column requested: %s, need to fetch all columns", $col);
                         $found = 0;
                         last;
                     }
