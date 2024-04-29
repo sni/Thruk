@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 57;
+plan tests => 70;
 
 ###########################################################
 # test thruks script path
@@ -84,6 +84,28 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r \'/csv/services?columns=count(*):num,upper(substr(host_name, 0, 2)),state\'',
         like => ['/;LO;0/'],
+    });
+}
+
+###########################################################
+# requested columns
+{
+    # do not request all columns for a count(*)
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk r -vv \'/services?columns=count(*):total,state\'',
+        errlike => ['/all request columns found: description, state/', '/"total"/'],
+    });
+
+    # do not request all columns for performance data
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk r -vv \'/hosts?columns=name,rta\'',
+        errlike => ['/all request columns found: name, perf_data/', '/"rta"/'],
+    });
+
+    # do not request all columns for custom variables
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk r -vv \'/hosts?columns=name,_SITE\'',
+        errlike => ['/all request columns found: name, custom_variable_values, custom_variable_names/', '/"_SITE"/', '/: null,/'],
     });
 }
 

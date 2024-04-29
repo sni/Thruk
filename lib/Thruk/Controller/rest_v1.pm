@@ -1144,7 +1144,31 @@ sub _livestatus_options {
 
     # try to reduce the number of requested columns
     if($type) {
-        my $columns = get_request_columns($c, NAMES) || [];
+        my $columns = [];
+        for my $col (@{get_request_columns($c, STRUCT) || []}) {
+            if($col->{'orig'} eq 'count(*)') {
+                # find a suitable column without requesting *
+                if($type eq 'hosts') {
+                    push @{$columns}, 'name'; next;
+                }
+                elsif($type eq 'services') {
+                    push @{$columns}, 'description'; next;
+                }
+                elsif($type eq 'contacts') {
+                    push @{$columns}, 'name'; next;
+                }
+                elsif($type eq 'logs') {
+                    push @{$columns}, 'class'; next;
+                }
+                elsif($type eq 'comments') {
+                    push @{$columns}, 'id'; next;
+                }
+                elsif($type eq 'downtimes') {
+                    push @{$columns}, 'id'; next;
+                }
+            }
+            push @{$columns}, $col->{'column'};
+        }
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
             $columns = Thruk::Base::array_uniq($columns);
@@ -1172,9 +1196,25 @@ sub _livestatus_options {
                 # if all requested columns are default columns, we can pass the columns to livestatus
                 my $found = 1;
                 for my $col (@{$columns}) {
-                    $col = "comments_with_info"  if $col eq 'comments_info';
-                    $col = "downtimes_with_info" if $col eq 'downtimes_info';
-                    $col = "custom_variables"    if $col =~ m/^_/mx;
+                    $col = "comments_with_info"     if $col eq 'comments_info';
+                    $col = "downtimes_with_info"    if $col eq 'downtimes_info';
+                    if($col =~ m/^_/mx) {
+                        $col = 'custom_variable_values';
+                        push @{$columns}, 'custom_variable_names'  if ! grep { $_ eq 'custom_variable_names' }  @{$columns};
+                        if($type eq 'services') {
+                            push @{$columns}, 'host_custom_variable_values' if ! grep { $_ eq 'host_custom_variable_values' } @{$columns};
+                            push @{$columns}, 'host_custom_variable_names'  if ! grep { $_ eq 'host_custom_variable_names' }  @{$columns};
+                        }
+                    }
+                    if($col eq '*') {
+                        $found = 0;
+                        last;
+                    }
+                    if(!$ref_columns->{$col} && $ref_columns->{'perf_data'}) {
+                        # add perf data column if available, since this is the only column (along with custom vars) which gets expanded later
+                        $col = "perf_data" if ! grep { $_ eq 'perf_data' } @{$columns};
+                    }
+
                     if(!$ref_columns->{$col}) {
                         _debug("unknown column requested: %s, need to fetch all columns", $col);
                         $found = 0;
@@ -1182,6 +1222,7 @@ sub _livestatus_options {
                     }
                 }
                 if($found) {
+                    _debug("all request columns found: %s", join(', ', @{$columns}));
                     $options->{'columns'} = $columns;
                 }
             }
