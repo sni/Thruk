@@ -35,6 +35,7 @@ Available commands are:
        --ip         set ip address        (available in add mode)
        --section    set section           (available in add mode)
   -k | --insecure   skip tls verification (available in add mode)
+       --cached     use cached host inventory
 
 
 =back
@@ -92,6 +93,7 @@ sub cmd {
         'clear_manual' => undef,
         'section'      => undef,
         'insecure'     => undef,
+        'cached'       => undef,
     };
     $opt->{'fresh'}        = 1 if Thruk::Base::array_contains('-II',  $commandoptions);
     $opt->{'clear_manual'} = 1 if Thruk::Base::array_contains('-III', $commandoptions);
@@ -116,6 +118,7 @@ sub cmd {
        "ip=s"         => \$opt->{'address'},
        "section=s"    => \$opt->{'section'},
        "k|insecure"   => \$opt->{'insecure'},
+       "cached"       => \$opt->{'cached'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -671,6 +674,8 @@ sub _get_checks {
     if($hostname =~ s/:\d+$//mx) {
         $port = $1;
     }
+
+    $update = 0 if $opt->{'cached'};
 
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                             'custom_variables' => { '~' => 'AGENT .+' },
