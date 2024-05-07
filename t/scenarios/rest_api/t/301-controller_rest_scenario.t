@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 327;
+    plan tests => 370;
 
     use lib('t');
     require TestUtils;
@@ -232,6 +232,41 @@ for my $test (@{$pages}) {
         'content_type' => 'text/plain; charset=utf-8',
         'method'       => 'GET',
         'like'         => ['local\\n'],
+    );
+};
+
+################################################################################
+# test query with timeperiod from query
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts/localhost/availability?q=***timeperiod = lastweek***',
+        'method'       => 'GET',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['time_indeterminate_nodata', '604800'],
+    );
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts/localhost/availability?q=***(time >= yesterday and time <= today)***',
+        'method'       => 'GET',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['time_indeterminate_nodata', '86400'],
+    );
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts/localhost/availability?q=***time >= yesterday and time <= today***',
+        'method'       => 'GET',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['time_indeterminate_nodata', '86400'],
+    );
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts/localhost/availability?q=***time >= yesterday***',
+        'method'       => 'GET',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['time_indeterminate_nodata'],
+    );
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts/localhost/availability?q=***(time >= yesterday)***',
+        'method'       => 'GET',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['time_indeterminate_nodata'],
     );
 };
 

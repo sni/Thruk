@@ -4,6 +4,7 @@ next:
           - fix recurring downtimes crontab entry for 2nd/3rd days of month
           - Rest:
             - add transformation and disaggregation functions
+            - add support for timeperiod / time queries in where clause
 
 3.14.2   Sat Mar 23 19:21:39 CET 2024
           - fix embedding 3rd party tools

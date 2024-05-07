@@ -3000,7 +3000,7 @@ sub filter2text {
     my $txt;
     eval {
         $txt = _filtertext($filter, $intend ? 2 : undef);
-        $txt =~ s/^\((.*)\)$/$1/gmx; # remove outermose brackets
+        $txt =~ s/^\((.*)\)$/$1/gmx if $txt; # remove outermose brackets
     };
     my $err = $@;
     if($err) {

@@ -220,6 +220,28 @@ sub _rest_get_servicegroup_outages {
 ##########################################################
 sub _rest_availability_prep {
     my($c) = @_;
+    # extract time / timeperiod filter from query
+    if($c->req->parameters->{'q'}) {
+        my($filter) = Thruk::Utils::Status::parse_lexical_filter($c->req->parameters->{'q'}, 1);
+        for my $param (@{$filter}) {
+            if(ref $param eq 'ARRAY' && scalar @{$param} == 1) {
+                $param = $param->[0];
+            }
+            my $ok = _rest_replace_logs_timeperiod_filter($c, $param);
+            if($ok) {
+                undef $param;
+                next;
+            }
+            $ok = _rest_replace_logs_time_filter($c, $param);
+            if($ok) {
+                undef $param;
+                next;
+            }
+        }
+        # combine remaining filter again
+        $c->req->parameters->{'q'} = Thruk::Utils::Status::filter2text($c, undef, $filter);
+    }
+
     if($c->req->parameters->{'timeperiod'} && ($c->req->parameters->{'start'} || $c->req->parameters->{'end'})) {
         return(undef, undef, {
                 'message'     => 'use either timeperiod or start/end, not both.',
@@ -238,6 +260,66 @@ sub _rest_availability_prep {
     }
 
     return($hostfilter, $servicefilter);
+}
+
+##########################################################
+# remove timeperiod filter from query and place start/end into request parameters
+# handles query likes 'timeperiod = lastweek'
+sub _rest_replace_logs_timeperiod_filter {
+    my($c, $param) = @_;
+    return if ref $param ne 'HASH';
+    return if scalar keys %{$param} != 1;
+    return if ! exists $param->{'timeperiod'};
+
+    return if ref $param->{'timeperiod'} ne 'HASH';
+    return if scalar keys %{$param->{'timeperiod'}} != 1;
+    my $op = (keys %{$param->{'timeperiod'}})[0];
+
+    my($start, $end) = Thruk::Utils::get_start_end_for_timeperiod($c, $param->{'timeperiod'}->{$op});
+    $c->req->parameters->{'start'} = $start;
+    $c->req->parameters->{'end'}   = $end;
+
+    return 1;
+}
+
+##########################################################
+# remove time filter from query and place start/end into request parameters
+# handles query likes (time >= ... and time <= ...)
+sub _rest_replace_logs_time_filter {
+    my($c, $param) = @_;
+    if(ref $param eq 'HASH' && scalar keys %{$param} == 1 && exists $param->{'time'}) {
+        $param = { "-and" => [ $param ] };
+    }
+
+    return if ref $param ne 'HASH';
+    return if scalar keys %{$param} != 1;
+    return if ! exists $param->{'-and'};
+
+    my($start, $end);
+    return if ref $param->{'-and'} ne 'ARRAY';
+    return if scalar @{$param->{'-and'}} < 1;
+    for my $t (@{$param->{'-and'}}) {
+        return if ref $t ne 'HASH';
+        return if scalar keys %{$t} != 1;
+        return if ! exists $t->{'time'};
+
+        my $op = (keys %{$t->{'time'}})[0];
+
+        if($op eq '>=' || $op eq '>') {
+            $start = $t->{'time'}->{$op};
+        }
+        elsif($op eq '<=' || $op eq '<') {
+            $end = $t->{'time'}->{$op};
+        } else {
+            return;
+        }
+    }
+
+    if($start) {
+        $c->req->parameters->{'start'} = $start;
+        $c->req->parameters->{'end'}   = $end // time();
+        return 1;
+    }
 }
 
 ##########################################################
