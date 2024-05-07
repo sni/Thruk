@@ -119,7 +119,7 @@ sub _build_app {
     $thruk = $self unless $thruk;
     my $config = Thruk->config;
 
-    if(Thruk->trace) {
+    if(Thruk->trace && $self->{'pool'}) {
         $self->{'pool'}->set_logger(Thruk::Utils::Log->log(), 1);
     }
 
