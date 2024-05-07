@@ -2165,6 +2165,9 @@ sub get_cron_time_entry {
         if($t eq 'Last') {
             $daycheck = '[ $(date +"\\%m") -ne $(date -d "'.(7*$weeks).'days" +"\\%m") ] && ';
         }
+        if($weeks && $weeks > 1) {
+            $daycheck .= '[ $(date +"\\%d") -gt '.(7*($weeks-1)).' ] && ';
+        }
         my $day;
         $day = 1 if $d eq 'Monday';
         $day = 2 if $d eq 'Tuesday';
