@@ -222,26 +222,7 @@ sub _rest_get_servicegroup_outages {
 sub _rest_availability_prep {
     my($c) = @_;
     # extract time / timeperiod filter from query
-    if($c->req->parameters->{'q'}) {
-        my($filter) = Thruk::Utils::Status::parse_lexical_filter($c->req->parameters->{'q'}, 1);
-        for my $param (@{$filter}) {
-            if(ref $param eq 'ARRAY' && scalar @{$param} == 1) {
-                $param = $param->[0];
-            }
-            my $ok = _rest_replace_logs_timeperiod_filter($c, $param);
-            if($ok) {
-                undef $param;
-                next;
-            }
-            $ok = _rest_replace_logs_time_filter($c, $param);
-            if($ok) {
-                undef $param;
-                next;
-            }
-        }
-        # combine remaining filter again
-        $c->req->parameters->{'q'} = Thruk::Utils::Status::filter2text($c, undef, $filter);
-    }
+    _rest_query_time_filter($c);
 
     if($c->req->parameters->{'timeperiod'} && ($c->req->parameters->{'start'} || $c->req->parameters->{'end'})) {
         return(undef, undef, {
@@ -261,6 +242,32 @@ sub _rest_availability_prep {
     }
 
     return($hostfilter, $servicefilter);
+}
+
+##########################################################
+sub _rest_query_time_filter {
+    my($c) = @_;
+    # extract time / timeperiod filter from query
+    return unless $c->req->parameters->{'q'};
+
+    my($filter) = Thruk::Utils::Status::parse_lexical_filter($c->req->parameters->{'q'}, 1);
+    for my $param (@{$filter}) {
+        if(ref $param eq 'ARRAY' && scalar @{$param} == 1) {
+            $param = $param->[0];
+        }
+        my $ok = _rest_replace_logs_timeperiod_filter($c, $param);
+        if($ok) {
+            undef $param;
+            next;
+        }
+        $ok = _rest_replace_logs_time_filter($c, $param);
+        if($ok) {
+            undef $param;
+            next;
+        }
+    }
+    # combine remaining filter again
+    $c->req->parameters->{'q'} = Thruk::Utils::Status::filter2text($c, undef, $filter);
 }
 
 ##########################################################
