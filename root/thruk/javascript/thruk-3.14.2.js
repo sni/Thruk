@@ -6124,8 +6124,12 @@ function check_server_action(id, link, backend, host, service, server_action_url
         if(!link.serverActionClickHandlerAdded) {
             link.serverActionClickHandlerAdded = true;
             jQuery(link).bind("click", function() {
+                if(jQuery(link).hasClass('disabled')) {
+                    return(false);
+                }
                 jQuery(link).find('IMG, I, SPAN.icon').css("display", "none");
                 jQuery(link).prepend('<div class="spinner"><\/div>');
+                jQuery(link).addClass('disabled').removeClass('clickable');
                 if(config == undefined) { config = {}; }
                 jQuery.ajax({
                     url: server_action_url,
@@ -6137,6 +6141,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                         reset_action_menu_icons();
                         jQuery(link).find('IMG, I, SPAN.icon').css("display", "");
                         jQuery(link).find('DIV.spinner').remove();
+                        jQuery(link).removeClass('disabled').addClass('clickable');
                         if(callback) { callback(data); }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
@@ -6145,6 +6150,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                         reset_action_menu_icons();
                         jQuery(link).find('IMG, I, SPAN.icon').css("display", "");
                         jQuery(link).find('DIV.spinner').remove();
+                        jQuery(link).removeClass('disabled').addClass('clickable');
                     }
                 });
                 return(false);
