@@ -1263,10 +1263,16 @@ sub _process_perfmap_page {
             $val =~ s/,/./gmxo;
             $val =~ m/^([\d\.\-]+)(.*?)$/mx;
             if(defined $val && defined $1) { # $val && required, triggers unused var in t/086-Test-Vars.t otherwise
+                my($num, $unit) = ($1, $2);
                 $svc->{'perf'}->{$key} = 1;
                 $keys->{$key} = 1;
-                $svc->{$key} = $1.$2 unless defined $svc->{$key}; # flatten performance data into service unless that key already exists
-                $svc->{$key.'_sort'} = $1;
+                # flatten performance data into service unless that key already exists
+                if($unit && $unit eq 'B') {
+                    ($num,$unit) = Thruk::Utils::reduce_number($num, $unit);
+                    $num = sprintf("%.2f", $num);
+                }
+                $svc->{$key} = $num.$unit unless defined $svc->{$key};
+                $svc->{$key.'_sort'} = $num;
             }
         }
         push @{$data}, $svc;
