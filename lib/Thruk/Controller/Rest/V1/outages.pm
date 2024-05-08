@@ -5,6 +5,7 @@ use strict;
 use Cpanel::JSON::XS ();
 
 use Thruk::Controller::rest_v1 ();
+use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Status ();
 
