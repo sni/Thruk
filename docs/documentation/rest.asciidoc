@@ -1132,15 +1132,25 @@ Optional arguments:
 |===========================================
 |Attribute                         | Type       | Unit     | Description
 |scheduled_time_down               | number     | s        | total seconds in state down (during downtimes)
+|scheduled_time_down_percent       | number     | %        | time down in percent of total time (during downtimes)
 |scheduled_time_indeterminate      | number     | s        | total seconds unknown (during downtimes)
+|scheduled_time_indeterminate_percent | number     | %        | time unknown in percent of total time (during downtimes)
 |scheduled_time_unreachable        | number     | s        | total seconds in state unreachable (during downtimes)
+|scheduled_time_unreachable_percent | number     | %        | time unreachable in percent of total time (during downtimes)
 |scheduled_time_up                 | number     | s        | total seconds in state up (during downtimes)
+|scheduled_time_up_percent         | number     | %        | time up in percent of total time (during downtimes)
 |time_down                         | number     | s        | total seconds in state down
+|time_down_percent                 | number     | %        | time down in percent of total time
 |time_indeterminate_nodata         | number     | s        | total seconds without any data
+|time_indeterminate_nodata_percent | number     | %        | time without any data in percent of total time
 |time_indeterminate_notrunning     | number     | s        | total seconds during core not running
+|time_indeterminate_notrunning_percent | number     | %        | time during core not running in percent of total time
 |time_indeterminate_outside_timeperiod | number     | s        | total seconds outside the given timeperiod
+|time_indeterminate_outside_timeperiod_percent | number     | %        | time outside the given timeperiod in percent of total time
 |time_unreachable                  | number     | s        | total seconds in state unreachable
+|time_unreachable_percent          | number     | %        | time unreachable in percent of total time
 |time_up                           | number     | s        | total seconds in state up
+|time_up_percent                   | number     | %        | time up in percent of total time
 |===========================================
 
 
@@ -1528,17 +1538,29 @@ Optional arguments:
 |===========================================
 |Attribute                         | Type       | Unit     | Description
 |scheduled_time_critical           | number     | s        | total seconds in state critical (during downtimes)
+|scheduled_time_critical_percent   | number     | %        | time critical in percent of total time (during downtimes)
 |scheduled_time_indeterminate      | number     | s        | total seconds unknown (during downtimes)
+|scheduled_time_indeterminate_percent | number     | %        | time unknown in percent of total time (during downtimes)
 |scheduled_time_ok                 | number     | s        | total seconds in state ok (during downtimes)
+|scheduled_time_ok_percent         | number     | %        | time ok in percent of total time (during downtimes)
 |scheduled_time_unknown            | number     | s        | total seconds in state unknown (during downtimes)
+|scheduled_time_unknown_percent    | number     | %        | time unknown in percent of total time (during downtimes)
 |scheduled_time_warning            | number     | s        | total seconds in state warning (during downtimes)
+|scheduled_time_warning_percent    | number     | %        | time warning in percent of total time (during downtimes)
 |time_critical                     | number     | s        | total seconds in state critical
+|time_critical_percent             | number     | %        | time critical in percent of total time
 |time_indeterminate_nodata         | number     | s        | total seconds without any data
+|time_indeterminate_nodata_percent | number     | %        | time without any data in percent of total time (during downtimes)
 |time_indeterminate_notrunning     | number     | s        | total seconds during core not running
+|time_indeterminate_notrunning_percent | number     | %        | time during core not running in percent of total time
 |time_indeterminate_outside_timeperiod | number     | s        | total seconds outside the given timeperiod
+|time_indeterminate_outside_timeperiod_percent | number     | %        | time outside the given timeperiod in percent of total time
 |time_ok                           | number     | s        | total seconds in state ok
+|time_ok_percent                   | number     | %        | time ok in percent of total time
 |time_unknown                      | number     | s        | total seconds in state unknown
+|time_unknown_percent              | number     | %        | time unknown in percent of total time
 |time_warning                      | number     | s        | total seconds in state warning
+|time_warning_percent              | number     | %        | time warning in percent of total time
 |===========================================
 
 
@@ -2336,3 +2358,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+

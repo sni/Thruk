@@ -1480,6 +1480,34 @@ sub _get_columns_meta_for_path {
         push @{$meta}, $col;
     }
 
+    if(scalar @{$meta} == 0) {
+        my $firstrow;
+        if(ref $data eq 'ARRAY' && $data->[0]) {
+            $firstrow = $data->[0];
+        }
+        elsif(ref $data eq 'HASH') {
+            $firstrow = $data;
+        }
+        if($firstrow) {
+            for my $key (sort keys %{$firstrow}) {
+                push @{$meta}, { name => $key };
+            }
+        }
+    }
+
+    # add missing columns from data
+    for my $conf (@{$meta}) {
+        if(!defined $conf->{'type'}) {
+            my($type, $unit) = guess_field_type($path_info, $conf->{'name'});
+            if($type) {
+                $conf->{'type'} = $type;
+            }
+            if($unit) {
+                $conf->{'config'}->{'unit'} = $unit;
+            }
+        }
+    }
+
     return $meta;
 }
 
@@ -2833,6 +2861,89 @@ sub _trim_re {
         return $val;
     }
     return $val;
+}
+
+##########################################################
+
+=head2 guess_field_type
+
+  guess_field_type($url, $fieldname)
+
+returns guess about field type
+
+=cut
+
+sub guess_field_type {
+    my($url, $name) = @_;
+
+    # ex.: hosts_active_15_perc
+    if($name =~ m/_perc$/mx) {
+        return('number', '%');
+    }
+    if($name =~ m/(^|_)percent$/mx) {
+        return('number', '%');
+    }
+
+    # seconds from availabilty checks
+    if($url =~ m/\/availability/mx) {
+        if($name =~ m/time_(down|up|unreachable|indeterminate|ok|warn|unknown|critical)/mx) {
+            return('number', 's');
+        }
+    }
+
+    if($url =~ m/\/recurring_downtimes/mx) {
+        if($name =~ m/^(duration|flex_range)$/mx) {
+            return('number', 'minutes');
+        }
+    }
+
+    if($url =~ m/\/sessions/mx) {
+        if($name =~ m/^(active)$/mx) {
+            return('time', '');
+        }
+    }
+
+    # ex.: hosts_active_15_sum
+    if($name =~ m/_(sum|avg|min|max)$/mx) {
+        my $unit = '';
+        if($name =~ m/_time_/mx) {
+            $unit = 's';
+        }
+        if($name =~ m/state_change/mx) {
+            $unit = '%';
+        }
+        return('number', $unit);
+    }
+
+    # ex.: start, end
+    if($name =~ m/^(mtime|start|end|localtime|lmd_last_cache_update|ts)$/mx) {
+        return('time', '');
+    }
+
+    # ex.: last_update
+    if($name =~ m/^(last_|next_|start_|end_)/mx) {
+        return('time', '');
+    }
+
+    # ex.: expire_ts
+    if($name =~ m/(_ts|_till|_last_update)$/mx) {
+        return('time', '');
+    }
+
+    # ex.: duration
+    if($name =~ m/^(duration|response_time|execution_time|time)$/mx) {
+        return('number', 's');
+    }
+    if($name =~ m/(_duration|_seconds)$/mx) {
+        return('number', 's');
+    }
+
+    # ex.: bytes_received
+    if($name =~ m/^(bytes_received|bytes_send|index_size|data_size)$/mx) {
+        return('number', 'bytes');
+    }
+
+    return('', '');
 }
 
 ##########################################################

@@ -418,7 +418,7 @@ sub _update_docs {
                     my $unit = Thruk::Base::trim_whitespace($doc->[2] || $attributes->{$url}->{$proto}->{$name}->[1] || '' );
                     my $desc = Thruk::Base::trim_whitespace($doc->[3] || $attributes->{$url}->{$proto}->{$name}->[2] || '' );
                     if(!$typ && !$unit) {
-                        ($typ, $unit) = _guess_field_type($url, $name);
+                        ($typ, $unit) = Thruk::Controller::rest_v1::guess_field_type($url, $name);
                     }
                     if($typ && $typ ne 'time' && $typ ne 'number') {
                         die("unknown typ in $url ($name): $typ");
@@ -600,80 +600,6 @@ sub _parse_attribute_docs {
         }
     }
     return $attributes;
-}
-
-################################################################################
-sub _guess_field_type {
-    my($url, $name) = @_;
-
-    # seconds from availabilty checks
-    if($url =~ m/\/availability/mx) {
-        if($name =~ m/time_(down|up|unreachable|indeterminate|ok|warn|unknown|critical)/mx) {
-            return('number', 's');
-        }
-    }
-
-    if($url =~ m/\/recurring_downtimes/mx) {
-        if($name =~ m/^(duration|flex_range)$/mx) {
-            return('number', 'minutes');
-        }
-    }
-
-    if($url =~ m/\/sessions/mx) {
-        if($name =~ m/^(active)$/mx) {
-            return('time', '');
-        }
-    }
-
-    # ex.: hosts_active_15_perc
-    if($name =~ m/_perc$/mx) {
-        return('number', '%');
-    }
-    if($name =~ m/^percent$/mx) {
-        return('number', '%');
-    }
-
-    # ex.: hosts_active_15_sum
-    if($name =~ m/_(sum|avg|min|max)$/mx) {
-        my $unit = '';
-        if($name =~ m/_time_/mx) {
-            $unit = 's';
-        }
-        if($name =~ m/state_change/mx) {
-            $unit = '%';
-        }
-        return('number', $unit);
-    }
-
-    # ex.: start, end
-    if($name =~ m/^(mtime|start|end|localtime|lmd_last_cache_update|ts)$/mx) {
-        return('time', '');
-    }
-
-    # ex.: last_update
-    if($name =~ m/^(last_|next_|start_|end_)/mx) {
-        return('time', '');
-    }
-
-    # ex.: expire_ts
-    if($name =~ m/(_ts|_till|_last_update)$/mx) {
-        return('time', '');
-    }
-
-    # ex.: duration
-    if($name =~ m/^(duration|response_time|time)$/mx) {
-        return('number', 's');
-    }
-    if($name =~ m/(_duration|_seconds)$/mx) {
-        return('number', 's');
-    }
-
-    # ex.: bytes_received
-    if($name =~ m/^(bytes_received|bytes_send|index_size|data_size)$/mx) {
-        return('number', 'bytes');
-    }
-
-    return('', '');
 }
 
 ################################################################################

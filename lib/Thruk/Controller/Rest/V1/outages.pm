@@ -268,6 +268,8 @@ sub _rest_query_time_filter {
     }
     # combine remaining filter again
     $c->req->parameters->{'q'} = Thruk::Utils::Status::filter2text($c, undef, $filter);
+
+    return;
 }
 
 ##########################################################
@@ -349,7 +351,34 @@ sub _rest_availability {
     require Thruk::Utils::Avail;
     my $avail = Thruk::Utils::Avail::calculate_availability($c);
 
+    # add percentage values
+    my $duration = $avail->{'avail'}->{'total'}->{'duration'};
+    for my $hst (sort keys %{$avail->{'avail'}->{'hosts'}}) {
+        _rest_add_avail_percent($avail->{'avail'}->{'hosts'}->{$hst}, $duration);
+    }
+    for my $hst (sort keys %{$avail->{'avail'}->{'services'}}) {
+        for my $svc (sort keys %{$avail->{'avail'}->{'services'}->{$hst}}) {
+            _rest_add_avail_percent($avail->{'avail'}->{'services'}->{$hst}->{$svc}, $duration);
+        }
+    }
+
     return($avail);
+}
+
+##########################################################
+sub _rest_add_avail_percent {
+    my($avail, $duration) = @_;
+
+    for my $key (keys %{$avail}) {
+        next if $key =~ m/_percent$/gmx;
+        my $perc = 0;
+        if($duration > 0) {
+            $perc = ($avail->{$key} / $duration) * 100;
+        }
+        $avail->{$key.'_percent'} = $perc;
+    }
+
+    return;
 }
 
 ##########################################################

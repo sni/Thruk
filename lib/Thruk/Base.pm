@@ -507,9 +507,10 @@ returns cleaned string
 
 =cut
 sub trim_whitespace {
-    $_[0] =~ s/^\s+//mxo;
-    $_[0] =~ s/\s+$//mxo;
-    return($_[0]);
+    my $val = $_[0];
+    $val =~ s/^\s+//mxo;
+    $val =~ s/\s+$//mxo;
+    return($val);
 }
 
 
