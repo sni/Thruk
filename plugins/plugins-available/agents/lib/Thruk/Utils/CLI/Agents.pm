@@ -587,10 +587,10 @@ sub _check_inventory {
     }
 
     my $t1 = [gettimeofday];
-    my($checks, $checks_num, $hst, $hostobj);
+    my($checks, $checks_num, $hst, $hostobj, $data);
 
     eval {
-        ($checks, $checks_num, $hst, $hostobj) = _get_checks($c, $hostname, $opt, 1);
+        ($checks, $checks_num, $hst, $hostobj, $data) = _get_checks($c, $hostname, $opt, 1);
     };
     my $err = $@;
     if($err) {
@@ -624,13 +624,35 @@ sub _check_inventory {
         ), 1);
     }
 
-    my @details;
+    my $class   = Thruk::Utils::Agents::get_agent_class($data->{'type'});
+    my $agent   = $class->new();
+    my $checks_config = _build_checks_config($checks);
+    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, 1);
+    my @need_update;
+    for my $obj (@{$objects}) {
+        next unless $obj->{'conf'}->{'service_description'};
+        my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
+        if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => 0 })) {
+            push @need_update, " - ".$obj->{'conf'}->{'service_description'};
+        }
+    }
+    if(scalar @need_update > 0) {
+        return(sprintf("WARNING - %s check%s could re-apply defaults. |%s\n%s\n\n(thruk agents -II %s)\n",
+            scalar @need_update,
+            (scalar @need_update != 1 ? 's' : ''),
+            $perfdata,
+            join("\n", @need_update),
+            $hostname,
+        ), 1);
+    }
+
+    my @unwanted;
     for my $chk (@{$checks->{'disabled'}}) {
-        push @details, " - ".$chk->{'name'};
+        push @unwanted, " - ".$chk->{'name'};
     }
     my $detail = "";
-    if(scalar @details > 0) {
-        $detail = "unwanted checks:\n".join("\n", @details);
+    if(scalar @unwanted > 0) {
+        $detail = "unwanted checks:\n".join("\n", @unwanted);
     }
     return(sprintf("OK - inventory unchanged|%s\n%s\n", $perfdata, $detail), 0);
 }

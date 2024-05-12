@@ -71,7 +71,7 @@ TestUtils::test_page( url     => '/thruk/r/services/host-http/agent%20inventory/
 );
 TestUtils::test_page( url     => '/thruk/cgi-bin/extinfo.cgi?type=2&host=host-http&service=agent+inventory',
         like    => ['Service.*agent inventory.*on'],
-        waitfor => 'inventory unchanged',
+        waitfor => 'inventory unchanged|could re-apply defaults',
 );
 
 TestUtils::test_page( url => '/thruk/cgi-bin/status.cgi', like => ['agent inventory', 'agent version', 'net eth0'] );
