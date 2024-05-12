@@ -16,7 +16,7 @@ Thruk::Agents::SNClient - implements snclient based agent configuration
 
 =cut
 
-my $settings = {
+my $global_defaults = {
     'type'          => 'snclient',
     'icon'          => 'snclient.png',
     'icon_dark'     => 'snclient_dark.png',
@@ -54,7 +54,7 @@ returns settings for this agent
 
 =cut
 sub settings {
-    return($settings);
+    return($global_defaults);
 }
 
 ##########################################################
@@ -74,7 +74,7 @@ sub get_config_objects {
     my $ip       = $data->{'ip'}       // '';
     my $section  = $data->{'section'}  // '';
     my $password = $data->{'password'} // '';
-    my $port     = $data->{'port'}     || $settings->{'default_port'};
+    my $port     = $data->{'port'}     || settings()->{'default_port'};
     my $mode     = $data->{'mode'}     || 'https';
 
     $section =~ s|^\/*||gmx if $section;
@@ -357,7 +357,7 @@ sub get_services_checks {
 
     my $checks  = [];
     my $data    = Thruk::Utils::IO::json_lock_retrieve($datafile);
-    $settings = {};
+    my $settings = {};
     if($hostobj && $hostobj->{'conf'}->{'_AGENT_CONFIG'}) {
         $settings = decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'});
     }
@@ -387,6 +387,7 @@ returns json structure from inventory api call.
 sub get_inventory {
     my($self, $c, $address, $hostname, $password, $port, $mode) = @_;
 
+    $port = $port || settings()->{'default_port'};
     my $proto = "https";
     $proto = "http" if($mode && $mode eq 'http');
     die("no password supplied") unless $password;
@@ -617,7 +618,7 @@ sub get_disabled_config {
 sub _check_nsc_web_extra_options {
     my($c, $mode) = @_;
     my $options = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_nsc_web_extra_options'}
-            // $settings->{'check_nsc_web_extra_options'};
+            // settings()->{'check_nsc_web_extra_options'};
     $options = $options." -k " if($mode && $mode eq 'insecure');
     return($options);
 }
