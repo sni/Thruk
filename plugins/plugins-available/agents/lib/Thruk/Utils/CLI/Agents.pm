@@ -637,12 +637,12 @@ sub _check_inventory {
         }
     }
     if(scalar @need_update > 0) {
-        return(sprintf("WARNING - %s check%s could re-apply defaults. |%s\n%s\n\n(thruk agents -II %s)\n",
+        return(sprintf("WARNING - %s check%s could re-apply defaults. |%s\n( run command: thruk agents -II '%s' )\nservices:\n%s\n",
             scalar @need_update,
             (scalar @need_update != 1 ? 's' : ''),
             $perfdata,
-            join("\n", @need_update),
             $hostname,
+            join("\n", @need_update),
         ), 1);
     }
 

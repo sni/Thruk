@@ -171,14 +171,14 @@
             >
             <div class="status col_plugin_output flex items-center truncate">
               [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
-                <div class="status col_plugin_output has_long_plugin_output font-bold link clickable flex-1 truncate">[% plugin_output | replace_links %]</div>
+                <div class="status col_plugin_output has_long_plugin_output font-bold link clickable flex-1 truncate">[% plugin_output | replace_links | replace_copy_paste %]</div>
               [% ELSE %]
                 <div class="status col_plugin_output flex-1 truncate">
-                  [% plugin_output | replace_links %]
+                  [% plugin_output | replace_links | replace_copy_paste %]
                 </div>
               [% END %]
               [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
-                <br>[% nl2br(long_plugin_output) | replace_links %]
+                <br>[% nl2br(long_plugin_output) | replace_links | replace_copy_paste %]
               [% END %]
               <div>
                 [% PROCESS _perfdata_table add_link="1" state=s.state plugin_output=orig_plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description pnp_url=get_pnp_url(c, s, 1) %]
