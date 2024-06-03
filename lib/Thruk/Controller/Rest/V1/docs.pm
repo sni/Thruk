@@ -768,7 +768,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time down in percent of total time (during downtimes)",
      "name": "scheduled_time_down_percent",
      "type": "number",
      "unit": "%"
@@ -780,7 +780,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time unknown in percent of total time (during downtimes)",
      "name": "scheduled_time_indeterminate_percent",
      "type": "number",
      "unit": "%"
@@ -792,7 +792,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time unreachable in percent of total time (during downtimes)",
      "name": "scheduled_time_unreachable_percent",
      "type": "number",
      "unit": "%"
@@ -804,7 +804,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time up in percent of total time (during downtimes)",
      "name": "scheduled_time_up_percent",
      "type": "number",
      "unit": "%"
@@ -816,7 +816,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time down in percent of total time",
      "name": "time_down_percent",
      "type": "number",
      "unit": "%"
@@ -828,7 +828,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time without any data in percent of total time",
      "name": "time_indeterminate_nodata_percent",
      "type": "number",
      "unit": "%"
@@ -840,7 +840,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time during core not running in percent of total time",
      "name": "time_indeterminate_notrunning_percent",
      "type": "number",
      "unit": "%"
@@ -852,7 +852,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time outside the given timeperiod in percent of total time",
      "name": "time_indeterminate_outside_timeperiod_percent",
      "type": "number",
      "unit": "%"
@@ -864,7 +864,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time unreachable in percent of total time",
      "name": "time_unreachable_percent",
      "type": "number",
      "unit": "%"
@@ -876,7 +876,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time up in percent of total time",
      "name": "time_up_percent",
      "type": "number",
      "unit": "%"
@@ -1518,7 +1518,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time critical in percent of total time (during downtimes)",
      "name": "scheduled_time_critical_percent",
      "type": "number",
      "unit": "%"
@@ -1530,7 +1530,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time unknown in percent of total time (during downtimes)",
      "name": "scheduled_time_indeterminate_percent",
      "type": "number",
      "unit": "%"
@@ -1542,7 +1542,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time ok in percent of total time (during downtimes)",
      "name": "scheduled_time_ok_percent",
      "type": "number",
      "unit": "%"
@@ -1554,7 +1554,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time unknown in percent of total time (during downtimes)",
      "name": "scheduled_time_unknown_percent",
      "type": "number",
      "unit": "%"
@@ -1566,7 +1566,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time warning in percent of total time (during downtimes)",
      "name": "scheduled_time_warning_percent",
      "type": "number",
      "unit": "%"
@@ -1578,7 +1578,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time critical in percent of total time",
      "name": "time_critical_percent",
      "type": "number",
      "unit": "%"
@@ -1590,7 +1590,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time without any data in percent of total time (during downtimes)",
      "name": "time_indeterminate_nodata_percent",
      "type": "number",
      "unit": "%"
@@ -1602,7 +1602,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time during core not running in percent of total time",
      "name": "time_indeterminate_notrunning_percent",
      "type": "number",
      "unit": "%"
@@ -1614,7 +1614,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time outside the given timeperiod in percent of total time",
      "name": "time_indeterminate_outside_timeperiod_percent",
      "type": "number",
      "unit": "%"
@@ -1626,7 +1626,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time ok in percent of total time",
      "name": "time_ok_percent",
      "type": "number",
      "unit": "%"
@@ -1638,7 +1638,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time unknown in percent of total time",
      "name": "time_unknown_percent",
      "type": "number",
      "unit": "%"
@@ -1650,7 +1650,7 @@ __DATA__
      "unit": "s"
     },
     {
-     "description": "",
+     "description": "time warning in percent of total time",
      "name": "time_warning_percent",
      "type": "number",
      "unit": "%"
