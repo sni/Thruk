@@ -54,7 +54,7 @@ for (1..2) {
 
 TestUtils::test_command({
     cmd  => '/usr/bin/env file tmp/grafana.png',
-    like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGBA, non-interlaced/'],
+    like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGB, non-interlaced/'],
 });
 
 TestUtils::test_command({
@@ -64,7 +64,7 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd  => '/usr/bin/env file tmp/grafana.png',
-    like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGBA, non-interlaced/'],
+    like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGB, non-interlaced/'],
 });
 
 TestUtils::test_command({
@@ -79,5 +79,5 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd  => '/usr/bin/env file tmp/grafana.png',
-    like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGBA, non-interlaced/'],
+    like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGB, non-interlaced/'],
 });
