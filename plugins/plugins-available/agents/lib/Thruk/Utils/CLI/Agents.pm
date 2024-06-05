@@ -482,7 +482,7 @@ sub _run_add_host {
             if($orig_checks->{'check.'.$id} ne $checks_config->{'check.'.$id}) {
                 $change = sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id});
             }
-            elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"use" => 0 })) {
+            elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => "join", "use" => "join" })) {
                 $change = "updated";
             }
             push @result, {
@@ -498,7 +498,7 @@ sub _run_add_host {
                     '_change' => sprintf("ip updated: %s -> %s", $obj->{'conf'}->{'address'}, $data->{'address'}),
                 };
                 $obj->{'conf'}->{'address'} = $data->{'address'};
-            } elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'})) {
+            } elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"use" => "join" })) {
                 push @result, {
                     'id'      => "_HOST_",
                     'name'    => $obj->{'conf'}->{'host_name'},
@@ -632,7 +632,7 @@ sub _check_inventory {
     for my $obj (@{$objects}) {
         next unless $obj->{'conf'}->{'service_description'};
         my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
-        if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => 0 })) {
+        if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => "join", "use" => "join" })) {
             push @need_update, " - ".$obj->{'conf'}->{'service_description'};
         }
     }
@@ -848,7 +848,21 @@ sub _deep_compare {
         # check size of array
         return if(scalar keys %{$obj1} ne scalar keys %{$obj2});
         for my $key (sort keys %{$obj1}) {
-            next if $skip_keys && exists $skip_keys->{$key};
+            if($skip_keys && exists $skip_keys->{$key}) {
+                if($skip_keys->{$key} && $skip_keys->{$key} eq 'join') {
+                    my $tst1 = $obj1->{$key};
+                    my $tst2 = $obj2->{$key};
+                    if(ref $obj1->{$key} eq 'ARRAY') {
+                        $tst1 = join(',', @{$obj1->{$key}});
+                    }
+                    if(ref $obj2->{$key} eq 'ARRAY') {
+                        $tst2 = join(',', @{$obj2->{$key}});
+                    }
+                    return($tst1 eq $tst2);
+                } else {
+                    next;
+                }
+            }
             return if(!exists $obj2->{$key});
             return if(!_deep_compare($obj1->{$key}, $obj2->{$key}, $skip_keys));
         }
