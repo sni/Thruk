@@ -141,10 +141,10 @@ server:
 web:
 	@python3 -m webbrowser ${PLACK_TEST_EXTERNALSERVER_URI}thruk/
 
-preparepre:
+pre_prepare:
 
 prepare: base_images
-	$(MAKE) preparepre
+	$(MAKE) pre_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	docker compose build
 	docker compose up --remove-orphans -d

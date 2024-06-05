@@ -1,14 +1,11 @@
 include ../_common/Makefile.common
 
-preparepre:
+pre_prepare:
 	cp -p ../../../.ci/prepare_machine.sh citest/
-	wget https://raw.githubusercontent.com/abbbi/github-actions-tune/master/speedup.sh -O citest/speedup.sh
-	chmod 755 citest/speedup.sh
 
 extra_prepare:
 	rm -rf citest/prepare_machine.sh
-	rm  -f citest/speedup.sh
-	docker exec citest_site_1 /thruk/t/scenarios/citest/extra_prepare.sh
+	docker exec citest-site-1 /thruk/t/scenarios/citest/extra_prepare.sh
 
 wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
@@ -20,10 +17,10 @@ wait_start:
 	docker ps
 
 test: test_prepare wait_start
-	docker exec citest_site_1 /thruk/t/scenarios/citest/test.sh $(filter-out $@,$(MAKECMDGOALS))
+	docker exec citest-site-1 /thruk/t/scenarios/citest/test.sh $(filter-out $@,$(MAKECMDGOALS))
 
 test_verbose: test_prepare wait_start
-	docker exec citest_site_1 /thruk/t/scenarios/citest/test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
+	docker exec citest-site-1 /thruk/t/scenarios/citest/test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
 
 test_prepare:
-	docker exec citest_site_1 rsync -a --delete --exclude=Makefile --exclude=thruk_local.conf --exclude=thruk_local.d --exclude=tmp/ --exclude=var/ --chown=naemon:naemon /thruk/. /var/lib/naemon/thruk/.
+	docker exec citest-site-1 rsync -a --delete --exclude=Makefile --exclude=thruk_local.conf --exclude=thruk_local.d --exclude=tmp/ --exclude=var/ --chown=naemon:naemon /thruk/. /var/lib/naemon/thruk/.
