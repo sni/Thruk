@@ -773,7 +773,8 @@ sub set_paging_steps {
 
   get_exposed_custom_vars($config, [$skip_wildcards])
 
-return combined list of show_custom_vars and expose_custom_vars
+return combined list of show_custom_vars and expose_custom_vars.
+(variable names have their leading underline removed)
 
 =cut
 sub get_exposed_custom_vars {
@@ -783,7 +784,9 @@ sub get_exposed_custom_vars {
     for my $src (qw/show_custom_vars expose_custom_vars/) {
         for my $var (@{Thruk::Base::list($config->{$src})}) {
             next if($skip_wildcards && $var =~ m/\*/mx);
-            $vars->{$var} = 1;
+            my $v = "$var";
+            $v =~ s/^_//gmx;
+            $vars->{$v} = 1;
         }
     }
     for my $src (qw/default_service_columns default_host_columns/) {
@@ -791,7 +794,7 @@ sub get_exposed_custom_vars {
         my @dfl = split(/\s*,\s*/mx, $config->{$src});
         for my $d (@dfl) {
             if($d =~ m/^cust_([a-zA-Z0-9]+?)(:.*|)$/mx) {
-                my $var  = $1;
+                my $var  = "$1";
                 $vars->{$var} = 1;
             }
         }
@@ -950,11 +953,13 @@ returns true if custom variable name is in the list of allowed variable names
 
 =cut
 sub check_custom_var_list {
-    my($varname, $allowed) = @_;
+    my($var, $allowed) = @_;
+    my $varname = "$var"; # make a copy to not alter the original reference
 
     $varname =~ s/^_//gmx;
 
-    for my $cust_name (@{$allowed}) {
+    for my $allow (@{$allowed}) {
+        my $cust_name = "$allow"; # make a copy to not alter the original reference
         $cust_name =~ s/^_//gmx;
         # direct match
         if($varname eq $cust_name) {

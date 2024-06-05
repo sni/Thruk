@@ -247,7 +247,7 @@
           [% FOREACH col = default_columns.$paneprefix %]
             [% IF col.field.match('^cust_') %]
               [% val = "";
-                field = col.field.replace('^cust_+', '');
+                field = col.field.replace('^cust_', '');
                 cust_vars = get_custom_vars(c, s, '', 1);
                 IF cust_vars.exists(field); val = cust_vars.$field;
                 ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;

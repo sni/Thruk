@@ -215,7 +215,7 @@
           [% FOREACH col = default_columns.$paneprefix %]
             [% IF col.field.match('^cust_') %]
               [% val = "";
-                  field = col.field.replace('^cust_+', '');
+                  field = col.field.replace('^cust_', '');
                   cust_vars = get_custom_vars(c, h);
                   IF cust_vars.exists(field); val = cust_vars.$field; END;
               %]
