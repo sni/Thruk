@@ -112,7 +112,7 @@
                         </div>
                         [% IF h.icon_image_expanded %]
                           <div class="flex pl-1.5">
-                            <a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% logo_path_prefix %][% h.icon_image_expanded %]' alt="[% h.icon_image_alt | html %]" title="[% h.icon_image_alt | html %]" border="0" width="20" height="20"></a>
+                            <a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% logo_path_prefix %][% h.icon_image_expanded %]' alt="[% h.icon_image_alt | html %]" title="[% h.icon_image_alt | html %]" width="20" height="20"></a>
                           </div>
                         [% END %]
                       </div>
