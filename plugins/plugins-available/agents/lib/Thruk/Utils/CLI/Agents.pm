@@ -634,6 +634,7 @@ sub _check_inventory {
         my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
         if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => "join", "use" => "join" })) {
             push @need_update, " - ".$obj->{'conf'}->{'service_description'};
+            _log_changes_diff($obj);
         }
     }
     if(scalar @need_update > 0) {
@@ -870,6 +871,48 @@ sub _deep_compare {
     }
 
     return($obj1 eq $obj2);
+}
+
+##############################################
+# log diff of changes
+sub _log_changes_diff {
+    my($obj) = @_;
+
+    return unless Thruk::Base::verbose();
+
+    my $txt1 = $obj->as_text();
+    my $conf = $obj->{'conf'};
+    $obj->{'conf'} = $obj->{'_prev_conf'};
+    my $txt2 = $obj->as_text();
+    $obj->{'conf'} = $conf;
+
+    my ($fh1, $filename1) = File::Temp::tempfile();
+    print $fh1 $txt1;
+    CORE::close($fh1);
+
+    my ($fh2, $filename2) = File::Temp::tempfile();
+    print $fh2 $txt2;
+    CORE::close($fh2);
+
+    my $cmd = 'diff -Nuhr "'.$filename2.'" "'.$filename1.'" 2>&1';
+    my $diff = "";
+    open(my $ph, '-|', $cmd);
+    while(<$ph>) {
+        my $line = $_;
+        Thruk::Utils::Encode::decode_any($line);
+        $diff .= $line;
+    }
+    unlink($filename1);
+    unlink($filename2);
+
+    # nice file path
+    $diff =~ s/\Q$filename2\E.*/old/mx;
+    $diff =~ s/\Q$filename1\E.*/new/mx;
+
+    _debug("changes in service '%s'", $obj->{'conf'}->{'service_description'});
+    _debug($diff);
+
+    return($diff);
 }
 
 ##############################################
