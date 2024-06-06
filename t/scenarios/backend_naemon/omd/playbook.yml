@@ -2,6 +2,7 @@
 - hosts: all
   roles:
     - role: common
+    - role: local_tests
     - role: thruk_developer
     - role: test-config-generator
   tasks:

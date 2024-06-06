@@ -816,7 +816,7 @@ expand a command line with host/service data
 
 sub expand_command {
     my( $self, %data ) = @_;
-    croak("no host")    unless defined $data{'host'};
+    croak("no host") unless defined $data{'host'};
     my $host     = $data{'host'};
     my $service  = $data{'service'};
     my $command  = $data{'command'};  # optional reference to a command object from the commands tabls

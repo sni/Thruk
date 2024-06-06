@@ -13,9 +13,6 @@ RUN apt-get update; \
     ; \
     apt-get clean
 
-COPY speedup.sh /tmp/speedup.sh
-RUN /tmp/speedup.sh
-
 COPY prepare_machine.sh /tmp/prepare_machine.sh
 RUN mkdir -p /tmp/install
 RUN cd /tmp/install && /tmp/prepare_machine.sh

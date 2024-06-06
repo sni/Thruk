@@ -1626,6 +1626,34 @@ sub replace_links {
 }
 
 ########################################
+
+=head2 replace_copy_paste
+
+    replace_copy_paste()
+
+return text with copy/paste links replaced with clickable links
+
+=cut
+sub replace_copy_paste {
+    my($txt) = @_;
+
+    my $c = $Thruk::Globals::c or die("not initialized!");
+
+    my $link = '$1$2 <button class="inline iconOnly px-1 copy_button" onclick="copyCode(event, \'$3\'); return false;"><i class="uil uil-copy" title="Copy to clipboard"></i></button>$4';
+
+    # copy paste links
+    for my $pattern (@{$c->config->{'copy_paste_link'}}) {
+        ## no critic
+        my $re1 = qr($pattern);
+        $txt =~ s|$re1|&_replace_dollars($link, $1, $2, escape_js($2), $3)|ge;
+        ## use critic
+    }
+
+    return($txt);
+}
+
+
+########################################
 sub _replace_link {
     my($name, $url) = @_;
     $url =~ s/\ /%20/gmx;

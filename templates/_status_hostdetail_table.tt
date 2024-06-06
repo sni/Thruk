@@ -156,14 +156,14 @@
           >
             <div class="status col_plugin_output flex items-center truncate">
               [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
-                <div class="status col_plugin_output has_long_plugin_output font-bold link clickable flex-1 truncate">[% plugin_output | replace_links %]</div>
+                <div class="status col_plugin_output has_long_plugin_output font-bold link clickable flex-1 truncate">[% plugin_output | replace_links | replace_copy_paste %]</div>
               [% ELSE %]
                 <div class="status col_plugin_output flex-1 truncate">
-                  [% plugin_output | replace_links %]
+                  [% plugin_output | replace_links | replace_copy_paste %]
                 </div>
               [% END %]
               [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
-                <br>[% nl2br(long_plugin_output) | replace_links %]
+                <br>[% nl2br(long_plugin_output) | replace_links | replace_copy_paste %]
               [% END %]
               <div>
                 [% PROCESS _perfdata_table add_link="1" state=h.state plugin_output=orig_plugin_output perfdata=h.perf_data check_command=h.check_command hst=h.name svc="_HOST_" pnp_url=get_pnp_url(c, h, 1) %]
@@ -215,7 +215,7 @@
           [% FOREACH col = default_columns.$paneprefix %]
             [% IF col.field.match('^cust_') %]
               [% val = "";
-                  field = col.field.replace('^cust_+', '');
+                  field = col.field.replace('^cust_', '');
                   cust_vars = get_custom_vars(c, h);
                   IF cust_vars.exists(field); val = cust_vars.$field; END;
               %]

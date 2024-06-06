@@ -97,6 +97,7 @@ my $base_defaults = {
     'show_logout_button'                    => 1,
     'logout_link'                           => '',
     'short_link'                            => [],
+    'copy_paste_link'                       => ['(run command: )(.*?)( \\))'],
     'commandline_obfuscate_pattern'         => [],
     'backends_with_obj_config'              => {},
     'use_feature_configtool'                => 0,
@@ -814,6 +815,7 @@ sub get_toolkit_config {
                     'escape_html'                   => \&Thruk::Utils::Filter::escape_html,
                     'lc'                            => \&Thruk::Utils::Filter::lc,
                     'replace_links'                 => \&Thruk::Utils::Filter::replace_links,
+                    'replace_copy_paste'            => \&Thruk::Utils::Filter::replace_copy_paste,
         },
         'PRE_DEFINE'                            => {
                     # subs from Thruk::Utils::Filter will be added automatically

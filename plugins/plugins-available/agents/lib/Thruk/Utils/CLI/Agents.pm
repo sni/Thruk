@@ -482,7 +482,7 @@ sub _run_add_host {
             if($orig_checks->{'check.'.$id} ne $checks_config->{'check.'.$id}) {
                 $change = sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id});
             }
-            elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"use" => 0 })) {
+            elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => "join", "use" => "join" })) {
                 $change = "updated";
             }
             push @result, {
@@ -498,7 +498,7 @@ sub _run_add_host {
                     '_change' => sprintf("ip updated: %s -> %s", $obj->{'conf'}->{'address'}, $data->{'address'}),
                 };
                 $obj->{'conf'}->{'address'} = $data->{'address'};
-            } elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'})) {
+            } elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"use" => "join" })) {
                 push @result, {
                     'id'      => "_HOST_",
                     'name'    => $obj->{'conf'}->{'host_name'},
@@ -632,17 +632,18 @@ sub _check_inventory {
     for my $obj (@{$objects}) {
         next unless $obj->{'conf'}->{'service_description'};
         my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
-        if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => 0 })) {
+        if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => "join", "use" => "join" })) {
             push @need_update, " - ".$obj->{'conf'}->{'service_description'};
+            _log_changes_diff($obj);
         }
     }
     if(scalar @need_update > 0) {
-        return(sprintf("WARNING - %s check%s could re-apply defaults. |%s\n%s\n\n(thruk agents -II %s)\n",
+        return(sprintf("WARNING - %s check%s could re-apply defaults. |%s\n( run command: thruk agents -II '%s' )\nservices:\n%s\n",
             scalar @need_update,
             (scalar @need_update != 1 ? 's' : ''),
             $perfdata,
-            join("\n", @need_update),
             $hostname,
+            join("\n", @need_update),
         ), 1);
     }
 
@@ -848,7 +849,21 @@ sub _deep_compare {
         # check size of array
         return if(scalar keys %{$obj1} ne scalar keys %{$obj2});
         for my $key (sort keys %{$obj1}) {
-            next if $skip_keys && exists $skip_keys->{$key};
+            if($skip_keys && exists $skip_keys->{$key}) {
+                if($skip_keys->{$key} && $skip_keys->{$key} eq 'join') {
+                    my $tst1 = $obj1->{$key};
+                    my $tst2 = $obj2->{$key};
+                    if(ref $obj1->{$key} eq 'ARRAY') {
+                        $tst1 = join(',', @{$obj1->{$key}});
+                    }
+                    if(ref $obj2->{$key} eq 'ARRAY') {
+                        $tst2 = join(',', @{$obj2->{$key}});
+                    }
+                    return($tst1 eq $tst2);
+                } else {
+                    next;
+                }
+            }
             return if(!exists $obj2->{$key});
             return if(!_deep_compare($obj1->{$key}, $obj2->{$key}, $skip_keys));
         }
@@ -856,6 +871,48 @@ sub _deep_compare {
     }
 
     return($obj1 eq $obj2);
+}
+
+##############################################
+# log diff of changes
+sub _log_changes_diff {
+    my($obj) = @_;
+
+    return unless Thruk::Base::verbose();
+
+    my $txt1 = $obj->as_text();
+    my $conf = $obj->{'conf'};
+    $obj->{'conf'} = $obj->{'_prev_conf'};
+    my $txt2 = $obj->as_text();
+    $obj->{'conf'} = $conf;
+
+    my ($fh1, $filename1) = File::Temp::tempfile();
+    print $fh1 $txt1;
+    CORE::close($fh1);
+
+    my ($fh2, $filename2) = File::Temp::tempfile();
+    print $fh2 $txt2;
+    CORE::close($fh2);
+
+    my $cmd = 'diff -Nuhr "'.$filename2.'" "'.$filename1.'" 2>&1';
+    my $diff = "";
+    open(my $ph, '-|', $cmd);
+    while(<$ph>) {
+        my $line = $_;
+        Thruk::Utils::Encode::decode_any($line);
+        $diff .= $line;
+    }
+    unlink($filename1);
+    unlink($filename2);
+
+    # nice file path
+    $diff =~ s/\Q$filename2\E.*/old/mx;
+    $diff =~ s/\Q$filename1\E.*/new/mx;
+
+    _debug("changes in service '%s'", $obj->{'conf'}->{'service_description'});
+    _debug($diff);
+
+    return($diff);
 }
 
 ##############################################

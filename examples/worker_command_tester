@@ -44,6 +44,7 @@ use Pod::Usage;
 use Getopt::Long;
 use IO::Select ();
 use IPC::Open3 qw/open3/;
+use Thruk::Constants ':backend_handling';
 use Thruk::Utils::CLI;
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
@@ -137,6 +138,7 @@ sub run {
     my $cli     = Thruk::Utils::CLI->new($options);
     my $c       = $cli->get_c();
     Thruk::Action::AddDefaults::add_defaults($c);
+    $c->stash->{'backend_errors_handling'} = DIE;
 
     $self->{'c'}   = $c;
     $self->{'opt'} = $opt;
@@ -202,7 +204,7 @@ sub _run_checks {
         exit(1);
     };
 
-    my $t1 = time();
+    my $t1       = time();
     my $num_jobs = scalar @{$jobs};
     my $numsize  = length("$num_jobs");
     my $nr       = 0;

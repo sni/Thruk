@@ -1309,6 +1309,19 @@ Replaces the string "GH#123" with the link:
   <a href="https://github.com/sni/Thruk/issues/123">123</a>
 
 
+=== copy_paste_link
+
+Define pattern to be replaced with copy / paste buttons in the plugin output.
+
+Syntax is: ```(pre text regex pattern)(link text regex pattern)(post text regex pattern)```
+
+Can be set multiple times.
+
+ex.:
+
+  copy_paste_link = (ticket id: ")(.*?)(")
+
+
 === perf_bar_mode
 This option enables a performance bar inside the status/host list which
 create a graph from the performance data of the plugin output. Available

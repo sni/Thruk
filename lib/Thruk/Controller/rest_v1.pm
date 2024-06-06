@@ -2915,8 +2915,8 @@ sub guess_field_type {
         return('number', $unit);
     }
 
-    # ex.: start, end
-    if($name =~ m/^(mtime|start|end|localtime|lmd_last_cache_update|ts)$/mx) {
+    # absolute time ex.: start, end
+    if($name =~ m/^(mtime|start|end|localtime|lmd_last_cache_update|ts|time)$/mx) {
         return('time', '');
     }
 
@@ -2931,7 +2931,7 @@ sub guess_field_type {
     }
 
     # ex.: duration
-    if($name =~ m/^(duration|response_time|execution_time|time)$/mx) {
+    if($name =~ m/^(duration|response_time|execution_time)$/mx) {
         return('number', 's');
     }
     if($name =~ m/(_duration|_seconds)$/mx) {
