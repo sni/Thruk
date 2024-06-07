@@ -1936,6 +1936,35 @@ sub _fill_locked_users {
 register_rest_path_v1('GET', qr%^/thruk/users?/([^/]+)$%mx, \&_rest_get_thruk_users);
 
 ##########################################################
+# REST PATH: POST /thruk/users/<id>/cmd/lock
+# lock given thruk user.
+register_rest_path_v1('GET', qr%^/thruk/users?/([^/]+)/cmd/lock$%mx, \&_rest_get_thruk_users_lock, ['admin']);
+sub _rest_get_thruk_users_lock {
+    my($c, undef, $name) = @_;
+
+    my $userdata = Thruk::Utils::get_user_data($c, $name);
+    $userdata->{'login'}->{'locked'} = 1;
+    Thruk::Utils::store_user_data($c, $userdata, $name);
+
+    return({ 'message' => 'ok - user has been locked', code => 200 });
+}
+
+##########################################################
+# REST PATH: POST /thruk/users/<id>/cmd/unlock
+# unlock given thruk user.
+register_rest_path_v1('GET', qr%^/thruk/users?/([^/]+)/cmd/lock$%mx, \&_rest_get_thruk_users_unlock, ['admin']);
+sub _rest_get_thruk_users_unlock {
+    my($c, undef, $name) = @_;
+
+    my $userdata = Thruk::Utils::get_user_data($c, $name);
+    delete $userdata->{'login'}->{'locked'};
+    $userdata->{'login'}->{'failed'} = 0;
+    Thruk::Utils::store_user_data($c, $userdata, $name);
+
+    return({ 'message' => 'ok - user has been unlocked', code => 200 });
+}
+
+##########################################################
 # REST PATH: GET /thruk/stats
 # lists thruk statistics.
 register_rest_path_v1('GET', qr%^/thruk/stats$%mx, \&_rest_get_thruk_stats, ['authorized_for_system_information']);

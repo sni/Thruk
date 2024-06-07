@@ -2327,6 +2327,14 @@ lists thruk user profiles.
 get thruk profile for given user.
 alias for /thruk/users?id=<id>
 
+=== POST /thruk/users/<id>/cmd/...
+
+external commands are documented in detail on a separate commands page.
+list of supported commands:
+
+ - link:rest_commands.html#post-thrukusersidcmdlock[lock]
+ - link:rest_commands.html#post-thrukusersidcmdunlock[unlock]
+
 === GET /thruk/whoami
 
 show current profile information.

@@ -1630,3 +1630,11 @@ This command does not require any arguments.
 
 See http://www.naemon.io/documentation/developer/externalcommands/stop_obsessing_over_svc_checks.html for details.
 
+=== POST /thruk/users/<id>/cmd/lock
+
+lock given thruk user.
+
+=== POST /thruk/users/<id>/cmd/unlock
+
+unlock given thruk user.
+
