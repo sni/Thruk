@@ -344,6 +344,7 @@ sub authenticate {
         if($user->{'settings'}->{'login'} && $user->{'settings'}->{'login'}->{'locked'}) {
             _debug(sprintf("user account '%s' is locked", $user->{'username'})) if Thruk::Base->verbose;
             $c->error($c->config->{'locked_message'});
+            $c->stash->{'user_is_locked'} = 1;
             return;
         }
     }

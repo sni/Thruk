@@ -166,6 +166,7 @@ sub begin {
         } else {
             if(!$c->authenticate(skip_db_access => 1)) {
                 _debug("user authentication failed") if Thruk::Base->verbose;
+                return $c->detach_error({msg => $c->config->{'locked_message'}, code => 403, log => 0}) if $c->stash->{'user_is_locked'};
                 return $c->detach('/error/index/10');
             }
         }
