@@ -1206,6 +1206,14 @@ sub _livestatus_options {
                             push @{$columns}, 'host_custom_variable_names'  if ! grep { $_ eq 'host_custom_variable_names' }  @{$columns};
                         }
                     }
+                    if($col eq 'custom_variables') {
+                        push @{$columns}, 'custom_variable_values' if ! grep { $_ eq 'custom_variable_values' } @{$columns};
+                        push @{$columns}, 'custom_variable_names'  if ! grep { $_ eq 'custom_variable_names' }  @{$columns};
+                    }
+                    if($col eq 'host_custom_variables') {
+                        push @{$columns}, 'host_custom_variable_values' if ! grep { $_ eq 'host_custom_variable_values' } @{$columns};
+                        push @{$columns}, 'host_custom_variable_names'  if ! grep { $_ eq 'host_custom_variable_names' }  @{$columns};
+                    }
                     if($col eq '*') {
                         $found = 0;
                         last;
