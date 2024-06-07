@@ -619,6 +619,10 @@ BODY.topNavOpen {
 #nav-container {
   @apply bg-[color:var(--navbar-bg)] text-[color:var(--navbar-fg)];
 
+  UL.navsectionlinks > LI {
+    @apply bg-[color:var(--navbar-item-bg)];
+  }
+
   &.collapsed {
     @apply w-[50px] !important;
     DIV.navsectionlinks {
