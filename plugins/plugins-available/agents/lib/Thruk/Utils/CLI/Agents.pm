@@ -482,7 +482,7 @@ sub _run_add_host {
             if($orig_checks->{'check.'.$id} ne $checks_config->{'check.'.$id}) {
                 $change = sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id});
             }
-            elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => "join", "use" => "join" })) {
+            elsif($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
                 $change = "updated";
             }
             push @result, {
@@ -498,7 +498,7 @@ sub _run_add_host {
                     '_change' => sprintf("ip updated: %s -> %s", $obj->{'conf'}->{'address'}, $data->{'address'}),
                 };
                 $obj->{'conf'}->{'address'} = $data->{'address'};
-            } elsif($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"use" => "join" })) {
+            } elsif($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
                 push @result, {
                     'id'      => "_HOST_",
                     'name'    => $obj->{'conf'}->{'host_name'},
@@ -632,7 +632,7 @@ sub _check_inventory {
     for my $obj (@{$objects}) {
         next unless $obj->{'conf'}->{'service_description'};
         my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
-        if($obj->{'_prev_conf'} && !_deep_compare($obj->{'_prev_conf'}, $obj->{'conf'}, {"host_name" => "join", "use" => "join" })) {
+        if($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
             push @need_update, " - ".$obj->{'conf'}->{'service_description'};
             _log_changes_diff($obj);
         }
@@ -829,7 +829,7 @@ sub _build_checks_config {
 
 ##############################################
 sub _deep_compare {
-    my($obj1, $obj2, $skip_keys) = @_;
+    my($obj1, $obj2) = @_;
 
     # check type
     return if(ref $obj1 ne ref $obj2);
@@ -839,7 +839,7 @@ sub _deep_compare {
         return if(scalar @{$obj1} ne scalar @{$obj2});
 
         for(my $x = 0; $x < scalar @{$obj1}; $x++) {
-            return if(!_deep_compare($obj1->[$x], $obj2->[$x], $skip_keys));
+            return if(!_deep_compare($obj1->[$x], $obj2->[$x]));
         }
 
         return 1;
@@ -849,23 +849,8 @@ sub _deep_compare {
         # check size of array
         return if(scalar keys %{$obj1} ne scalar keys %{$obj2});
         for my $key (sort keys %{$obj1}) {
-            if($skip_keys && exists $skip_keys->{$key}) {
-                if($skip_keys->{$key} && $skip_keys->{$key} eq 'join') {
-                    my $tst1 = $obj1->{$key};
-                    my $tst2 = $obj2->{$key};
-                    if(ref $obj1->{$key} eq 'ARRAY') {
-                        $tst1 = join(',', @{$obj1->{$key}});
-                    }
-                    if(ref $obj2->{$key} eq 'ARRAY') {
-                        $tst2 = join(',', @{$obj2->{$key}});
-                    }
-                    return($tst1 eq $tst2);
-                } else {
-                    next;
-                }
-            }
             return if(!exists $obj2->{$key});
-            return if(!_deep_compare($obj1->{$key}, $obj2->{$key}, $skip_keys));
+            return if(!_deep_compare($obj1->{$key}, $obj2->{$key}));
         }
         return 1;
     }
@@ -913,6 +898,23 @@ sub _log_changes_diff {
     _debug($diff);
 
     return($diff);
+}
+
+##############################################
+sub _join_lists {
+    my($obj) = @_;
+
+    return unless ref $obj eq 'HASH';
+
+    my $cleaned = {};
+    for my $key (sort keys %{$obj}) {
+        $cleaned->{$key} = $obj->{$key};
+        if(ref $cleaned->{$key} eq 'ARRAY') {
+            $cleaned->{$key} = join(',', @{$cleaned->{$key}});
+        }
+    }
+
+    return($cleaned);
 }
 
 ##############################################
