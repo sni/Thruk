@@ -345,7 +345,7 @@
                   [% IF empty || service_stats.notifications_disabled == 0 %]
                     <div class="itemblock"><span>All Services Enabled</span></div>
                   [% ELSE %]
-                    <a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", servicveprops => 4096 }) %]'>[% service_stats.notifications_disabled %] Services Disabled</a>
+                    <a class="itemblock unimportantProblem" href='[% uri_with(c, { _page => "status.cgi", style => "detail", serviceprops => 4096 }) %]'>[% service_stats.notifications_disabled %] Services Disabled</a>
                   [% END %]
                   [% IF empty || host_stats.notifications_disabled == 0 %]
                   <div class="itemblock"><span>All Hosts Enabled</span></div>
