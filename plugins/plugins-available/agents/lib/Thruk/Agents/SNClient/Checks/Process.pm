@@ -31,6 +31,36 @@ sub get_checks {
 
     return unless $inventory->{'process'};
 
+    my $procs = Thruk::Base::list($inventory->{'process'});
+
+    # generic processes check
+    if(scalar @{$procs} > 0) {
+        push @{$checks}, {
+            'id'       => 'proc',
+            'name'     => 'processes',
+            'check'    => 'check_process',
+            'parent'   => 'agent version',
+        };
+    }
+
+    # generic zombie processes check
+    if(scalar @{$procs} > 0) {
+        push @{$checks}, {
+            'id'       => 'proc.zombies',
+            'name'     => 'zombie processes',
+            'check'    => 'check_process',
+            'args'     => {
+                    'empty-syntax' => "%(status) - no zombie processes found",
+                    'top-syntax'   => "%(status) - %(count) zombie processes found",
+                    'filter'       => "state=zombie",
+                    'empty-state'  => 0,
+                    'perf-config'  => 'rss(ignored:true) virtual(ignored:true) cpu(ignored:true)',
+            },
+            'parent'   => 'agent version',
+        };
+    }
+
+    # specifically configured process checks
     my $already_checked = {};
     my $wanted = [];
     my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'proc'});
@@ -58,7 +88,6 @@ sub get_checks {
             }
         }
     }
-    my $procs = Thruk::Base::list($inventory->{'process'});
     for my $p (@{$procs}) {
         for my $cfg (@{$wanted}) {
             my $args = [

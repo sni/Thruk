@@ -115,6 +115,18 @@ For example:
           name  = httpd
         </proc>
 
+        # set generic process threshold
+        <extra_service_opts>
+          service = ^processes$
+          args    = warn='count > 2000' crit='count > 2000'
+        </extra_service_opts>
+
+        # set zombie process threshold
+        <extra_service_opts>
+          service = ^zombie processes$
+          args    = warn='count > 0' crit='count > 5'
+        </extra_service_opts>
+
         # set extra service attributes (if multiple blocks match, each is applied in order and overwrites previous values)
         # block can be used multiple times
         <extra_service_opts>
