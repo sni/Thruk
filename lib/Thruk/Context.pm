@@ -74,14 +74,15 @@ sub new {
     }
     my $req = Thruk::Request->new($env);
     my $self = {
-        app    => $app,
-        env    => $env,
-        config => $config,
-        req    => $req,
-        res    => $req->new_response(200),
-        stats  => $Thruk::Globals::c ? $Thruk::Globals::c->stats : Thruk::Stats->new(),
-        user   => undef,
-        errors => [],
+        app     => $app,
+        env     => $env,
+        config  => $config,
+        req     => $req,
+        res     => $req->new_response(200),
+        stats   => $Thruk::Globals::c ? $Thruk::Globals::c->stats : Thruk::Stats->new(),
+        user    => undef,
+        errors  => [],
+        errored => 0,
     };
     $self->{'stash'} = Thruk::Config::get_default_stash($self, {
             'time_begin'    => $time_begin,
