@@ -1938,7 +1938,7 @@ register_rest_path_v1('GET', qr%^/thruk/users?/([^/]+)$%mx, \&_rest_get_thruk_us
 ##########################################################
 # REST PATH: POST /thruk/users/<id>/cmd/lock
 # lock given thruk user.
-register_rest_path_v1('GET', qr%^/thruk/users?/([^/]+)/cmd/lock$%mx, \&_rest_get_thruk_users_lock, ['admin']);
+register_rest_path_v1('POST', qr%^/thruk/users?/([^/]+)/cmd/lock$%mx, \&_rest_get_thruk_users_lock, ['admin']);
 sub _rest_get_thruk_users_lock {
     my($c, undef, $name) = @_;
 
@@ -1952,7 +1952,7 @@ sub _rest_get_thruk_users_lock {
 ##########################################################
 # REST PATH: POST /thruk/users/<id>/cmd/unlock
 # unlock given thruk user.
-register_rest_path_v1('GET', qr%^/thruk/users?/([^/]+)/cmd/lock$%mx, \&_rest_get_thruk_users_unlock, ['admin']);
+register_rest_path_v1('POST', qr%^/thruk/users?/([^/]+)/cmd/lock$%mx, \&_rest_get_thruk_users_unlock, ['admin']);
 sub _rest_get_thruk_users_unlock {
     my($c, undef, $name) = @_;
 
