@@ -357,7 +357,9 @@ sub authenticate {
     # set session id for all requests
     if(!$sessiondata && !$internal) {
         if(!Thruk::Base->mode_cli()) {
-            ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address);
+            my $extra = {};
+            $extra->{'fake'} = 0 if _is_browser_request($c);
+            ($sessionid,$sessiondata) = Thruk::Utils::get_fake_session($c, undef, $username, undef, $c->req->address, $extra);
             if(!$options{'keep_session'}) {
                 $c->cookie('thruk_auth', $sessionid, { httponly => 1 });
             }
@@ -454,7 +456,7 @@ sub _request_username {
     # kerberos authentication
     elsif(($env->{'AUTH_TYPE'}//'') eq 'Negotiate' && ($env->{'GSS_NAME'}//'') ne '' ) {
         $username = $env->{'REMOTE_USER'} // $env->{'GSS_NAME'};
-        $auth_src = "Negotiate";
+        $auth_src = "negotiate";
     }
     # basic authentication
     elsif(defined $env->{'REMOTE_USER'} && $env->{'REMOTE_USER'} ne '' ) {
@@ -1120,6 +1122,21 @@ sub _is_ssl_request {
         return(1);
     }
 
+    return;
+}
+
+###################################################
+# return true if request is from a browser and not scripted, for example from curl / wget
+sub _is_browser_request {
+    my($c) = @_;
+
+    # theme cookie is a good indicator for a user request
+    my $cookies = $c->env->{'HTTP_COOKIE'};
+    if($cookies) {
+        return 1 if($cookies =~ m/thruk_theme|thruk_screen/gmx);
+    }
+
+    # everything else assumed to be not a browser
     return;
 }
 

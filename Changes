@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - fix recurring downtimes crontab entry for 2nd/3rd days of month
+          - fix sessions removed early when using kerberos authentication
           - Rest:
             - add transformation and disaggregation functions
             - add support for timeperiod / time queries in where clause

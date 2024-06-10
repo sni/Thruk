@@ -1790,6 +1790,8 @@ sub get_fake_session {
             $sessiondata->{$key} = $extra->{$key};
         }
     }
+    delete $sessiondata->{'fake'} unless $sessiondata->{'fake'}; # make it possible to create non-fake sessions via extra data
+
     require Thruk::Utils::CookieAuth;
     $sessiondata = Thruk::Utils::CookieAuth::store_session($c->config, $id, $sessiondata);
     $c->stash->{'fake_session_id'}   = $sessiondata->{'private_key'};
