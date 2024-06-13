@@ -246,6 +246,8 @@ ok(is_utf8($encoded), 'is_utf8 test20ac');
 
 #########################
 my $uri;
+my($res, $context) = TestUtils::ctx_request('/thruk/main.html');
+$c = $context;
 $uri = Thruk::Utils::Filter::uri_with($c, {});
 is($uri, 'main.html', 'uri_with without params');
 
@@ -255,7 +257,7 @@ is($uri, 'main.html?a=1&amp;b=2&amp;c=3', 'uri_with with 3 params');
 $uri = Thruk::Utils::Filter::uri_with($c, { a => 1, b => undef, c => 'undef'});
 is($uri, 'main.html?a=1', 'uri_with with undef params');
 
-my($res, $context) = TestUtils::ctx_request('/thruk/main.html?a=1&b=2&c=3&a=4');
+($res, $context) = TestUtils::ctx_request('/thruk/main.html?a=1&b=2&c=3&a=4');
 $c = $context;
 
 my $param_exp = {a=>[1,4], b => 2, c => 3};

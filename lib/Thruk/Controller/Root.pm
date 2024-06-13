@@ -118,7 +118,11 @@ page: /thruk/changes.html
 sub thruk_changes_html {
     my( $c ) = @_;
     $c->stash->{'hide_backends_chooser'} = 1;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
+    # use cached and safe defaults
+    eval {
+        Thruk::Action::AddDefaults::add_defaults($c, [ Thruk::Constants::ADD_CACHED_DEFAULTS, Thruk::Constants::ADD_SAFE_DEFAULTS ]);
+    };
+    _debug("adding defaults failed: ".$@) if $@;
     $c->stash->{infoBoxTitle}            = 'Change Log';
     $c->stash->{'title'}                 = 'Change Log';
     $c->stash->{'no_auto_reload'}        = 1;
@@ -141,7 +145,11 @@ page: /thruk/docs/
 sub thruk_docs  {
     my( $c ) = @_;
     $c->stash->{'hide_backends_chooser'} = 1;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
+    # use cached and safe defaults
+    eval {
+        Thruk::Action::AddDefaults::add_defaults($c, [ Thruk::Constants::ADD_CACHED_DEFAULTS, Thruk::Constants::ADD_SAFE_DEFAULTS ]);
+    };
+    _debug("adding defaults failed: ".$@) if $@;
     $c->stash->{infoBoxTitle}            = 'Documentation';
     $c->stash->{'title'}                 = 'Documentation';
     $c->stash->{'no_auto_reload'}        = 1;

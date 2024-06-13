@@ -631,7 +631,7 @@ sub get_c {
     our($c);
     return $c if defined $c;
     my $res;
-    ($res, $c) = ctx_request('/thruk/main.html');
+    ($res, $c) = ctx_request('/thruk/changes.html');
     return $c;
 }
 
