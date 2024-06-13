@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1293;
+    plan tests => 1304;
 }
 
 BEGIN {
@@ -64,6 +64,7 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?host=all&dfl_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Cexecution_time',
     '/thruk/cgi-bin/status.cgi?host=all&dfl_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccomments',
     { url => '/thruk/cgi-bin/status.cgi?q=***host_name = "'.$host.'"***', like => ['Service Status Details', 'Items Displayed'] },
+    '/thruk/cgi-bin/status.cgi?style=detail&dfl_s0_type=host&dfl_s0_val_pre=&dfl_s0_op=!~&dfl_s0_value=^A&dfl_s1_type=host&dfl_s1_val_pre=&dfl_s1_op=!~&dfl_s1_value=^0',
 
 # Servicegroups
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=detail',

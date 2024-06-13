@@ -3210,8 +3210,11 @@ sub _improve_filter {
                     my $json = Cpanel::JSON::XS->new->utf8->canonical;
                     my $num = scalar @{$filter->{$key}->[0]->{'-and'}};
                     for(my $x = 0; $x < $num; $x++) {
-                        my $enc = $json->encode($filter->{$key}->[0]->{'-and'}->[0]);
+                        if(ref($filter->{$key}->[0]->{'-and'}->[0]) eq '') {
+                            last;
+                        }
                         my $missed = 0;
+                        my $enc = $json->encode($filter->{$key}->[0]->{'-and'}->[0]);
                         for my $f (@{$filter->{$key}}) {
                             my $enc2 = $json->encode($f->{'-and'}->[0]);
                             if($enc2 ne $enc) {
