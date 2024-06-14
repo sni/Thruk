@@ -11,6 +11,8 @@ BEGIN {
     import TestUtils;
 }
 
+undef $ENV{'THRUK_MODE'}; # do not die on backend errors
+
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::Status');
 use_ok('Monitoring::Livestatus::Class::Lite');
