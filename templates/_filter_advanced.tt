@@ -5,4 +5,4 @@ rows="5"
 wrap="hard"
 name="[% paneprefix %]q"[% DEFAULT disabled = 0; IF disabled %] disabled[% END %]
 onfocus="initAutoCompleteQuery(this, queryCodeCompletions)"
->[% content %]</textarea>
+>[% content | html %]</textarea>
