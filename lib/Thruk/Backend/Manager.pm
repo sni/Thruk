@@ -1467,6 +1467,7 @@ sub _set_host_macros {
     if($peer) {
         $macros->{'$HOSTBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';
         $macros->{'$HOSTBACKENDADDRESS$'} = (defined $peer->{'addr'}) ? $peer->{'addr'} : '';
+        $macros->{'$HOSTBACKENDID$'}      = (defined $peer->{'key'})  ? $peer->{'key'}  : '';
     }
 
     my $prefix = (defined $host->{'host_custom_variable_names'}) ? 'host_' : '';
@@ -1515,6 +1516,7 @@ sub _set_service_macros {
     if($peer) {
         $macros->{'$SERVICEBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';
         $macros->{'$SERVICEBACKENDADDRESS$'} = (defined $peer->{'addr'}) ? $peer->{'addr'} : '';
+        $macros->{'$SERVICEBACKENDID$'}      = (defined $peer->{'key'})  ? $peer->{'key'}  : '';
     }
 
     # service user macros...
