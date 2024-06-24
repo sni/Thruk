@@ -1516,7 +1516,6 @@ sub _set_service_macros {
     if($peer) {
         $macros->{'$SERVICEBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';
         $macros->{'$SERVICEBACKENDADDRESS$'} = (defined $peer->{'addr'}) ? $peer->{'addr'} : '';
-        $macros->{'$SERVICEBACKENDID$'}      = (defined $peer->{'key'})  ? $peer->{'key'}  : '';
     }
 
     # service user macros...
