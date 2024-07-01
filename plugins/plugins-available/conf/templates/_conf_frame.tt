@@ -48,21 +48,28 @@
       </div>
     </div>
     <div class="h-3">
-    [% IF last_changed || needs_commit || show_save_reload %]
-      [% PROCESS _button btn = {
-        form   => { action => 'conf.cgi', },
-        data   => { sub => 'objects', 'apply' => 'yes', save_and_reload => 'yes', CSRFtoken => get_user_token(c), },
-        button => { class => 'w-full', title => "Apply all changes and reload core", onclick => "return save_reload_apply(this, '" _ show_save_reload _ "')", html => '<i class="uil uil-save"></i>Save &amp; Reload' },
-      }%]
-    [% END %]
+      [% apply_reload_btn = BLOCK %]
+        [% IF last_changed || needs_commit || show_save_reload %]
+        [% PROCESS _button btn = {
+          form   => { action => 'conf.cgi', },
+          data   => { sub => 'objects', 'apply' => 'yes', save_and_reload => 'yes', CSRFtoken => get_user_token(c), },
+          button => { class => 'w-full', title => "Apply all changes and reload core", onclick => "return save_reload_apply(this, '" _ show_save_reload _ "')", html => '<i class="uil uil-save"></i>Save &amp; Reload' },
+        }%]
+        [% END %]
+      [% END %]
+      [% apply_reload_btn %]
     </div>
   </div>
 </div>
 [% END %]
 
 [% IF action != "tree" && action != "editor" %]
-<div class="flex place-content-center">
+<div class="w-full flexrow justify-between place-content-center">
+  <div class="w-34"></div>
   <h1 class='mainTitle'>[% subtitle %]</h1>
+  <div class="w-34">
+    <div class="2xl:hidden">[% apply_reload_btn %]</div>
+  </div>
 </div>
 [% END %]
 
