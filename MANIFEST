@@ -2309,6 +2309,7 @@ t/scenarios/backend_naemon/t/300-controller_extinfo.t
 t/scenarios/backend_naemon/t/300-controller_status.t
 t/scenarios/backend_naemon/t/300-controller_tac.t
 t/scenarios/backend_naemon/t/local/010-custom_vars_default_view.t
+t/scenarios/backend_naemon/t/local/020-custom_vars_filter.t
 t/scenarios/backend_naemon/thruk.conf
 t/scenarios/backend_naemon/thruk_local.conf
 t/scenarios/backend_nagios4/docker-compose.yml

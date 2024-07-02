@@ -1263,7 +1263,6 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'custom variable' ) {
             my $pre = uc($filter->{'val_pre'});
-            if(substr($pre, 0, 1) eq '_') { $pre = substr($pre, 1); }
             push @hostfilter,       { custom_variables => { $op => $pre." ".$value } };
             push @hosttotalsfilter, { custom_variables => { $op => $pre." ".$value } };
             my $cop = '-or';
