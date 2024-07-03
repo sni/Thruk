@@ -19,7 +19,7 @@
   vars:
     package:
       - glibc-langpack-en
-  when: not locale_path.stat.exists and ansible_distribution_version|int >= 8
+  when: not locale_path.stat.exists and ansible_distribution_major_version|int >= 8
 
 - name: "install File::ChangeNotify"
   shell: "sudo su - {{ site }} -c 'cpanm -n File::ChangeNotify'"

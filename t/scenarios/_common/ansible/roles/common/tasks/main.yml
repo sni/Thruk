@@ -2,6 +2,13 @@
   shell: "yum clean all || :"
 - name: "apt update"
   shell: "apt update || :"
+- name: "switch centos 7 to vault.centos.org"
+  shell: |
+    sed -i -e 's%mirror.centos.org%vault.centos.org%g' /etc/yum.repos.d/CentOS-Base.repo
+    sed -i -e 's%^mirrorlist=%#mirrorlist=%g'          /etc/yum.repos.d/CentOS-Base.repo
+    sed -i -e 's%^#baseurl=%baseurl=%g'                /etc/yum.repos.d/CentOS-Base.repo
+  when: ansible_distribution_major_version|int == 7
+
 - name: "run set_admin_password"
   shell: "! test -x /omd/sites/{{site}}/bin/set_admin_password || sudo su - {{ site }} -c 'set_admin_password omd'"
 - name: "stop site"
