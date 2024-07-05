@@ -134,6 +134,7 @@ my $base_defaults = {
                 'use_expire'                    => 0,
                 'childoptions'                  => 0,
                 'hostserviceoptions'            => 0,
+                'reschedule_spread'             => 0,
     },
     'command_disabled'                      => [],
     'command_enabled'                       => [],
