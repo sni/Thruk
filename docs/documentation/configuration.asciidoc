@@ -2141,6 +2141,16 @@ ex.:
 
 
 
+=== reschedule_spread
+Default spread of rescheduled checks in seconds. Default is none.
+Options are 0, 10, 30, 60, 300, 900, 1800, 3600.
+
+ex.:
+
+  reschedule_spread = 0
+
+
+
 === cmd_quick_status
 Configure which commands should be available as quick status commands.
 
