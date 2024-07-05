@@ -5,6 +5,7 @@ use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS ();
 
+use Thruk::Constants ':backend_handling';
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
@@ -104,8 +105,30 @@ sub set_dynamic_attributes {
         return $self;
     }
 
-    my $data;
+    my($data, $use_cached);
     if($skip_db_access) {
+        $use_cached = 1;
+    } else {
+        _debug("fetching user data from livestatus") if Thruk::Base->verbose;
+        eval {
+            local $c->stash->{backend_errors_handling} = DIE;
+            my($alias, $email, $can_submit_commands, $groups,$src_peers) = $self->_fetch_user_data($c);
+            $data->{'alias'}                   = $alias               if defined $alias;
+            $data->{'email'}                   = $email               if defined $email;
+            $data->{'can_submit_commands'}     = $can_submit_commands if defined $can_submit_commands;
+            $data->{'can_submit_commands_src'} = "set as contact attribute" if defined $can_submit_commands;
+            $data->{'contact_src_peer'}        = $src_peers;
+            $data->{'contactgroups'}           = $groups              if defined $groups;
+            $data->{'timestamp'}               = time();
+        };
+        my $err = $@;
+        if($err) {
+            _debug("failed to fetch user data from livestatus: %s", $err);
+            $use_cached = 1;
+        }
+    }
+
+    if($use_cached) {
         _debug("using cached user data") if Thruk::Base->verbose;
         my $cache = $c->cache->get->{'users'};
         $data = {};
@@ -115,16 +138,6 @@ sub set_dynamic_attributes {
         if($data->{'contactgroups'} && ref $data->{'contactgroups'} eq 'HASH') {
             $data->{'contactgroups'} = [sort keys %{$data->{'contactgroups'}}];
         }
-    } else {
-        _debug("fetching user data from livestatus") if Thruk::Base->verbose;
-        my($alias, $email, $can_submit_commands, $groups,$src_peers) = $self->_fetch_user_data($c);
-        $data->{'alias'}                   = $alias               if defined $alias;
-        $data->{'email'}                   = $email               if defined $email;
-        $data->{'can_submit_commands'}     = $can_submit_commands if defined $can_submit_commands;
-        $data->{'can_submit_commands_src'} = "set as contact attribute" if defined $can_submit_commands;
-        $data->{'contact_src_peer'}        = $src_peers;
-        $data->{'contactgroups'}           = $groups              if defined $groups;
-        $data->{'timestamp'}               = time();
     }
 
     $self->_apply_user_data($c, $data);

@@ -21,6 +21,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Base qw/:compat/;
+use Thruk::Constants ':backend_handling';
 use Thruk::Utils::DateTime ();
 use Thruk::Utils::Encode ();
 use Thruk::Utils::Filter ();
@@ -2396,6 +2397,7 @@ sub wait_after_reload {
     while($start > time() - $max_wait) {
         $procinfo = {};
         eval {
+            local $c->stash->{backend_errors_handling} = DIE;
             local $SIG{ALRM}   = sub { die "alarm\n" };
             alarm(5);
             $c->db->reset_failed_backends();
