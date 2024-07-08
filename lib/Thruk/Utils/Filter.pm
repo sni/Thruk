@@ -1723,6 +1723,11 @@ sub _is_frame_url_allowed {
     $url = URI->new($url);
     my $req = $c->req->uri;
 
+    # unknown links cannot be embedded
+    return unless $url;
+    return unless $url->can("scheme");
+    return unless $url->can("host");
+
     # relative links are allowed
     return 1 unless $url->scheme;
     return 1 unless $url->host;
