@@ -990,6 +990,7 @@ sub _external_request {
         my $login_page = $req->{'_headers'}->{'location'};
         my $r = _external_request($login_page, undef, undef, $agent);
         $login_page =~ s/nocookie&//gmx;
+        $login_page =~ s/%3f/?/gmx; # fix AH: Unsafe URL with %3f URL rewritten without UnsafeAllow3F
            $r = _external_request($login_page, undef, { password => $pass, login => $user, submit => 'login', referer => $referer }, $agent, undef, undef, 0);
         $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, undef, undef, 0);
     }
