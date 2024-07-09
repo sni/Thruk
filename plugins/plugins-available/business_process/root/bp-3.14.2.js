@@ -767,10 +767,15 @@ function bp_edit_node_submit(formId) {
         el.options[el.selectedIndex].setAttribute("selected","");
       }
     });
-    var form = document.getElementById(formId).cloneNode(true);
-    jQuery(form).find(".template").remove();
+    var form = document.getElementById(formId);
+
+    // temporarily disable templated fields
+    jQuery(form).find(".template").find("input, textarea, select, button").attr("disabled", true);
     jQuery(form).find('#bp_'+bp_id+'_selected_nodes OPTION').prop('selected',true);
     var data = jQuery(form).serializeArray();
+    // enable again
+    jQuery(form).find(".template").find("input, textarea, select, button").attr("disabled", false);
+
     var id = current_edit_node_clicked ? current_edit_node_clicked : current_edit_node;
     bp_post_and_refresh('bp.cgi?action=edit_node&bp='+bp_id+'&node='+id, data, current_edit_node);
     closeModalWindow();
