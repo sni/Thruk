@@ -53,6 +53,10 @@ sub index {
         $keywords = 'logout';
         $logoutref = $1;
     }
+    # replace first & with ? (so we don't have to use encoded %3f which breaks apache rewrites)
+    if($logoutref && $logoutref !~ m/\?/mx) {
+        $logoutref =~ s|&|?|mx;
+    }
 
     my $login   = $c->req->parameters->{'login'}    || '';
     my $pass    = $c->req->parameters->{'password'} || '';
@@ -75,6 +79,11 @@ sub index {
     # remove known keywords from referer
     $referer  =~ s/^(logout|expired|invalid|problem|locked|setsession|nocookie)\&//gmx;
     $keywords =~ s/^(logout|expired|invalid|problem|locked|setsession|nocookie)\&.*$/$1/gmx if $keywords;
+
+    # replace first & with ? (so we don't have to use encoded %3f which breaks apache rewrites)
+    if($referer && $referer !~ m/\?/mx) {
+        $referer =~ s|&|?|mx;
+    }
 
     $c->stash->{'referer'}       = $referer;
     $c->stash->{'clean_cookies'} = 0;

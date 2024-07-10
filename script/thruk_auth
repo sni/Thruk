@@ -145,7 +145,7 @@ sub process {
 
     # remove last &
     $path =~ s|/____/|?|mxo;
-    $path =~ s|\?$||mxo;
+    $path =~ s|\?$||mxo; # remove trailing ?
 
     # some urls must pass
     if($path =~ $pass_regex) {
@@ -194,7 +194,7 @@ sub process {
         if(defined $cached && ($cache_timeout == 0 || ($cache_timeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $cache_timeout))) {
             if($sessioncache->{$auth}->{'failed'}) {
                 _debug("basic auth login failed by cache hit: ".substr($auth, 0, 6)."...") if $verbose > 1;
-                return $loginurl."?invalid&".$path;
+                return $loginurl."?invalid&"._encode_path($path);
             }
             _debug("basic auth login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose > 1;
             return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path;
@@ -217,14 +217,14 @@ sub process {
                 'failed' => 1,
                 'time'   => $now,
         };
-        return $loginurl."?invalid&".$path;
+        return $loginurl."?invalid&"._encode_path($path);
     }
 
     # did we get a cookie
     if($cookies eq '' || $cookies !~ $cookie_regex) {
         _debug("no cookie: $path") if $verbose;
         return "/loginok/".$guest."/".$path if $guest;
-        return $loginurl."?nocookie&".$path;
+        return $loginurl."?nocookie&"._encode_path($path);
     }
     my $auth = $1;
 
@@ -233,7 +233,7 @@ sub process {
     if(defined $sessioncache->{$auth} && ($cache_timeout == 0 || ($cache_timeout > 0 && $sessioncache->{$auth}->{'time'} >= $now - $cache_timeout))) {
         if($sessioncache->{$auth}->{'failed'}) {
             _debug("login failed by cache hit") if $verbose > 1;
-            return $loginurl."?invalid&".$path;
+            return $loginurl."?invalid&"._encode_path($path);
         }
         _debug("login by cache hit: ".$sessioncache->{$auth}->{'login'}) if $verbose > 1;
         return "/loginok/".$sessioncache->{$auth}->{'login'}."/".$path;
@@ -246,7 +246,7 @@ sub process {
         _debug("session expired: ".($sessioncache->{$auth}->{'login'} || '?')) if $verbose;
         delete $sessioncache->{$auth} if defined $sessioncache->{$auth};
         return "/loginok/".$guest."/".$path if $guest;
-        return $loginurl."?expired&".$path;
+        return $loginurl."?expired&"._encode_path($path);
     }
 
     # fill sessioncache, so we don't have to revalidate new sessions immediately
@@ -265,7 +265,7 @@ sub process {
         unlink($session->{'file'});
         delete $sessioncache->{$auth};
         return "/loginok/".$guest."/".$path if $guest;
-        return $loginurl."?expired&".$path;
+        return $loginurl."?expired&"._encode_path($path);
     }
 
     # revalidation disabled
@@ -274,7 +274,7 @@ sub process {
         # no validation enabled
         if($sessioncache->{$auth}->{'failed'}) {
             _debug("session not ok by cache hit") if $verbose > 1;
-            return $loginurl."?invalid&".$path;
+            return $loginurl."?invalid&"._encode_path($path);
         }
         _debug("session ok (not revalidated)") if $verbose > 1;
     }
@@ -298,14 +298,14 @@ sub process {
             _audit_log("session", "technical issue during session revalidation, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
-            return $loginurl."?problem&".$path;
+            return $loginurl."?problem&"._encode_path($path);
         }
         elsif($rc == 0) {
             _debug("basic auth verify failed for ".$user) if $verbose;
             _audit_log("session", "session revalidation failed, removing session file", $session->{'username'}//'?', $session->{'file'}, 0);
             unlink($session->{'file'});
             delete $sessioncache->{$auth};
-            return $loginurl."?invalid&".$path;
+            return $loginurl."?invalid&"._encode_path($path);
         }
     }
 
@@ -343,3 +343,18 @@ sub _clean_credentials {
     }
     return($str);
 }
+
+##########################################################
+sub _encode_path {
+    my($path) = @_;
+
+    # replace first ? by &
+    $path =~ s|\?|&|mx;
+
+    # replace first encoded ? by &
+    $path =~ s|%3f|&|mx;
+
+    return($path);
+}
+
+##########################################################

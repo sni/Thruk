@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 308;
+    plan tests => 317;
 
     use lib('t');
     require TestUtils;
@@ -200,5 +200,15 @@ BEGIN {
         'like'   => ['logout successful'],
         'follow' => 1,
         'code'   => 401,
+    );
+};
+
+# check redirect when there is no cookie
+{
+    local $ENV{'THRUK_TEST_AUTH'} = undef;
+    TestUtils::test_page(
+        'url'      => '/thruk/cgi-bin/extinfo.cgi?type=2&host=localhost',
+        'redirect' => 1,
+        'location' => 'login.cgi\?nocookie&demo/thruk/cgi-bin/extinfo.cgi&type=2&host=localhost',
     );
 };

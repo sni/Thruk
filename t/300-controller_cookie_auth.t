@@ -6,7 +6,7 @@ BEGIN {
     eval "use Test::Cmd";
     plan skip_all => 'Test::Cmd required' if $@;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 59;
+    plan tests => 67;
 
     use lib('t');
     require TestUtils;
@@ -24,8 +24,8 @@ SKIP: {
 my $pages = [
     { url => '/thruk/cgi-bin/login.cgi',      like => ['Thruk Monitoring Webinterface', 'loginuser' ], code => 401 },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi', 'redirect' => 1, location => 'tac.cgi', like => 'This item has moved' },
-    { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi%3ftest=blah', 'redirect' => 1, location => 'tac.cgi\?test=blah', like => 'This item has moved' },
-    { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi%3ftest=blah&test2=blub', 'redirect' => 1, location => 'tac.cgi\?test=blah&test2=blub', like => 'This item has moved' },
+    { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi&test=blah', 'redirect' => 1, location => 'tac.cgi\?test=blah', like => 'This item has moved' },
+    { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi&test=blah&test2=blub', 'redirect' => 1, location => 'tac.cgi\?test=blah&test2=blub', like => 'This item has moved' },
 ];
 
 for my $url (@{$pages}) {
@@ -43,4 +43,16 @@ TestUtils::test_command({
     cmd   => './script/thruk_auth',
     stdin => '///____/thruk/cgi-bin/tac.cgi',
     like => ['/^\/redirect\/thruk\/cgi\-bin\/login\.cgi\?nocookie&thruk\/cgi\-bin\/tac\.cgi$/'],
+});
+
+TestUtils::test_command({
+    cmd   => './script/thruk_auth',
+    stdin => '///____/thruk/cgi-bin/tac.cgi%3ftest=blah',
+    like => ['/^\/redirect\/thruk\/cgi\-bin\/login\.cgi\?nocookie&thruk\/cgi\-bin\/tac\.cgi&test=blah$/'],
+});
+
+TestUtils::test_command({
+    cmd   => './script/thruk_auth',
+    stdin => '///____/thruk/cgi-bin/tac.cgi?test=blah',
+    like => ['/^\/redirect\/thruk\/cgi\-bin\/login\.cgi\?nocookie&thruk\/cgi\-bin\/tac\.cgi&test=blah$/'],
 });
