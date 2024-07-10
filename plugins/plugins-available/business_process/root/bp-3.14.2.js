@@ -1072,7 +1072,7 @@ function bp_render(containerId, nodes, edges) {
     // first reset zoom
     bp_zoom(1);
     jQuery('#'+containerId).css("visibility", "hidden");
-    var g = new dagre.graphlib.Graph();
+    var g = new dagre.graphlib.Graph({ "multigraph": true });
     g.setGraph({
         // https://github.com/dagrejs/dagre/wiki#configuring-the-layout
         "nodesep": bp_graph_options.bp_nodeSep,
