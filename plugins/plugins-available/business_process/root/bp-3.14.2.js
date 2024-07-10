@@ -1067,43 +1067,49 @@ function bp_get_node(id) {
 }
 
 /* do the layout */
-var bp_graph_layout;
+var bp_graph_layout = null;
 function bp_render(containerId, nodes, edges) {
     // first reset zoom
     bp_zoom(1);
     jQuery('#'+containerId).css("visibility", "hidden");
-    var g = new dagre.Digraph();
+    var g = new dagre.graphlib.Graph();
+    g.setGraph({
+        // https://github.com/dagrejs/dagre/wiki#configuring-the-layout
+        "nodesep": bp_graph_options.bp_nodeSep,
+        "edgesep": bp_graph_options.bp_edgeSep,
+        "ranksep": bp_graph_options.bp_rankSep,
+        "rankdir": bp_graph_options.bp_rankDir
+    })
+    g.setDefaultEdgeLabel(function() { return {}; });
 
     jQuery.each(nodes, function(nr, n) {
-        g.addNode(n.id, { label: n.label, width: node_width, height: node_height });
+        g.setNode(n.id, { label: n.label, width: node_width, height: node_height });
     });
     jQuery.each(edges, function(nr, e) {
-        g.addEdge(null, e.sourceId, e.targetId);
+        g.setEdge(e.sourceId, e.targetId);
     });
 
+    bp_graph_layout = null;
     try {
-        bp_graph_layout = dagre.layout()
-            //.debugLevel(4)
-            .nodeSep(bp_graph_options.bp_nodeSep)
-            .edgeSep(bp_graph_options.bp_edgeSep)
-            .rankSep(bp_graph_options.bp_rankSep)
-            .rankDir(bp_graph_options.bp_rankDir)
-            .run(g);
+        dagre.layout(g);
+        bp_graph_layout = g;
     } catch(e) {
         var msg = '<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>';
         if(thruk_debug_js) { msg += '<br><div style="width:500px; height: 400px; text-align: left;">Details:<br>'+e+'</div>'; }
         jQuery('.bp_zoom_container').css('height','500px');
         jQuery('#inner_'+containerId).html(msg);
+        jQuery('#'+containerId).css("visibility", "");
         return;
     }
 
-    bp_graph_layout.eachNode(function(u, value) {
+    g.nodes().forEach(function(id) {
         // move node
-        jQuery('#'+u).css('left', (value.x-55)+'px').css('top', (value.y-15)+'px');
+        var n = g.node(id);
+        jQuery('#'+id).css('left', (n.x-55)+'px').css('top', (n.y-15)+'px');
     });
 
-    bp_graph_layout.eachEdge(function(e, u, v, value) {
-        bp_plump('inner_'+containerId, u, v, value);
+    jQuery.each(edges, function(nr, e) {
+        bp_plump('inner_'+containerId, e.sourceId, e.targetId, g.edge(e.sourceId, e.targetId));
     });
 
     jQuery('#'+containerId).css("visibility", "");
@@ -1275,7 +1281,8 @@ function bp_redraw(evt) {
 
     maxX = 0;
     maxY = 0;
-    bp_graph_layout.eachNode(function(u, value) {
+    bp_graph_layout.nodes().forEach(function(id) {
+        var value = bp_graph_layout.node(id);
         if(maxX < value.x) { maxX = value.x }
         if(maxY < value.y) { maxY = value.y }
         if(minY == -1 || value.y < minY) { minY = value.y; }
