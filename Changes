@@ -1,7 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
-          - fix using unescaped url in reports
+3.16     Fri Jul 12 16:23:37 CEST 2024
+          - fix using unescaped url in reports (CVE-2024-39915)
           - fix recurring downtimes crontab entry for 2nd/3rd days of month
           - fix sessions removed early when using kerberos authentication
           - fix using custom variables starting with multiple underlines
