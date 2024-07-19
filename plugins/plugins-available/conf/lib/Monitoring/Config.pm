@@ -2226,6 +2226,24 @@ sub _check_references {
                     return if $tst =~ m/$newval/;
                     ## use critic
                 }
+            } elsif($attr eq 'parents' && $link eq 'service') {
+                if($val =~ m/,/mx) {
+                    my @list = split(/\s*,\s*/mx, $val);
+                    my $failed;
+                    while(scalar @list > 0) {
+                        my $hst = shift @list;
+                        my $svc = shift @list;
+                        if(!defined $hst || !$objects_by_name->{'host'}->{$hst}) {
+                            $failed = 1;
+                            last;
+                        }
+                        if(!defined $svc || !$objects_by_name->{'service'}->{$svc}) {
+                            $failed = 1;
+                            last;
+                        }
+                    }
+                    return if !$failed;
+                }
             }
 
             if($options{'hash'}) {
