@@ -129,6 +129,8 @@
             || key == 'contacts'
             || key == 'contactgroups'
       %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ "," _ key _ ",1" %]
+      [% ELSIF type == 'hostdependency'    && key == 'dependent_host_name' %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
+      [% ELSIF type == 'servicedependency' && key == 'dependent_host_name' %][% has_wizard = 1 %][% PROCESS _wizard_list.tt id="id_" _ key _ "_wzd" _ nr wzd_args="id_" _ key _ nr _ ",hosts,1" %]
       [% END %]
     [% END %]
     <div class="flexrow flex-nowrap gap-1">
