@@ -5,7 +5,6 @@ next:
             - fix validating service parents (#1376)
             - enable list wizard for host/service depenencies (#1358)
 
-
 3.16     Fri Jul 12 16:23:37 CEST 2024
           - fix using unescaped url in reports (CVE-2024-39915)
           - fix recurring downtimes crontab entry for 2nd/3rd days of month
