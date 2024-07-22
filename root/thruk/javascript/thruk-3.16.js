@@ -8133,6 +8133,13 @@ function check_filter_style_changes(form, pageStyle, columnFieldId) {
 var status_form_clean = true;
 function setNoFormClean() {
     status_form_clean = false;
+
+    return(true);
+}
+
+function changeFormToPost(el) {
+    jQuery(el).parents('form:first').attr("method", "POST")
+    return(true);
 }
 
 /* remove empty values from form to reduce request size */

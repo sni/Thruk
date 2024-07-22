@@ -10,10 +10,11 @@
 
     <div>
       [% IF style != 'combined' %]
-        <form action='status.cgi' method="GET" id="bookmark_form">
-        <input type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
+        <form action='status.cgi' method="POST" id="bookmark_form">
+        <input type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean() && changeFormToPost(this))" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
       [% END %]
       <input type="hidden" name="referer" value="[% short_uri(c) %]">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <table class="body sub_2">
         <tr>
           <th>Url</th>
@@ -60,7 +61,7 @@
         </tr>
         <tr>
           <td colspan="2" align="center">
-            <input class="w-36 my-2" type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean())">
+            <input class="w-36 my-2" type="submit" value="add bookmark" name="addb" onclick="return(checknonempty('newname', 'name') && setNoFormClean() && changeFormToPost(this))">
           </td>
         </tr>
       </table>
@@ -162,7 +163,7 @@
 
         <tr class="no-hover">
           <td colspan="4" align="center">
-            <input type="submit" class="w-36 my-2" value="save changes" name="saveb" onclick="return(setNoFormClean())">
+            <input type="submit" class="w-36 my-2" value="save changes" name="saveb" onclick="return(setNoFormClean() && changeFormToPost(this))">
           </td>
         </tr>
       </table>
