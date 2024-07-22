@@ -612,6 +612,11 @@ sub set_default_config {
     $config->{'themes'}     = \@themes;
     $config->{'themes_dir'} = $themes_dir;
 
+    # make sure default themes exist
+    my $available_themes = Thruk::Base::array2hash(\@themes);
+    $config->{'default_theme'}      = 'Light' unless defined $available_themes->{$config->{'default_theme'}};
+    $config->{'default_theme_dark'} = 'Dark'  unless defined $available_themes->{$config->{'default_theme_dark'}};
+
     ###################################################
     # use uid to make tmp dir more uniq
     $config->{'tmp_path'} = '/tmp/thruk_'.$> unless defined $config->{'tmp_path'};
