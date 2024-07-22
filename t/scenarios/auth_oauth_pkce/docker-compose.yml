@@ -1,0 +1,38 @@
+networks:
+  default:
+    ipam:
+     config:
+       - subnet: 192.168.105.0/24
+
+services:
+  omd:
+    build: omd/
+    ports:
+        - "127.0.0.3:60080:80"     # apache
+        - "127.0.0.3:60557:6557"   # livestatus
+        - "127.0.0.3:8003:8003"    # grafana
+        - "127.0.0.3:4444:4444"    # oauth server
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/scenario:ro
+    networks:
+      default:
+        ipv4_address: 192.168.105.2
+    depends_on:
+        - mock-oauth2-server
+
+  mock-oauth2-server:
+    image: ghcr.io/navikt/mock-oauth2-server:2.1.8
+    ports:
+      - 8080:8080
+    environment:
+      JSON_CONFIG: '{ "interactiveLogin": false }'
+    networks:
+      default:
+        ipv4_address: 192.168.105.3
+    healthcheck:
+      test: ["CMD", "curl", "-kf", "http://localhost:8080/default/.well-known/openid-configuration"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5m

@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add optional oauth 2.1 pkce workflow
           - Config Tool:
             - fix validating service parents (#1376)
             - enable list wizard for host/service depenencies (#1358)

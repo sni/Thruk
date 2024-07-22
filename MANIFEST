@@ -2225,6 +2225,14 @@ t/scenarios/auth_oauth/omd/thruk_local.conf
 t/scenarios/auth_oauth/README
 t/scenarios/auth_oauth/t/100-auth-oauth.t
 t/scenarios/auth_oauth/thruk_local.conf
+t/scenarios/auth_oauth_pkce/docker-compose.yml
+t/scenarios/auth_oauth_pkce/Makefile
+t/scenarios/auth_oauth_pkce/omd/Dockerfile
+t/scenarios/auth_oauth_pkce/omd/playbook.yml
+t/scenarios/auth_oauth_pkce/omd/thruk_local.conf
+t/scenarios/auth_oauth_pkce/README
+t/scenarios/auth_oauth_pkce/t/100-auth-oauth.t
+t/scenarios/auth_oauth_pkce/thruk_local.conf
 t/scenarios/auth_ssl_client_cert/docker-compose.yml
 t/scenarios/auth_ssl_client_cert/Makefile
 t/scenarios/auth_ssl_client_cert/omd/cgi.cfg

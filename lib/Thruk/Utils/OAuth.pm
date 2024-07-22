@@ -4,6 +4,8 @@ use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 use Data::Dumper;
+use Digest::SHA ();
+use MIME::Base64 ();
 
 use Thruk::Authentication::User ();
 use Thruk::Controller::login ();
@@ -57,14 +59,20 @@ sub handle_oauth_login {
         my $ua = Thruk::UserAgent->new({}, $c->config);
         $ua->default_header(Accept => "application/json");
         _debug(sprintf("oauth login step2: fetching token from: %s", $auth->{'token_url'})) if Thruk::Base->debug;
-        my $res = $ua->post($auth->{'token_url'}, {
-                                    client_id       => $auth->{'client_id'},
-                                    client_secret   => $auth->{'client_secret'},
-                                    code            => $code,
-                                    redirect_uri    => $loginpage_uri,
-                                    state           => $state,
-                                    grant_type      => 'authorization_code',
-        });
+        my $token_data = {
+            client_id       => $auth->{'client_id'},
+            client_secret   => $auth->{'client_secret'},
+            code            => $code,
+            redirect_uri    => $loginpage_uri,
+            state           => $state,
+            grant_type      => 'authorization_code',
+        };
+        if($auth->{'enable_pkce'}) {
+            $token_data->{'code_verifier'} = $data->{'pkce_code'};
+            delete $token_data->{'client_secret'}; # client secret is not required when using pkce
+        }
+        my $res = $ua->post($auth->{'token_url'}, $token_data);
+        _debug_http_response($res) if Thruk::Base->trace;
         unlink($auth_folder."/".$state.".json");
         my $token = _get_json($c, $res);
         if(!$token || !$token->{"access_token"}) {
@@ -81,14 +89,12 @@ sub handle_oauth_login {
         if ($auth->{'api_url'}) {
             _debug(sprintf("oauth login step2: fetching user id from: %s", $auth->{'api_url'})) if Thruk::Base->debug;
             $res = $ua->get($auth->{'api_url'});
+            _debug_http_response($res) if Thruk::Base->trace;
             my $userinfo = _get_json($c, $res);
             if(!$userinfo) {
                 return $c->detach_error({msg => "cannot fetch oauth user details", code => 500, debug_information => { res => $res }});
             }
-            _debug(sprintf("oauth login step2: got user details:")) if Thruk::Base->debug;
-            _debug(Dumper($userinfo)) if Thruk::Base->debug;
-            # get username from response hash
-            $login = $auth->{'login_field'} ? $userinfo->{$auth->{'login_field'}} : ($userinfo->{'login'} || $userinfo->{'email'});
+            $login = _extract_login($auth, $userinfo);
             if(!defined $login) {
                 return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { userinfo => $userinfo }});
             }
@@ -106,6 +112,7 @@ sub handle_oauth_login {
             if ($auth->{'jwks_url'}) {
                 _debug(sprintf("oauth login step2: get jwks from: %s", $auth->{'jwks_url'})) if Thruk::Base->debug;
                 $res = $ua->get($auth->{'jwks_url'});
+                _debug_http_response($res) if Thruk::Base->trace;
                 my $jwks = _get_json($c, $res);
                 $id_token = decode_jwt(token => $token->{'id_token'}, kid_keys => $jwks);
             } elsif ($auth->{'jwk_key'}) {
@@ -114,8 +121,7 @@ sub handle_oauth_login {
                 _debug("oauth login step2: WARNING insecure JWT decode");
                 $id_token = decode_jwt(token => $token->{'id_token'}, ignore_signature => 1);
             }
-            _debug(Dumper($id_token)) if Thruk::Base->debug;
-            $login = $auth->{'login_field'} ? $id_token->{$auth->{'login_field'}} : ($id_token->{'login'} || $id_token->{'email'});
+            $login = _extract_login($auth, $id_token);
             if(!defined $login) {
                 return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { token => $token, id_token => $id_token }});
             }
@@ -144,16 +150,33 @@ sub handle_oauth_login {
     }
     # redirect to auth url
     $state = Thruk::Utils::Crypt::random_uuid([time()]);
+
+    my $state_data = {
+        'time'    => time(),
+        'oauth'   => $id,
+        'referer' => $referer,
+    };
+    my $login_data = {
+        client_id             => $auth->{'client_id'},
+        scope                 => $auth->{'scopes'},
+        state                 => $state,
+        response_type         => 'code',
+        redirect_uri          => $loginpage_uri,
+    };
+
+    # PKCE workflow as described in rfc7636
+    if($auth->{'enable_pkce'}) {
+        my $pkce_code           = substr(Thruk::Utils::Crypt::random_uuid([time()]), 0, 64);
+        my $pkce_code_challenge = _base64_url_encode(Digest::SHA::sha256($pkce_code));
+        $login_data->{'code_challenge'}        = $pkce_code_challenge;
+        $login_data->{'code_challenge_method'} = 'S256';
+        $state_data->{'pkce_code'}             = $pkce_code;
+    }
+
     Thruk::Utils::IO::mkdir($auth_folder);
-    Thruk::Utils::IO::json_lock_store($auth_folder."/".$state.".json", { 'time' => time(), 'oauth' => $id, referer => $referer });
+    Thruk::Utils::IO::json_lock_store($auth_folder."/".$state.".json", $state_data);
     _cleanup_oauth_files($auth_folder, 600);
-    my $oauth_login_url = Thruk::Utils::Filter::uri_with($c, {
-                                    client_id       => $auth->{'client_id'},
-                                    scope           => $auth->{'scopes'},
-                                    state           => $state,
-                                    response_type   => 'code',
-                                    redirect_uri    => $loginpage_uri,
-                            }, 1, $auth->{'auth_url'}, 1);
+    my $oauth_login_url = Thruk::Utils::Filter::uri_with($c, $login_data, 1, $auth->{'auth_url'}, 1);
     _debug("oauth login step1: redirecting to ".$oauth_login_url) if Thruk::Base->verbose;
     return $c->redirect_to($oauth_login_url);
 }
@@ -200,5 +223,37 @@ sub _get_json {
     }
     return $c->detach_error({msg => "cannot get oauth data", code => 500, debug_information => { res => $res }});
 }
+
+##########################################################
+# get username from response hash
+sub _extract_login {
+    my($auth, $userinfo) = @_;
+
+    if(Thruk::Base->debug) {
+        _debug("oauth login step2: got user details:");
+        _debug($userinfo);
+    }
+
+    if($auth->{'login_field'}) {
+        return $userinfo->{$auth->{'login_field'}};
+    }
+
+    return $userinfo->{'login'} if $userinfo->{'login'};
+    return $userinfo->{'email'} if $userinfo->{'email'};
+
+    return;
+}
+
+##########################################################
+sub _base64_url_encode {
+    my($str) = @_;
+
+    my $data = MIME::Base64::encode_base64($str, '');
+    $data =~ tr|+/=|-_|d;
+
+    return($data);
+}
+
+##########################################################
 
 1;

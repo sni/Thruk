@@ -23,6 +23,7 @@ use Thruk::Utils::Encode ();
 use base 'Exporter';
 our @EXPORT_OK = qw(_fatal _error _warn _info _infos _infoc
                     _debug _debug2 _debugs _debugc _trace _audit_log
+                    _debug_http_response
                     );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
@@ -113,6 +114,21 @@ sub _debugc {
 ##############################################
 sub _debug2 {
     return &_log(DEBUG2, \@_);
+}
+
+##############################################
+sub _debug_http_response {
+    my($res) = @_;
+    _debug("request:");
+    _debug(">>>");
+    _debug($res->request->as_string());
+    _debug("<<< end of request");
+    _debug("\n\nresponse:\n");
+    _debug(">>>");
+    _debug($res->as_string());
+    _debug("<<< end of response");
+
+    return;
 }
 
 ##############################################
