@@ -102,7 +102,9 @@ sub begin {
     }
 
     # hide navigation
-    $c->stash->{show_nav} = (defined $c->req->parameters->{'nav'} && $c->req->parameters->{'nav'} eq '0') ? 0 : 1;
+    $c->stash->{'show_nav'} = (defined $c->req->parameters->{'nav'} && $c->req->parameters->{'nav'} eq '0') ? 0 : 1;
+    $c->stash->{'iframed'}  = $c->req->parameters->{'iframed'} || 0;
+    $c->stash->{'show_nav'} = 0 if $c->stash->{'iframed'};
 
     # minmal custom monitor screen
     $c->stash->{minimal} = $c->req->parameters->{'minimal'} || '';
@@ -130,8 +132,6 @@ sub begin {
     if(defined $target && $target eq '_parent' ) {
         $c->stash->{'target'} = '_parent';
     }
-
-    $c->stash->{'iframed'} = $c->req->parameters->{'iframed'} || 0;
 
     # additional views on status pages
     $c->stash->{'additional_views'} = $Thruk::Globals::additional_views || {};

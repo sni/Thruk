@@ -10,7 +10,7 @@
   <a class="button text-xs font-normal p-px m-0" href="#" onclick="bp_zoom_rel(-0.05)">-</a>
 </div>
 <div class="bp_back_link z-20 absolute top-1 left-2" style="display: none;">
-  <button class="iconOnly m-0" onclick="return(bp_details_link_clicked(event, this))"><i class="fa-solid fa-house leading-none"></i></button>
+  <a href="" class="button iconOnly m-0" onclick="return(bp_details_link_clicked(event, this))"><i class="fa-solid fa-house leading-none"></i></a>
 </div>
 <div class="relative w-full h-full z-10 overflow-auto">
   <div id='zoom[% bp.id %]'>
