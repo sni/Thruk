@@ -111,16 +111,29 @@ sub index {
         }
     }
     Thruk::Action::AddDefaults::set_processinfo($c, Thruk::Constants::ADD_CACHED_DEFAULTS) if $ENV{'THRUK_USE_LMD'}; # required for the first request on federated backends
-    if(scalar @{$backends} > 0) {
-        Thruk::Action::AddDefaults::set_enabled_backends($c, $backends);
-    }
+
+    # activate backends
+    if(scalar @{$backends} > 0) {}
     elsif($c->req->parameters->{'backend'}) {
-        Thruk::Action::AddDefaults::set_enabled_backends($c, $c->req->parameters->{'backend'});
+        $backends = [$c->req->parameters->{'backend'}];
         delete $c->req->parameters->{'backend'};
     }
     elsif($c->req->parameters->{'backends'}) {
-        Thruk::Action::AddDefaults::set_enabled_backends($c, $c->req->parameters->{'backends'});
+        $backends = [$c->req->parameters->{'backends'}];
         delete $c->req->parameters->{'backends'};
+    }
+
+    if(scalar @{$backends} > 0) {
+        local $ENV{'THRUK_TEST_NO_LOG'} = ""; # suppress warnings
+        Thruk::Action::AddDefaults::set_enabled_backends($c, $backends);
+        if($c->stash->{'failed_backends'} && scalar keys %{$c->stash->{'failed_backends'}} > 0) {
+            my $data = {
+                'message'     => 'failed to find backend(s): '.join(', ', keys %{$c->stash->{'failed_backends'}}),
+                'code'        => 400,
+                'failed'      => Cpanel::JSON::XS::true,
+            };
+            return(_format_output($c, $format, $data));
+        }
     } else {
         my($disabled_backends) = Thruk::Action::AddDefaults::set_enabled_backends($c);
         Thruk::Action::AddDefaults::set_possible_backends($c, $disabled_backends);
@@ -131,20 +144,25 @@ sub index {
         $c->user->set_dynamic_attributes($c);
     }
 
-    my $data;
     if($c->user->{'readonly'} && $c->req->method ne 'GET') {
-        $data = {
+        my $data = {
             'message'     => 'only GET requests allowed for readonly api keys.',
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
-         };
-    } elsif($c->config->{'demo_mode'} && $c->req->method ne 'GET') {
-        $data = {
+        };
+        return(_format_output($c, $format, $data));
+    }
+
+    if($c->config->{'demo_mode'} && $c->req->method ne 'GET') {
+        my $data = {
             'message'     => 'only GET requests allowed in demo_mode.',
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
-         };
-    } elsif($path_info =~ m/\.cgi$/mx) {
+        };
+        return(_format_output($c, $format, $data));
+    }
+
+    if($path_info =~ m/\.cgi$/mx) {
         my $uri = $c->env->{'thruk.request.url'} // $c->req->url();
         $uri =~ s/^.*?\/r\/(v1\/|)/\/cgi-bin\//gmx;
         my $sub_c = $c->sub_request($uri, $c->req->env->{'REQUEST_METHOD'}, $c->req->parameters, 1, 7);
@@ -154,9 +172,16 @@ sub index {
         $c->{'rendered'} = 1;
         $c->stash->{'inject_stats'} = 0;
         return;
-    } else {
-        $data = process_rest_request($c, $path_info);
     }
+
+    my $data = process_rest_request($c, $path_info);
+    return(_format_output($c, $format, $data));
+}
+
+##########################################################
+sub _format_output {
+    my($c, $format, $data) = @_;
+
     return $data if $c->{'rendered'};
 
     if($format eq 'csv') {

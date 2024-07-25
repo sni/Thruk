@@ -1091,6 +1091,7 @@ sub set_enabled_backends {
                         $disabled_backends->{$peer->{'key'}} = 0;
                     } else {
                         if(!_set_disabled_by_section($c, $b, $disabled_backends)) {
+                            $c->stash->{'failed_backends'}->{$b} = 'backend does not exist';
                             _warn(sprintf("no backend found for: %s", $b));
                         }
                     }
@@ -1131,6 +1132,7 @@ sub set_enabled_backends {
                         # silently ignore, leads to hen/egg problem when using federation peers
                         #die("got no peer for: ".$b);
                         #_warn(sprintf("no backend found for: %s", $b));
+                        $c->stash->{'failed_backends'}->{$b} = 'backend does not exist';
                     }
                 }
             }
@@ -1171,6 +1173,7 @@ sub set_enabled_backends {
                 } else {
                     if(!_set_disabled_by_section($c, $b, $disabled_backends)) {
                         #_warn(sprintf("no backend found for: %s", $b));
+                        $c->stash->{'failed_backends'}->{$b} = 'backend does not exist';
                     }
                 }
             }
