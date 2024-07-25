@@ -2,6 +2,7 @@
 
 var thruk_version       = '[% thrukversion %]';
 var thruk_extra_version = '[% c.config.extra_version %]';
+var refresh_rate        = [% IF refresh_rate %][% refresh_rate %][% ELSE %]null[% END %];
 var server_time         = new Date([% date.now * 1000 %]);
 var client_time         = new Date();
 var delta_time          = client_time.getTime() - server_time.getTime();
