@@ -115,11 +115,11 @@ sub index {
     # activate backends
     if(scalar @{$backends} > 0) {}
     elsif($c->req->parameters->{'backend'}) {
-        $backends = [$c->req->parameters->{'backend'}];
+        $backends = Thruk::Base::list($c->req->parameters->{'backend'});
         delete $c->req->parameters->{'backend'};
     }
     elsif($c->req->parameters->{'backends'}) {
-        $backends = [$c->req->parameters->{'backends'}];
+        $backends = Thruk::Base::list($c->req->parameters->{'backends'});
         delete $c->req->parameters->{'backends'};
     }
 
