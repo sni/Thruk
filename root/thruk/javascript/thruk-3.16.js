@@ -2531,7 +2531,8 @@ function site_panel_search() {
         jQuery(searches).each(function(i, v) {
             if(v == "") { return true; }
             try {
-                if(!name.match(v)) {
+                var re = new RegExp(v, "i");
+                if(!name.match(re)) {
                     show = false;
                     return false;
                 }
