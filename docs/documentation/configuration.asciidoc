@@ -853,6 +853,16 @@ ex.:
   default_main_filter = contact = $REMOTE_USER$
 
 
+=== main_exclude_top5_hostgroups
+
+Exclude some hostgroups from the top 5 list on the "Home" page. The values
+can be regular expressions.
+
+ex.:
+
+  main_exclude_top5_hostgroups = all_hosts, regex.*filter
+
+
 == Paging Settings
 
 

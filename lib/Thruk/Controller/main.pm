@@ -176,6 +176,23 @@ sub index {
     ############################################################################
     # top 5 hostgroups
     my $hostgroups = _get_top5_hostgroups($c, $hostfilter);
+    # exclude some hostgroups
+    if($c->config->{'main_exclude_top5_hostgroups'}) {
+        my $excludes = Thruk::Base::comma_separated_list($c->config->{'main_exclude_top5_hostgroups'});
+        for my $ex (@{$excludes}) {
+            if(Thruk::Base::looks_like_regex($ex)) {
+                for my $key (sort keys %{$hostgroups}) {
+                    ## no critic
+                    if($key =~ /$ex/) {
+                        delete $hostgroups->{$key};
+                    }
+                    ## use critic
+                }
+            } else {
+                delete $hostgroups->{$ex};
+            }
+        }
+    }
     my $top5_hg = [];
     my @hashkeys_hg = sort { $hostgroups->{$b} <=> $hostgroups->{$a} || $a cmp $b } keys %{$hostgroups};
     splice(@hashkeys_hg, 5) if scalar(@hashkeys_hg) > 5;
