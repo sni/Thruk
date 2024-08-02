@@ -145,8 +145,7 @@
       <div class="head">
         <h3><a href="status.cgi?hostgroup=all&style=hostdetail" class="link">Hosts</a></h3>
       </div>
-      <div id="hosts-gaugeChart">
-      </div>
+      <div id="hosts-gaugeChart" class="js-graph-container"></div>
     </div>
   </div>
 
@@ -155,8 +154,7 @@
       <div class="head">
         <h3><a href="status.cgi" class="link">Services</a></h3>
       </div>
-      <div id="services-gaugeChart">
-      </div>
+      <div id="services-gaugeChart" class="js-graph-container"></div>
     </div>
   </div>
 
@@ -166,8 +164,7 @@
         <div class="head">
           <h3>Available Backends</h3>
         </div>
-        <div id="backends-gaugeChart">
-        </div>
+        <div id="backends-gaugeChart" class="js-graph-container"></div>
       </div>
     </div>
     [% IF backend_stats.enabled - backend_stats.down > 1 %]
@@ -176,8 +173,7 @@
         <div class="head">
           <h3>Hosts per Backend</h3>
         </div>
-        <div id="hostloc-pieChart">
-        </div>
+        <div id="hostloc-pieChart" class="js-graph-container"></div>
       </div>
     </div>
     [% END %]
@@ -188,7 +184,7 @@
       <div class="head">
         <h3><a href="status.cgi?style=hostoverview" class="link">Top 5 Hostgroups</a></h3>
       </div>
-      <div id="hostgroups-barChart"></div>
+      <div id="hostgroups-barChart" class="js-graph-container"></div>
     </div>
   </div>
 
@@ -199,7 +195,7 @@
         [% IF notifications_age && notifications_age > 30 %]<div class="ml-4 textHINTsoft" title="last update: [% date_format(c, date.now - notifications_age) %]">updated [% duration(notifications_age, 6) %] ago</div>[% END %]
       </div>
       <a href="notifications.cgi?start=&end=" id="notifications-link" class="relative">
-        <div id="notifications-barChart"></div>
+        <div id="notifications-barChart" class="js-graph-container"></div>
       </a>
     </div>
   </div>
@@ -330,12 +326,33 @@ function getToolTipTemplateRow(name, value, color, cls) {
 
 function initGraphs() {
   // chrome sometimes draws panels to big on refresh, delay rendering graphs until the cards have a sane size
-  if(jQuery("#hosts-gaugeChart").innerWidth() > jQuery(document).innerWidth() * 0.8) {
+  var inner = jQuery(document).innerWidth() * 0.8;
+  var ready = true;
+  jQuery(".js-graph-container").each(function(i, el) {
+    var w = jQuery(el).innerWidth();
+    if(w == 0 || w > inner) {
+      ready = false;
+    }
+  });
+  if(!ready) {
     window.setTimeout(function() {
       initGraphs();
-    }, 50);
+    }, 80);
     return;
   }
+
+  try {
+    drawGraphs();
+  } catch(e) {
+    console.warn(e);
+    window.setTimeout(function() {
+      // final retry
+      drawGraphs();
+    }, 1000);
+  }
+}
+
+function drawGraphs() {
   //avail backends
   [% IF backend_stats.available > 1 %]
     var backends = bb.generate({
