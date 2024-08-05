@@ -16,7 +16,7 @@
     <div class="flexrow gap-1 flex-nowrap items-center">
       <h3 class="h-min">Page Profile</h3>
     </div>
-    <button class="iconOnly medium" onClick="toggleElement('stats_details'); return false;"><i class="uil uil-times"></i></button>
+    <button class="iconOnly medium" onClick="toggleElement('stats_details_card'); return false;"><i class="uil uil-times"></i></button>
   </div>
   <div>
     [% PROCESS _profiles.tt profiles=page_profiles id='stats_details' %]
