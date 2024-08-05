@@ -84,18 +84,23 @@
       }
 
       [% IF clean_cookies %]
-        <script>
-        <!--
-          [%# try to remove https cookies as well, as they prevent storing http cookies #%]
-          if(window.location.protocol && window.location.protocol == "http:") {
-            jQuery('BODY').append(jQuery("<img>", {
-              src: window.location.toString().replace(/^http:/, "https:"),
-              width: "1px",
-              height: "1px",
-              style: "position: absolute; top: -1px; left: 1px; width: 1px; height: 1px;"
-            }));
-          }
+        [%# try to remove https cookies as well, as they prevent storing http cookies #%]
+        if(window.location.protocol && window.location.protocol == "http:") {
+          jQuery('BODY').append(jQuery("<img>", {
+            src: window.location.toString().replace(/^http:/, "https:"),
+            width: "1px",
+            height: "1px",
+            style: "position: absolute; top: -1px; left: 1px; width: 1px; height: 1px;"
+          }));
+        }
       [% END %]
+
+      [%# clear cookies only once to avoid login loops #%]
+      var curUrl = getCurrentUrl(false);
+      var newUrl = curUrl.replace(/\?nocookie&/, '?');
+      if(newUrl != curUrl) {
+        updateUrl(newUrl);
+      }
     -->
     </script>
 

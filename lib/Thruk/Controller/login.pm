@@ -124,6 +124,12 @@ sub index {
         }
     }
 
+    # simply redirect if already authenticated
+    if($referer && $c->cookies('thruk_auth') && $c->authenticate()) {
+        $referer = '/'.$referer if $referer !~ m|^/|mx;
+        return $c->redirect_to($referer);
+    }
+
     if($c->req->parameters->{'state'} || (defined $c->req->parameters->{'oauth'} && $c->req->parameters->{'oauth'} ne "")) {
         require Thruk::Utils::OAuth;
         return(Thruk::Utils::OAuth::handle_oauth_login($c, $referer, $cookie_path, $cookie_domain));
