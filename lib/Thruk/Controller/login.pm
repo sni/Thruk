@@ -44,6 +44,7 @@ sub index {
     my $cookie_domain = $c->get_cookie_domain();
 
     my $keywords = $c->req->uri->query;
+    my $has_query = $c->req->uri->query ? 1 : 0;
     my $logoutref;
     if($keywords and $keywords =~ m/^logout(\/.*)/mx) {
         $keywords = 'logout';
@@ -125,7 +126,7 @@ sub index {
     }
 
     # simply redirect if already authenticated
-    if($referer && $c->cookies('thruk_auth') && $c->authenticate()) {
+    if($has_query && $referer && $c->cookies('thruk_auth') && $c->authenticate()) {
         $referer = '/'.$referer if $referer !~ m|^/|mx;
         return $c->redirect_to($referer);
     }
