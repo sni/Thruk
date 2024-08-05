@@ -21,7 +21,7 @@ use File::Copy qw/move copy/;
 use IO::Select ();
 use IPC::Open3 qw/open3/;
 use POSIX ":sys_wait_h";
-use Time::HiRes qw/sleep/;
+use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::Log qw/:all/;
@@ -48,9 +48,15 @@ close filehandle and ensure permissions and ownership
 =cut
 sub close {
     my($fh, $filename, $just_close) = @_;
+    my $t1 = [gettimeofday];
     my $rc = CORE::close($fh);
     confess("cannot write to $filename: $!") unless $rc;
     ensure_permissions('file', $filename) unless $just_close;
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
     return $rc;
 }
 
@@ -65,6 +71,8 @@ create folder and ensure permissions and ownership
 =cut
 
 sub mkdir {
+    my $t1 = [gettimeofday];
+
     for my $dirname (@_) {
         if(!CORE::mkdir($dirname)) {
             my $err = $!;
@@ -72,6 +80,10 @@ sub mkdir {
         }
         ensure_permissions('dir', $dirname);
     }
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
     return 1;
 }
 
@@ -111,10 +123,16 @@ read file and return content
 
 sub read {
     my($path) = @_;
+    my $t1 = [gettimeofday];
+
     open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
     local $/ = undef;
     my $content = <$fh>;
     CORE::close($fh);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
     return($content);
 }
 
@@ -145,10 +163,17 @@ read file and return content or undef in case it cannot be read
 
 sub saferead {
     my($path) = @_;
+    my $t1 = [gettimeofday];
+
     open(my $fh, '<', $path) || return;
     local $/ = undef;
     my $content = <$fh>;
     CORE::close($fh);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
     return($content);
 }
 
@@ -164,10 +189,17 @@ read file and return content as array
 
 sub read_as_list {
     my($path) = @_;
+    my $t1 = [gettimeofday];
+
     my @res;
     open(my $fh, '<', $path) || die "Can't open file ".$path.": ".$!;
     chomp(@res = <$fh>);
     CORE::close($fh);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
     return(@res);
 }
 
@@ -183,10 +215,17 @@ read file and return content as array, return empty list if open fails
 
 sub saferead_as_list {
     my($path) = @_;
+    my $t1 = [gettimeofday];
+
     my @res;
     open(my $fh, '<', $path) || return(@res);
     chomp(@res = <$fh>);
     CORE::close($fh);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
     return(@res);
 }
 
@@ -202,6 +241,8 @@ creates file and ensure permissions
 
 sub write {
     my($path,$content,$mtime,$append) = @_;
+    my $t1 = [gettimeofday];
+
     my $mode = $append ? '>>' : '>';
     open(my $fh, $mode, $path) or confess('cannot create file '.$path.': '.$!);
     print $fh $content;
@@ -211,6 +252,11 @@ sub write {
     } else {
         utime($mtime, $mtime, $path) if $mtime;
     }
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
     return 1;
 }
 
@@ -275,6 +321,7 @@ locks given file in shared / readonly mode. Returns filehandle.
 sub file_rlock {
     my($file) = @_;
     confess("no file") unless $file;
+    my $t1 = [gettimeofday];
 
     alarm(10);
     local $SIG{'ALRM'} = sub { confess("timeout while trying to shared flock: ".$file."\n"._fuser($file)); };
@@ -307,6 +354,10 @@ sub file_rlock {
         _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
 
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_lock'} += $elapsed if $c;
+
     return($fh);
 }
 
@@ -325,6 +376,7 @@ sub file_lock {
     confess("no file") unless $file;
     if($mode && $mode eq 'sh') { return file_rlock($file); }
 
+    my $t1 = [gettimeofday];
     alarm(20);
     local $SIG{'ALRM'} = sub { confess("timeout while trying to excl. flock: ".$file."\n"._fuser($file)); };
 
@@ -423,6 +475,10 @@ sub file_lock {
         _warn("got lock for ".$file." after ".$retrys." retries") unless $ENV{'TEST_IO_NOWARNINGS'};
     }
 
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_lock'} += $elapsed if $c;
+
     return($fh, $lock_fh);
 }
 
@@ -493,6 +549,8 @@ sub json_store {
         }
     }
 
+    my $t1 = [gettimeofday];
+
     my $tmpfile = $options->{'tmpfile'} // $file.'.new';
     open(my $fh, '>', $tmpfile) or confess('cannot write file '.$tmpfile.': '.$!);
     print $fh ($write_out || $json->encode($data)) or confess('cannot write file '.$tmpfile.': '.$!);
@@ -515,6 +573,10 @@ sub json_store {
 
 
     move($tmpfile, $file) or confess("cannot replace $file with $tmpfile: $!");
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
 
     return 1;
 }
@@ -562,6 +624,8 @@ sub json_retrieve {
         $jsonreader->relaxed();
     }
 
+    my $t1 = [gettimeofday];
+
     seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
 
     my $data;
@@ -582,6 +646,11 @@ sub json_retrieve {
         }
         confess("error while reading $file: ".$err);
     }
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
     return($data, $content) if wantarray;
     return $data;
 }
@@ -682,6 +751,9 @@ sub save_logs_to_tempfile {
     my($data) = @_;
     require Encode;
     require File::Temp;
+
+    my $t1 = [gettimeofday];
+
     my($fh, $filename) = File::Temp::tempfile();
     $filename = $filename.'_tmplogs';
     open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
@@ -689,6 +761,11 @@ sub save_logs_to_tempfile {
         print $fh Encode::encode_utf8($r->{'message'}),"\n";
     }
     &close($fh, $filename);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
     return($filename);
 }
 
@@ -716,6 +793,8 @@ optional timeout will kill the command after the timeout (seconds)
 
 sub cmd {
     my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode, $timeout, $no_touch_signals) = @_;
+
+    my $t1 = [gettimeofday];
 
     if($timeout) {
         setpgrp();
@@ -840,6 +919,11 @@ sub cmd {
     _debug( "output: ". $output ) if $c;
     &timing_breakpoint('IO::cmd done');
     $c->stats->profile(end => "IO::cmd") if $c;
+
+    my $elapsed = tv_interval($t1);
+    $c = $c || $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_cmd'} += $elapsed if $c;
+
     return($rc, $output) if wantarray;
     return($output);
 }
@@ -979,6 +1063,8 @@ return memory usage of pid or own process if no pid specified
 
 sub get_memory_usage {
     my($pid) = @_;
+    my $t1 = [gettimeofday];
+
     $pid = $$ unless defined $pid;
     my $page_size_in_kb = 4;
     if(sysopen(my $fh, "/proc/$pid/statm", 0)) {
@@ -995,6 +1081,11 @@ sub get_memory_usage {
         }
     }
     CORE::close($ph);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
     return($rsize);
 }
 

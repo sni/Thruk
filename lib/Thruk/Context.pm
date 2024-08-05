@@ -1063,10 +1063,15 @@ adds common statistics
 =cut
 sub set_stats_common_totals {
     my($c) = @_;
-    $c->stats->totals(
+    my @totals = (
         { '*total time waited on backends'  => $c->stash->{'total_backend_waited'} },
         { '*total time waited on rendering' => $c->stash->{'total_render_waited'}  },
     );
+    push @totals, { '*total time waited on io'        => $c->stash->{'total_io_time'}  } if $c->stash->{'total_io_time'} > 0;
+    push @totals, { '*total time waited on io locks'  => $c->stash->{'total_io_lock'}  } if $c->stash->{'total_io_lock'} > 0;
+    push @totals, { '*total time waited on ext cmd'   => $c->stash->{'total_io_cmd'}  }  if $c->stash->{'total_io_cmd'}  > 0;
+
+    $c->stats->totals(@totals);
     return;
 }
 

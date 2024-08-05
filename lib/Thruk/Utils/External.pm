@@ -781,6 +781,9 @@ sub do_child_stuff {
     $c->stats->clear(); # start new stats session
     $c->stash->{'total_backend_waited'} = 0;
     $c->stash->{'total_render_waited'}  = 0;
+    $c->stash->{'total_io_time'}        = 0;
+    $c->stash->{'total_io_lock'}        = 0;
+    $c->stash->{'total_io_cmd'}         = 0;
     $c->stats->profile(begin => 'External Job: '.$id) if $id;
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s', (scalar localtime), $c->config->{'hostname'}, $$));
     delete $c->stash->{'db_profiles'};
