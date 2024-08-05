@@ -71,9 +71,11 @@ create folder and ensure permissions and ownership
 =cut
 
 sub mkdir {
+    my(@dirs) = @_;
+
     my $t1 = [gettimeofday];
 
-    for my $dirname (@_) {
+    for my $dirname (@dirs) {
         if(!CORE::mkdir($dirname)) {
             my $err = $!;
             confess("failed to create ".$dirname.": ".$err) unless -d $dirname;

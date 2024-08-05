@@ -1298,6 +1298,10 @@ sub js_deinit {
 #################################################
 sub js_ok {
     my($src, $msg) = @_;
+
+    # replace template toolkit comments
+    $src =~ s/\[%\#.*?\#%\]//gmx;
+
     our $mech;
     ok(1, sprintf("js_ok(%s)", $msg));
     local $SIG{ALRM} = sub { die("timeout while waiting for js eval") };
