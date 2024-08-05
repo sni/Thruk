@@ -83,8 +83,20 @@
         }
       }
 
-      [% IF clean_cookies %]
-        [%# try to remove https cookies as well, as they prevent storing http cookies #%]
+      [%# clear cookies only once to avoid login loops #%]
+      var curUrl = getCurrentUrl(false);
+      var newUrl = curUrl.replace(/\?nocookie&/, '?');
+      if(newUrl != curUrl) {
+        updateUrl(newUrl);
+      }
+
+      -->
+    </script>
+
+    [% IF clean_cookies %]
+      [%# try to remove https cookies as well, as they prevent storing http cookies #%]
+      <script>
+      <!--
         if(window.location.protocol && window.location.protocol == "http:") {
           jQuery('BODY').append(jQuery("<img>", {
             src: window.location.toString().replace(/^http:/, "https:"),
@@ -93,16 +105,9 @@
             style: "position: absolute; top: -1px; left: 1px; width: 1px; height: 1px;"
           }));
         }
-      [% END %]
-
-      [%# clear cookies only once to avoid login loops #%]
-      var curUrl = getCurrentUrl(false);
-      var newUrl = curUrl.replace(/\?nocookie&/, '?');
-      if(newUrl != curUrl) {
-        updateUrl(newUrl);
-      }
     -->
     </script>
+    [% END %]
 
     [% IF ssi_footer; ssi_footer | evaltt; END %]
   </body>
