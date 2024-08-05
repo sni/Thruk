@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 317;
+    plan tests => 362;
 
     use lib('t');
     require TestUtils;
@@ -210,5 +210,36 @@ BEGIN {
         'url'      => '/thruk/cgi-bin/extinfo.cgi?type=2&host=localhost',
         'redirect' => 1,
         'location' => 'login.cgi\?nocookie&demo/thruk/cgi-bin/extinfo.cgi&type=2&host=localhost',
+    );
+};
+
+# check redirect from login page when already logged in
+{
+    local $ENV{'THRUK_TEST_AUTH'} = 'test:test';
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/user.cgi',
+        'like'   => ['>User<.*?>test<', 'none'],
+    );
+    local $ENV{'THRUK_TEST_AUTH'} = undef;
+
+    # still logged in?
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/user.cgi',
+        'like'   => ['>User<.*?>test<', 'none'],
+    );
+
+    # redirect from login page when already got a session id
+    TestUtils::test_page(
+        'url'      => '/thruk/cgi-bin/login.cgi?demo/thruk/cgi-bin/tac.cgi',
+        'redirect' => 1,
+        'location' => '/demo/thruk/cgi-bin/tac.cgi',
+    );
+
+    # logout
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/login.cgi?logout',
+        'like'   => ['logout successful'],
+        'follow' => 1,
+        'code'   => 401,
     );
 };
