@@ -2721,6 +2721,7 @@ function postToggleBackend() {
     cookieSave('thruk_backends', toQueryString(current_backend_states));
     // remove &backends=... from url, they would overwrite cookie settings
     removeParams['backends'] = true;
+    removeParams['backend']  = true;
 
     var delay = 1.5;
     if(jQuery('#site_panel_content').is(':visible')) { delay = 20; }

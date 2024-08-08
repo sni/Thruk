@@ -5,6 +5,9 @@
   [% IF c.request.parameters.defined("entries") %]
   <input type="hidden" name="entries" value="[% c.request.parameters.entries | html %]">
   [% END %]
+  [% IF c.request.parameters.defined("backend") %]
+  <input type="hidden" name="backend" value="[% c.request.parameters.backend | html %]">
+  [% END %]
 
   <div class="flexrow justify-between gap-x-1">
     <div class="flexcol gap-x-1">
