@@ -4,8 +4,8 @@
     <div class="description textBody font-semibold" style="width: 90px;">Time: [% sprintf("%.3fs", time_total) %]</div>
     <div class="bar flex relative" style="height: 12px; width: 100px;">
       <div style="height: 12px; background: var(--stats-time-backend); width: [% sprintf("%d", total_backend_waited / total * 200) %]px"></div>
-      <div style="height: 12px; background: var(--stats-time-controler); width: [% sprintf("%d", (time_total - total_backend_waited - total_render_waited) / total * 200) %]px"></div>
       <div style="height: 12px; background: var(--stats-time-view); width: [% sprintf("%d", total_render_waited / total * 200) %]px"></div>
+      <div style="height: 12px; background: var(--stats-time-controler); width: [% sprintf("%d", (time_total - total_backend_waited - total_render_waited) / total * 200) %]px"></div>
       [% IF total_backend_queries > 0 %]<div class="absolute opacity-80 bg-transparent right-1 top-0 leading-3">Queries: [% total_backend_queries %]</div>[% END %]
     </div>
   </div>
@@ -24,18 +24,59 @@
       <table class="w-[100px] my-2">
         <tr>
           <td class="pr-2">Backend</td>
-          <td class="pr-2"><div class="thruk_dev_panel_square" style="background: var(--stats-time-backend);"></div>[% sprintf("%.3f", total_backend_waited) %]s ([% perc = total_backend_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
-          <td><div class="progressbar" style="padding-top: 4px; width: 100px;"><div class="bar" style="height: 12px;"><div style="height: 12px; background: var(--stats-time-backend); width: [% sprintf("%d", perc) %]px"></div></div></div></td>
-        </tr>
-        <tr>
-          <td class="pr-2">Controller</td>
-          <td class="pr-2"><div class="thruk_dev_panel_square" style="background: var(--stats-time-controler);"></div>[% time_controler = time_total - total_backend_waited - total_render_waited;  sprintf("%.3f", time_controler) %]s ([% perc = time_controler / time_total * 100; sprintf("%.0f", perc) %]%)</td>
-          <td><div class="progressbar" style="padding-top: 4px;"><div class="bar" style="height: 12px;"><div style="height: 12px; background: var(--stats-time-controler); width: [% sprintf("%d", perc) %]px"></div></div></div></td>
+          <td class="pr-2">
+            <div class="thruk_dev_panel_square" style="background: var(--stats-time-backend);"></div>
+            [% sprintf("%.3f", total_backend_waited) %]s ([% perc = total_backend_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
+          <td>
+            <div class="progressbar" style="padding-top: 4px; width: 100px;">
+              <div class="bar" style="height: 12px;">
+                <div style="height: 12px; background: var(--stats-time-backend); width: [% sprintf("%d", perc) %]px"></div>
+              </div>
+            </div>
+          </td>
         </tr>
         <tr>
           <td class="pr-2">View</td>
-          <td class="pr-2"><div class="thruk_dev_panel_square" style="background: var(--stats-time-view);"></div>[% sprintf("%.3f", total_render_waited) %]s ([% perc = total_render_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
-          <td><div class="progressbar" style="padding-top: 4px;"><div class="bar" style="height: 12px;"><div style="height: 12px; background: var(--stats-time-view); width: [% sprintf("%d", perc) %]px"></div></div></div></td>
+          <td class="pr-2">
+            <div class="thruk_dev_panel_square" style="background: var(--stats-time-view);"></div>
+            [% sprintf("%.3f", total_render_waited) %]s ([% perc = total_render_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
+          <td>
+            <div class="progressbar" style="padding-top: 4px;">
+              <div class="bar flex relative" style="height: 12px;">
+                <div style="height: 12px; background: var(--stats-time-view); width: [% sprintf("%d", perc) %]px"></div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="pr-2">Controller</td>
+          <td class="pr-2">
+            <div class="thruk_dev_panel_square" style="background: var(--stats-time-controler);"></div>
+            [% time_controler = time_total - total_backend_waited - total_render_waited;  sprintf("%.3f", time_controler) %]s ([% perc = time_controler / time_total * 100; sprintf("%.0f", perc) %]%)
+            [%# add detailed drill down into sub tasks of controller #%]
+            [%
+              perc_io   = 0;
+              IF total_io_time > 0; perc_io   = total_io_time / time_total * 100; END;
+
+              perc_lock = 0;
+              IF total_io_lock > 0; perc_lock = total_io_lock / time_total * 100; END;
+
+              perc_cmds = 0;
+              IF total_io_cmd  > 0; perc_cmds = total_io_cmd  / time_total * 100; END;
+
+              perc_ctrl = perc - perc_cmds - perc_lock - perc_io;
+            %]
+          </td>
+          <td>
+            <div class="progressbar" style="padding-top: 4px;">
+              <div class="bar" style="height: 12px;">
+                [% IF perc_io   > 0 %]<div style="height: 12px; background: var(--stats-time-io); width: [% sprintf("%d", perc_io) %]px" title="disk io"></div>[% END %]
+                [% IF perc_lock > 0 %]<div style="height: 12px; background: var(--stats-time-locks); width: [% sprintf("%d", perc_lock) %]px" title="io locks"></div>[% END %]
+                [% IF perc_cmds > 0 %]<div style="height: 12px; background: var(--stats-time-cmds); width: [% sprintf("%d", perc_cmds) %]px" title="external commands"></div>[% END %]
+                [% IF perc_ctrl > 0 %]<div style="height: 12px; background: var(--stats-time-controler); width: [% sprintf("%d", perc_ctrl) %]px" title="controller"></div>[% END %]
+              </div>
+            </div>
+          </td>
         </tr>
       </table>
     </div>

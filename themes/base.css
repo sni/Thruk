@@ -149,6 +149,9 @@
 
   --stats-time-backend:       var(--color-sky-400);
   --stats-time-controler:     var(--color-yellow-400);
+  --stats-time-io:            var(--color-lime-500);
+  --stats-time-locks:         var(--color-rose-400);
+  --stats-time-cmds:          var(--color-indigo-500);
   --stats-time-view:          var(--color-orange-400);
 
   --dashboard-series-1:       var(--color-sky-600);
