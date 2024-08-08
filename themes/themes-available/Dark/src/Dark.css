@@ -35,7 +35,7 @@
   --text-alert:               var(--color-red-500);
   --text-unreachable:         var(--color-red-500);
   --text-mixed-gradient-from: var(--color-gray-400);
-  --text-mixed-gradient-to  : var(--color-gray-500);
+  --text-mixed-gradient-to:   var(--color-gray-500);
 
   --navbar-fg:                var(--text-body);
   --navbar-bg:                var(--header-bg);
@@ -137,6 +137,10 @@
   --button-green-bg:          var(--color-green-700);
   --button-green-hover-fg:    var(--text-body);
   --button-green-hover-bg:    var(--color-green-800);
+  --button-orange-fg:         var(--color-white);
+  --button-orange-bg:         var(--color-orange-600);
+  --button-orange-hover-fg:   var(--color-white);
+  --button-orange-hover-bg:   var(--color-orange-700);
   --button-disabled-fg:       #ccc;
   --button-disabled-bg:       #555;
 
@@ -146,6 +150,10 @@
   --stats-time-locks:         var(--color-rose-500);
   --stats-time-cmds:          var(--color-indigo-600);
   --stats-time-view:          var(--color-orange-600);
+
+  --dashboard-series-1:       var(--color-sky-600);
+  --dashboard-series-2:       var(--color-orange-500);
+  --dashboard-series-3:       var(--color-purple-600);
 }
 
 /*******************************************************************************
