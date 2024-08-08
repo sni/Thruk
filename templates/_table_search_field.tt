@@ -1,4 +1,14 @@
-﻿<input type="text" placeholder="filter" id="table_search_input" class="deletable" onchange='table_search(this.id, [% encode_json_obj(ids) %])' onkeyup='table_search(this.id, [% encode_json_obj(ids) %])' onfocus='table_search(this.id, [% encode_json_obj(ids) %], true)'>
+﻿[% DEFAULT skip_hash = 0 %]
+<input
+    type="text"
+    placeholder="[% DEFAULT placeholder = 'filter'; placeholder %]"
+    id="table_search_input"
+    class="deletable [% DEFAULT extraCls = ""; extraCls %]"
+    onchange='table_search(this.id, [% encode_json_obj(ids) %], undefined, [% IF skip_hash %]false[% ELSE %]true[% END %])'
+    onkeyup='table_search(this.id, [% encode_json_obj(ids) %], undefined, [% IF skip_hash %]false[% ELSE %]true[% END %])'
+    onfocus='table_search(this.id, [% encode_json_obj(ids) %], true, [% IF skip_hash %]false[% ELSE %]true[% END %])'
+>
+[% IF !skip_hash %]
 <script>
 <!--
 [%+ FOREACH id = ids +%]
@@ -15,3 +25,4 @@ jQuery(document).ready(function() {
 [%+ END +%]
 -->
 </script>
+[% END %]
