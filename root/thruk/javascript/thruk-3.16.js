@@ -3588,25 +3588,29 @@ function add_form_row(el, row_num_to_clone) {
 /* filter table content by search field */
 var table_search_input_id, table_search_table_ids, table_search_timer;
 var table_search_cb = {};
-function table_search(input_id, table_ids, nodelay) {
+function table_search(input_id, table_ids, nodelay, preserve_hash) {
     table_search_input_id  = input_id;
     table_search_table_ids = table_ids;
     clearTimeout(table_search_timer);
     if(nodelay != undefined) {
-        do_table_search();
+        do_table_search(preserve_hash);
     } else {
-        table_search_timer = window.setTimeout(do_table_search, 300);
+        table_search_timer = window.setTimeout(function() {
+            do_table_search(preserve_hash);
+        }, 300);
     }
 }
 /* do the search work */
-function do_table_search() {
+function do_table_search(preserve_hash) {
     var ids      = table_search_table_ids;
     var value    = jQuery('#'+table_search_input_id).val();
     if(value == undefined) {
         return;
     }
     value    = value.toLowerCase();
-    set_hash(value, 2);
+    if(preserve_hash) {
+        set_hash(value, 2);
+    }
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
         if(table.tagName == "DIV") {
@@ -3633,6 +3637,7 @@ function do_table_search_table(id, table, value) {
     }
     table.dataset["search"] = value;
     var startWith = 1;
+    if(table.tagName == "TBODY") { startWith = 0; }
     if(jQuery(table).hasClass('header2')) {
         startWith = 2;
     }
@@ -3645,14 +3650,8 @@ function do_table_search_table(id, table, value) {
             var found = 0;
             jQuery.each(table.rows, function(nr, row) {
                 var cell = row.cells[col_nr];
-                try {
-                    if(cell.innerHTML.toLowerCase().match(value)) {
-                        found = 1;
-                    }
-                } catch(err) {
-                    if(cell.innerHTML.toLowerCase().indexOf(value) != -1) {
-                        found = 1;
-                    }
+                if(matchTableCellContent(cell, value)) {
+                    found = 1;
                 }
             });
             jQuery.each(table.rows, function(nr, row) {
@@ -3685,7 +3684,7 @@ function do_table_search_table(id, table, value) {
             var found = 0;
             jQuery.each(row.cells, function(nr, cell) {
                 /* if regex matching fails, use normal matching */
-                if(matchOrIndex(cell.innerHTML.toLowerCase(), value)) {
+                if(matchTableCellContent(cell, value)) {
                     found = 1;
                     return false;
                 }
@@ -3705,6 +3704,13 @@ function do_table_search_table(id, table, value) {
             console.log(err);
         }
     }
+}
+
+function matchTableCellContent(el, value) {
+    var src = el.innerHTML.toLowerCase();
+    // remove html tags
+    src = src.replace(/<[^>]*?>/g, '');
+    return matchOrIndex(src, value);
 }
 
 function updatePagerCount(table_id) {
@@ -3727,7 +3733,7 @@ function do_table_search_div(id, div, value) {
             return;
         }
         /* if regex matching fails, use normal matching */
-        if(matchOrIndex(row.innerHTML.toLowerCase(), value)) {
+        if(matchTableCellContent(row, value)) {
             jQuery(row).removeClass('filter_hidden');
         } else {
             jQuery(row).addClass('filter_hidden');
