@@ -2595,34 +2595,49 @@ sort columns based on request parameters
 =cut
 sub sort_table_columns {
     my($columns, $params) = @_;
-    if(!$params) { return($columns); }
 
-    my $hashed = {};
+    my $hashed    = {};
+    my $available = {};
     for my $col (@{$columns}) {
         $hashed->{$col->{'field'}} = $col;
+        $available->{$col->{'field'}} = 1;
     }
 
+    # add columns from request parameters
     my $sorted = [];
-    for my $param (split/,/mx, $params) {
-        my($key,$title) = split(/:/mx, $param, 2);
-        if($hashed->{$key}) {
-            $hashed->{$key}->{'checked'} = 1;
-            if(defined $title) {
-                $title = Thruk::Utils::Filter::escape_html($title);
-                $hashed->{$key}->{'orig'}  = $hashed->{$key}->{'title'};
-                $hashed->{$key}->{'title'} = $title;
+    if($params) {
+        for my $param (split/,/mx, $params) {
+            my($key,$title) = split(/:/mx, $param, 2);
+            if($hashed->{$key}) {
+                $hashed->{$key}->{'checked'} = 1;
+                if(defined $title) {
+                    $title = Thruk::Utils::Filter::escape_html($title);
+                    $hashed->{$key}->{'orig'}  = $hashed->{$key}->{'title'};
+                    $hashed->{$key}->{'title'} = $title;
+                }
+                push @{$sorted}, $hashed->{$key};
+                delete $hashed->{$key};
             }
-            push @{$sorted}, $hashed->{$key};
-            delete $hashed->{$key};
         }
     }
+
     # add missing
     for my $col (@{$columns}) {
         if($hashed->{$col->{'field'}}) {
             $hashed->{$col->{'field'}}->{'checked'} = 0;
+
+            # skip _HOST custom vars, if they have been added without HOST already
+            my $field = $col->{'field'};
+            if($field =~ m/^cust_HOST/mx) {
+                $field =~ s/^cust_HOST/cust_/gmx;
+                if($available->{$field}) {
+                    next;
+                }
+            }
             push @{$sorted}, $hashed->{$col->{'field'}};
         }
     }
+
     return($sorted);
 }
 
