@@ -3,7 +3,7 @@
     type="text"
     placeholder="[% DEFAULT placeholder = 'filter'; placeholder %]"
     id="table_search_input"
-    class="deletable [% DEFAULT extraCls = ""; extraCls %]"
+    class="deletable [% DEFAULT extraCls = ''; extraCls %]"
     onchange='table_search(this.id, [% encode_json_obj(ids) %], undefined, [% IF skip_hash %]false[% ELSE %]true[% END %])'
     onkeyup='table_search(this.id, [% encode_json_obj(ids) %], undefined, [% IF skip_hash %]false[% ELSE %]true[% END %])'
     onfocus='table_search(this.id, [% encode_json_obj(ids) %], true, [% IF skip_hash %]false[% ELSE %]true[% END %])'
