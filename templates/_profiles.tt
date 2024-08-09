@@ -10,11 +10,11 @@
         <a class="flex font-mono" href="#" onclick="show_list('#[% loop.index %]', '#[% id %] DIV.profiles', '#[% id %] DIV.prof_head'); return false;">
           <div class="relative w-24 h-5">
             [% IF p.defined("total_perc") %]
-              <div style="width: [% sprintf("%.0f", p.total_perc) %]%; height: 20px;" class="WARNING opacity-50 absolute top-0 left-0"></div>
+              <div style="width: [% sprintf("%.0f", p.total_perc) %]%;" class="WARNING opacity-50 absolute top-0 left-0 h-5"></div>
             [% END %]
             <span class="absolute top-0 left-0">[% date_format(c, p.time, "%H:%M:%S.%MILLI") %]</span>
           </div>
-          <div class="ml-2">[% p.name %]</div>
+          <div class="ml-2 text-ellipsis overflow-hidden w-32" title="[% p.name %]">[% p.name %]</div>
         </a>
       </div>
     [% END %]
