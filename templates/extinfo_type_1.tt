@@ -36,15 +36,15 @@
         [% IF host.childs.size > 0 %]<div><a href="status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]">View Child Hosts For This Host</a></div>[% END %]
         [% IF show_impacts_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]">View Impacts For This Problem</a></div>[% END %]
         [% IF show_rootproblems_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]">View Root Problem For This Impact</a></div>[% END %]
-        <div class="flex flex-nowrap gap-x-1"><a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1&amp;backend=[% peer_key %]">View Alert History For This Host</a> (<a href="showlog.cgi?host=[% host.name | uri %]&amp;backend=[% peer_key %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% host.name | uri %]&amp;backend=[% peer_key %]">Outages</a>)</div>
-        [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host.name | uri %]">View Trends For This Host</a></div>[% END %]
-        <div><a href="avail.cgi?host=[% host.name | uri %]&amp;show_log_entries">View Availability Report For This Host</a></div>
-        <div><a href="notifications.cgi?host=[% host.name | uri %]">View Notifications For This Host</a></div>
+        <div class="flex flex-nowrap gap-x-1"><a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1[% add_request_backend %]">View Alert History For This Host</a> (<a href="showlog.cgi?host=[% host.name | uri %][% add_request_backend %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% host.name | uri %][% add_request_backend %]">Outages</a>)</div>
+        [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host.name | uri %][% add_request_backend %]">View Trends For This Host</a></div>[% END %]
+        <div><a href="avail.cgi?host=[% host.name | uri %]&amp;show_log_entries[% add_request_backend %]">View Availability Report For This Host</a></div>
+        <div><a href="notifications.cgi?host=[% host.name | uri %][% add_request_backend %]">View Notifications For This Host</a></div>
         [% IF c.check_user_roles('authorized_for_configuration_information') %]
           <div class="flex flex-nowrap gap-x-1">
             <a href="config.cgi?type=hosts&amp;jump2=[% host.name | uri %]">View Configuration For This Host</a>
             [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
-              <a href="conf.cgi?edit&amp;host=[% host.name | uri %]&amp;backend=[% peer_key %]"> (Edit This Host)</a>
+              <a href="conf.cgi?edit&amp;host=[% host.name | uri %][% add_request_backend %]"> (Edit This Host)</a>
             [% END %]
           </div>
         [% END %]

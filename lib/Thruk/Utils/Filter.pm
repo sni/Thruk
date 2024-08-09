@@ -2041,6 +2041,16 @@ sub add_request_backend {
     my $c = $Thruk::Globals::c;
 
     my $backend = $c->request->parameters->{'backend'} || $c->request->parameters->{'backends'};
+    if(!$backend) {
+        if($c->stash->{'host'} && ref $c->stash->{'host'} eq 'HASH') {
+            $backend = $c->stash->{'host'}->{'peer_key'};
+        }
+    }
+    if(!$backend) {
+        if($c->stash->{'service'} && ref $c->stash->{'service'} eq 'HASH') {
+            $backend = $c->stash->{'service'}->{'peer_key'};
+        }
+    }
     return("") unless $backend;
 
     return("&backend=".&escape_html($backend));

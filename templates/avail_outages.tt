@@ -4,6 +4,9 @@
 
 <form action="avail.cgi" method="GET" id="date_form">
   <input type="hidden" name="outages" value="1">
+  [% IF c.request.parameters.defined("backend") %]
+  <input type="hidden" name="backend" value="[% c.request.parameters.backend | html %]">
+  [% END %]
 
   <div class="flexrow justify-between gap-1">
     <div class="flexcol gap-1">
@@ -12,18 +15,18 @@
         <div class="card mt-5 min-w-[350px] overflow-hidden">
           <div class="actionbox less-padding">
             [% IF service %]
-              <div><a class="flex" href="avail.cgi?host=[% host | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For This Host</a></div>
+              <div><a class="flex" href="avail.cgi?host=[% host | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %][% add_request_backend %]">View Availability Report For This Host</a></div>
               <div><a class="flex" href="avail.cgi?host=null&amp;service=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For All Services</a></div>
               [% IF use_feature_trends %]<div><a class="flext" href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=no&amp;includesoftstates=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedservicestate=0&amp;backtrack=4&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Trends For This Service</a></div>[% END %]
-              <div><a class="flex" href="history.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;nosystem=1">View Alert History For This Service</a></div>
-              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>
+              <div><a class="flex" href="history.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;nosystem=1[% add_request_backend %]">View Alert History For This Service</a></div>
+              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %][% add_request_backend %]">View Notifications For This Service</a></div>
               <div><a class="flex" href="extinfo.cgi?type=2&amp;host=[% host | uri %]&service=[% service | uri %]">View Information For This Service</a></div>
             [% ELSIF host %]
               <div><a class="flex" href="avail.cgi?host=all&amp;t1=[% start %]&amp;t2=[% end %]&amp;backtrack=[% backtrack | uri %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;initialassumedservicestate=[% initialassumedservicestate | uri %]&amp;[% IF show_log_entries %]show_log_entries[% END %]&amp;showscheduleddowntime=[% showscheduleddowntime | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Availability Report For All Hosts</a></div>
-              [% IF use_feature_trends %]<div><a class="flex" href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;backtrack=[% backtrack | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %]">View Trends For This Host</a></div>[% END %]
+              [% IF use_feature_trends %]<div><a class="flex" href="trends.cgi?host=[% host | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=[% assumestateretention | uri %]&amp;assumeinitialstates=[% assumeinitialstates | uri %]&amp;includesoftstates=[% includesoftstates | uri %]&amp;assumestatesduringnotrunning=[% assumestatesduringnotrunning | uri %]&amp;initialassumedhoststate=[% initialassumedhoststate | uri %]&amp;backtrack=[% backtrack | uri %]&amp;rpttimeperiod=[% rpttimeperiod | uri %][% add_request_backend %]">View Trends For This Host</a></div>[% END %]
               <div><a class="flex" href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a></div>
-              <div><a class="flex" href="history.cgi?host=[% host | uri %]&amp;nosystem=1">View Alert History For This Host</a></div>
-              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a></div>
+              <div><a class="flex" href="history.cgi?host=[% host | uri %]&amp;nosystem=1[% add_request_backend %]">View Alert History For This Host</a></div>
+              <div><a class="flex" href="notifications.cgi?host=[% host | uri %][% add_request_backend %]">View Notifications For This Host</a></div>
               <div><a class="flex" href="extinfo.cgi?type=1&amp;host=[% host | uri %]">View Information For This Host</a></div>
             [% END %]
           </div>
@@ -125,7 +128,7 @@
         <td class="[% l.class.upper | html %]">[% l.type %]</td>
         <td class="truncate max-w-[600px]">[% log_line_plugin_output(l) %]</td>
         <td>
-          <a href="showlog.cgi?host=[% l.host | uri %][% IF l.exists('service') %]&service=[% l.service | uri %][% END %]&start=[% l.start | uri %]&end=[% IF l.end %][% l.end | uri %][% ELSE %][% date.now %][% END %]">
+          <a href="showlog.cgi?host=[% l.host | uri %][% IF l.exists('service') %]&service=[% l.service | uri %][% END %]&start=[% l.start | uri %]&end=[% IF l.end %][% l.end | uri %][% ELSE %][% date.now %][% END %][% add_request_backend %]">
             <i class="fa-solid fa-magnifying-glass-arrow-right" title='Show Logfiles'></i>
           </a>
         </td>

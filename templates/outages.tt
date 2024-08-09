@@ -46,14 +46,14 @@
                     <i class="fa-solid fa-bars small" title='View status detail for this host'></i>
                   </a>
                   [% IF use_feature_trends %]
-                    <a href="trends.cgi?host=[% host.name | uri %]">
+                    <a href="trends.cgi?host=[% host.name | uri %][% add_request_backend %]">
                       <i class="fa-solid fa-chart-simple" title='View trends for this host'></i>
                     </a>
                   [% END %]
-                  <a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1">
+                  <a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1[% add_request_backend %]">
                     <i class="fa-solid fa-clock-rotate-left small" title='View alert history for this host'></i>
                   </a>
-                  <a href="notifications.cgi?host=[% host.name | uri %]">
+                  <a href="notifications.cgi?host=[% host.name | uri %][% add_request_backend %]">
                     <i class="fa-solid fa-volume-high small" title='View notifications for this host'></i>
                   </a>
                 </div>
