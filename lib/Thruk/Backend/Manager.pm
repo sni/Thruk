@@ -2962,6 +2962,12 @@ sub _add_query_stats {
         $profile->{'filter'}     = $arg{'filter'}     if defined $arg{'filter'};
         $profile->{'debug_hint'} = $arg{'debug_hint'} if defined $arg{'debug_hint'};
     }
+    if(!$profile->{'debug_hint'}) {
+        my $stack = $profile->{'stack'} = Carp::longmess($function);
+        if($stack =~ m/lib\/Thruk\/Controller\/(\S+\.pm)\ line\ (\d+)/mx) {
+            $profile->{'debug_hint'} = sprintf("%s:%s", $1, $2);
+        }
+    }
     push @{$c->stash->{'db_profiles'}}, $profile;
     return;
 }

@@ -279,6 +279,12 @@ sub _total2row {
     my($total) = @_;
     my $name = $total->[0];
     my $time = $total->[1];
+    if($name =~ m/total\ backend\ queries/mx) {
+        return({
+            name    => sprintf("%s: %d", $name, $time),
+            level   => 1,
+        });
+    }
     my $row = {
         name    => $name,
         elapsed => $time,

@@ -556,11 +556,18 @@ sub get_result {
         chomp($text);
         my $htmlfile = $p;
         $htmlfile =~ s/\.log\./.html./gmx;
+        my $jsonfile = $p;
+        $jsonfile =~ s/\.log\./.json./gmx;
+        my $totals;
+        if(-f $jsonfile) {
+            $totals = Thruk::Utils::IO::json_lock_retrieve($jsonfile);
+        }
         push @{$profiles}, {
-            name => "Job ".$id,
-            time => $end[9] // $start[9],
-            html => -e $htmlfile ? Thruk::Utils::IO::read($htmlfile) : undef,
-            text => $text,
+            name   => "Job ".$id,
+            time   => $end[9] // $start[9],
+            html   => -e $htmlfile ? Thruk::Utils::IO::read($htmlfile) : undef,
+            text   => $text,
+            totals => $totals ? $totals->{'totals'} : undef,
         };
         my $dbfile = $p;
         $dbfile =~ s/\.log\./.db./gmx;
@@ -752,8 +759,11 @@ sub save_profile {
     $file =~ s/profile\.log/profile.html/gmx;
     Thruk::Utils::IO::write($file, $profile);
 
+    $file =~ s/profile\.html/profile.json/gmx;
+    Thruk::Utils::IO::json_lock_store($file, { totals => $c->stats->{'totals'}});
+
     if($c->stash->{'db_profiles'} && $c->user && $c->user->check_user_roles('admin')) {
-        $file =~ s/profile\.html/profile.db/gmx;
+        $file =~ s/profile\.json/profile.db/gmx;
         my $db_profile = Thruk::Utils::render_db_profile($c, 'Job '.$ENV{'THRUK_JOB_ID'}.' DB', $c->stash->{'db_profiles'});
         Thruk::Utils::IO::json_lock_store($file, $db_profile, { pretty => 1 });
         delete $c->stash->{'db_profiles'};
@@ -779,11 +789,12 @@ sub do_child_stuff {
     _decouple_fcgid();
 
     $c->stats->clear(); # start new stats session
-    $c->stash->{'total_backend_waited'} = 0;
-    $c->stash->{'total_render_waited'}  = 0;
-    $c->stash->{'total_io_time'}        = 0;
-    $c->stash->{'total_io_lock'}        = 0;
-    $c->stash->{'total_io_cmd'}         = 0;
+    $c->stash->{'total_backend_waited'}  = 0;
+    $c->stash->{'total_render_waited'}   = 0;
+    $c->stash->{'total_io_time'}         = 0;
+    $c->stash->{'total_io_lock'}         = 0;
+    $c->stash->{'total_io_cmd'}          = 0;
+    $c->stash->{'total_backend_queries'} = 0;
     $c->stats->profile(begin => 'External Job: '.$id) if $id;
     $c->stats->profile(comment => sprintf('time: %s - host: %s - pid: %s', (scalar localtime), $c->config->{'hostname'}, $$));
     delete $c->stash->{'db_profiles'};
