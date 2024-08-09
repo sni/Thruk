@@ -16,20 +16,20 @@
         <div class="actionbox less-padding">
           [% IF service != '' and host != 'all' %]
             [% IF service != 'all' %]
-              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Notifications For This Service</a></div>
+              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %][% add_request_backend %]">View Notifications For This Service</a></div>
               [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View Trends For This Service</a></div>[% END %]
-              <div><a class="flex" href="showlog.cgi?host=[% host | uri %]&amp;nosystem=1">View History For This Host</a></div>
+              <div><a class="flex" href="showlog.cgi?host=[% host | uri %]&amp;nosystem=1[% add_request_backend %]">View History For This Host</a></div>
             [% ELSE %]
-              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %]">View All Notifications For This Host</a></div>
+              <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %][% add_request_backend %]">View All Notifications For This Host</a></div>
               [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]">View Trends For This Host</a></div>[% END %]
             [% END %]
           [% ELSIF host != 'all' %]
           <div><a class="flex" href="status.cgi?host=[% host | uri %]">View Status Detail For This Host</a></div>
-          <div><a class="flex" href="notifications.cgi?host=[% host | uri %]">View Notifications For This Host</a></div>
+          <div><a class="flex" href="notifications.cgi?host=[% host | uri %][% add_request_backend %]">View Notifications For This Host</a></div>
           [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host | uri %]">View Trends For This Host</a></div>[% END %]
           [% ELSE %]
           <div><a class="flex" href='status.cgi?host=all'>View Status Detail For All Hosts</a></div>
-          <div><a class="flex" href='notifications.cgi?host=all'>View Notifications For All Hosts</a></div>
+          <div><a class="flex" href='notifications.cgi?host=all[% add_request_backend %]'>View Notifications For All Hosts</a></div>
           [% END %]
         </div>
       </div>

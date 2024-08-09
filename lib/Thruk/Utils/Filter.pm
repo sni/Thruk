@@ -2029,4 +2029,23 @@ sub is_empty_filter {
 
 ########################################
 
+=head2 add_request_backend
+
+  add_request_backend()
+
+add backend from request paramters as link parameter
+
+=cut
+
+sub add_request_backend {
+    my $c = $Thruk::Globals::c;
+
+    my $backend = $c->request->parameters->{'backend'} || $c->request->parameters->{'backends'};
+    return("") unless $backend;
+
+    return("&backend=".&escape_html($backend));
+}
+
+########################################
+
 1;
