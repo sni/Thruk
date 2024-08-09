@@ -1739,14 +1739,21 @@ sub get_comments_filter {
         }
     }
     else {
-        my $comments     = $c->db->get_comments( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ], columns => ['id'] );
-        my @comment_ids  = sort { $a <=> $b } keys %{ Thruk::Base::array2hash([@{$comments}], 'id') };
+        my $comments     = $c->db->get_comments(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments'  ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ], columns => ['id', 'service_description'] );
+        my $downtimes    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ], columns => ['id', 'service_description'] );
+        $num             = scalar @{$comments} + scalar @{$downtimes};
+        my($host_comments, $host_downtimes, $service_comments, $service_downtimes) = ([],[],[],[]);
+        for my $com (@{$comments})  { $com->{'service_description'} ? push(@{$service_comments},  $com) : push(@{$host_comments},     $com); }
+        for my $dow (@{$downtimes}) { $dow->{'service_description'} ? push(@{$service_downtimes}, $dow) : push(@{$service_downtimes}, $dow); }
 
-        my $downtimes    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ], columns => ['id'] );
-        my @downtime_ids = sort { $a <=> $b } keys %{ Thruk::Base::array2hash([@{$downtimes}], 'id') };
-        $num             = scalar @downtime_ids + scalar @comment_ids;
-        if(scalar @comment_ids  == 0) { @comment_ids  = (-1); }
-        if(scalar @downtime_ids == 0) { @downtime_ids = (-1); }
+        my @host_comment_ids     = sort { $a <=> $b } keys %{ Thruk::Base::array2hash([@{$host_comments}],     'id') };
+        my @host_downtime_ids    = sort { $a <=> $b } keys %{ Thruk::Base::array2hash([@{$host_downtimes}],    'id') };
+        my @service_comment_ids  = sort { $a <=> $b } keys %{ Thruk::Base::array2hash([@{$service_comments}],  'id') };
+        my @service_downtime_ids = sort { $a <=> $b } keys %{ Thruk::Base::array2hash([@{$service_downtimes}], 'id') };
+        if(scalar @host_comment_ids     == 0) { @host_comment_ids     = (-1); }
+        if(scalar @host_downtime_ids    == 0) { @host_downtime_ids    = (-1); }
+        if(scalar @service_comment_ids  == 0) { @service_comment_ids  = (-1); }
+        if(scalar @service_downtime_ids == 0) { @service_downtime_ids = (-1); }
 
         my $comment_op = '!>=';
         my $combine    = '-and';
@@ -1754,8 +1761,8 @@ sub get_comments_filter {
             $comment_op = '>=';
             $combine    = '-or';
         }
-        push @hostfilter,          { $combine => [ comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
-        push @servicefilter,       { $combine => [ host_comments => { $comment_op => \@comment_ids }, host_downtimes => { $comment_op => \@downtime_ids }, comments => { $comment_op => \@comment_ids }, downtimes => { $comment_op => \@downtime_ids } ]};
+        push @hostfilter,          { $combine => [ comments => { $comment_op => \@host_comment_ids }, downtimes => { $comment_op => \@host_downtime_ids } ]};
+        push @servicefilter,       { $combine => [ host_comments => { $comment_op => \@host_comment_ids }, host_downtimes => { $comment_op => \@host_downtime_ids }, comments => { $comment_op => \@service_comment_ids }, downtimes => { $comment_op => \@service_downtime_ids } ]};
     }
 
     $c->stash->{'cached_get_comments_filter'}->{$op}->{$value} = [\@hostfilter, \@servicefilter, $num];
