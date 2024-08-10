@@ -14,7 +14,7 @@
             [% END %]
             <span class="absolute top-0 left-0">[% date_format(c, p.time, "%H:%M:%S.%MILLI") %]</span>
           </div>
-          <div class="ml-2 text-ellipsis overflow-hidden w-32" title="[% p.name %]">[% p.name %]</div>
+          <div class="ml-2 text-ellipsis overflow-hidden w-32" title="[% p.name | html %]">[% p.name | html %]</div>
         </a>
       </div>
     [% END %]
@@ -23,7 +23,7 @@
     [% FOREACH p = profiles %]
       <div class="profiles w-[800px]"[% IF !loop.first %] style="display: none;"[% END %]>
         <div class="head p-0 mb-2" [% IF profiles.size <= 1 %]style="display: none;"[% END %]>
-          <span class="tabs text-sm active">[% p.name %]</span>
+          <span class="tabs text-sm active">[% p.name | html %]</span>
         </div>
         [% IF p.defined("html") %]
           <div class="font-mono">[% p.html %]</div>
