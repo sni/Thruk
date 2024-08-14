@@ -145,6 +145,9 @@ cp support/thruk_cookie_auth.include.apache22    support/thruk_cookie_auth.inclu
 cp support/thruk_cookie_auth_vhost.conf.apache22 support/thruk_cookie_auth_vhost.conf
 %endif
 
+%if 0%{?rhel} >= 8
+%endif
+
 # remove version control files
 find . -name .gitignore -delete
 

@@ -16,6 +16,8 @@ alarm(180);
 my $options = {
   'prefix'          => '/usr/local',
   'htmlurl'         => '/thruk',
+  'unsafeallow3f'   => '',
+  'nounsafeallow3f' => '',
   'thruk-user'      => `id -un`,
   'thruk-group'     => `id -gn`,
   'httpd-conf'      => '',
@@ -43,6 +45,8 @@ Getopt::Long::GetOptions (
    "with-logdir=s"          => \$options->{'logdir'},
    "with-htmlurl=s"         => \$options->{'htmlurl'},
    "with-httpd-conf=s"      => \$options->{'httpd-conf'},
+   "with-unsafeallow3f"     => \$options->{'unsafeallow3f'},
+   "without-unsafeallow3f"  => \$options->{'nounsafeallow3f'},
    "with-checkresultdir=s"  => \$options->{'checkresultdir'},
    "with-bashcompletedir=s" => \$options->{'bashcompldir'},
    "with-thruk-user=s"      => \$options->{'thruk-user'},
@@ -92,6 +96,21 @@ $options->{'htmlurl'}    = '/'.$options->{'htmlurl'};
 $options->{'compress'}   = $options->{'nocompress'} ? 'disabled' : 'enabled';
 $options->{'thruk-libs'} = '' if $options->{'nolibs'};
 
+# recent apaches might require the UnsafeAllow3F flag
+if(!$options->{'nounsafeallow3f'} && !$options->{'unsafeallow3f'}) {
+    # try to autodetect
+    my($os, $ver) = _get_os();
+    if($os eq 'rhel' && $ver >= 8) {
+        $options->{'unsafeallow3f'} = 1;
+    }
+}
+if($options->{'nounsafeallow3f'}) {
+    $options->{'unsafeallow3f'} = '';
+}
+if($options->{'unsafeallow3f'}) {
+    $options->{'unsafeallow3f'} = ',UnsafeAllow3F';
+}
+
 open(my $fh, '>', 'script/Makefile.options') or die("cannot write to: script/Makefile.options:".$!);
 print $fh <<EOT;
 ### THRUK
@@ -115,6 +134,7 @@ THRUKGROUP       = $options->{'thruk-group'}
 THRUKLIBS        = $options->{'thruk-libs'}
 CHECKRESULTDIR   = $options->{'checkresultdir'}
 THRUKCOMPRESS    = $options->{'compress'}
+UNSAFEALLOW3F    = $options->{'unsafeallow3f'}
 
 EOT
 
@@ -163,6 +183,7 @@ print <<EOT;
   logdir             = $options->{'logdir'}
   htmlurl            = $options->{'htmlurl'}
   httpd-conf         = $options->{'httpd-conf'}
+  unsafeallow3f      = $options->{'unsafeallow3f'}
   thruk-user         = $options->{'thruk-user'}
   thruk-group        = $options->{'thruk-group'}
   thruk-libs         = $options->{'thruk-libs'}
@@ -176,6 +197,29 @@ to install thruk with these settings.
 EOT
 
 exit;
+
+# try to detect os and version
+sub _get_os {
+    my($os, $version) = ("", 0);
+
+    # right now, we only need rhel/rocky/alma
+    if(-e '/etc/redhat-release') {
+        my $release_file = '/etc/redhat-release';
+        open(my $fh, '<', $release_file) or die("cannot read $release_file: $!");
+        my $release_info = <$fh>;
+        close $fh;
+
+        if ($release_info =~ /^(.*?)(?: release)? ([\d.]+)/) {
+            my $version = $2;
+            $version =~ s/\..*$//gmx; # we only need the major number
+            return("rhel", 0+$version);
+        } else {
+            die "Unable to detect distribution and version from $release_file\n";
+        }
+    }
+
+    return($os, $version);
+}
 
 1;
 __END__
@@ -227,5 +271,7 @@ __END__
     --with-thruk-group           sets group name to run thruk [thruk]
     --with-checkresultdir        sets path to Naemon/Nagios/Icinga/Shinken checkresult directory [PREFIX/var/cache/naemon/checkresults]
     --without-thruk-libs         skip building the required perl modules. Make sure you add dependencies accordingly
+
+    --with(out)-unsafeallow3f    enable/disable apache mod_rewrite flag UnsafeAllow3F
 
 =cut
