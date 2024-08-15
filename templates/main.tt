@@ -195,7 +195,7 @@
         [% IF notifications_age && notifications_age > 30 %]<div class="ml-4 textHINTsoft" title="last update: [% date_format(c, date.now - notifications_age) %]">updated [% duration(notifications_age, 6) %] ago</div>[% END %]
       </div>
       <a href="notifications.cgi?start=&end=" id="notifications-link" class="relative">
-        <div id="notifications-barChart" class="js-graph-container"></div>
+        <div id="notifications-barChart" class="js-graph-no-check-container"></div>
       </a>
     </div>
   </div>
