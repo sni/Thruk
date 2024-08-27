@@ -20,7 +20,7 @@
           <option disabled>loading...</option>
         </select>
       </td>
-      <td class="w-auto">
+      <td class="w-auto" id="backend_filter_button">
         <button class="m-2 p-0 px-1" onclick="data_select_move('available_backends', '[% param_name %]', true); return false;"[% IF !can_edit || !backends_selected %] disabled[% END %]><i class="uil uil-angle-double-right m-0 text-2xl"></i></button>
         <button class="m-2 p-0 px-1" onclick="data_select_move('[% param_name %]', 'available_backends');       return false;"[% IF !can_edit || !backends_selected %] disabled[% END %]><i class="uil uil-angle-double-left m-0 text-2xl"></i></button>
       </td>
@@ -74,11 +74,13 @@
       jQuery('#available_backends').prop('disabled', false);
       jQuery('#filter_selected').prop('disabled', false);
       jQuery('#[% param_name %]').prop('disabled', false);
+      jQuery('#backend_filter_button BUTTON').prop('disabled', false);
     } else {
       jQuery('#filter_available').prop('disabled', true);
       jQuery('#available_backends').prop('disabled', true);
       jQuery('#filter_selected').prop('disabled', true);
       jQuery('#[% param_name %]').prop('disabled', true);
+      jQuery('#backend_filter_button BUTTON').prop('disabled', true);
     }
   }
 -->
