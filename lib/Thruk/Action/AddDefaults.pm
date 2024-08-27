@@ -1374,6 +1374,7 @@ sub check_federation_peers {
             ## use critic
         }
     }
+    $c->db->reset_failed_backends($c); # do not confuse actual page from federation initialization
     return($processinfo, $cached_data) unless $all_sites_info;
 
     # add sub federated backends
@@ -1471,6 +1472,7 @@ sub check_federation_peers {
         require Thruk::Utils::LMD;
         Thruk::Utils::LMD::check_changed_lmd_config($c, $c->config);
     }
+    $c->db->reset_failed_backends($c); # do not confuse actual page from federation initialization
     return($processinfo, $cached_data);
 }
 
