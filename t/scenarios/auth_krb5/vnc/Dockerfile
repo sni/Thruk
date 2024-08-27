@@ -1,5 +1,5 @@
 FROM ghcr.io/consol/docker-headless-vnc-container/debian-xfce-vnc:nightly
-ENV REFRESHED_AT 2019-03-25
+ENV REFRESHED_AT=2019-03-25
 
 USER 0
 RUN apt-get -y update && apt-get -y install krb5-user xvfb curl && apt-get clean
