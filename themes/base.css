@@ -1299,7 +1299,7 @@ SELECT:focus OPTION {
 INPUT:disabled,BUTTON:disabled {
   @apply bg-[color:var(--button-disabled-bg)] !cursor-auto hover:bg-[color:var(--button-disabled-bg)] text-[color:var(--button-disabled-fg)] hover:text-[color:var(--button-disabled-fg)];
 }
-INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid {
+INPUT:invalid, INPUT:focus:invalid, INPUT.invalid, INPUT:focus.invalid, TEXTAREA:invalid, TEXTAREA:focus:invalid, TEXTAREA.invalid, TEXTAREA:focus.invalid, SELECT:invalid {
   @apply outline-none ring-0 ring-[color:var(--border-error)] border-[color:var(--border-error)];
   &.silent {
     @apply outline-none ring-0 ring-[color:var(--border-forms)] border-[color:var(--border-forms)];
