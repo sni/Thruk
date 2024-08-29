@@ -2242,7 +2242,7 @@ var TP = {
         TP.log('[global] full reload');
         // save current dashboards to a cookie, otherwise we would display something else after the reload
         Ext.getCmp('tabbar').getState();
-        reloadPage(50, false, true, url_prefix+'cgi-bin/extinfo.cgi?type=0', 300);
+        reloadPage(50, false, true, url_prefix+'cgi-bin/panorama.cgi?state', 300);
     },
     log: function(str) {
         //debug(str); /* makes too much noise */
