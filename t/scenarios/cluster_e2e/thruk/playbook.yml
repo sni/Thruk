@@ -13,6 +13,14 @@
       stdin: |
         APACHE_MODE=own
   - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
+  - name: "create secret.key"
+    shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - name: "set permissions on secret.key"
+    file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
   - shell: ln -sfn /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
   - shell: "rsync -avu /omd/sites/demo/{{item}}/thruk/. /mnt/{{item}}/. ; rm -rf /omd/sites/demo/{{item}}/thruk ; ln -sfn /mnt/{{item}} /omd/sites/demo/{{item}}/thruk; chown demo: /mnt/{{item}}/."
     with_items: ['etc', 'var']

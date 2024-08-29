@@ -316,6 +316,7 @@ sub run_cluster {
 
     # run function on each cluster node
     my $res = [];
+    my $secret_key = Thruk::Config::secret_key();
     for my $n (@nodeids) {
         next unless $self->{'nodes_by_id'}->{$n};
         next if($type eq 'others' && $self->is_it_me($n));
@@ -324,7 +325,7 @@ sub run_cluster {
         my $http = Thruk::Backend::Provider::HTTP->new({
                             options => {
                                 peer => $node->{'node_url'},
-                                auth => Thruk::Config::secret_key(),
+                                auth => $secret_key,
                             },
                         }, $c->config);
         my $t1   = [gettimeofday];
