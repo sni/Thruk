@@ -1274,7 +1274,15 @@ sub js_init {
         launch_arg       => ["--password-store=basic", "--remote-allow-origins=*"],
     );
     $mech->get_local(".");
-    $mech->update_html("");
+	eval {
+        $mech->update_html("");
+    };
+    if($@) {
+        # retry once because of occasional: Could not find node with given id
+        # -32000 at .../lib/perl5/Chrome/DevToolsProtocol/Target.pm line 508
+        sleep(2);
+        $mech->update_html("");
+    }
     $mech->clear_js_errors();
 
     my $console = $mech->add_listener('Runtime.consoleAPICalled', sub {
