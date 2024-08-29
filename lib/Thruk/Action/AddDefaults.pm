@@ -1220,7 +1220,7 @@ sub set_enabled_backends {
                     }
                 }
                 if(!$access) {
-                    $disabled_backends->{$peer->{'key'}} = DISABLED_AUTH;  # completly hidden
+                    $disabled_backends->{$peer->{'key'}} = DISABLED_AUTH;  # completely hidden
                 }
             }
         }

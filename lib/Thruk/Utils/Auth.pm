@@ -38,7 +38,7 @@ sub get_auth_filter {
 
     confess("no backend!") unless defined $c->db();
 
-    # if authentication is completly disabled
+    # if authentication is completely disabled
     if($c->config->{'use_authentication'} == 0 and $c->config->{'use_ssl_authentication'} == 0) {
         return;
     }

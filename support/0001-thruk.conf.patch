@@ -65,7 +65,7 @@
  ######################################
  # verbosity / debug level
 @@ -622,23 +622,23 @@
- # Specifiy a file which is then completly under the control of Thruk.
+ # Specifiy a file which is then completely under the control of Thruk.
  # It will be used to store cronjobs, ex. for reports. The file has to
  # be writable by Thruk.
 -cron_file          = /tmp/thruk_cron.tmp

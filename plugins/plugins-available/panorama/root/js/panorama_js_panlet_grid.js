@@ -129,7 +129,7 @@ Ext.define('TP.GridLoader', {
                     for(var x=0; x<panel.grid.columns.length; x++) {
                         if(!panel.grid.columns[x].isHidden()) {
                             var width = panel.grid.columns[x].getWidth();
-                            // width is 1 if not yet completly rendered and we don't want to store that
+                            // width is 1 if not yet completely rendered and we don't want to store that
                             // width is 0 if the settings window is open
                             if(width > 1) {
                                 state.columns[x].width = width;

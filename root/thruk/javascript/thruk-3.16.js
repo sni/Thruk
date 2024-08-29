@@ -4056,7 +4056,7 @@ function fade(id, duration, remove) {
     });
 
     window.setTimeout(function() {
-        // completly remove message from dom after fading out
+        // completely remove message from dom after fading out
         if(remove) {
             jQuery(el).remove();
             return;

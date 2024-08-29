@@ -2970,7 +2970,7 @@ sub backends_list_to_hash {
         # save original list
         my($selected_backends) = $c->db->select_backends('get_hosts');
 
-        # save completly enabled sections
+        # save completely enabled sections
         Thruk::Action::AddDefaults::update_site_panel_hashes($c, $backends);
         my $sections = _collect_enabled_sections($c->stash->{'sites'}, "/");
         $hashlist->{'sections'} = $sections if scalar @{$sections} > 0;

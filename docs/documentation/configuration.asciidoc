@@ -233,11 +233,12 @@ The link:rest.html[rest api] is enabled by default, disabling it would break Thr
 
 === api_keys_enabled
 {% include new_since.ad version="2.24" %}
-Using api keys can be disabled by setting this to 0.
+Using api keys can be disabled by setting this to 0. You cannot use api
+keys at all if this is disabled.
 
 Note: this value cannot be overridden on a per user/group basis because it is
-used on pre-authentication stage. If you want users to create new keys, use
-`max_api_keys_per_user`.
+used on pre-authentication stage. If you want users to not create new keys, use
+`max_api_keys_per_user = 0`.
 
 ex.:
 
@@ -913,7 +914,7 @@ ex.:
 
 
 === problems_limit
-Cut off objects on problems page, set 0 to disable limit completly.
+Cut off objects on problems page, set 0 to disable limit completely.
 Defaults to 500.
 
 ex.:

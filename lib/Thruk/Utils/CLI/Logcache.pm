@@ -396,7 +396,7 @@ Prune logcache data older than 3 years
 
   %> thruk logcache clean 3y
 
-Remove logcache data completly
+Remove logcache data completely
 
   %> thruk logcache drop
 

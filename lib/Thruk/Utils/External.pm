@@ -1175,7 +1175,7 @@ sub _fork_twice {
         return(1, $parent_res);
     }
 
-    # fork twice to completly detach
+    # fork twice to completely detach
     my $pid2 = fork();
     die "fork() failed: $!" unless defined $pid2;
     if($pid2) {

@@ -985,7 +985,7 @@ returns merged variables
 merge will be as follows:
 
     - hash keys will be replaced with the last level of hash keys
-    - arrays will will be replaced completly, unless $merge_var is a hash of
+    - arrays will will be replaced completely, unless $merge_var is a hash of
       the form: { array_index => replacement }
     - everything else will be replaced
 

@@ -125,7 +125,7 @@ sub as_text {
     my $text             = Monitoring::Config::Object::format_comments($self->{'comments'});
     my $nr_comment_lines = scalar @{$self->{'comments'}};
 
-    # remove completly empty comments
+    # remove completely empty comments
     if(join('', @{$self->{'comments'}}) =~ /^\s*$/mx) {
         $nr_comment_lines = 0;
         $text = "";
