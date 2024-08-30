@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 78;
+plan tests => 87;
 
 use_ok('Thruk::Utils::IO');
 
@@ -96,6 +96,13 @@ TestUtils::test_command($test);
 $test = {
     cmd  => '/usr/bin/env thruk apikey info '.$data->{'file'},
     like => ['/comment/', '/digest/', '/\.SHA\-256/', '/super user/'],
+};
+TestUtils::test_command($test);
+
+###########################################################
+$test = {
+    cmd  => '/usr/bin/env thruk apikey create -u test -r authorized_for_read_only --comment="test key"',
+    like => ['/test key/', '/digest/', '/\.SHA\-256/', '/user.*test/', '/super user.*no/', '/role restriction.*authorized_for_read_only/' ],
 };
 TestUtils::test_command($test);
 
