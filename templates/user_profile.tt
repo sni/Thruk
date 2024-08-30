@@ -14,9 +14,11 @@
     </div>
   </div>
   <div class="body">
-    Store this key to a safe place, it won't be shown again.<br><br>
-    <span class="font-semibold">[%- new_private_key -%]</span>
-    <br><br>
+    Store this key to a safe place, it won't be shown again.
+    <div class="flexrow flex-nowrap gap-x-2 py-2">
+      <span class="font-semibold" id="private_key">[%- new_private_key -%]</span>
+      <button class="iconOnly px-1 copy_button" onclick="copyCode(event, 'private_key'); return false;"><i class="uil uil-copy" title="Copy key to clipboard"></i></button>
+    </div>
     <button class="mx-auto" title="close this message" onclick="fade('new_key_alert', 500, true);return false;">dismiss</button>
   </div>
 </div>

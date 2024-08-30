@@ -68,7 +68,8 @@ sub index {
             }
             my($private_key, undef, undef) = Thruk::Utils::APIKeys::create_key_by_params($c, $c->req->parameters);
             if($private_key) {
-                Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
+                # no need to show 2 messages, there is a success popup already
+                #Thruk::Utils::set_message( $c, 'success_message', 'API key created' );
                 $c->stash->{'new_private_key'} = $private_key;
             }
             return(user_page($c));
