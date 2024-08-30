@@ -162,6 +162,9 @@
         <span class="textHINT">Read-Only sessions cannot create API keys.</span>
       [% ELSE %]
         [% list_api_keys = 1 %]
+        [% IF c.config.max_api_keys_per_user == 0 %]
+          <span class="textHINT">New API keys cannot be created, because <i>max_api_keys_per_user</i> is set to 0</span>
+        [% ELSE %]
         <form action="user.cgi" method="POST">
           <input type="hidden" name="action" value="create">
           <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
@@ -204,6 +207,7 @@
             </div>
           </div>
         </form>
+        [% END %]
       [% END %]
   </div>
 
