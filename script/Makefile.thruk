@@ -205,12 +205,13 @@ local_install: local_patches
 	       -i ${DESTDIR}${DATADIR}/thruk_auth \
 	       -i ${DESTDIR}${BINDIR}/*
 
+QUICK_FILES = \
+	t/xt/panorama/javascript.t \
+	t/0*.t \
+	t/*rest_v1.t \
+	t/9*.t
 quicktest:
-	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" \
-	    t/xt/panorama/javascript.t \
-	    t/0*.t \
-	    t/*rest_v1.t \
-	    t/9*.t
+	TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'inc', 'lib/')" $(QUICK_FILES)
 
 authortest:
 	TEST_AUTHOR=1 THRUK_AUTHOR=1 THRUK_TEST_E2E=1 $(MAKE) test
