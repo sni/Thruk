@@ -105,7 +105,7 @@ sub _rest_get_thruk_api_key_new {
             'code'    => 403,
         });
     }
-    my($private_key, $hashed_key, $filename) = Thruk::Utils::APIKeys::create_key_from_req_params($c);
+    my($private_key, $hashed_key, $filename) = Thruk::Utils::APIKeys::create_key_by_params($c, $c->req->parameters);
     if($private_key) {
         return({
             'message'     => 'successfully created api key',

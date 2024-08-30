@@ -65,7 +65,6 @@ Getopt::Long::GetOptions(
    "T"                  => sub {  }, # already processed
    "q|quiet"            => \$options->{'quiet'},
    "V|version"          => \$options->{'version'},
-   "r|remote-url=s"     => \$options->{'remoteurl'},
    "k|insecure"         => \$options->{'insecure'},
    "H|header=s"         =>  $options->{'headers'},
      "local"            => \$options->{'local'},

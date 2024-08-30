@@ -161,34 +161,43 @@ sub create_key {
 
 ##############################################
 
-=head2 create_key_from_req_params
+=head2 create_key_by_params
 
-    create_key_from_req_params($c)
+    create_key_by_params($c, $params)
 
-create new api key for user from request parameters
+create new api key for user from parameters
+
+parameters are:
+    username        # technical username for this key
+    roles           # restrict roles to given list
+    comment         # description
+    superuser       # superuser keys can change into any username
+    force_user      # sets username in combination with super user flag
+    restrict        # not used
+    restrict_only   # not used
 
 returns private, hashed key and filename on success or undef otherwise
 
 =cut
-sub create_key_from_req_params {
-    my($c) = @_;
+sub create_key_by_params {
+    my($c, $params) = @_;
     my $username = $c->stash->{'remote_user'};
     if($c->check_user_roles('admin')) {
-        if($c->req->parameters->{'username'}) {
-            $username = $c->req->parameters->{'username'};
+        if($params->{'username'}) {
+            $username = $params->{'username'};
         } elsif($c->user->{'internal'}) {
-            $c->req->parameters->{'superuser'} = 1;
+            $params->{'superuser'} = 1;
         }
     } else {
         # only allowed for admins
-        $c->req->parameters->{'superuser'} = 0;
+        $params->{'superuser'} = 0;
     }
 
     # roles cannot exceed existing roles
-    my $roles ;
-    if($c->req->parameters->{'roles'} && (!$c->req->parameters->{'restrict_only'} || $c->req->parameters->{'restrict'})) {
+    my $roles;
+    if($params->{'roles'} && (!$params->{'restrict_only'} || $params->{'restrict'})) {
         $roles = [];
-        for my $role (@{Thruk::Base::list($c->req->parameters->{'roles'})}) {
+        for my $role (@{Thruk::Base::list($params->{'roles'})}) {
             next unless $c->user->check_role_permissions($role);
             push @{$roles}, $role;
         }
@@ -198,10 +207,10 @@ sub create_key_from_req_params {
         = create_key(
             $c,
             $username,
-           ($c->req->parameters->{'comment'} // ''),
+           ($params->{'comment'} // ''),
             $roles,
-            $c->req->parameters->{'superuser'} ? 1 : 0,
-            $c->req->parameters->{'force_user'},
+            $params->{'superuser'} ? 1 : 0,
+            $params->{'force_user'},
     );
     return($private_key, $hashed_key, $filename);
 }

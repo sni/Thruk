@@ -9,6 +9,8 @@ next:
             - enable list wizard for host/service depenencies (#1358)
           - Panorama:
             - fix linking nested business processes
+          - CLI:
+            - add create option to apikey command
 
 3.16     Fri Jul 12 16:23:37 CEST 2024
           - fix using unescaped url in reports (CVE-2024-39915)
