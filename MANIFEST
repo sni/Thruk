@@ -2544,6 +2544,13 @@ t/scenarios/logfile_cache_icinga2_ido_e2e/t/400-postgres.t
 t/scenarios/logfile_cache_icinga2_ido_e2e/thruk.conf
 t/scenarios/logfile_cache_icinga2_ido_e2e/thruk_local.conf
 t/scenarios/Makefile
+t/scenarios/omd_debian_e2e/docker-compose.yml
+t/scenarios/omd_debian_e2e/Makefile
+t/scenarios/omd_debian_e2e/omd/Dockerfile
+t/scenarios/omd_debian_e2e/omd/playbook.yml
+t/scenarios/omd_debian_e2e/omd/test.cfg
+t/scenarios/omd_debian_e2e/thruk.conf
+t/scenarios/omd_debian_e2e/thruk_local.conf
 t/scenarios/pentest_arachni/arachni/Dockerfile
 t/scenarios/pentest_arachni/docker-compose.yml
 t/scenarios/pentest_arachni/Makefile

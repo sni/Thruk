@@ -1,0 +1,38 @@
+---
+- hosts: all
+  gather_facts: true
+  roles:
+    - role: common
+    - role: thruk_developer
+  tasks:
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        CORE=naemon
+        LIVESTATUS_TCP=on
+
+  - name: "copy example.cfg"
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+
+  - name: "create secret.key"
+    shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - name: "set permissions on secret.key"
+    file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+
+  - name: "copy test.cfg"
+    copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+
