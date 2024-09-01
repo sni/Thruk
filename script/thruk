@@ -65,6 +65,7 @@ Getopt::Long::GetOptions(
    "T"                  => sub {  }, # already processed
    "q|quiet"            => \$options->{'quiet'},
    "V|version"          => \$options->{'version'},
+     "remote-url=s"     => \$options->{'remoteurl'},
    "k|insecure"         => \$options->{'insecure'},
    "H|header=s"         =>  $options->{'headers'},
      "local"            => \$options->{'local'},
@@ -169,7 +170,7 @@ thruk - Command Line Utility for Thruk Monitoring Gui
     -c, --credential=<pw>         Credential when connecting to remote
                                   Thruk installations specified by the
                                   remote-url.
-    -r, --remote-url=<url>        URL to remote installation.
+        --remote-url=<url>        URL to remote installation.
     -k, --insecure                skip ssl certificate verification.
 
     -y, --yes                     answer yes to all given questions.
