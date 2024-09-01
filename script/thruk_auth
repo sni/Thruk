@@ -130,6 +130,7 @@ sub process {
     my($cookies, $extra, $path);
     if($in =~ $line_regex) {
         ($cookies, $extra, $path) = ($1, $2, $3);
+        $cookies =~ s/^auth://gmx;
     } else {
         # everything else redirects to login
         _debug("unknown url ".$in) if $verbose;
