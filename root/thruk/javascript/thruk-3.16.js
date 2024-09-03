@@ -1532,8 +1532,10 @@ function cookieRemoveAll(name) {
             domain = hostpart+"."+domain;
         }
         jQuery.each(paths, function(key2, path) {
-            document.cookie = name+"=del; path="+path+";domain="+domain+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
-            document.cookie = name+"=del; path="+path+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
+            try {
+                document.cookie = name+"=del; path="+path+";domain="+domain+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
+                document.cookie = name+"=del; path="+path+";expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=lax;";
+            } catch(err) { console.log(err) }
         });
     });
 }
