@@ -1301,7 +1301,7 @@ sub js_deinit {
 
 #################################################
 sub js_ok {
-    my($src, $msg) = @_;
+    my($src, $msg, $diag) = @_;
 
     # replace template toolkit comments
     $src =~ s/\[%\#.*?\#%\]//gmx;
@@ -1316,7 +1316,7 @@ sub js_ok {
     };
     my $err = $@;
     if($err) {
-        fail(sprintf("js ok failed for %s: %s", $msg, $err));
+        fail(sprintf("js ok failed for %s: %s%s", $msg, ($diag ? ' (from '.$diag.') ' : ''), $err));
     }
     my @err = $mech->js_errors();
     for my $e (@err) {
@@ -1329,9 +1329,9 @@ sub js_ok {
 
 #################################################
 sub js_eval_ok {
-  my($file) = @_;
+  my($file, $msg) = @_;
   my $src = Thruk::Utils::IO::read($file);
-  js_ok($src, $file);
+  js_ok($src, $file, $msg);
 }
 
 #################################################
@@ -1383,7 +1383,7 @@ sub _js_diag_error {
 
 #################################################
 sub js_eval_extracted {
-    my($file) = @_;
+    my($file, $msg) = @_;
     ok(1, "extracting from ".$file);
     my $cont = Thruk::Utils::IO::read($file);
     my @codes = $cont =~ m/<script[^>]*?>(.*?)<\/script>/gsmxi;
@@ -1393,7 +1393,7 @@ sub js_eval_extracted {
     my($fh, $filename) = tempfile();
     print $fh $jscode;
     close($fh);
-    js_eval_ok($filename);
+    js_eval_ok($filename, $msg);
     unlink($filename);
     return;
 }

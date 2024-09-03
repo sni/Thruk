@@ -67,27 +67,29 @@ for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
 
 #################################################
 # set start page
+my $url = '/thruk/cgi-bin/panorama.cgi';
 $tst = TestUtils::test_page(
-    'url'           => '/thruk/cgi-bin/panorama.cgi',
+    'url'           => $url,
     'like'          => 'thruk_version.*=',
 );
 $mech->update_html($tst->{'content'});
 ($fh, $filename) = tempfile();
 print $fh $tst->{'content'};
 close($fh);
-js_eval_extracted($filename);
+js_eval_extracted($filename, $url);
 
 #################################################
 # add dynamic js
+$url = '/thruk/cgi-bin/panorama.cgi?js=1';
 $tst = TestUtils::test_page(
-    'url'           => '/thruk/cgi-bin/panorama.cgi?js=1',
+    'url'           => $url,
     'like'          => 'BLANK_IMAGE_URL',
     'content_type'  => 'text/javascript; charset=utf-8',
 );
 ($fh, $filename) = tempfile();
 print $fh $tst->{'content'};
 close($fh);
-js_eval_ok($filename) && unlink($filename);
+js_eval_ok($filename, $url) && unlink($filename);
 
 #################################################
 # tests from javascript_tests file
