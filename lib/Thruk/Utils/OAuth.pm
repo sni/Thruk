@@ -58,7 +58,12 @@ sub handle_oauth_login {
         }
         my $ua = Thruk::UserAgent->new({}, $c->config);
         $ua->default_header(Accept => "application/json");
-        _debug(sprintf("oauth login step2: fetching token from: %s", $auth->{'token_url'})) if Thruk::Base->debug;
+	if (defined $auth->{'https_proxy'}) {
+            $ua->proxy('https', $auth->{'https_proxy'});
+            _debug(sprintf("oauth login step2: fetching token from: %s (via proxy: %s)", $auth->{'token_url'}, $auth->{'https_proxy'})) if Thruk::Base->debug;
+        } else {
+            _debug(sprintf("oauth login step2: fetching token from: %s", $auth->{'token_url'})) if Thruk::Base->debug;
+        };
         my $token_data = {
             client_id       => $auth->{'client_id'},
             client_secret   => $auth->{'client_secret'},
