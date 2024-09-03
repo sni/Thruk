@@ -63,7 +63,7 @@ sub handle_oauth_login {
             _debug(sprintf("oauth login step2: fetching token from: %s (via proxy: %s)", $auth->{'token_url'}, $auth->{'https_proxy'})) if Thruk::Base->debug;
         } else {
             _debug(sprintf("oauth login step2: fetching token from: %s", $auth->{'token_url'})) if Thruk::Base->debug;
-        };
+        }
         my $token_data = {
             client_id       => $auth->{'client_id'},
             client_secret   => $auth->{'client_secret'},
