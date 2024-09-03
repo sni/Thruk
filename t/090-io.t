@@ -67,20 +67,20 @@ for my $fail (sort @fails) {
     fail($fail);
 }
 
-my($rc, $output) = Thruk::Utils::IO::cmd(undef, 'ls -la');
+my($rc, $output) = Thruk::Utils::IO::cmd('ls -la');
 is($rc, 0, "ls returned with rc: 0");
 like($output, '/thruk.conf/', "ls returned something");
 
-($rc, $output) = Thruk::Utils::IO::cmd(undef, ['ls', '-l', '-a']);
+($rc, $output) = Thruk::Utils::IO::cmd(['ls', '-l', '-a']);
 is($rc, 0, "ls returned with rc: 0");
 like($output, '/thruk.conf/', "ls array args returned something");
 
 my $false = -x '/usr/bin/false' ? '/usr/bin/false' : '/bin/false';
-($rc, $output) = Thruk::Utils::IO::cmd(undef, [$false]);
+($rc, $output) = Thruk::Utils::IO::cmd([$false]);
 ok($rc != 0, $false." returned with anything but 0");
 like($output, '/^$/', "false returned nothing");
 
-($rc, $output) = Thruk::Utils::IO::cmd(undef, $false);
+($rc, $output) = Thruk::Utils::IO::cmd($false);
 ok($rc != 0, $false." returned with anything but 0");
 like($output, '/^$/', "false returned nothing");
 
@@ -116,7 +116,7 @@ if(-e '/dev/full') {
 #########################
 # background commands
 my $start = time();
-($rc, $output) = Thruk::Utils::IO::cmd($c, "sleep 1 >/dev/null 2>&1 &");
+($rc, $output) = Thruk::Utils::IO::cmd("sleep 1 >/dev/null 2>&1 &");
 my $time = time()- $start;
 ok($time < 5, "runtime < 5 (".$time."s)");
 is($rc, 0, "exit code is: ".$rc);
@@ -169,6 +169,27 @@ is($rc, 0, "exit code is: ".$rc);
     my $c = Thruk::Utils::IO::merge_deep($a, $b);
     is_deeply($c, $expect, "merge hashes with arrays worked");
 };
+
+#########################
+# backwards compatible IO::cmd
+my $hostname = `hostname`;
+my(undef, $hostname2) = Thruk::Utils::IO::cmd($c, "hostname");
+is($hostname2, $hostname, "leading Context");
+
+(undef, $hostname2) = Thruk::Utils::IO::cmd($c, ["hostname"]);
+is($hostname2, $hostname, "leading Context and array");
+
+(undef, $hostname2) = Thruk::Utils::IO::cmd(["hostname"], undef, undef, undef, undef, 10);
+is($hostname2, $hostname, "timeout");
+
+(undef, $hostname2) = Thruk::Utils::IO::cmd($c, ["hostname"], undef, undef, undef, undef, 10);
+is($hostname2, $hostname, "context and timeout");
+
+(undef, $hostname2) = Thruk::Utils::IO::cmd($c, ["hostname"], undef, undef, undef, undef, 10, 1);
+is($hostname2, $hostname, "context and timeout, signals");
+
+(undef, $hostname2) = Thruk::Utils::IO::cmd(["hostname"], undef, undef, undef, undef, 10, 1);
+is($hostname2, $hostname, "timeout, signals");
 
 #########################
 done_testing();

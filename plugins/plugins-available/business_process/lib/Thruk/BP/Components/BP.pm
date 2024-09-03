@@ -499,7 +499,7 @@ sub commit {
     if($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}) {
         local $ENV{'THRUK_BP_FILE'}  = $self->{'file'};
         local $ENV{'THRUK_BP_STAGE'} = 'pre';
-        my($rc, $out) = Thruk::Utils::IO::cmd($c, $c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'});
+        my($rc, $out) = Thruk::Utils::IO::cmd($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'});
         if($rc != 0) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'pre save hook failed: '.$rc.': '.$out, escape => 0 });
             return;
@@ -516,7 +516,7 @@ sub commit {
     if($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}) {
         local $ENV{'THRUK_BP_FILE'}  = $self->{'file'};
         local $ENV{'THRUK_BP_STAGE'} = 'post';
-        my($rc, $out) = Thruk::Utils::IO::cmd($c, $c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'});
+        my($rc, $out) = Thruk::Utils::IO::cmd($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'});
         if($rc != 0) {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'post save hook failed: '.$rc.': '.$out, escape => 0 });
             return;

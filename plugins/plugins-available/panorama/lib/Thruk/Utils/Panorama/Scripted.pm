@@ -93,7 +93,7 @@ sub load_dashboard {
         $Thruk::Utils::Panorama::Scripted::data = undef;
         $Thruk::Utils::Panorama::Scripted::meta = undef;
     } else {
-        my($rc, $output) = Thruk::Utils::IO::cmd($c, $file);
+        my($rc, $output) = Thruk::Utils::IO::cmd($file);
         if($rc != 0) {
             my $err = "got rc $rc while executing dynamic dashboard from ".$file;
             _error($err);

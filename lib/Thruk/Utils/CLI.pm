@@ -926,7 +926,7 @@ sub _cmd_configtool {
 
         if($c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}) {
             my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
-            my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+            my($rc, $out) = Thruk::Utils::IO::cmd($cmd);
             if($rc != 0) {
                 _info('pre save hook: '.$rc);
                 _info('pre save hook: '.$out);
@@ -992,7 +992,7 @@ sub _cmd_configtool {
 
         # run post hook
         if($c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}) {
-            Thruk::Utils::IO::cmd($c, [$c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot]);
+            Thruk::Utils::IO::cmd([$c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}, 'post', $filesroot]);
         }
     } else {
         return("unknown configtool command", 1);

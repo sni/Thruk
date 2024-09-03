@@ -986,7 +986,7 @@ sub _process_objects_page {
     my $dir        = $c->{'obj_db'}->{'config'}->{'git_base_dir'} || $c->config->{'Thruk::Plugin::ConfigTool'}->{'git_base_dir'} || $files_root;
     if(-d $dir) {
         my $cmd       = "cd '".$dir."' && git log --pretty='format:%H' -1 2>&1";
-        my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+        my($rc, $out) = Thruk::Utils::IO::cmd($cmd);
         $c->stash->{'has_history'} = 1 if $rc == 0;
     }
 
@@ -1660,7 +1660,7 @@ sub _store_changes {
 sub _cmd {
     my($c, $cmd, $stdin) = @_;
 
-    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, $stdin);
+    my($rc, $output) = Thruk::Utils::IO::cmd($cmd, { stdin => $stdin });
     $c->stash->{'output'} = $output;
     if($rc != 0) {
         return 0;

@@ -100,7 +100,7 @@ sub check_proc {
         $cmd .= ' >'.$startlog.' 2>&1 &';
 
         _debug("start cmd: ". $cmd);
-        my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, 1); # start detached
+        my($rc, $output) = Thruk::Utils::IO::cmd($cmd, { detached => 1 }); # start detached
         if($rc != 0) {
             _error(sprintf('starting lmd failed with rc %d: %s', $rc, $output));
         } else {
@@ -514,7 +514,7 @@ sub get_lmd_version {
     my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
               .' -version';
 
-    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    my($rc, $output) = Thruk::Utils::IO::cmd($cmd);
     $config->{'lmd_version'} = $output;
     if($output && $output =~ m/version\s+([\S]+)\s+/mx) {
         return $1;

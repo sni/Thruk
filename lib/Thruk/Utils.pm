@@ -1590,7 +1590,7 @@ sub get_perf_image {
 
     # call login hook, because it might transfer our sessions to remote graphers
     if($c->config->{'cookie_auth_login_hook'}) {
-        Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'});
+        Thruk::Utils::IO::cmd($c->config->{'cookie_auth_login_hook'});
     }
 
     require File::Temp;
@@ -1600,7 +1600,7 @@ sub get_perf_image {
     if($grafanaurl) {
         $cmd = $exporter.' "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
-    my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd, undef, undef, undef,undef, 30);
+    my($rc, $out) = Thruk::Utils::IO::cmd($cmd, { timeout => 30 });
     unlink($c->stash->{'fake_session_file'});
     if(-e $filename) {
         my $imgdata  = Thruk::Utils::IO::read($filename);
@@ -2021,7 +2021,7 @@ sub update_cron_file {
         my($fh2, $tmperror) = File::Temp::tempfile();
         Thruk::Utils::IO::close($fh2, $tmperror);
         my $cmd = $c->config->{'cron_pre_edit_cmd'}." 2>>".$tmperror;
-        my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+        my($rc, $output) = Thruk::Utils::IO::cmd($cmd);
         my $errors = Thruk::Utils::IO::read($tmperror);
         unlink($tmperror);
         print $fh $errors;
@@ -2105,7 +2105,7 @@ sub update_cron_file {
     if($c->config->{'cron_post_edit_cmd'}) {
         local $< = $> if $< == 0; # set real and effective uid to user, crontab will still be run as root on some systems otherwise
         my $cmd = $c->config->{'cron_post_edit_cmd'}." 2>>".$errorlog;
-        my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+        my($rc, $output) = Thruk::Utils::IO::cmd($cmd);
         if($rc != 0) {
             die(sprintf("cron_post_edit_cmd (".$cmd.") exited with value %d: %s\n", $rc, $output));
         }
@@ -3909,12 +3909,12 @@ sub has_node_module {
     return unless Thruk::Base::has_binary("node");
     return unless Thruk::Base::has_binary("npm");
 
-    my($rc, $out) = Thruk::Utils::IO::cmd($c, ["npm", "ls", "-g"]);
+    my($rc, $out) = Thruk::Utils::IO::cmd(["npm", "ls", "-g"]);
     if($out =~ m/$module_name/mx) {
         return 1;
     }
 
-    ($rc, $out) = Thruk::Utils::IO::cmd($c, ["npm", "ls"]);
+    ($rc, $out) = Thruk::Utils::IO::cmd(["npm", "ls"]);
     if($out =~ m/$module_name/mx) {
         return 1;
     }

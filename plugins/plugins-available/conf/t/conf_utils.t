@@ -413,7 +413,7 @@ for my $mergedir (qw/1/) {
     my($fh, $filename) = File::Temp::tempfile();
     print $fh $file->get_new_file_content();
     close($fh);
-    my($rc2, $out) = Thruk::Utils::IO::cmd(undef, 'diff -Nuh "./t/xt/conf/data/merges/'.$mergedir.'/d.cfg" "'.$filename.'" 2>&1');
+    my($rc2, $out) = Thruk::Utils::IO::cmd('diff -Nuh "./t/xt/conf/data/merges/'.$mergedir.'/d.cfg" "'.$filename.'" 2>&1');
     is($rc2, 0, "diff successfull");
     is($out, "", "diff successfull");
     unlink($filename);

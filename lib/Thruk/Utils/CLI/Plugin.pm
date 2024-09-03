@@ -256,7 +256,7 @@ sub _do_plugin_install {
         $stick_version = $plugin->{'version'};
     }
     _debug("inspecting tarball");
-    my $tar_out = Thruk::Utils::IO::cmd($c, ["tar", "tvfz", $tarball]);
+    my $tar_out = Thruk::Utils::IO::cmd(["tar", "tvfz", $tarball]);
     my $root = {};
     for my $line (split/\n/mx, $tar_out) {
         my @info = split(/\s+/mx, $line, 6);
@@ -282,7 +282,7 @@ sub _do_plugin_install {
     }
 
     _debug("unpacking");
-    Thruk::Utils::IO::cmd($c, ["tar", "xfz", $tarball, "-C", $tmpdir]);
+    Thruk::Utils::IO::cmd(["tar", "xfz", $tarball, "-C", $tmpdir]);
     $root = $tmpdir.'/'.(keys %{$root})[0];
     move($root, $tmpdir.'/'.$name);
     $root = $tmpdir.'/'.$name;

@@ -19,6 +19,7 @@ if($0 =~ m/scenario\-(.*)\.t$/mx) {
 
 use_ok("Thruk::Utils");
 use_ok("Thruk::Utils::IO");
+use_ok("Thruk::Utils::Log");
 use_ok("Thruk::Config");
 
 my $verbose   = $ENV{'HARNESS_IS_VERBOSE'} ? 1 : undef;
@@ -92,7 +93,10 @@ sub _run {
 
     my $t0 = [gettimeofday];
     ok(1, "$dir: running make $step");
-    my($rc, $out) = Thruk::Utils::IO::cmd(undef, [$make, $step], undef, ($verbose ? '## ' : undef));
+    my($rc, $out) = Thruk::Utils::IO::cmd([$make, $step], {
+        print_prefix  => ($verbose ? '## ' : undef),
+        output_prefix => Thruk::Utils::Log::time_prefix(),
+    });
     is($rc, 0, sprintf("step %s complete, rc=%d duration=%.1fsec", $step, $rc, tv_interval ($t0)));
     if($out =~ m/^(FROM.*version:.*)$/mx) {
         diag($1);

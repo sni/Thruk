@@ -620,7 +620,7 @@ sub _check_command {
         ];
     }
 
-    my($rc, $output) = Thruk::Utils::IO::cmd($self->{'c'}, $cmd, undef, undef, undef, undef, undef, 1);
+    my($rc, $output) = Thruk::Utils::IO::cmd($cmd, { no_touch_signals => 1 });
     if(($rc == 2 && $output =~ m/\Qtest run into timeout after\E/) || $rc == 124) {
         $rc     = 3;
         $output = sprintf("check timed out after %d seconds", $self->{'opt'}->{'timeout'});

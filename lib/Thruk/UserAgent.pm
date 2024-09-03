@@ -386,7 +386,7 @@ sub _get_cmd_line {
 ##############################################
 sub _get_response {
     my($self, $cmd) = @_;
-    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd, undef, undef, undef, 1);
+    my($rc, $output) = Thruk::Utils::IO::cmd($cmd, {no_decode => 1});
     if($rc != 0 || $output !~ m|^HTTP/|mx) {
         my $res = HTTP::Response->new(500);
         $res->content($output);

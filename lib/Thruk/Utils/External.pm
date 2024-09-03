@@ -63,7 +63,7 @@ sub cmd {
        or ($c->stash->{job_id} && !$conf->{'background'}) # do not cascade jobs unless they should be forked to background
     ) {
         # $rc, $out
-        my(undef, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+        my(undef, $out) = Thruk::Utils::IO::cmd($cmd);
         return _finished_job_page($c, $c->stash, undef, $out);
     }
 

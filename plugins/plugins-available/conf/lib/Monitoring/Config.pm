@@ -237,7 +237,7 @@ sub commit {
         local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'pre_obj_save_cmd'}." pre '".$filesroot."' 2>&1";
-        my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+        my($rc, $out) = Thruk::Utils::IO::cmd($cmd);
         _debug("pre save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             _info('pre save hook out: '.$out);
@@ -321,7 +321,7 @@ sub commit {
         local $ENV{THRUK_BACKEND_ID}   = $c->stash->{'param_backend'};
         local $ENV{THRUK_BACKEND_NAME} = $backend_name;
         my $cmd = $c->config->{'Thruk::Plugin::ConfigTool'}->{'post_obj_save_cmd'}." post '".$filesroot."' 2>&1";
-        my($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+        my($rc, $out) = Thruk::Utils::IO::cmd($cmd);
         _debug("post save hook: '" . $cmd . "', rc: " . $rc);
         if($rc != 0) {
             _info('post save hook out: '.$out);

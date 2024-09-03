@@ -70,3 +70,5 @@ for my $teststr (@{$testdata->{'data'}}) {
     is($str, $teststr, "read string from cat matched");
     ok(unlink($file), 'remove tempfile');
 }
+
+################################################################################

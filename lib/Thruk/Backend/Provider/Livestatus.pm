@@ -2062,7 +2062,7 @@ sub _fetchlogs_external_command {
     require File::Temp;
     my($fh, $filename) = File::Temp::tempfile();
     my $cmd = $self->{'fetch_command'}.' > '.$filename;
-    my($rc, $output) = Thruk::Utils::IO::cmd(undef, $cmd);
+    my($rc, $output) = Thruk::Utils::IO::cmd($cmd);
     if($rc != 0) {
         die("fetchlogs cmd failed, rc ".$rc.": ".$cmd."\n".$output);
     }

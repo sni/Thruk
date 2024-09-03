@@ -437,7 +437,7 @@ sub _lmd_checks  {
 
     # try to run
     my $cmd = ($c->config->{'lmd_core_bin'} || 'lmd').' --version 2>&1';
-    my(undef, $output) = Thruk::Utils::IO::cmd($c, $cmd);
+    my(undef, $output) = Thruk::Utils::IO::cmd($cmd);
     if($output !~ m/\Qlmd - version \E/mx) {
         $details .= sprintf("  - cannot execute lmd: %s\n", $output);
         return({sub => 'lmd', rc => 2, msg => "LMD CRITICAL", details => $details });

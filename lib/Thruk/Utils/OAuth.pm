@@ -133,7 +133,7 @@ sub handle_oauth_login {
                                                                     username   => $login,
         });
         if($c->config->{'cookie_auth_login_hook'}) {
-            Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1');
+            Thruk::Utils::IO::cmd($c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1');
         }
         _debug(sprintf("oauth login step2: login succesful as user: %s", $login)) if Thruk::Base->verbose;
         return(Thruk::Controller::login::login_successful($c, $login, $session, ($data->{'referer'}//$referer), $cookie_domain, "oauth: ".($auth->{'id'}//$auth->{'login'}//$auth->{'name'})));

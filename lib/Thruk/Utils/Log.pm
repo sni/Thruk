@@ -275,12 +275,9 @@ sub _audit_log {
 
     if(defined $config->{'audit_logs'} && $config->{'audit_logs'}->{'logfile'}) {
         my $file = $config->{'audit_logs'}->{'logfile'};
-        my(undef, $microseconds) = Time::HiRes::gettimeofday();
-        my $milliseconds = substr(sprintf("%06s", $microseconds), 0, 3);
         my @localtime = localtime;
-        my $log = sprintf("[%s,%s][%s]%s\n",
-            POSIX::strftime("%Y-%m-%d %H:%M:%S", @localtime),
-            $milliseconds,
+        my $log = sprintf("%s[%s]%s\n",
+            &time_prefix(),
             ## no lint
             $Thruk::Globals::HOSTNAME,
             ## use lint
@@ -293,6 +290,21 @@ sub _audit_log {
     }
 
     return;
+}
+
+##############################################
+
+=head2 time_prefix
+
+    returns time prefix including milliseconds
+
+=cut
+sub time_prefix {
+    my($seconds, $microseconds) = Time::HiRes::gettimeofday;
+    return(sprintf("[%s,%s]",
+        POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime($seconds)),
+        substr(sprintf("%06s", $microseconds), 0, 3),
+    ));
 }
 
 ##############################################

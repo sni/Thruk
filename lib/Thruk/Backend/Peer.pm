@@ -369,7 +369,7 @@ sub cmd {
             if($background_options) {
                 ($out) = @{$self->{'class'}->request("Thruk::Utils::External::cmd", ['Thruk::Context', $background_options], { timeout => 120 })};
             } else {
-                ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", ['Thruk::Context', $cmd], { timeout => 120 })};
+                ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", [$cmd], { timeout => 120 })};
             }
         }
 
@@ -384,7 +384,7 @@ sub cmd {
             $out = Thruk::Utils::External::cmd($c, $background_options);
         } else {
             require Thruk::Utils::IO;
-            ($rc, $out) = Thruk::Utils::IO::cmd($c, $cmd);
+            ($rc, $out) = Thruk::Utils::IO::cmd($cmd);
         }
     }
 

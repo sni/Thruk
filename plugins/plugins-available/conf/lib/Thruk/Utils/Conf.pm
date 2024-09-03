@@ -1299,7 +1299,7 @@ sub _nice_check_output {
 sub _cmd {
     my($c, $cmd, $stdin) = @_;
 
-    my($rc, $output) = Thruk::Utils::IO::cmd($c, $cmd, $stdin);
+    my($rc, $output) = Thruk::Utils::IO::cmd($cmd, { stdin => $stdin });
     $c->stash->{'output'} = $output;
     if($rc != 0) {
         return 0;

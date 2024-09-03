@@ -275,7 +275,7 @@ sub cmd {
 
     # run post hook
     if($c->config->{'Thruk::Plugin::BP'}->{'post_refresh_cmd'}) {
-        my($rc, $out) = Thruk::Utils::IO::cmd($c, $c->config->{'Thruk::Plugin::BP'}->{'post_refresh_cmd'});
+        my($rc, $out) = Thruk::Utils::IO::cmd($c->config->{'Thruk::Plugin::BP'}->{'post_refresh_cmd'});
         if($rc != 0) {
             _error("bp post hook exited with rc: ".$rc.': '.$out);
         }

@@ -330,7 +330,7 @@ sub save_bp_objects {
         my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
         my $reloaded = 0;
         if($cmd) {
-            ($rc, $msg) = Thruk::Utils::IO::cmd($c, $cmd." 2>&1");
+            ($rc, $msg) = Thruk::Utils::IO::cmd($cmd." 2>&1");
             $reloaded = 1;
         }
         elsif($result_backend) {

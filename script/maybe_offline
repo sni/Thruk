@@ -75,7 +75,7 @@ sub main {
     _debug("options: %s", Thruk::Utils::dump_params($opt)) if $opt->{'verbose'};
 
     # run the check
-    my($rc,$out) = Thruk::Utils::IO::cmd(undef, \@ARGV, undef, undef, undef, undef, $opt->{'timeout'});
+    my($rc,$out) = Thruk::Utils::IO::cmd(\@ARGV, { timeout => $opt->{'timeout'} });
     _debug("command returned with exit code: %d", $rc);
     if($rc < 0 || $rc > 3) {
         $rc = 3;

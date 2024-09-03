@@ -21,8 +21,10 @@ use File::Copy qw/move copy/;
 use IO::Select ();
 use IPC::Open3 qw/open3/;
 use POSIX ":sys_wait_h";
+use Scalar::Util 'blessed';
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
+use Thruk::Base ();
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::Log qw/:all/;
 
@@ -775,43 +777,59 @@ sub save_logs_to_tempfile {
 
 =head2 cmd
 
-  cmd($command)
-  cmd($c, $command [, $stdin] [, $print_prefix] [, $detached] [, $no_decode] [, $timeout])
+  cmd($command, [ $options ])
 
 run command and return exit code and output
 
 $command can be either a string like '/bin/prog arg1 arg2' or an
 array like ['/bin/prog', 'arg1', 'arg2']
 
-optional print_prefix will print the result on the fly with given prefix.
+options are:
 
-optional detached will run the command detached in the background
-
-optional no_decode will skip decoding
-
-optional timeout will kill the command after the timeout (seconds)
+    - stdin                 text used as stdin for the command
+    - print_prefix          print the result on the fly with given prefix.
+    - output_prefix         add prefix to output (can be a callback)
+    - detached              run the command detached in the background
+    - no_decode             skip decoding
+    - timeout               kill the command after the timeout (seconds)
+    - no_touch_signals      do not change signal handler
 
 =cut
 
+## no critic
 sub cmd {
-    my($c, $cmd, $stdin, $print_prefix, $detached, $no_decode, $timeout, $no_touch_signals) = @_;
+## use critic
+    my($cmd, $options) = @_;
 
+    # REMOVE AFTER: 01.01.2027
+    if(scalar @_ > 2 || ref $options ne 'HASH') {
+       return(_cmd_old(@_));
+    }
+    # end REMOVE...
+    # enable check again
+    #confess("cmd options have been migrated to hash") if(scalar @_ > 2);
+
+    $options = {} unless defined $options;
+    Thruk::Base::validate_options($options, [qw/stdin print_prefix output_prefix detached no_decode timeout no_touch_signals/]);
+
+    my $c = $Thruk::Globals::c || undef;
     my $t1 = [gettimeofday];
 
-    if($timeout) {
+    if($options->{'timeout'}) {
         setpgrp();
-        alarm($timeout);
+        alarm($options->{'timeout'});
+        delete $options->{'timeout'};
         local $SIG{'ALRM'} = sub { die("timeout"); };
         my @res;
         eval {
-            @res = cmd($c, $cmd, $stdin, $print_prefix, $detached, $no_decode);
+            @res = &cmd($cmd, $options);
         };
         my $err = $@;
         my $remain = alarm(0);
         if($err) {
             if($c) {
                 if($remain <= 0 || $err =~ m/timeout/mx) {
-                    _warn(longmess("command timed out after ".$timeout." seconds"));
+                    _warn(longmess("command timed out after ".$options->{'timeout'}." seconds"));
                 } else {
                     _warn(longmess("command errror: ".$err));
                 }
@@ -823,15 +841,11 @@ sub cmd {
         return(@res);
     }
 
-    if(defined $c && !defined $cmd) {
-        $cmd = $c;
-        $c = $Thruk::Globals::c || undef;
-    }
     $c->stats->profile(begin => "IO::cmd") if $c;
 
-    local $SIG{INT}  = 'DEFAULT' unless $no_touch_signals;
-    local $SIG{TERM} = 'DEFAULT' unless $no_touch_signals;
-    local $SIG{PIPE} = 'DEFAULT' unless $no_touch_signals;
+    local $SIG{INT}  = 'DEFAULT' unless $options->{'no_touch_signals'};
+    local $SIG{TERM} = 'DEFAULT' unless $options->{'no_touch_signals'};
+    local $SIG{PIPE} = 'DEFAULT' unless $options->{'no_touch_signals'};
     local $ENV{REMOTE_USER} = $c->stash->{'remote_user'} if $c;
     my $groups = [];
     if($c && $c->user_exists) {
@@ -842,8 +856,8 @@ sub cmd {
     local $ENV{REMOTE_USER_ALIAS} = $c->user->{'alias'} if $c && $c->user;
     local $ENV{THRUK_REQ_URL}     = "".$c->req->uri if $c;
 
-    if($detached) {
-        confess("stdin not supported for detached commands") if $stdin;
+    if($options->{'detached'}) {
+        confess("stdin not supported for detached commands") if $options->{'stdin'};
         confess("array cmd not supported for detached commands") if ref $cmd eq 'ARRAY';
         require Thruk::Utils::External;
         Thruk::Utils::External::perl($c, { expr => '`'.$cmd.'`', background => 1 });
@@ -851,7 +865,7 @@ sub cmd {
         return(0, "cmd started in background");
     }
 
-    require Thruk::Utils::Encode unless $no_decode;
+    require Thruk::Utils::Encode unless $options->{'no_decode'};
 
     my($rc, $output);
     if(ref $cmd eq 'ARRAY') {
@@ -862,8 +876,8 @@ sub cmd {
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
         my $sel = IO::Select->new;
         $sel->add($rdr);
-        if($stdin) {
-            print $wtr $stdin,"\n";
+        if($options->{'stdin'}) {
+            print $wtr $options->{'stdin'},"\n";
         }
         CORE::close($wtr);
 
@@ -877,8 +891,15 @@ sub cmd {
                     $sel->remove($fh);
                     next;
                 } else {
+                    if($options->{'output_prefix'}) {
+                        my $prefix = $options->{'output_prefix'};
+                        if(ref $prefix eq 'CODE') {
+                            $prefix = &{$prefix};
+                        }
+                        $line = $prefix.$line;
+                    }
                     push @lines, $line;
-                    print $print_prefix, $line if defined $print_prefix;
+                    print $options->{'print_prefix'}, $line if defined $options->{'print_prefix'};
                 }
             }
         }
@@ -887,11 +908,11 @@ sub cmd {
         $rc = $?;
         @lines = grep defined, @lines;
         $output = join('', @lines) // '';
-        $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
+        $output = Thruk::Utils::Encode::decode_any($output) unless $options->{'no_decode'};
         # restore original array
         unshift @{$cmd}, $prog;
     } else {
-        confess("stdin not supported for string commands") if $stdin;
+        confess("stdin not supported for string commands") if $options->{'stdin'};
         &timing_breakpoint('IO::cmd: '.$cmd);
         _debug( "running cmd: ". $cmd ) if $c;
 
@@ -908,7 +929,7 @@ sub cmd {
         } else {
             $output = `$cmd`;
             $rc     = $?;
-            $output = Thruk::Utils::Encode::decode_any($output) unless $no_decode;
+            $output = Thruk::Utils::Encode::decode_any($output) unless $options->{'no_decode'};
         }
     }
 
@@ -928,6 +949,27 @@ sub cmd {
 
     return($rc, $output) if wantarray;
     return($output);
+}
+
+########################################
+sub _cmd_old {
+    my($cmd, $stdin, $print_prefix, $detached, $no_decode, $timeout, $no_touch_signals) = @_;
+    # REMOVE AFTER: 01.01.2027
+    # backwards compatible options (remove blessed import when removing this...)
+    if($cmd && ref $cmd && blessed($cmd) && $cmd->isa("Thruk::Context")) {
+        shift @_;
+        return(_cmd_old(@_));
+    }
+    my $options = {
+        stdin                 => $stdin,
+        print_prefix          => $print_prefix,
+        detached              => $detached,
+        no_decode             => $no_decode,
+        timeout               => $timeout,
+        no_touch_signals      => $no_touch_signals,
+    };
+    return(&cmd($cmd, $options));
+    # end REMOVE...
 }
 
 ########################################

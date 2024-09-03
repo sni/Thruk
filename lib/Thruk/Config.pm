@@ -1511,7 +1511,7 @@ sub get_thruk_version {
 ###################################################
 sub _cmd {
     my($cmd) = @_;
-    my($rc, $out) = Thruk::Utils::IO::cmd(undef, $cmd, undef, undef, undef, 1);
+    my($rc, $out) = Thruk::Utils::IO::cmd($cmd, { no_decode => 1 });
     chomp($out);
     return($rc, $out);
 }

@@ -199,7 +199,7 @@ sub _handle_basic_login {
     elsif($session) {
         # call a script hook after successful login?
         if($c->config->{'cookie_auth_login_hook'}) {
-            Thruk::Utils::IO::cmd($c, $c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1');
+            Thruk::Utils::IO::cmd($c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1');
         }
         return(login_successful($c, $login, $session, $referer, $cookie_domain, "password"));
     }

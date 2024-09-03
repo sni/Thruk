@@ -552,6 +552,28 @@ sub has_binary {
     return;
 }
 
+########################################
+
+=head2 validate_options
+
+    validate_options($options, $known_keys)
+
+dies if $options contains unknown keys
+
+=cut
+sub validate_options {
+    my($options, $known_keys) = @_;
+    return unless defined $options;
+
+    confess("option must be a hash") unless(ref $options eq 'HASH');
+    $known_keys = array2hash($known_keys);
+    for my $key (sort keys %{$options}) {
+        confess("unknown option '$key' in options") unless defined $known_keys->{$key};
+    }
+
+    return;
+}
+
 ##############################################
 
 =head1 SEE ALSO

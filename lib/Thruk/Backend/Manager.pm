@@ -1139,7 +1139,7 @@ sub _renew_logcache {
         } else {
             return 1 if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
             local $ENV{'THRUK_LOGCACHE_MODE'} = 'update';
-            my($rc, $output) = Thruk::Utils::IO::cmd($c, $c->config->{'logcache_import_command'});
+            my($rc, $output) = Thruk::Utils::IO::cmd($c->config->{'logcache_import_command'});
             if($rc != 0) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => $output });
             }

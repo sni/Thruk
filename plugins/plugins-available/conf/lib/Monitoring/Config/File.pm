@@ -619,7 +619,7 @@ sub try_merge {
 
     # get diff from new file from disk compared to our backup
     my $cmd = 'cd '.$tmpdir.' && diff -u file1.cfg file2.cfg > patch 2>/dev/null';
-    my($rc) = Thruk::Utils::IO::cmd(undef, $cmd);
+    my($rc) = Thruk::Utils::IO::cmd($cmd);
 
     # save cleaned version of current file from disk
     my $file3 = Monitoring::Config::File->new($self->{'path'}, undef, $self->{'coretype'});
@@ -631,7 +631,7 @@ sub try_merge {
 
     # try to apply patch to current file from disk
     $cmd = 'cd '.$tmpdir.' && patch -F 10 -p0 < patch 2>&1';
-    my($rc2, $out) = Thruk::Utils::IO::cmd(undef, $cmd);
+    my($rc2, $out) = Thruk::Utils::IO::cmd($cmd);
 
     my $text = Thruk::Utils::Encode::decode_any(Thruk::Utils::IO::read($tmpdir.'/file1.cfg'));
 

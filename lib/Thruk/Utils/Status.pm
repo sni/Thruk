@@ -2314,7 +2314,7 @@ sub serveraction {
 
     my($rc, $output);
     eval {
-        ($rc, $output) = Thruk::Utils::IO::cmd($c, [$cmd, @cmdline, @args]);
+        ($rc, $output) = Thruk::Utils::IO::cmd([$cmd, @cmdline, @args]);
     };
     if($@) {
         return('1', $@);

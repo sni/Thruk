@@ -392,7 +392,7 @@ sub get_url {
     if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'} && $c->stash->{'param'}->{'pdf'} eq 'yes') {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
         local $ENV{THRUK_SESSION_ID} = $sessionid;
-        Thruk::Utils::IO::cmd($c, [$c->config->{home}.'/script/html2pdf.sh', $url, $c->stash->{'attachment'}.'.pdf']);
+        Thruk::Utils::IO::cmd([$c->config->{home}.'/script/html2pdf.sh', $url, $c->stash->{'attachment'}.'.pdf']);
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
         $Thruk::Utils::PDF::attachment = 'report.pdf';

@@ -31,12 +31,12 @@ for my $str ('abc', 'öäüß', 'test€') {
   is($test, $orig, 'decode_any '.encode_utf8($test));
 
   $test = $orig;
-  my($rc, $output) = Thruk::Utils::IO::cmd($c, ["/usr/bin/printf", "%s", $test]);
+  my($rc, $output) = Thruk::Utils::IO::cmd(["/usr/bin/printf", "%s", $test]);
   is($rc, 0, "printf got rc 0");
   is($output, $orig, "got correct string");
 
   $test = $orig;
-  ($rc, $output) = Thruk::Utils::IO::cmd($c, '/usr/bin/printf "%s" "'.$test.'"');
+  ($rc, $output) = Thruk::Utils::IO::cmd('/usr/bin/printf "%s" "'.$test.'"');
   is($rc, 0, "printf got rc 0");
   is($output, $orig, "got correct string");
 }
