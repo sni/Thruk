@@ -2058,6 +2058,7 @@ ex.:
       api_url       = https://oauthserver/oauth2/v1/userinfo      # API endpoint to retrieve user information from
       login_field   = login                                       # Hash key from userinfo to get the actual username from. If not set, Thruk will try 'login', then 'email'
       #enable_pkce  = 0                                           # enable oauth 2.1 pkce workflow if set to 1. Disable by default
+      #https_proxy = http://<server>:<port>                       # optional proxy to use for accessing URLs from above
     </provider>
   </auth_oauth>
 
