@@ -336,18 +336,19 @@ sub run_cluster {
         my $err = $@;
         my $elapsed = tv_interval($t1);
         if($err) {
-            $err =~ s/^(OMD:.*?)\ at\ \/.*$/$1/gmx;
+            my($short, undef) = Thruk::Utils::extract_connection_error($err);
             if(!$node->{'last_error'} && !$node->{'maintenance'}) {
-                _error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
+                _error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
             } else {
-                _debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, $@));
+                _debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
             }
             Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
                 $n => {
-                    last_error => $err,
+                    last_error => ($short // $err),
                 },
             }, { pretty => 1, allow_empty => 1 });
-            $node->{'last_error'} = $err;
+            $node->{'last_error'} = ($short // $err);
+            _debug2(Carp::longmess("cluster error: ".$err));
         } else {
             if($sub =~ m/Cluster::pong/mx) {
                 if($n ne $r->{'output'}->[0]->{'node_id'}) {
