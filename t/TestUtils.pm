@@ -1264,8 +1264,10 @@ sub js_init {
     my($chrome, $diagnosis) = WWW::Mechanize::Chrome->find_executable();
     plan skip_all => 'WWW::Mechanize::Chrome requires chrome: '.$diagnosis if !$chrome;
 
-    $ENV{'XDG_CONFIG_HOME'} = "/tmp/.thruk_chromium_test.".$>;
-    $ENV{'XDG_CACHE_HOME'}  = "/tmp/.thruk_chromium_test.".$>;
+    my $chrome_folder = "/tmp/.thruk_chromium_test.".$>;
+    $ENV{'XDG_CONFIG_HOME'} = $chrome_folder;
+    $ENV{'XDG_CACHE_HOME'}  = $chrome_folder;
+    Thruk::Utils::IO::cmd("rm -rf $chrome_folder");
 
     use Log::Log4perl qw(:easy);
     Log::Log4perl->easy_init($ERROR);
