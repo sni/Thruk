@@ -98,7 +98,7 @@ sub _run {
         output_prefix => Thruk::Utils::Log::time_prefix(),
     });
     is($rc, 0, sprintf("step %s complete, rc=%d duration=%.1fsec", $step, $rc, tv_interval ($t0)));
-    if($out =~ m/^(FROM.*version:.*)$/mx) {
+    if($out =~ m/^\[.*?\](FROM.*version:.*)$/mx) {
         diag($1);
     }
     push @{$archive}, [$step, $rc, $out];
