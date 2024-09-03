@@ -80,6 +80,8 @@ sub index {
     Thruk::Utils::Panorama::set_is_admin($c);
 
     $c->stash->{one_tab_only}           = '';
+    $c->stash->{'refresh_rate'}         = 0;
+    $c->stash->{'no_auto_reload'}       = 1; # panorama does not need auto-reload and has own refresh mechanism
     $c->stash->{'full_reload_interval'} = defined $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} ? $c->config->{'Thruk::Plugin::Panorama'}->{'full_reload_interval'} : 10800;
     $c->stash->{'extjs_version'}        = "4.2.2";
 

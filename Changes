@@ -9,6 +9,7 @@ next:
             - enable list wizard for host/service depenencies (#1358)
           - Panorama:
             - fix linking nested business processes
+            - fix white page after switching tabs
           - CLI:
             - add create option to apikey command
 
