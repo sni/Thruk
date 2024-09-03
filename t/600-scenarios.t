@@ -105,13 +105,14 @@ sub _run {
     # already printed in verbose mode
     if(!$verbose && $rc != 0) {
         for my $a (@{$archive}) {
-            my $chr = $a->[1] == 0 ? '*' : '!';
+            my($step, $rc, $out) = @{$a};
+            my $chr = $rc == 0 ? '*' : '!';
             diag("");
             diag("");
-            diag(($chr x 3).sprintf(" make %-12s ", $a->[0]).($chr x 58));
-            diag("step: ".$a->[0]);
-            diag("rc:   ".$a->[1]);
-            diag($a->[2]);
+            diag(($chr x 3).sprintf(" make %-12s ", $step).($chr x 58));
+            diag("step: ".$step);
+            diag("rc:   ".$rc);
+            diag($out);
             diag($chr x 78);
             diag("");
         }
