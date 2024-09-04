@@ -278,7 +278,7 @@ sub read_key {
             $stats = Thruk::Utils::IO::json_lock_retrieve($file.'.stats');
         };
         _debug("failed to read stats file: ".$@) if $@;
-        $data = { %{$stats}, %{$data} };
+        $data = { %{$stats}, %{$data} } if $stats;
     }
 
     return($data);
