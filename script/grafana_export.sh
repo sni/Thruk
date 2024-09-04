@@ -25,16 +25,12 @@ export PATH=$PATH:$DIR
 INPUT="$INPUT&from=$START&to=$END"
 
 NODE="node"
-export XDG_CONFIG_HOME=/tmp/.thruk_chromium
-export XDG_CACHE_HOME=/tmp/.thruk_chromium
 if [ -n "$OMD_ROOT" ]; then
     if [ -d "$OMD_ROOT/node_modules/" ]; then
         export NODE_PATH=$OMD_ROOT/node_modules/
     elif [ -d "$OMD_ROOT/lib/node_modules/" ]; then
         export NODE_PATH=$OMD_ROOT/lib/node_modules/
     fi
-    export XDG_CONFIG_HOME=~/tmp/.thruk_chromium
-    export XDG_CACHE_HOME=~/tmp/.thruk_chromium
 fi
 if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/puppeteer/node_modules" ]; then
     export NODE_PATH="/var/lib/thruk/puppeteer/node_modules"

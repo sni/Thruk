@@ -8,6 +8,9 @@
  */
 
 const puppeteer = require('puppeteer');
+const os        = require('os');
+const path      = require('path');
+
 
 var url       = process.argv[2];
 var output    = process.argv[3];
@@ -16,6 +19,17 @@ var height    = process.argv[5];
 var sessionid = process.argv[6];
 var is_report = process.argv[7];
 var waitTimeout = 20000;
+
+// Set XDG_CONFIG_HOME and XDG_CACHE_HOME if not already set (chrome >= ~ 128 does not start otherwise)
+var tempDir = "";
+if(process.env['OMD_ROOT']) {
+  tempDir = path.join(process.env['OMD_ROOT'], 'tmp', 'thruk' `puppeteer.cache.${userId}`);
+} else {
+  const userId  = process.getuid ? process.getuid() : '0000';
+  tempDir = path.join(os.tmpdir(), `puppeteer.cache.${userId}`);
+}
+if (!process.env['XDG_CONFIG_HOME']) { process.env['XDG_CONFIG_HOME'] = tempDir; }
+if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir; }
 
 (async () => {
   const browser = await puppeteer.launch({
