@@ -4,6 +4,7 @@ next:
           - add optional oauth 2.1 pkce workflow
           - add new option main_exclude_top5_hostgroups
           - improve login handling when using multiple tabs (#1315)
+          - improve search when search includes comments/downtimes
           - Config Tool:
             - fix validating service parents (#1376)
             - enable list wizard for host/service depenencies (#1358)
