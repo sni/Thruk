@@ -1594,8 +1594,12 @@ sub _do_on_peers {
         _debug($err);
         _debug2(Carp::longmess("backend error"));
         $err = $short_err if $short_err;
-        $c->stash->{'backend_error'} = 1;
-        if($function eq 'send_command' || $c->stash->{backend_errors_handling} == DIE || ($ENV{'THRUK_MODE'}//'') eq 'TEST') {
+        $c->stash->{'backend_error'} = $err;
+        if($function eq 'send_command'
+            || $c->stash->{backend_errors_handling} == DIE
+            || ($ENV{'THRUK_MODE'}//'') eq 'TEST'
+            || $err =~ m/^\Qbad request:\E/gmx
+        ) {
             die($err);
         }
     }

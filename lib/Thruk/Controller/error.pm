@@ -6,6 +6,7 @@ use Carp qw/confess longmess/;
 use Cpanel::JSON::XS ();
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Constants ':backend_handling';
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -408,6 +409,10 @@ sub _get_connection_details {
 
     if($c->stash->{'lmd_error'}) {
         return "lmd error - ".$c->stash->{'lmd_error'};
+    }
+
+    if($c->stash->{'backend_error'} && $c->stash->{'backend_error'} ne '1') {
+        $detail .= 'backend error: '.$c->stash->{'backend_error'}."\n";
     }
 
     my $listed = {};
