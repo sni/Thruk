@@ -20,7 +20,6 @@ BEGIN {
     import TestUtils;
 }
 
-
 ###########################################################
 # test modules
 if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
