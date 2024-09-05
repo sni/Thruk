@@ -31,6 +31,11 @@ if [ -n "$OMD_ROOT" ]; then
     elif [ -d "$OMD_ROOT/lib/node_modules/" ]; then
         export NODE_PATH=$OMD_ROOT/lib/node_modules/
     fi
+    export XDG_CONFIG_HOME=$OMD_ROOT/tmp/thruk/puppeteer.cache
+    export XDG_CACHE_HOME=$XDG_CACHE_HOME
+else
+    export XDG_CONFIG_HOME=/tmp/puppeteer.cache.$(id -u)
+    export XDG_CACHE_HOME=$XDG_CACHE_HOME
 fi
 if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/puppeteer/node_modules" ]; then
     export NODE_PATH="/var/lib/thruk/puppeteer/node_modules"
