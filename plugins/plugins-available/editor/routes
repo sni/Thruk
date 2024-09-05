@@ -1,0 +1,25 @@
+##########################################################
+
+=head2 add_routes
+
+page: /thruk/cgi-bin/editor.cgi
+
+=cut
+
+$routes->{'/thruk/cgi-bin/editor.cgi'} = 'Thruk::Controller::editor::index';
+
+# enable editor features if this plugin is loaded
+$app->config->{'use_feature_editor'} = 1;
+$app->config->{'plugin_editor_path'} = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
+
+# add new menu item, but only if user has access to at least some files
+sub _plugin_editor_menu_visibility {
+    my($c) = @_;
+    require Thruk::Controller::editor;
+    return(scalar @{Thruk::Controller::editor::get_edits($c)});
+}
+Thruk::Utils::Menu::insert_item('System', {
+                                'href'       => '/thruk/cgi-bin/editor.cgi',
+                                'name'       => 'Editor',
+                                'visible_cb' => 'Thruk::_plugin_editor_menu_visibility',
+});

@@ -1,0 +1,110 @@
+﻿[% PROCESS _header.tt css=[ "plugins/${plugin_name}/editor.css", "vendor/jstree-3.3.8/themes/default/style.min.css"]
+                      js=[ "plugins/${plugin_name}/editor.js",
+                           "vendor/ace-builds-1.4.12/src-min-noconflict/ace.js",
+                           "vendor/ace-builds-1.4.12/src-min-noconflict/ext-language_tools.js",
+                           "vendor/jstree-3.3.8/jstree.min.js"]
+%]
+[% PROCESS _message.tt %]
+[% PROCESS _blocks.tt %]
+
+<div class="flexcol h-full">
+  <div class="flexrow flex-nowrap justify-between" id="top_pane"[% IF hidetop == 1 %]style="visibility:hidden; display:none;"[% END %]>
+    <div class="basis-1/3">
+      [% PROCESS _infobox.tt show_last_update=0 %]
+    </div>
+    <div class="basis-1/3">
+      <h1>Editor</h1>
+    </div>
+    <div class="basis-1/3 flexrow justify-end">
+      [% PROCESS _button btn = {
+      form   => {},
+      button => { id => 'editor_back_button', class => 'update_button', onclick => 'return false;', text => 'back', style => 'display: none;' },
+      }%]
+    </div>
+  </div>
+
+  [% BLOCK dir_block %]
+    [% FOREACH d = dir.dirs.keys.sort %]
+    [% folder = dir.dirs.$d %]
+      <ul>
+        [% remote_thruk_url = "" %]
+        [% IF folder.defined("peer") %]
+          [% remote_thruk_url = get_remote_thruk_url(c, folder.peer) %]
+        [% END %]
+        <li class="[% IF remote_thruk_url != "" %]remote_folder[% END %]">
+          <a href="#"[% IF remote_thruk_url != "" %] onclick="_load_remote_peer('[% escape_js(folder.peer) %]', '[% escape_js(remote_thruk_url) %]')"[% END %]>[% d %]</a>
+          [% INCLUDE dir_block dir = folder %]
+        </li>
+      </ul>
+    [% END %]
+    [% FOREACH f = dir.files.keys.sort %]
+      <ul>
+        <li class="file_node">
+          <a href='#' onclick="_load_file('[% escape_js(dir.files.$f.path) %]/[% escape_js(f) %]')">[% f | html %]</a>
+        </li>
+      </ul>
+    [% END %]
+  [% END %]
+
+  <div class="flexrow flex-nowrap h-full" id="localeditor">
+    <div class="card w-full h-full">
+      <div class="flexrow gap-0 flex-nowrap h-full">
+        <div class="flexcol gap-0 h-auto overflow-auto" style="flex: 0 0 250px;">
+          <div class="head">
+            <div class="radiogroup">
+              <input type="radio" name="tool_expand" id="tool_collapse" onclick="jQuery('#container').jstree('close_all');"><label for="tool_collapse"><i class="uil uil-folder-minus"></i></label>
+              <input type="radio" name="tool_expand" id="tool_expand"   onclick="jQuery('#container').jstree('open_all');" ><label for="tool_expand"><i class="uil uil-folder-open"></i></label>
+            </div>
+            <input type="text" class="w-full ml-2" placeholder="search..." onkeyup="_tree_search(this.value)">
+          </div>
+          <div id="container" class="w-full h-full">
+            <ul class="w-full" style="display: none;">
+              [% IF iframed %]
+              <li id="o_back">
+                <a href="#" onclick="_load_local_editor()">&lt; back</a>
+              </li>
+              [% END %]
+              [% FOREACH edit = files_tree %]
+              <li id="o_[% loop.index %]">
+                <a href="#">[% edit.name %]</a>
+                [% INCLUDE dir_block dir = edit %]
+              </li>
+              [% END %]
+            </ul>
+          </div>
+        </div>
+        <div class="flexcol gap-0 w-full h-auto border-l borderDefault">
+          <div class="head" id="tabs">
+          </div>
+          <div id="editor" class="w-full h-full"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card overflow-hidden" style="flex: 0 0 200px;">
+      <div class="head">
+        <h3>Actions</h3>
+      </div>
+      <div class="actionbox" id="action_menu_table">
+        <div class="flexrow gap-x-1 justify-between clickable" onclick='_save_current_file(); return(false);'>
+          <a href='#' class="js-saveicon w-min">
+            <div class="spinner w-5 h-5 mr-1" style="display: none;"></div>
+            <i class="fa-solid fa-save w-5 h-5 mr-1"></i>
+            <i class="fa-solid fa-check round green w-5 h-5 mr-1" style="display: none;"></i>
+            <i class="uil uil-exclamation round yellow w-5 h-5 mr-1" style="display: none;"></i>
+            Save Changes
+          </a>
+          <div class="textHINTsoft w-min"> (Ctrl+s)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <iframe id="remoteframe" class="p-0 m-0 w-full h-full" style="display: none;"></iframe>
+</div>
+
+<script type="text/javascript">
+<!--
+var file_meta_data = [% json_encode(files_meta) %];
+-->
+</script>
+
+[% PROCESS _footer.tt %]

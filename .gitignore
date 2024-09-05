@@ -73,7 +73,6 @@ thruk_local.d/
 t/scenarios/*/panorama/
 tmp_*
 action_menus/*
-plugins/plugins-available/editor
 plugins/plugins-enabled/editor
 plugins/plugins-available/omd
 plugins/plugins-available/pansnaps

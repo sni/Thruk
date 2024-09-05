@@ -1,0 +1,33 @@
+LI.file_node I.jstree-icon {
+  background-position: -100px -69px;
+}
+
+LI.remote_folder I.jstree-icon {
+	background-position: -260px -36px;
+}
+
+DIV.actionbox DIV.spinner {
+	width: 20px !important;
+	height: 20px !important;
+	margin-right: 4px;
+	margin-bottom: 1px;
+}
+
+/* editor textarea container */
+#editor {
+	background-color: var(--forms-bg);
+	color: var(--forms-fg);
+}
+/* editor line number background */
+.ace-clouds .ace_gutter {
+	background-color: var(--body-bg);
+	color: var(--forms-fg);
+}
+
+.ace-clouds .ace_gutter-active-line {
+	background-color: var(--hover-bg);
+}
+
+.ace_active-line, .ace-clouds .ace_marker-layer .ace_active-line {
+	background: var(--text-highlight-bg);
+}

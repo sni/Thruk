@@ -1,0 +1,4 @@
+The 'Editor' plugin is a all purpose general web based text editor.
+Read more about this plugin on https://github.com/sni/thruk-plugin-editor
+
+Url: editor.cgi
