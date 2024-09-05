@@ -747,15 +747,20 @@ sub _remote_cmd {
         # fallback to ssh if possible
         my $facts     = ansible_get_facts($c, $peer, 0);
         my $host_name = $facts->{'ansible_facts'}->{'ansible_fqdn'};
-        if($host_name && !$background_options) {
+        my $config    = config($c);
+        if(!$config->{'ssh_fallback'}) {
+            die("http(s) connection failed\n".$err);
+        } elsif($host_name && !$background_options) {
             _warn("remote cmd failed, trying ssh fallback: %s", $err);
             _debug("fallback to ssh");
             ($rc, $out) = Thruk::Utils::IO::cmd($c, "ansible all -i $host_name, -m shell -a \"".$cmd."\"");
-            die($out) if $out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx;
+            if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
+                die("http(s) and ssh connection failed\nhttp(s):\n".$err."\n\nssh:\n".$out);
+            }
             $out =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=\d\s+>>//gmx;
             return($rc, $out);
         } else {
-            die($err);
+            die("http(s) connection failed\n".$err);
         }
     }
     return($rc, $out);
@@ -838,6 +843,7 @@ sub config {
 
     # set defaults
     my $defaults = {
+        'ssh_fallback'            => 1,
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',
         'cmd_yum_pkg_install'     => 'sudo -n yum install -y %PKG',
         'cmd_dnf_pkg_install'     => 'sudo -n dnf install -y %PKG',
