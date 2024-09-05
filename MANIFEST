@@ -1141,7 +1141,6 @@ root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/haskell.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/haskell_cabal.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/haxe.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/hjson.js
-root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/html.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/html_elixir.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/html_ruby.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/ini.js
@@ -1160,7 +1159,6 @@ root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/julia.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/kotlin.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/latex.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/less.js
-root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/liquid.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/lisp.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/livescript.js
 root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/snippets/logiql.js
