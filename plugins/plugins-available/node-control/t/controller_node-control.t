@@ -8,9 +8,9 @@ BEGIN {
     plan skip_all => 'test skipped'      if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
     # enable plugin
-    `cd plugins/plugins-enabled && ln -s ../plugins-available/editor .`;
+    `cd plugins/plugins-enabled && ln -s ../plugins-available/node-control .`;
 
-    plan tests => 30;
+    plan tests => 12;
 }
 
 BEGIN {
@@ -21,23 +21,15 @@ BEGIN {
 
 ###########################################################
 # test modules
-unshift @INC, 'plugins/plugins-available/editor/lib';
-use_ok 'Thruk::Controller::editor';
+unshift @INC, 'plugins/plugins-available/node-control/lib';
+use_ok 'Thruk::Controller::node_control';
 
 ###########################################################
 # test main page
 TestUtils::test_page(
-    'url'             => '/thruk/cgi-bin/editor.cgi',
-    'like'            => 'Editor',
+    'url'             => '/thruk/cgi-bin/node_control.cgi',
+    'like'            => 'Node Control',
 );
 
-# make sure syntax highlighting works
-for my $alias (qw/naemon nagios/) {
-    TestUtils::test_page(
-        'url'             => '/thruk/vendor/ace-builds-1.4.12/src-min-noconflict/mode-'.$alias.'.js',
-        'like'            => ['TextHighlightRules', 'servicegroup_members', 'NaemonHighlightRules'],
-    );
-}
-
 # restore default
-`cd plugins/plugins-enabled && rm -f editor`;
+`cd plugins/plugins-enabled && rm -f node-control`;

@@ -489,7 +489,8 @@ sub test_page {
         for my $match (@matches1, @matches2) {
             $x++;
             next if $x%2==1;
-            next if $match =~ m/^http/mxo;
+            next if $match =~ m/^https?:/mxo;
+            next if $match =~ m/^\/\//mxo;
             next if $match =~ m/^ssh/mxo;
             next if $match =~ m/^mailto:/mxo;
             next if $match =~ m/^(\#|'|")/mxo;
