@@ -95,8 +95,6 @@ t/docker/cases/.*/.*.js
 .idea/
 ^action_menus/*
 ^lmd.ini$
-plugins/plugins-available/editor
-plugins/plugins-enabled/editor
 ^thruk_local.d/.*.conf
 t/scenarios/sakuli_e2e/_run/
 t/scenarios/*/panorama/
@@ -106,12 +104,12 @@ t/scenarios/pentest_arachni/results/
 ^.ci/
 .github/
 ^continue$
-plugins/plugins-available/editor
 plugins/plugins-available/omd
 plugins/plugins-available/pansnaps
 plugins/plugins-available/status-dashboard
 plugins/plugins-available/woshsh
 plugins/plugins-enabled/agents
+plugins/plugins-enabled/editor
 ^node_modules/
 ^package-lock.json
 ^package.json
