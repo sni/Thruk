@@ -43,7 +43,10 @@ sub index {
     my $parallel_actions     = $config->{'parallel_tasks'} // 3;
     $c->stash->{ms_parallel} = $parallel_actions;
 
-    $c->stash->{show_os_updates} = $config->{'os_updates'} // 1;
+    $c->stash->{'show_os_updates'}  = $config->{'os_updates'} // 1;
+    $c->stash->{'show_pkg_install'} = $config->{'pkg_install'} // 1;
+    $c->stash->{'show_pkg_cleanup'} = $config->{'pkg_cleanup'} // 1;
+    $c->stash->{'show_all_button'}  = $config->{'all_button'} // 1;
 
     my $action = $c->req->parameters->{'action'} || 'list';
 
@@ -143,6 +146,7 @@ sub _node_action {
 
     if($action eq 'cleanup') {
         return unless Thruk::Utils::check_csrf($c);
+        return unless $config->{'pkg_cleanup'};
         my $job = Thruk::NodeControl::Utils::omd_cleanup($c, $peer);
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job"}));
@@ -150,6 +154,7 @@ sub _node_action {
 
     if($action eq 'omd_install') {
         return unless Thruk::Utils::check_csrf($c);
+        return unless $config->{'pkg_install'};
         my $job = Thruk::NodeControl::Utils::omd_install($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job"}));

@@ -81,10 +81,18 @@
           <th class="w-8 not-hoverable">
             <div class="flexrow flex-nowrap gap-x-1">
               <a href="#" onclick="return nc_run_all(this, '.js-update-btn', {action: 'update'})"><i class="fa-solid fa-arrows-rotate text-sm" title="Update facts for all visible servers"></i></a>
-              <a href="#" onclick="return nc_run_all(this, '.js-install-btn', {action: 'omd_install'})"><i class="fa-solid fa-truck-arrow-right text-sm" title="Run omd install for all visible servers"></i></a>
-              <a href="#" onclick="return nc_run_all(this, '.js-omd-update-btn', {action: 'omd_update'})"><i class="fa-solid fa-square-up-right text-sm" title="Run omd update for all visible servers"></i></a>
-              <a href="#" onclick="return nc_run_all(this, '.js-cleanup-btn', {action: 'cleanup'})"><i class="fa-solid fa-broom text-sm" title="Run omd cleanup for all visible servers"></i></a>
-              <a href="#" onclick="return nc_run_all(this, '.js-run-all-btn', {action: 'omd_install_update_cleanup'})"><i class="fa-solid fa-arrows-up-to-line text-sm" title="Run omd install,update,cleanup for all visible servers"></i></a>
+              [% IF show_pkg_install && show_all_button %]
+                <a href="#" onclick="return nc_run_all(this, '.js-install-btn', {action: 'omd_install'})"><i class="fa-solid fa-truck-arrow-right text-sm" title="Run omd install for all visible servers"></i></a>
+              [% END %]
+              [% IF show_all_button %]
+                <a href="#" onclick="return nc_run_all(this, '.js-omd-update-btn', {action: 'omd_update'})"><i class="fa-solid fa-square-up-right text-sm" title="Run omd update for all visible servers"></i></a>
+              [% END %]
+              [% IF show_pkg_cleanup && show_all_button %]
+                <a href="#" onclick="return nc_run_all(this, '.js-cleanup-btn', {action: 'cleanup'})"><i class="fa-solid fa-broom text-sm" title="Run omd cleanup for all visible servers"></i></a>
+              [% END %]
+              [% IF show_all_button %]
+                <a href="#" onclick="return nc_run_all(this, '.js-run-all-btn', {action: 'omd_install_update_cleanup'})"><i class="fa-solid fa-arrows-up-to-line text-sm" title="Run omd install,update,cleanup for all visible servers"></i></a>
+              [% END %]
             </div>
           </th>
         </tr>
@@ -200,10 +208,12 @@
                     [% FOREACH ver = s.omd_versions %]
                       [% IF ver == omd_default_version; has_installed = 1; LAST; END %]
                     [% END %]
-                    [% IF !omd_default_available && s.omd_available_versions.size > 0 %]
-                      <a href="#" class="js-install-btn disabled not-clickable" title="omd version [% omd_default_version | html %] not available on this host."><i class="fa-solid fa-truck-arrow-right text-sm"></i></a>
-                    [% ELSE %]
-                      <a href="#" class="js-install-btn [% IF has_installed || !s.omd_version %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="return nc_action_with_popup(this, {action: 'omd_install'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-truck-arrow-right text-sm" title="Install omd-[% omd_default_version | html %]"></i></a>
+                    [% IF show_pkg_install %]
+                      [% IF !omd_default_available && s.omd_available_versions.size > 0 %]
+                        <a href="#" class="js-install-btn disabled not-clickable" title="omd version [% omd_default_version | html %] not available on this host."><i class="fa-solid fa-truck-arrow-right text-sm"></i></a>
+                      [% ELSE %]
+                        <a href="#" class="js-install-btn [% IF has_installed || !s.omd_version %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="return nc_action_with_popup(this, {action: 'omd_install'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-truck-arrow-right text-sm" title="Install omd-[% omd_default_version | html %]"></i></a>
+                      [% END %]
                     [% END %]
                   [% END %]
 
@@ -213,10 +223,12 @@
                     <a href="#" class="js-omd-update-btn [% IF s.omd_version == omd_default_version || !has_installed %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="return nc_action_with_popup(this, {action: 'omd_update'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-square-up-right text-sm" title="Update to omd-[% omd_default_version | html %]"></i></a>
                   [% END %]
 
-                  [% IF s.cleaning %]
-                    <div class="spinner clickable" style="margin-right: 3px;" title="site is cleaning up right now" onclick="showJobOutputPopup('[% s.cleaning | html %]','[% s.peer_key | html %]')"></div>
-                  [% ELSE %]
-                    <a href="#" class="js-cleanup-btn [% IF s.omd_cleanable.size == 0 %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="return nc_action_with_popup(this, {action: 'cleanup'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-broom text-sm" title="Run omd cleanup to remove:&#013;[% s.omd_cleanable.join("&#013;") %]"></i></a>
+                  [% IF show_pkg_cleanup %]
+                    [% IF s.cleaning %]
+                      <div class="spinner clickable" style="margin-right: 3px;" title="site is cleaning up right now" onclick="showJobOutputPopup('[% s.cleaning | html %]','[% s.peer_key | html %]')"></div>
+                    [% ELSE %]
+                      <a href="#" class="js-cleanup-btn [% IF s.omd_cleanable.size == 0 %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="return nc_action_with_popup(this, {action: 'cleanup'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-broom text-sm" title="Run omd cleanup to remove:&#013;[% s.omd_cleanable.join("&#013;") %]"></i></a>
+                    [% END %]
                   [% END %]
 
                   [% IF s.run_all %]

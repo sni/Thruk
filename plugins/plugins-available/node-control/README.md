@@ -48,6 +48,15 @@ ex. because the site is stopped.
       # set to 0 to disable os updates
       #os_updates = 1
 
+      # set to 0 to disable pkg installation
+      #pkg_install = 1
+
+      # set to 0 to disable pkg cleanup
+      #pkg_cleanup = 1
+
+      # set to 0 to hide 'all' buttons
+      #all_button = 1
+
       cmd_omd_cleanup         = sudo -n omd cleanup
 
       cmd_yum_pkg_install     = sudo -n yum install -y %PKG

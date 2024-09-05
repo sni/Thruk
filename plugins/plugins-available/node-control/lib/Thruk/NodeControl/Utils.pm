@@ -574,7 +574,7 @@ sub _omd_install_update_cleanup_step2 {
     my($job, $jobdata);
     # install omd pkg
     print "*** installing $version\n";
-    if(!grep(/$version/mx, @{$facts->{'omd_versions'} // []})) {
+    if($config->{'pkg_install'} && !grep(/$version/mx, @{$facts->{'omd_versions'} // []})) {
         $job     = omd_install($c, $peer, $version, 1);
         die("failed to start install") unless $job;
         $jobdata = _wait_for_job($c, $peer, $job, 3, 1800);
@@ -605,12 +605,14 @@ sub _omd_install_update_cleanup_step2 {
     }
 
     # cleanup
-    print "*** running cleanup\n";
-    $job     = omd_cleanup($c, $peer, 1);
-    die("failed to start cleanup") unless $job;
-    $jobdata = _wait_for_job($c, $peer, $job, 3, 1800);
-    print $jobdata->{'stdout'},"\n";
-    print $jobdata->{'stderr'},"\n";
+    if($config->{'pkg_cleanup'}) {
+        print "*** running cleanup\n";
+        $job     = omd_cleanup($c, $peer, 1);
+        die("failed to start cleanup") unless $job;
+        $jobdata = _wait_for_job($c, $peer, $job, 3, 1800);
+        print $jobdata->{'stdout'},"\n";
+        print $jobdata->{'stderr'},"\n";
+    }
 
     Thruk::Utils::IO::json_lock_patch($file, { 'run_all' => 0, 'last_error' => '' }, { pretty => 1, allow_empty => 1 });
 
@@ -845,6 +847,7 @@ sub config {
     my $defaults = {
         'ssh_fallback'            => 1,
         'os_updates'              => 1,
+        'pkg_install'             => 1,
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',
         'cmd_yum_pkg_install'     => 'sudo -n yum install -y %PKG',
         'cmd_dnf_pkg_install'     => 'sudo -n dnf install -y %PKG',
