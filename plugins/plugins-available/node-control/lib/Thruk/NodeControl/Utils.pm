@@ -844,6 +844,7 @@ sub config {
     # set defaults
     my $defaults = {
         'ssh_fallback'            => 1,
+        'os_updates'              => 1,
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',
         'cmd_yum_pkg_install'     => 'sudo -n yum install -y %PKG',
         'cmd_dnf_pkg_install'     => 'sudo -n dnf install -y %PKG',

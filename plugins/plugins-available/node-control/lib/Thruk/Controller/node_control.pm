@@ -43,6 +43,8 @@ sub index {
     my $parallel_actions     = $config->{'parallel_tasks'} // 3;
     $c->stash->{ms_parallel} = $parallel_actions;
 
+    $c->stash->{show_os_updates} = $config->{'os_updates'} // 1;
+
     my $action = $c->req->parameters->{'action'} || 'list';
 
     if($action && $action ne 'list') {
@@ -169,6 +171,7 @@ sub _node_action {
 
     if($action eq 'os_update') {
         return unless Thruk::Utils::check_csrf($c);
+        return unless $config->{'os_updates'};
         my $job = Thruk::NodeControl::Utils::os_update($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job"}));
@@ -176,6 +179,7 @@ sub _node_action {
 
     if($action eq 'os_sec_update') {
         return unless Thruk::Utils::check_csrf($c);
+        return unless $config->{'os_updates'};
         my $job = Thruk::NodeControl::Utils::os_sec_update($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job" }));

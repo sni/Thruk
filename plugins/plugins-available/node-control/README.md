@@ -45,6 +45,9 @@ ex. because the site is stopped.
       # set to 0 to disable ssh fallback in case http connection fails
       #ssh_fallback = 1
 
+      # set to 0 to disable os updates
+      #os_updates = 1
+
       cmd_omd_cleanup         = sudo -n omd cleanup
 
       cmd_yum_pkg_install     = sudo -n yum install -y %PKG

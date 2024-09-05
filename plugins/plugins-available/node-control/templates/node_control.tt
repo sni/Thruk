@@ -63,6 +63,7 @@
           <th class="w-32">Site</th>
           <th class="w-32">OMD</th>
           <th class="w-24">OMD Status</th>
+          [% IF show_os_updates %]
           <th class="w-32">
             <div class="flexrow flex-nowrap gap-x-1 justify-between">
               <span>OS</span>
@@ -72,6 +73,7 @@
               </div>
             </div>
           </th>
+          [% END %]
           <th class="w-24">Virt.</th>
           <th class="w-24">CPU</th>
           <th class="w-24">Memory</th>
@@ -123,6 +125,7 @@
                 [% END %]
               [% END %]
             </td>
+            [% IF show_os_updates %]
             <td class="align-top">
               <div class="flexrow flex-nowrap gap-x-1 justify-between">
                 <span class="clickable" onclick="openModalWindowUrl('node_control.cgi?action=facts&modal=1&peer=[% s.peer_key | html %]');">[% s.os_name | html %] [% s.os_version | html %]</span>
@@ -148,6 +151,7 @@
                 </form>
               </div>
             </td>
+            [% END %]
             <td>[% s.machine_type %]</td>
             <td class='align-top relative'>
               [% IF s.cpu_perc; %][%IF s.cpu_perc > 1; s.cpu_perc = 1; END %]
