@@ -8,7 +8,7 @@ on:
 
 jobs:
   citest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: perl -V
@@ -21,7 +21,7 @@ jobs:
         run: sudo su naemon -c ./.ci/install_deps.sh
       - name: ./script/install_puppeteer.sh
         run: sudo ./script/install_puppeteer.sh
-      - name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
-        uses: mxschmitt/action-tmate@v3
-      #- name: make citest
-      #  run: sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && make citest'
+      #- name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
+      #  uses: mxschmitt/action-tmate@v3
+      - name: make citest
+        run: sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && make citest'
