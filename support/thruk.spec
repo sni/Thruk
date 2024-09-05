@@ -451,6 +451,10 @@ exit 0
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/core_scheduling
 %{_datadir}/%{name}/plugins/plugins-available/agents
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/agents
+%{_datadir}/%{name}/plugins/plugins-available/editor
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/editor
+%{_datadir}/%{name}/plugins/plugins-available/node-control
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/node-control
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/usercontent/

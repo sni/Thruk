@@ -27,6 +27,10 @@
 /etc/thruk/plugins/plugins-available/core_scheduling
 /usr/share/thruk/plugins/plugins-available/agents
 /etc/thruk/plugins/plugins-available/agents
+/usr/share/thruk/plugins/plugins-available/editor
+/etc/thruk/plugins/plugins-available/editor
+/usr/share/thruk/plugins/plugins-available/node-control
+/etc/thruk/plugins/plugins-available/node-control
 /etc/thruk/ssi
 /etc/thruk/action_menus
 /etc/thruk/themes
