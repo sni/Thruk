@@ -1181,16 +1181,6 @@ sub _get_user_agent {
 }
 
 ##############################################
-sub _format_response_error {
-    my($response) = @_;
-    if(defined $response) {
-        return $response->code().': '.$response->message();
-    } else {
-        return Dumper($response);
-    }
-}
-
-##############################################
 sub _authorize_function {
     my($c, $function, $opt) = @_;
 

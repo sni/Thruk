@@ -443,6 +443,8 @@ sub clean_credentials_from_string {
 
         $str    =~ s%("|')($key)("|')(\s*=>\s*')[^']+(',?)%$1$2$3$4...$5%gmx; # remove from perl structures
         $str    =~ s%("|')($key)("|')(\s*=>\s*")[^']+(",?)%$1$2$3$4...$5%gmx; # same, but with single quotes
+
+        $str    =~ s%(thruk_auth=)\S+%$1...%gmx; # thruk_auth cookie from request header
     }
 
     return($str);

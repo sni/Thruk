@@ -989,7 +989,7 @@ sub _req {
         die("not an array ref, got ".ref($data->{'output'}));
     }
     _debug_log_request_response($c, $response);
-    die(_format_response_error($response));
+    die(Thruk::Utils::http_response_error($response));
 }
 
 ##########################################################
@@ -1122,23 +1122,6 @@ sub _clean_code_refs {
         }
     }
     return;
-}
-
-##########################################################
-sub _format_response_error {
-    my($response) = @_;
-    my $message = "";
-    if($response->decoded_content && $response->decoded_content =~ m|<h1>(OMD:.*?)</h1>|sxm) {
-        return($1);
-    }
-    if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)(:error\|)\-\->|sxm) {
-        $message = "\n".$1;
-    }
-    if(defined $response) {
-        return $response->code().': '.$response->message().$message;
-    } else {
-        return(sprintf("request failed: %d - %s\nrequest:\n%s\n\nresponse:\n%s\n", $response->code(), $response->message(), $response->request->as_string(), $response->as_string()));
-    }
 }
 
 ##########################################################

@@ -3960,6 +3960,32 @@ sub extract_connection_error {
     return(undef, $err);
 }
 
+##########################################################
+
+=head2 http_response_error
+
+  http_response_error($response)
+
+returns a short connection error.
+
+=cut
+sub http_response_error {
+    my($response) = @_;
+    my $message = "";
+    if($response->decoded_content && $response->decoded_content =~ m|<h1>(OMD:.*?)</h1>|sxm) {
+        return($1);
+    }
+    if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)(:error\|)\-\->|sxm) {
+        $message = "\n".$1;
+    }
+    if(defined $response) {
+        return $response->code().': '.$response->message().$message;
+    } else {
+        my $req_string = Thruk::Base::clean_credentials_from_string($response->request->as_string());
+        return(sprintf("request failed: %d - %s\nrequest:\n%s\n\nresponse:\n%s\n", $response->code(), $response->message(), $req_string, $response->as_string()));
+    }
+}
+
 ##############################################
 
 1;

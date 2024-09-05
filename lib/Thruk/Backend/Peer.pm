@@ -360,7 +360,14 @@ sub cmd {
 
             require Thruk::Controller::proxy;
             my $res    = Thruk::Controller::proxy::proxy_request($c, $self->{'key'}, $url.'cgi-bin/remote.cgi', $req);
-            my $result = Cpanel::JSON::XS::decode_json($res->content());
+            my $result;
+            eval {
+                $result = Cpanel::JSON::XS::decode_json($res->content());
+            };
+            my $err = $@;
+            if($err) {
+                die(Thruk::Utils::http_response_error($res));
+            }
             ($rc, $out) = @{$result->{'output'}};
             if($background_options) {
                 ($out) = @{$result->{'output'}};
