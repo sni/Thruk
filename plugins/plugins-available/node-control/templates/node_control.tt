@@ -42,6 +42,7 @@
 <script>
   var ms_parallel = [% ms_parallel | html %];
 </script>
+[% last_section = "" %]
 
 <div class="card w-full mt-5" style="min-width: 800px;">
   <div class="head p-0 justify-between border-0">
@@ -89,7 +90,7 @@
       <tbody class="rowhover">
         [% FOREACH s = data %]
           <tr class="js-tabs" id="node_row_[% s.peer_key | html %]">
-            <td class="align-top js-node-row">[% IF s.section != "Default"; s.section | html; END %]</td>
+            <td class="align-top js-node-row">[% IF s.section != "Default"; IF s.section != last_section; s.section | html; END; last_section = s.section; END %]</td>
             <td class="align-top"><a class="link" target="_blank" href="//[% s.host_name | html %]/[% s.omd_site | html %]/"><i class="uil uil-external-link-alt text-xs"></i>[% s.host_name | html %]</a></td>
             <td class="align-top">
               [% IF s.omd_site %]
