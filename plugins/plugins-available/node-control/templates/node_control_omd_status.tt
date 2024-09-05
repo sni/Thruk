@@ -1,0 +1,41 @@
+﻿[% IF ! modal %]
+  [% PROCESS _header.tt %]
+  [% PROCESS _message.tt %]
+
+  [% PROCESS _infobox.tt %]
+[% END %]
+
+<div class="card w-fit h-auto [% IF modal %] shadow-float[% END %]">
+  <div class="head justify-between">
+    <h3>OMD Status: [% s.host_name | html %]</h3>
+    [% IF modal %]
+    <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+    [% END %]
+  </div>
+  <div class="body">
+    <form action="node_control.cgi" method="POST">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <table class="w-fit mx-auto innercellborder">
+        [% FOREACH service IN s.omd_status.keys.sort %]
+          [% IF service == "OVERALL"; NEXT; END %]
+          [% status = s.omd_status.$service %]
+          <tr id="omd_status_[% s.peer_key | html %]_[% service | html %]">
+            <td class="js-omd-status-[% s.peer_key | html %]-[% service | html %]"><div class="badge w-full h-7 leading-7 [% IF status == 0 %]OK[% ELSE %]CRITICAL[% END %]">[% service | html %]</div></td>
+            <td><button onclick="nc_omd_service(this, {peer: '[% s.peer_key | html %]', service: '[% service | html %]', action: 'omd_start'}); return false;" [% IF status == 0 %]disabled[% END %]><i class="fa-solid fa-play text-sm"></i> start</button></td>
+            <td><button onclick="nc_omd_service(this, {peer: '[% s.peer_key | html %]', service: '[% service | html %]', action: 'omd_stop'}); return false;" [% IF status != 0 %]disabled[% ELSE %]class="hover-red"[% END %]><i class="fa-solid fa-power-off text-sm"></i> stop</button></td>
+            <td><button onclick="nc_omd_service(this, {peer: '[% s.peer_key | html %]', service: '[% service | html %]', action: 'omd_restart'}); return false;"><i class="fa-solid fa-rotate-right text-sm"></i> restart</button></td>
+          </tr>
+        [% END %]
+      </table>
+    </form>
+  </div>
+  [% IF modal %]
+    <div class="footer justify-center">
+      <button class="w-20" onclick="closeModalWindow()">OK</button>
+    </div>
+  [% END %]
+</div>
+
+[% IF ! modal %]
+  [% PROCESS _footer.tt %]
+[% END %]

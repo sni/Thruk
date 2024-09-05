@@ -1,0 +1,266 @@
+﻿[% PROCESS _header.tt js="plugins/${plugin_name}/node_control.js" %]
+[% PROCESS _message.tt %]
+
+<div class="flexrow justify-between gap-x-1">
+  [% PROCESS _infobox.tt %]
+
+  <div class="card" style="min-width: 400px;">
+    <div class="head">
+      <h3>Options</h3>
+    </div>
+    <form action="node_control.cgi" method="POST" onsubmit="setFormBtnSpinner(this);">
+      <input type="hidden" name="action" value="save_options">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <div class="flexrow flex-nowrap gap-2">
+        <table class="cellspacing-x">
+          <tr>
+            <td class="w-0">OMD Default Version</td>
+            <td>
+              <select name='omd_default_version' class="w-full">
+                [% FOREACH v = omd_available_versions %]
+                  <option[% IF v == omd_default_version %] selected[% END %]>[% v | html %]</option>
+                [% END %]
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Parallel Tasks</td>
+            <td><input type="text" name="parallel" value="[% ms_parallel | html %]" class="w-8"></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>
+              <input type='submit' value='Apply' class="w-24 mt-auto">
+            </td>
+          </tr>
+        </table>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  var ms_parallel = [% ms_parallel | html %];
+</script>
+
+<div class="card w-full mt-5" style="min-width: 800px;">
+  <div class="head p-0 justify-between border-0">
+    <div class="mx-2">
+      [% PROCESS _table_search_field.tt ids=["msTable"] %]
+    </div>
+    <div class="grow"></div>
+    <span class="tabs active">Nodes</span>
+    <div class="grow"></div>
+    <div class="w-48"></div>
+  </div>
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
+    <table class="mainTable js-striped" id="msTable">
+      <thead>
+        <tr>
+          <th class="w-32">Section</th>
+          <th class="">Hostname</th>
+          <th class="w-32">Site</th>
+          <th class="w-32">OMD</th>
+          <th class="w-24">OMD Status</th>
+          <th class="w-32">
+            <div class="flexrow flex-nowrap gap-x-1 justify-between">
+              <span>OS</span>
+              <div class="flexrow flex-nowrap gap-x-1">
+                <a href="#" onclick="return nc_run_all(this, '.js-os-update-btn', {action: 'os_update'})"><i class="fa-solid fa-shield text-sm" title="Install OS updates for all visible servers"></i></a>
+                <a href="#" onclick="return nc_run_all(this, '.js-os-sec-update-btn', {action: 'os_sec_update'})"><i class="fa-solid fa-shield-halved text-sm" title="Install security OS updates for all visible servers"></i></a>
+              </div>
+            </div>
+          </th>
+          <th class="w-24">Virt.</th>
+          <th class="w-24">CPU</th>
+          <th class="w-24">Memory</th>
+          <th class="w-24">Disk</th>
+          <th class="w-8 not-hoverable">
+            <div class="flexrow flex-nowrap gap-x-1">
+              <a href="#" onclick="return nc_run_all(this, '.js-update-btn', {action: 'update'})"><i class="fa-solid fa-arrows-rotate text-sm" title="Update facts for all visible servers"></i></a>
+              <a href="#" onclick="return nc_run_all(this, '.js-install-btn', {action: 'omd_install'})"><i class="fa-solid fa-truck-arrow-right text-sm" title="Run omd install for all visible servers"></i></a>
+              <a href="#" onclick="return nc_run_all(this, '.js-omd-update-btn', {action: 'omd_update'})"><i class="fa-solid fa-square-up-right text-sm" title="Run omd update for all visible servers"></i></a>
+              <a href="#" onclick="return nc_run_all(this, '.js-cleanup-btn', {action: 'cleanup'})"><i class="fa-solid fa-broom text-sm" title="Run omd cleanup for all visible servers"></i></a>
+              <a href="#" onclick="return nc_run_all(this, '.js-run-all-btn', {action: 'omd_install_update_cleanup'})"><i class="fa-solid fa-arrows-up-to-line text-sm" title="Run omd install,update,cleanup for all visible servers"></i></a>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="rowhover">
+        [% FOREACH s = data %]
+          <tr class="js-tabs" id="node_row_[% s.peer_key | html %]">
+            <td class="align-top js-node-row">[% IF s.section != "Default"; s.section | html; END %]</td>
+            <td class="align-top"><a class="link" target="_blank" href="//[% s.host_name | html %]/[% s.omd_site | html %]/"><i class="uil uil-external-link-alt text-xs"></i>[% s.host_name | html %]</a></td>
+            <td class="align-top">
+              [% IF s.omd_site %]
+                [% remote_thruk_url = get_remote_thruk_url(c, s.peer_key) %]
+                <a class="link" href="[% IF remote_thruk_url %]proxy.cgi/[% s.peer_key | html %][% remote_thruk_url %][% ELSE %][% url_prefix %][% END %]" target="_blank">
+                  <i class="fa-solid fa-desktop text-xs" title="Open site in a new tab."></i> [% s.omd_site | html %]
+                </a>
+              [% END %]
+            </td>
+            [% IF s.omd_version && omd_default_version != s.omd_version %]
+              <td class="align-top WARNING" title="node uses an outdated omd release.">[% s.omd_version | html %]</td>
+            [% ELSE %]
+              <td class="align-top">[% s.omd_version | html %]</td>
+            [% END %]
+            <td class="align-top clickable" onclick="openModalWindowUrl('node_control.cgi?action=omd_status&modal=1&peer=[% s.peer_key | html %]');">
+              [% IF s.omd_status && s.omd_status.exists("OVERALL") %]
+                [% IF s.omd_status.OVERALL == 0 %]
+                  <div class="badge OK">OK</div>
+                [% ELSE %]
+                  [% failed = []; %]
+                  [% FOREACH service IN s.omd_status.keys.sort %]
+                    [% IF service == "OVERALL"; NEXT; END %]
+                    [% IF s.omd_status.$service != 0; failed.push(service); END %]
+                  [% END %]
+                  [% IF failed.size == 1 %]
+                    <div class="badge WARNING">[% failed.0 %]</div>
+                  [% ELSE %]
+                    <div class="badge WARNING">[% failed.size %] stopped</div>
+                  [% END %]
+                [% END %]
+              [% END %]
+            </td>
+            <td class="align-top">
+              <div class="flexrow flex-nowrap gap-x-1 justify-between">
+                <span class="clickable" onclick="openModalWindowUrl('node_control.cgi?action=facts&modal=1&peer=[% s.peer_key | html %]');">[% s.os_name | html %] [% s.os_version | html %]</span>
+                <form action="node_control.cgi" method="POST">
+                  <input type="hidden" name="peer" value="[% s.peer_key | html %]">
+                  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                  <div class="flexrow flex-nowrap gap-x-1">
+                    [% IF s.os_updating %]
+                      <div class="spinner clickable" onclick="showJobOutputPopup('[% s.os_updating | html %]','[% s.peer_key | html %]'); return false;"></div>
+                    [% ELSE %]
+                      <button class="round p-0 h-5 w-5 gray text-xs text-center [% IF s.os_updates.size == 0 || s.os_sec_updating %]invisible[% END %] js-os-update-btn" title="There are [% s.os_updates.size %] updates available: [% s.os_updates.join(", ").substr(0, 250) %]" onclick="return nc_action_with_popup(this, {action: 'os_update'}, '[% s.peer_key | html %]')">
+                        <i style="font-style: normal;">[% s.os_updates.size %]</i>
+                      </button>
+                    [% END %]
+                    [% IF s.os_sec_updating %]
+                      <div class="spinner clickable" style="margin-left: 3px;" onclick="showJobOutputPopup('[% s.os_sec_updating | html %]','[% s.peer_key | html %]'); return false;"></div>
+                    [% ELSE %]
+                      <button class="round p-0 h-5 w-5 red text-xs text-center [% IF s.os_security.size == 0 || s.os_updating %]invisible[% END %] js-os-sec-update-btn" title="There are [% s.os_security.size %] security updates available: [% s.os_security.join(", ").substr(0, 250) %]" onclick="return nc_action_with_popup(this, {action: 'os_sec_update'}, '[% s.peer_key | html %]')">
+                        <i style="font-style: normal;">[% s.os_security.size %]</i>
+                      </button>
+                    [% END %]
+                  </div>
+                </form>
+              </div>
+            </td>
+            <td>[% s.machine_type %]</td>
+            <td class='align-top relative'>
+              [% IF s.cpu_perc; %][%IF s.cpu_perc > 1; s.cpu_perc = 1; END %]
+              <div style='width: [% 100 * s.cpu_perc %]%; height: 100%;' class='[% IF s.cpu_perc > 0.9 %]CRITICAL[% ELSIF s.cpu_perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
+              [% END %]
+              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.cpu_perc; sprintf("%.d", s.cpu_perc*100); "% used"; END %]">
+                [% IF s.cpu_cores; s.cpu_cores; " Cores"; END %]
+              </span>
+            </td>
+            <td class='align-top relative'>
+              [% IF s.memfree; perc = ( s.memtotal - s.memfree ) / s.memtotal %][%IF perc > 1; perc = 1; END %]
+              <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF perc > 0.9 %]CRITICAL[% ELSIF perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
+              [% END %]
+              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.memfree; sprintf("%.d", perc*100); "% used"; END %]">
+                [% IF s.memtotal; n = reduce_number(s.memtotal*1024*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
+              </span>
+            </td>
+            <td class='align-top relative'>
+              [% IF s.omd_disk_total; perc = ( s.omd_disk_total - s.omd_disk_free ) / s.omd_disk_total %][%IF perc > 1; perc = 1; END %]
+              <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF perc > 0.9 %]CRITICAL[% ELSIF perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
+              [% END %]
+              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.omd_disk_total %][% sprintf("%.d", perc*100) %]% used, [% n = reduce_number(s.omd_disk_free*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1) %] free[% END %]">
+                [% IF s.omd_disk_total; n = reduce_number(s.omd_disk_total*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
+              </span>
+            </td>
+            <td class="align-top text-center">
+              <form action="node_control.cgi" method="POST">
+                <input type="hidden" name="peer" value="[% s.peer_key | html %]">
+                <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                <div class="flexrow flex-nowrap gap-1">
+                  [% IF s.gathering %]
+                    <div class="spinner" style="margin-right: 3px;" title="site is gathering facts right now"></div>
+                  [% ELSE %]
+                    <a href="#" class="js-update-btn" onclick="return send_form_in_background_and_reload(this, {action: 'update'}, true)"><i class="fa-solid fa-arrows-rotate text-sm" title="Update Facts"></i></a>
+                  [% END %]
+
+                  [% show_all_btn = 0 %]
+                  [% has_installed = 0 %]
+                  [% IF s.installing %]
+                    <div class="spinner clickable" style="margin-right: 3px;" title="site is installing omd right now" onclick="showJobOutputPopup('[% s.installing | html %]','[% s.peer_key | html %]')"></div>
+                  [% ELSE %]
+                    [% omd_default_available = 0 %]
+                    [% FOREACH ver = s.omd_available_versions %]
+                      [% IF ver == omd_default_version; omd_default_available = 1; LAST; END %]
+                    [% END %]
+                    [% FOREACH ver = s.omd_versions %]
+                      [% IF ver == omd_default_version; has_installed = 1; LAST; END %]
+                    [% END %]
+                    [% IF !omd_default_available && s.omd_available_versions.size > 0 %]
+                      <a href="#" class="js-install-btn disabled not-clickable" title="omd version [% omd_default_version | html %] not available on this host."><i class="fa-solid fa-truck-arrow-right text-sm"></i></a>
+                    [% ELSE %]
+                      <a href="#" class="js-install-btn [% IF has_installed || !s.omd_version %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="return nc_action_with_popup(this, {action: 'omd_install'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-truck-arrow-right text-sm" title="Install omd-[% omd_default_version | html %]"></i></a>
+                    [% END %]
+                  [% END %]
+
+                  [% IF s.updating %]
+                    <div class="spinner clickable" style="margin-right: 3px;" title="site is updating omd right now" onclick="showJobOutputPopup('[% s.updating | html %]','[% s.peer_key | html %]')"></div>
+                  [% ELSE %]
+                    <a href="#" class="js-omd-update-btn [% IF s.omd_version == omd_default_version || !has_installed %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="return nc_action_with_popup(this, {action: 'omd_update'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-square-up-right text-sm" title="Update to omd-[% omd_default_version | html %]"></i></a>
+                  [% END %]
+
+                  [% IF s.cleaning %]
+                    <div class="spinner clickable" style="margin-right: 3px;" title="site is cleaning up right now" onclick="showJobOutputPopup('[% s.cleaning | html %]','[% s.peer_key | html %]')"></div>
+                  [% ELSE %]
+                    <a href="#" class="js-cleanup-btn [% IF s.omd_cleanable.size == 0 %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="return nc_action_with_popup(this, {action: 'cleanup'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-broom text-sm" title="Run omd cleanup to remove:&#013;[% s.omd_cleanable.join("&#013;") %]"></i></a>
+                  [% END %]
+
+                  [% IF s.run_all %]
+                    <div class="spinner clickable" style="margin-right: 3px;" title="site is updating right now" onclick="showJobOutputPopup('[% s.run_all | html %]','[% s.peer_key | html %]')"></div>
+                  [% ELSE %]
+                    <a href="#" class="js-run-all-btn [% IF !show_all_btn %]invisible[% END %]" onclick="return nc_action_with_popup(this, {action: 'omd_install_update_cleanup'}, '[% s.peer_key | html %]')"><i class="fa-solid fa-arrows-up-to-line text-sm" title="Run omd install,update,cleanup"></i></a>
+                  [% END %]
+
+                  [% IF s.last_job %]
+                    <i class="fa-solid fa-file-lines clickable" title="show output of last job" onclick="showJobOutputPopup('[% s.last_job | html %]','[% s.peer_key | html %]', '[% s.host_name | html %]')"></i>
+                  [% END %]
+                </div>
+              </form>
+            </td>
+          </tr>
+          [% IF s.last_error %]
+            [% lines = s.last_error.split("\n") %]
+            <tr>
+              <td></td>
+              <td></td>
+              <td colspan="9" class="textALERT whitespace-pre truncate overflow-hidden [% IF lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF lines.size > 1 %]onclick="toggleElement(jQuery(this).find('SPAN')[0])"[% END %]>[% lines.shift | html %]<br><span class="hidden">[% lines.join("\n") %]</span></td>
+            </tr>
+          [% ELSIF s.last_facts_error %]
+            [% lines = s.last_facts_error.split("\n") %]
+            <tr>
+              <td></td>
+              <td></td>
+              <td colspan="9" class="textALERT whitespace-pre truncate overflow-hidden [% IF lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF lines.size > 1 %]onclick="toggleElement(jQuery(this).find('SPAN')[0])"[% END %]>[% lines.shift | html %]<br><span class="hidden">[% lines.join("\n") %]</span></td>
+            </tr>
+          [% END %]
+        [% END %]
+      </tbody>
+    </table>
+  </div>
+  <div class="mainTableFooter">
+    <div class="flex-1 self-center">
+      [% PROCESS _pager_total_items.tt pager = { total_items => data.size } %]
+    </div>
+  </div>
+</div>
+
+[% IF c.req.parameters.defined("showjob") && c.req.parameters.showjob != "" %]
+<script>
+  showJobOutputPopup('[% c.req.parameters.showjob %]', '[% c.req.parameters.showpeer %]');
+  removeParams["showjob"]  = true;
+  removeParams["showpeer"] = true;
+  updateUrl();
+</script>
+[% END %]
+
+
+[% PROCESS _footer.tt %]

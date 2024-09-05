@@ -1,0 +1,20 @@
+##########################################################
+
+=head2 add_routes
+
+page: /thruk/cgi-bin/node_control.cgi
+
+=cut
+
+$routes->{'/thruk/cgi-bin/node_control.cgi'} = 'Thruk::Controller::node_control::index';
+
+# add new menu item, but only if user has all of the
+# requested roles
+Thruk::Utils::Menu::insert_item('System', {
+                                'href'  => '/thruk/cgi-bin/node_control.cgi',
+                                'name'  => 'Node Control',
+                                'roles' => 'admin',
+});
+
+# this plugin creates cronjobs with with function
+$app->register_cron_entries("Thruk::NodeControl::Utils::update_cron_file");

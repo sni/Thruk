@@ -1,0 +1,5 @@
+# update runtime data every 5min
+*/5 * * * * thruk nc runtime >/dev/null 2>&1
+
+# update facts data every 2 hours
+0 */2 * * * thruk nc facts >/dev/null 2>&1

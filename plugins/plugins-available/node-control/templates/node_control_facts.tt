@@ -1,0 +1,32 @@
+﻿[% IF ! modal %]
+  [% PROCESS _header.tt %]
+  [% PROCESS _message.tt %]
+
+  [% PROCESS _infobox.tt %]
+[% END %]
+
+<script src="[% url_prefix %]vendor/linedtextarea-e619e09/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
+<div class="card w-full [% IF modal %] shadow-float[% END %] flexcol flex-nowrap gap-0" style="min-width: 1200px; min-height: 500px;">
+  <div class="head justify-between">
+    <h3>Node Facts: [% s.host_name | html %]</h3>
+    [% IF modal %]
+    <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+    [% END %]
+  </div>
+  <div class="w-full h-full flex grow overflow-hidden p-2">
+    <textarea class="w-full h-full whitespace-pre js-text-editor" wrap="off" readonly style="line-height: 15px; white-space: pre;">[% json_encode_pretty(s.facts) %]</textarea>
+  </div>
+  [% IF modal %]
+    <div class="footer justify-center">
+      <button class="w-20" onclick="closeModalWindow()">OK</button>
+    </div>
+  [% END %]
+</div>
+<script>
+  var editor = document.getElementById('texteditor');
+  jQuery(".js-text-editor").linedtextarea();
+</script>
+
+[% IF ! modal %]
+  [% PROCESS _footer.tt %]
+[% END %]

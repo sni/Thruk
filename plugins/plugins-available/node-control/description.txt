@@ -1,0 +1,3 @@
+The 'Node Control' plugin can update OMD and OS patches.
+
+Url: node_control.cgi
