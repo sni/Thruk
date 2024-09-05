@@ -3,7 +3,7 @@
  *
  * usage: node puppeteer.js <url> <output file> <width> <height> <sessionid>
  *
- * docs: https://github.com/puppeteer/puppeteer/blob/main/docs/api.md
+ * docs: https://github.com/puppeteer/puppeteer/blob/main/docs/api/index.md
  *
  */
 
