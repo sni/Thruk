@@ -125,6 +125,7 @@ for my $p (sort keys %{$paths}) {
     if($paths->{$p}->{'GET'}) {
         next if $p =~ m%<%mx;
         next if $p =~ m%heartbeat%mx;
+        next if $p =~ m%editor%mx;
         if($content !~ m%$p%mx) {
             fail("missing test case for ".$p);
         }

@@ -2030,6 +2030,14 @@ restarts all cluster nodes sequentially
 
 lists configuration information
 
+=== GET /thruk/editor
+
+lists editor sections.
+
+=== GET /thruk/editor/files
+
+lists editor files and path.
+
 === GET /thruk/jobs
 
 lists thruk jobs.

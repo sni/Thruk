@@ -26,7 +26,8 @@ sub check_logger {
     return if $file =~ m|/Thruk/Utils/Log.pm$|gmx;
     my $content = Thruk::Utils::IO::read($file);
     return if $content =~ m/\Quse Thruk::Utils::Log\E/gmx;
-    $content =~ s|::make_info\(||gmx; # reduce false positive
+    $content =~ s|::make_info\(||gmx;           # reduce false positive
+    $content =~ s|::http_response_error\(||gmx; # reduce false positive
     if($content =~ m/^(.*(_debug|_error|_warn|_info|_audit_log)\(.*)/gmx) {
         my $line = $1;
         unless($content =~ m/\Quse Thruk::Utils::Log\E/gmx) {
