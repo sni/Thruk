@@ -287,7 +287,8 @@ function init_page() {
 function initLastUserInteraction() {
     jQuery(window)
         .off("mousewheel DOMMouseScroll click keyup")
-        .on("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction);
+        .on("mousewheel DOMMouseScroll click keyup", updateLastUserInteraction)
+        .on("mousewheel DOMMouseScroll click keyup", ajax_search.updateResultPositionDelayed);
 
     jQuery(window).off("blur").on("blur", function() {
         thrukState.lastPageFocus = (new Date()).getTime();
@@ -9452,15 +9453,7 @@ var ajax_search = {
 
         panel.innerHTML = resultHTML;
 
-        var style     = panel.style;
-        var coords    = jQuery(input).offset();
-        style.left    = coords.left + "px";
-        style.top     = (coords.top + input.offsetHeight) + "px";
-        var size      = jQuery(input).outerWidth();
-        if(size < 100) { size = 100; }
-        if(size > jQuery(panel).outerWidth()) {
-            style.width   = size + "px";
-        }
+        ajax_search.updateResultPosition(panel, input);
 
         jQuery(panel).appendTo("BODY");
 
@@ -9472,6 +9465,34 @@ var ajax_search = {
         try { // Error: Can't move focus to the control because it is invisible, not enabled, or of a type that does not accept the focus.
             input.focus();
         } catch(err) {}
+    },
+
+    updateResultPositionDelayed() {
+        ajax_search.updateResultPosition();
+        clearTimeout(ajax_search.scrollTimeout);
+        ajax_search.scrollTimeout = window.setTimeout(ajax_search.updateResultPositionDelayed, 500);
+    },
+
+    updateResultPosition: function(panel, input) {
+        if(!panel) {
+            panel = document.getElementById(ajax_search.result_pan);
+        }
+        if(!input) {
+            input = document.getElementById(ajax_search.input_field);
+        }
+        if(!panel || !input) { return; }
+
+        var style     = panel.style;
+        if(!style || style.display == 'none') { return; }
+
+        var coords    = jQuery(input).offset();
+        style.left    = coords.left + "px";
+        style.top     = (coords.top + input.offsetHeight) + "px";
+        var size      = jQuery(input).outerWidth();
+        if(size < 100) { size = 100; }
+        if(size > jQuery(panel).outerWidth()) {
+            style.width   = size + "px";
+        }
     },
 
     onempty: function() {
