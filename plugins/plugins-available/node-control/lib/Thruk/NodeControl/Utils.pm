@@ -143,6 +143,7 @@ sub get_server {
     }
     my $server = {
         peer_key                => $peer->{'key'},
+        peer_name               => $peer->{'name'},
         section                 => $peer->{'section'},
         gathering               => $facts->{'gathering'} || 0,
         cleaning                => $facts->{'cleaning'} || 0,

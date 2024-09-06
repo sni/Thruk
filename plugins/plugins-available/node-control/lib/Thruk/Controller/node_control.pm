@@ -90,7 +90,8 @@ sub index {
     $c->stash->{omd_available_versions} = $available_omd_versions;
 
     # sort servers by section, host_name, site
-    $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'host_name', 'omd_site']);
+    map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};
+    $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'peer_name', 'host_name', 'omd_site']);
 
     $c->stash->{data} = $servers;
 
