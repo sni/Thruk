@@ -48,6 +48,10 @@ services:
       resources:
         limits:
           memory: 1000M
+    ulimits:
+      nofile:
+        soft: "65536"
+        hard: "65536"
 
   tier1c:
     build: tier1c/
@@ -70,6 +74,10 @@ services:
       resources:
         limits:
           memory: 1000M
+    ulimits:
+      nofile:
+        soft: "65536"
+        hard: "65536"
 
   tier1d:
     build: tier1d/
@@ -131,6 +139,10 @@ services:
       resources:
         limits:
           memory: 1000M
+    ulimits:
+      nofile:
+        soft: "65536"
+        hard: "65536"
 
   tier2c:
     build: tier2c/
@@ -168,6 +180,10 @@ services:
       resources:
         limits:
           memory: 1000M
+    ulimits:
+      nofile:
+        soft: "65536"
+        hard: "65536"
 
   tier2e:
     build: tier2e/
@@ -187,6 +203,10 @@ services:
       resources:
         limits:
           memory: 1000M
+    ulimits:
+      nofile:
+        soft: "65536"
+        hard: "65536"
 
   tier3a:
     build: tier3a/

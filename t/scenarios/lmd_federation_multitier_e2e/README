@@ -9,7 +9,8 @@ this scenario tests federation with lmd or http. The topology looks like:
   │   │    └── tier3b
   │   │    └── tier3c  # icinga 2 instance
   │   ├── tier2b
-  │   └── tier2c
+  │   ├── tier2c
+  │   └── tier2e       # old ubuntu
   ├── tier1b
   ├── tier1c
   └── tier1d            # basic auth enabled thruk instance
