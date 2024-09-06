@@ -1320,7 +1320,7 @@ sub get_remote_thruk_url {
     my $peer = $c->db->get_peer_by_key($id);
     confess("got no peer for id: ".$id) unless $peer;
     my $url = "";
-    if($peer->{'fed_info'}) {
+    if($peer->{'fed_info'} && $peer->{'fed_info'}->{'addr'}) {
         # use last address which starts with http
         for my $u (reverse @{$peer->{'fed_info'}->{'addr'}}) {
             if($u =~ m|^https?:|mx) {
