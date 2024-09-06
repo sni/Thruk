@@ -73,7 +73,6 @@ sub index {
         push @{$servers}, Thruk::NodeControl::Utils::get_server($c, $peer, $config);
     }
 
-    my $available_omd_versions = $servers->[0]->{omd_available_versions};
     if(!$config->{'omd_default_version'}) {
         my(undef, $version) = Thruk::Utils::IO::cmd("omd version -b");
         chomp($version);
@@ -82,9 +81,9 @@ sub index {
         });
         $config->{'omd_default_version'} = $version;
     }
-    if(!$available_omd_versions || scalar @{$available_omd_versions} == 0) {
-        $available_omd_versions = [$config->{'omd_default_version'}];
-    }
+    my $available_omd_versions = [$config->{'omd_default_version'}];
+    map { push @{$available_omd_versions}, @{$_->{omd_available_versions}} } @{$servers};
+    $available_omd_versions = [reverse sort @{Thruk::Base::array_uniq($available_omd_versions)}];
 
     $c->stash->{omd_default_version}    = $config->{'omd_default_version'},
     $c->stash->{omd_available_versions} = $available_omd_versions;
