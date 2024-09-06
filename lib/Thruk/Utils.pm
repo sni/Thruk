@@ -1310,22 +1310,29 @@ sub proxifiy_me {
 
 =head2 get_remote_thruk_url
 
-  get_remote_thruk_url($peer_key)
+  get_remote_thruk_url($c, $peer_key, [$full])
 
 return url for remote thruk installation
 
 =cut
 sub get_remote_thruk_url {
-    my($c, $id) = @_;
+    my($c, $id, $full) = @_;
     my $peer = $c->db->get_peer_by_key($id);
     confess("got no peer for id: ".$id) unless $peer;
     my $url = "";
     if($peer->{'fed_info'}) {
-        $url = $peer->{'fed_info'}->{'addr'}->[scalar @{$peer->{'fed_info'}->{'addr'}}-1];
+        # use last address which starts with http
+        for my $u (reverse @{$peer->{'fed_info'}->{'addr'}}) {
+            if($u =~ m|^https?:|mx) {
+                $url = $u;
+                last;
+            }
+        }
     }
     if($peer->{'type'} eq 'http' && (!$url || $url !~ /^https?:/mx)) {
         $url = $peer->{'addr'};
     }
+    return($url || "") if $full;
     if($url) {
         if($url !~ m/^https?:\/\//mx) {
             return("");
@@ -1337,6 +1344,26 @@ sub get_remote_thruk_url {
         $url = $url.'/thruk/';
     }
     return($url || "");
+}
+
+########################################
+
+=head2 get_remote_thruk_url_full
+
+  get_remote_thruk_url_full($c, $peer_key)
+
+returns ($proto, $hostname, $site)
+
+=cut
+sub get_remote_thruk_url_full {
+    my($c, $id) = @_;
+    my $url = get_remote_thruk_url($c, $id, 1);
+    return unless $url;
+
+    if($url =~ m|^(https?)://([^/]+)/([^/]+)/|gmx) {
+        return($1, $2, $3);
+    }
+    return;
 }
 
 ########################################

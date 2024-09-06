@@ -245,11 +245,12 @@
     <th>Data Source</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.exists('fed_info') %]
-      <span title="[% FOREACH addr IN backend_detail.$pd.fed_info.addr %][% addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') | html %]&#013;[% END %]">
+      [% plist = peer_address_list(pd) %]
+      [% IF plist.2.size > 1 %]
+      <span title="[% FOREACH addr IN plist.2; addr | html %]&#013;[% END %]">
       [% END %]
-      [% backend_detail.$pd.addr.replace('/cgi-bin/remote.cgi', '/').replace('/thruk/', '/') | html %]
-      [% IF backend_detail.$pd.exists('fed_info') %]
+      [% plist.0 | html %]
+      [% IF plist.2.size > 1 %]
       </span>
       [% END %]
     </td>

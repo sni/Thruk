@@ -2058,4 +2058,40 @@ sub add_request_backend {
 
 ########################################
 
+=head2 peer_address_list
+
+  peer_address_list($peer_key)
+
+return list of peer addresses
+
+=cut
+
+sub peer_address_list {
+    my($id) = @_;
+    my $c = $Thruk::Globals::c;
+
+    my $peer = $c->db->get_peer_by_key($id);
+    confess("got no peer for id: ".$id) unless $peer;
+
+    my $mainAddr = $peer->{'addr'};
+    my($proto, $host, $site) = Thruk::Utils::get_remote_thruk_url_full($c, $id);
+    my $http = "";
+    if($host) {
+        $http = CORE::sprintf('%s://%s/%s', $proto, $host, $site);
+        $mainAddr = $http;
+    }
+    my $full = [];
+    if($peer->{'fed_info'}) {
+        for my $url (@{$peer->{'fed_info'}->{'addr'}}) {
+            $url =~ s|cgi-bin\/remote\.cgi$||gmx;
+            $url =~ s|thruk/?$||gmx;
+            push @{$full}, $url;
+        }
+    }
+
+    return([$mainAddr, $http, $full]);
+}
+
+########################################
+
 1;

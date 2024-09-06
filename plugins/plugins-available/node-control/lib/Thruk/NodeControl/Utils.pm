@@ -6,10 +6,9 @@ use Carp;
 use Cpanel::JSON::XS ();
 use Time::HiRes qw/sleep/;
 
-use Thruk::Base ();
 use Thruk::Constants qw/:peer_states/;
+use Thruk::Utils ();
 use Thruk::Utils::External ();
-use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME
@@ -175,6 +174,15 @@ sub get_server {
         last_job                => $facts->{'last_job'} // '',
         facts                   => $facts || {},
     };
+
+    # add fallback site name and address
+    if(!$server->{'omd_site'}) {
+        my(undef, $host, $site) = Thruk::Utils::get_remote_thruk_url_full($c, $peer->{'key'});
+        if($host) {
+            $server->{'host_name'} = $host;
+            $server->{'omd_site'}  = $site;
+        }
+    }
 
     # remove current default from cleanable
     if($server->{'omd_cleanable'}) {
