@@ -800,6 +800,7 @@ sub _process_process_info_page {
                 section   => $c->stash->{'backend_detail'}->{$key}->{'section'},
             };
         }
+        map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$backends};
         $backends = Thruk::Backend::Manager::sort_result($c, $backends, { 'ASC' => [ 'section', 'peer_name' ] });
         $c->stash->{'backends'} = [];
         for my $p (@{$backends}) {

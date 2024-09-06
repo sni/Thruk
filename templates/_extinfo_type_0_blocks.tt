@@ -34,7 +34,7 @@
   <tr>
     <th>Section</th>
     [% FOREACH pd IN tmpbackends %]
-    <td>[% backend_detail.$pd.section %]</td>
+    <td>[% IF backend_detail.$pd.section != "Default"; backend_detail.$pd.section | html ; END %]</td>
     [% END %]
   </tr>
   [% END %]

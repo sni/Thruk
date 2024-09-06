@@ -31,10 +31,11 @@
   [% FOREACH pd IN backends %]
   <tr>
     <td>
-      <span [% IF last_section == backend_detail.$pd.section %]style="display: none;"[% END %]>
-      [% backend_detail.$pd.section %]/
+      [% section = backend_detail.$pd.section %]
+      <span [% IF last_section == section || section == "Default" || section == "" %]style="display: none;"[% END %]>
+      [% section | html %]/
       </span>
-      [% last_section = backend_detail.$pd.section %]
+      [% last_section = section %]
     </td>
     <td title="id: [% pd %]">
       <b>
