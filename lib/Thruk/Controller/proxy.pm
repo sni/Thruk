@@ -2,6 +2,7 @@ package Thruk::Controller::proxy;
 
 use warnings;
 use strict;
+use Cpanel::JSON::XS ();
 use HTTP::Request 6.12 ();
 
 use Thruk::Action::AddDefaults ();
@@ -93,7 +94,12 @@ sub proxy_request {
         $request_url = $request_url.'?'.$base_req->{'env'}->{'QUERY_STRING'};
     }
     my $req = HTTP::Request->new($base_req->method, $request_url, $base_req->headers->clone);
-    $req->content($base_req->content());
+    my $content = $base_req->content();
+    if($c->check_user_roles('admin')) {
+        my $update = _update_federate_remote_req($c, $peer, $request_url, $content);
+        $content = $update if defined $update;
+    }
+    $req->content($content);
     # cleanup a few headers
     for my $h (qw/host via x-forwarded-for referer/) {
         $req->header($h, undef);
@@ -218,5 +224,43 @@ sub _add_cookie {
     return;
 }
 ##########################################################
+sub _update_federate_remote_req {
+    my($c, $peer, $request_url, $content) = @_;
+
+    return unless $request_url =~ m|/thruk/cgi-bin/remote.cgi$|gmx;
+    return unless $content =~ m|^\{|gmx;
+
+    my $data;
+    my $json = Cpanel::JSON::XS->new->utf8;
+    $json->relaxed();
+    eval {
+        $data = $json->decode($content);
+    };
+    my $err = $@;
+    if($err) {
+        _debug("failed to decode json: ".$err);
+        return;
+    }
+
+    return unless $data->{'data'};
+
+    eval {
+        $data = $json->decode($data->{'data'});
+    };
+    if($err) {
+        _debug("failed to decode json: ".$err);
+        return;
+    }
+
+    $data->{'credential'} = $peer->{'class'}->{'auth'} if $data->{'credential'};
+    if($data->{'options'} && $data->{'options'}->{'remote_name'}) {
+        $data->{'options'}->{'remote_name'} = $peer->{'class'}->{'remote_name'} if $peer->{'class'}->{'remote_name'};
+    }
+
+    return($json->encode({ data => $json->encode($data) }));
+}
+
+##########################################################
+
 
 1;
