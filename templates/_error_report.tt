@@ -4,6 +4,12 @@
 Make sure the report does not contain confidential information.
 
 ---------------
+[% errorMessage %]
+[%+ dump2str(errorDetails) +%]
+[%- FOREACH deb IN errorDebugInfo.list -%]
+  [%- dump2str(deb, 0, 0) +%]
+[%+ END -%]
+
 Url:        [%+ uri_with(c, {}, "", "", 1) +%]
 Browser:    [%+ get_browser_user_agent() +%]
 Version:    [% fullversion(c) +%]
@@ -20,3 +26,4 @@ Backends:
 
 Stacktrace:
 [%+ stacktrace %]
+---------------

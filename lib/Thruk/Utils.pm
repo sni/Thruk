@@ -2833,11 +2833,11 @@ log error along with details about url and logged in user
 sub log_error_with_details {
     my($c, @errorDetails) = @_;
     _error("***************************");
-    _error(sprintf("page:    %s %s\n", $c->req->method(), $c->req->url)) if defined $c->req->url;
-    _error(sprintf("params:  %s\n", dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
-    _error(sprintf("user:    %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
-    _error(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
-    _error(sprintf("time:    %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
+    _error(sprintf("page:     %s %s\n", $c->req->method(), $c->req->url)) if defined $c->req->url;
+    _error(sprintf("params:   %s\n", dump_params($c->req->parameters))) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    _error(sprintf("user:     %s\n", ($c->stash->{'remote_user'} // 'not logged in')));
+    _error(sprintf("address:  %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
+    _error(sprintf("duration: %.1fs\n", scalar tv_interval($c->stash->{'time_begin'})));
     for my $details (@errorDetails) {
         for my $line (@{Thruk::Base::list($details)}) {
             if(ref $line ne '') {

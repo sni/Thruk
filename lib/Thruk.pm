@@ -305,14 +305,12 @@ sub _dispatcher {
     };
     my $begin_err = $@;
     if($begin_err) {
-        if(!$c->{'detached'}) {
-            _error($begin_err);
+        if(!$c->{'errored'} && !$c->{'rendered'} && !$c->{'detached'}) {
+            $c->error($begin_err);
+            Thruk::Controller::error::index($c, 13); # internal server error
+            $c->{'detached'} = 1;
         } else {
             _debug($begin_err);
-        }
-        if(!$c->{'errored'} && !$c->{'rendered'} && !$c->{'detached'}) {
-            Thruk::Controller::error::index($c, 13);
-            $c->{'detached'} = 1;
         }
         $c->{'errored'} = 1;
     }
@@ -333,7 +331,7 @@ sub _dispatcher {
                 $c->stats->profile(end => $routename);
             }
             else {
-                $rc = Thruk::Controller::error::index($c, 25);
+                $rc = Thruk::Controller::error::index($c, 25); # error 404
             }
             if($rc) {
                 Thruk::Action::AddDefaults::end($c);
