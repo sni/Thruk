@@ -1089,6 +1089,12 @@ sub get_user_data {
     if(-s $file) {
         $user_data = read_data_file($file);
     }
+
+    # remove null entries from site_panel_bookmarks
+    if($user_data->{'site_panel_bookmarks'}) {
+        @{$user_data->{'site_panel_bookmarks'}} = grep defined, @{$user_data->{'site_panel_bookmarks'}};
+    }
+
     $c->stats->profile(end => "get_user_data");
     return $user_data;
 }
