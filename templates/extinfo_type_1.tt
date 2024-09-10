@@ -22,7 +22,7 @@
                 <option value="[% b | html %]"[% IF b == backend %] selected[% END %]>[% peer_name(b) %]</option>
               [% END %]
             </select>
-            <input type="submit" name="go" value="go">
+            <button>go</button>
           </div>
         </form>
       </div>

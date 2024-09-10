@@ -13,9 +13,9 @@
     [% IF matching_backends.size > 1 %]
       <div class="card mt-5 min-w-[350px] p-3">
         <form action="extinfo.cgi" method="GET">
-          <input type="hidden" name="type" value="1">
+          <input type="hidden" name="type" value="2">
           <input type="hidden" name="host" value="[% service.host_name | html %]">
-          <input type="hidden" name="description" value="[% service.description | html %]">
+          <input type="hidden" name="service" value="[% service.description | html %]">
           <div class="flexrow gap-1 items-center">
             <span>This service is ambiguous:</span>
             <select name="backend">
@@ -23,7 +23,7 @@
                 <option value="[% b | html %]"[% IF b == backend %] selected[% END %]>[% peer_name(b) %]</option>
               [% END %]
             </select>
-            <input type="submit" name="go" value="go">
+            <button>go</button>
           </div>
         </form>
       </div>
