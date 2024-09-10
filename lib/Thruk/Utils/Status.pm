@@ -1739,8 +1739,12 @@ sub get_comments_filter {
         }
     }
     else {
-        my $comments     = $c->db->get_comments(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments'  ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ], columns => ['id', 'service_description'] );
-        my $downtimes    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $op => $value }, author => { $op => $value }]} ], columns => ['id', 'service_description'] );
+        my $cop = $op;
+
+        if($op eq '!~~') { $cop = '~~'; } # still search for comments matching the pattern, because the list operator later negates the match
+        if($op eq '!=')  { $cop = '~~'; }
+        my $comments     = $c->db->get_comments(  filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments'  ), { -or => [comment => { $cop => $value }, author => { $cop => $value }]} ], columns => ['id', 'service_description'] );
+        my $downtimes    = $c->db->get_downtimes( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), { -or => [comment => { $cop => $value }, author => { $cop => $value }]} ], columns => ['id', 'service_description'] );
         $num             = scalar @{$comments} + scalar @{$downtimes};
         my($host_comments, $host_downtimes, $service_comments, $service_downtimes) = ([],[],[],[]);
         for my $com (@{$comments})  { $com->{'service_description'} ? push(@{$service_comments},  $com) : push(@{$host_comments},     $com); }
@@ -1755,10 +1759,10 @@ sub get_comments_filter {
         if(scalar @service_comment_ids  == 0) { @service_comment_ids  = (-1); }
         if(scalar @service_downtime_ids == 0) { @service_downtime_ids = (-1); }
 
-        my $comment_op = '!>=';
+        my $comment_op = '!>='; # contains not
         my $combine    = '-and';
         if($op eq '=' or $op eq '~~') {
-            $comment_op = '>=';
+            $comment_op = '>='; # contains
             $combine    = '-or';
         }
         push @hostfilter,          { $combine => [ comments => { $comment_op => \@host_comment_ids }, downtimes => { $comment_op => \@host_downtime_ids } ]};
