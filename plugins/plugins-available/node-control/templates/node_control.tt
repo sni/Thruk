@@ -163,7 +163,7 @@
             </td>
             [% END %]
             <td>[% s.machine_type %]</td>
-            <td class='align-top relative'>
+            <td class='align-top relative overflow-hidden'>
               [% IF s.cpu_perc; %][%IF s.cpu_perc > 1; s.cpu_perc = 1; END %]
               <div style='width: [% 100 * s.cpu_perc %]%; height: 100%;' class='[% IF s.cpu_perc > 0.9 %]CRITICAL[% ELSIF s.cpu_perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
               [% END %]
@@ -171,7 +171,7 @@
                 [% IF s.cpu_cores; s.cpu_cores; " Cores"; END %]
               </span>
             </td>
-            <td class='align-top relative'>
+            <td class='align-top relative overflow-hidden'>
               [% IF s.memfree; perc = ( s.memtotal - s.memfree ) / s.memtotal %][%IF perc > 1; perc = 1; END %]
               <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF perc > 0.9 %]CRITICAL[% ELSIF perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
               [% END %]
@@ -179,7 +179,7 @@
                 [% IF s.memtotal; n = reduce_number(s.memtotal*1024*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
               </span>
             </td>
-            <td class='align-top relative'>
+            <td class='align-top relative overflow-hidden'>
               [% IF s.omd_disk_total; perc = ( s.omd_disk_total - s.omd_disk_free ) / s.omd_disk_total %][%IF perc > 1; perc = 1; END %]
               <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF perc > 0.9 %]CRITICAL[% ELSIF perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
               [% END %]
