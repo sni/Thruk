@@ -5,14 +5,32 @@ next:
           - add new option main_exclude_top5_hostgroups
           - improve login handling when using multiple tabs (#1315)
           - improve search when search includes comments/downtimes
+          - validate if default theme exists (#1228)
+          - fix saving bookmarks (#1383)
+          - fix forbidden error without apache unsafeallow3f flag (#1387)
+          - fix login page issue on latest apache with new UNC flag
+          - fix backend parameter changing when selecting different log range
+          - keep backend on more log related links for performance reasons
+          - fix negated comments/downtimes filter
+          - fix puppeteer start errors with latest chrome
+          - add proxy support during oauth authentication (#1393)
+          - fix custom var box layout in safari (#1385)
+          - fix ambiguous service button (#1391)
+          - improve referer containing spaces (#1368)
           - Config Tool:
-            - fix validating service parents (#1376)
             - enable list wizard for host/service depenencies (#1358)
+            - fix validating service parents (#1376)
+            - fix selecting custom variable from drop down list
           - Panorama:
             - fix linking nested business processes
             - fix white page after switching tabs
+            - fix showing title in BP panel (#1369)
           - CLI:
             - add create option to apikey command
+          - Editor:
+            - added as core module
+          - Node-Control:
+            - added as core module
 
 3.16     Fri Jul 12 16:23:37 CEST 2024
           - fix using unescaped url in reports (CVE-2024-39915)
