@@ -58,7 +58,7 @@
             [% IF has_sections %]
               <td>[% agent.section %]</td>
             [% END %]
-            <td class="text-ellipsis overflow-hidden max-w-0 js-agent-row">
+            <td class="truncate w-60 max-w-0 js-agent-row">
               <div class="flexrow flex-nowrap gap-x-1 justify-between">
                 <a class="link" href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | html %]" title="edit this host">[% h.name | html %]</a>
                 <a href="status.cgi?host=[% h.name | uri %]" title="view service details for this host"><i class="fa-solid fa-bars"></i></a>
@@ -85,7 +85,7 @@
                 [% IF info.exists(hostname) %]<div class="w-full h-full" title="[% info.$hostname.full_version | html %]">[% info.$hostname.version | html %]</div>[% END %]
               </div>
             </td>
-            <td title="[% info.$hostname.os_version_full | html %]" class="text-ellipsis overflow-hidden max-w-0">
+            <td title="[% info.$hostname.os_version_full | html %]" class="truncate w-60 max-w-0">
               [% info.$hostname.os_version | html %]
             </td>
             <td>[% info.$hostname.os_arch %]</td>
