@@ -78,7 +78,7 @@ sub index {
     my $query = $keywords || $c->req->uri->query;
 
     # remove known keywords from referer
-    $referer  =~ s/^(logout|expired|invalid|problem|locked|setsession|nocookie)\&//gmx;
+    $referer  =~ s/^(logout|expired|invalid|problem|locked|setsession|nocookie)(\&|$)//gmx;
     $keywords =~ s/^(logout|expired|invalid|problem|locked|setsession|nocookie)\&.*$/$1/gmx if $keywords;
 
     # replace first & with ? (so we don't have to use encoded %3f which breaks apache rewrites)
