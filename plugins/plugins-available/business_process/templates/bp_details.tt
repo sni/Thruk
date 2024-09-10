@@ -13,6 +13,7 @@
 
 <div class="flexrow flex-nowrap w-full h-full [% IF minimal %]minimal[% END %]">
   <div class="card flexcol flex-nowrap gap-0 w-full h-full">
+    [% IF !iframed %]
     <div class="head justify-between">
       [% IF !minimal %]
         <div class="w-32">
@@ -38,7 +39,8 @@
       [% END %]
       </div>
     </div>
-    <div id='bp[% bp.id %]' class="flex grow relative bp_zoom_container">
+    [% END %]
+    <div id='bp[% bp.id %]' class="flex grow relative bp_zoom_container[% IF iframed %] mt-1[% END %]">
       [% PROCESS _bp_graph.tt %]
     </div>
   </div>
