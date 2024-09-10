@@ -48,7 +48,7 @@ document.write('<\/table>');
       graphite_end = values[2];
     }
   }
-  set_graphite_img(graphite_start, graphite_end, graphite_id);
+  set_graphite_img(graphite_start, graphite_end, graphite_id, true);
 
 } else {
   document.write('<div id="third_graph_pane" style="position: relative; border-color:#C4C2C2; border-style:ridge; border-width:2px; border-collapse: separate; border-spacing:2px; width:825px; margin-right:275px;">');

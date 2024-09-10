@@ -78,5 +78,5 @@
       pnp_source = values[3];
     }
   }
-  set_png_img(pnp_start, pnp_end, pnp_id, pnp_source);
+  set_png_img(pnp_start, pnp_end, pnp_id, pnp_source, true);
 </script>

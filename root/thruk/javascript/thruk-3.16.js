@@ -9744,7 +9744,7 @@ function graphite_unformat_date(str) {
     return date.getTime()/1000;
 }
 
-function set_graphite_img(start, end, id) {
+function set_graphite_img(start, end, id, skip_hash) {
     var newUrl = graph_url + "&from=" + graphite_format_date(start) + "&until=" + graphite_format_date(end);
 
     jQuery('#graphitewaitimg').css('display', 'block');
@@ -9782,14 +9782,9 @@ function set_graphite_img(start, end, id) {
         }
     }
 
-    if(id) {
+    if(id && !skip_hash) {
         // replace history otherwise we have to press back twice
-        var newhash = "#" + id + "/" + start + "/" + end;
-        if (history.replaceState) {
-            history.replaceState({}, "", newhash);
-        } else {
-            window.location.replace(newhash);
-        }
+        set_hash(id + "/" + start + "/" + end);
     }
 
     // reset reload timer for page
@@ -9822,7 +9817,7 @@ function move_graphite_img(factor) {
 88          88      `888 88
 *******************************************************************************/
 
-function set_png_img(start, end, id, source) {
+function set_png_img(start, end, id, source, skip_hash) {
     if(start  == undefined) { start  = pnp_start; }
     if(end    == undefined) { end    = pnp_end; }
     if(source == undefined) { source = pnp_source; }
@@ -9865,7 +9860,7 @@ function set_png_img(start, end, id, source) {
         id = get_hash();
     }
 
-    if(id) {
+    if(id && !skip_hash) {
         // replace history otherwise we have to press back twice
         set_hash(id + "/" + start + "/" + end + "/" + source);
     }
@@ -9889,7 +9884,7 @@ function move_png_img(factor) {
     return set_png_img(start, end);
 }
 
-function set_histou_img(start, end, id, source) {
+function set_histou_img(start, end, id, source, skip_hash) {
     if(start  == undefined) { start  = histou_start; }
     if(end    == undefined) { end    = histou_end; }
     if(source == undefined) { source = histou_source; }
@@ -9936,7 +9931,7 @@ function set_histou_img(start, end, id, source) {
         id = get_hash();
     }
 
-    if(id) {
+    if(id && !skip_hash) {
         // replace history otherwise we have to press back twice
         set_hash(id + "/" + start + "/" + end + "/" + source);
     }

@@ -120,5 +120,5 @@
       histou_source = values[3];
     }
   }
-  set_histou_img(histou_start, histou_end, histou_id, histou_source);
+  set_histou_img(histou_start, histou_end, histou_id, histou_source, true);
 </script>
