@@ -418,6 +418,7 @@ sub uri_with {
     } else {
         $uri = $c->stash->{original_uri} ? URI->new($c->stash->{original_uri}) : $c->req->uri;
     }
+    my $has_perc20_space = $uri =~ m/%20/gmx;
 
     my %uri_filter = %{$c->config->{'base_uri_filter'}};
     for my $key (sort keys %uri_filter) {
@@ -458,6 +459,10 @@ sub uri_with {
         $uri =~ s/^(http|https):\/\/.*?\//\//gmx;
         # make relative url
         $uri =~ s|^/[^?]+/||mx;
+    }
+
+    if($has_perc20_space) {
+        $uri =~ s/\+/%20/gmx;
     }
     return($uri) if $skip_escape;
     return(&escape_html($uri));
