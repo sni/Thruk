@@ -2748,8 +2748,8 @@ sub _parse_columns_data_alias {
         if($name =~ s/^`([^`]+)`/placeholder/mx) {
             $realcol = $1;
         }
-        if($name =~ m/\s+as\s+([^\s]+)\s*$/mx) {
-            $name =~ s/^.*?\s+as\s+([^\s]+)\s*$/$1/mx; # strip "as alias" from column
+        if($name =~ m/\s+as\s+([^\s]+)\s*$/mxi) {
+            $name =~ s/^.*?\s+as\s+([^\s]+)\s*$/$1/mxi; # strip "as alias" from column
         } else {
             $name =~ s/^[^:]+:([^"']*?)$/$1/gmx; # strip alias
         }
@@ -2773,8 +2773,8 @@ sub _parse_columns_data_names {
         if($name =~ s/^`([^`]+)`/placeholder/mx) {
             $realcol = $1;
         }
-        if($name =~ m/\s+as\s+([^\s]+)\s*$/mx) {
-            $name =~ s/\s+as\s+([^\s]+)\s*$//mx; # strip "as alias" from column
+        if($name =~ m/\s+as\s+([^\s]+)\s*$/mxi) {
+            $name =~ s/\s+as\s+([^\s]+)\s*$//mxi; # strip "as alias" from column
         } else {
             $name =~ s/^([^:]+):[^"']*?$/$1/gmx; # strip alias
         }

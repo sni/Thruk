@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 70;
+plan tests => 76;
 
 ###########################################################
 # test thruks script path
@@ -25,7 +25,11 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
 {
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r \'/hosts/localhost?columns=name,calc(rta, "+", 1) as rta_plus&headers=wrapped_json\'',
-        like => ['/rta_plus/', '/localhost/', '/"ms"/'],
+        like => ['/"rta_plus"/', '/localhost/', '/"ms"/'],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r \'/hosts/localhost?columns=name,calc(rta, "+", 1) AS rta_plus&headers=wrapped_json\'',
+        like => ['/"rta_plus"/', '/localhost/', '/"ms"/'],
     });
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r \'/hosts/localhost?columns=name,unit(calc(rta, "*", 1000), "s") as rta_seconds&headers=wrapped_json\'',
