@@ -172,7 +172,7 @@ update cache from file
 =cut
 sub _update {
     my($self) = @_;
-    if(-f $self->{'_cachefile'}) {
+    if(-s $self->{'_cachefile'}) {
         my @stat = stat(_);
         if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
             $self->{'_data'} = $self->_retrieve();
