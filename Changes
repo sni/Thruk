@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+
+
 3.18     Tue Sep 10 22:30:40 CEST 2024
           - add optional oauth 2.1 pkce workflow
           - add new option main_exclude_top5_hostgroups
