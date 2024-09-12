@@ -9478,6 +9478,7 @@ var ajax_search = {
             panel = document.getElementById(ajax_search.result_pan);
         }
         if(!input) {
+            if(!ajax_search.input_field) { return; }
             input = document.getElementById(ajax_search.input_field);
         }
         if(!panel || !input) { return; }
