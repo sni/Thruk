@@ -38,7 +38,7 @@
             [% FOREACH b = all_broadcasts %]
               <tr>
                 <td>
-                  <a href="broadcast.cgi?id=[% b.basefile | html %]&amp;action=edit">
+                  <a href="broadcast.cgi?id=[% b.basefile | uri %]&amp;action=edit">
                     [% IF b.name %]
                       [% b.name | html %]
                     [% ELSE %]
@@ -55,10 +55,10 @@
                 <td class="max-w-sm truncate">[% b.contactgroups.join(', ') | html %]</td>
                 <td>
                   <div class="flex gap-1 justify-center">
-                    <a href="broadcast.cgi?id=[% b.basefile | html %]&amp;action=clone">
+                    <a href="broadcast.cgi?id=[% b.basefile | uri %]&amp;action=clone">
                       <i class="fa-solid fa-copy small" title='Clone Broadcast'></i>
                     </a>
-                    <a href="broadcast.cgi?id=[% b.basefile | html %]&amp;action=edit">
+                    <a href="broadcast.cgi?id=[% b.basefile | uri %]&amp;action=edit">
                       <i class="fa-solid fa-pencil small" title='Edit Broadcast'></i>
                     </a>
                     <form action="broadcast.cgi" method="POST">

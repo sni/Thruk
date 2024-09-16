@@ -31,10 +31,10 @@
           [% hash = l.hash %]
           [% commit = blame.commits.$hash %]
           <tr>
-            <td><a class="link" href="conf.cgi?sub=objects&action=history&id=[% hash | html %]">[% hash.substr(0, 6) %]</a></td>
+            <td><a class="link" href="conf.cgi?sub=objects&action=history&id=[% hash | uri %]">[% hash.substr(0, 6) %]</a></td>
             <td><a class="link" href="mailto:[% commit.item('author-mail').replace('<', '').replace('>', '') %]">[% commit.author | html %]</a></td>
             <td style="text-align: right;">[% date_format(c, commit.item('author-time')) %]</td>
-            <td title="[% commit.summary | html %]"><a class="link" href="conf.cgi?sub=objects&action=history&id=[% hash | html %]">[% commit.summary.substr(0, 30) | html %]</a></td>
+            <td title="[% commit.summary | html %]"><a class="link" href="conf.cgi?sub=objects&action=history&id=[% hash | uri %]">[% commit.summary.substr(0, 30) | html %]</a></td>
             <td>[% l.sourceline %]</td>
             <td><pre style="margin: 0; padding: 0;">[%- l.line | html -%]</pre></td>
           </tr>

@@ -250,7 +250,7 @@
         <td class="align-top">[% IF key.exists('created') %][% date_format(c, key.created) %][% ELSE %]unknown[% END %]</td>
         <td class="align-top">[% IF key.exists('last_used') %][% date_format(c, key.last_used) %] ([% IF key.exists('last_from') %][% key.last_from | html %][% END %])[% ELSE %]never[% END %]</td>
         <td class="align-top text-center">
-          <a href="user.cgi?file=[% basename(key.file) | html %]&amp;action=remove_key" onClick="if(confirm('Really remove?')) { setBtnSpinner(this); return true; } else { return false; }" title="delete this api key">
+          <a href="user.cgi?file=[% basename(key.file) | uri %]&amp;action=remove_key" onClick="if(confirm('Really remove?')) { setBtnSpinner(this); return true; } else { return false; }" title="delete this api key">
             <i class="fa-solid fa-trash text-base"></i>
           </a>
         </td>

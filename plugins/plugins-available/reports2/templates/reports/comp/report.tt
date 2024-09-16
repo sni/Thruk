@@ -12,7 +12,7 @@
     [% FOR t = report_themes %]
       [% IF t.name == r.params.report_theme %]
         [% FOR s = t.reportstyles %]
-        <link rel="stylesheet" type="text/css" href="[% url_prefix %]themes/[% t.name | html %]/[% s | html %]" />
+        <link rel="stylesheet" type="text/css" href="[% url_prefix %]themes/[% t.name | uri %]/[% s | uri %]" />
         [% END %]
       [% END %]
     [% END %]

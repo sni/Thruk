@@ -103,11 +103,11 @@
           <tr class="js-tabs" id="node_row_[% s.peer_key | html %]">
             <td class="align-top js-node-row">[% IF s.section != "Default" && s.section != "" && s.section != last_section; s.section | html; END; last_section = s.section; %]</td>
             <td class="align-top" title="[% s.peer_key | html %]">[% s.peer_name | html %]</td>
-            <td class="align-top">[% IF s.omd_site %]<a class="link" target="_blank" href="//[% s.host_name | html %]/[% s.omd_site | html %]/"><i class="uil uil-external-link-alt text-xs"></i>[% s.host_name | html %]</a>[% END %]</td>
+            <td class="align-top">[% IF s.omd_site %]<a class="link" target="_blank" href="//[% s.host_name | uri %]/[% s.omd_site | uri %]/"><i class="uil uil-external-link-alt text-xs"></i>[% s.host_name | html %]</a>[% END %]</td>
             <td class="align-top">
               [% IF s.omd_site %]
                 [% remote_thruk_url = get_remote_thruk_url(c, s.peer_key) %]
-                <a class="link" href="[% IF remote_thruk_url %]proxy.cgi/[% s.peer_key | html %][% remote_thruk_url %][% ELSE %][% url_prefix %][% END %]" target="_blank">
+                <a class="link" href="[% IF remote_thruk_url %]proxy.cgi/[% s.peer_key | uri %][% remote_thruk_url %][% ELSE %][% url_prefix %][% END %]" target="_blank">
                   <i class="fa-solid fa-desktop text-xs" title="Open site in a new tab."></i> [% s.omd_site | html %]
                 </a>
               [% END %]

@@ -30,7 +30,7 @@
     </div>
   [% ELSE %]
     [% IF defaults.exists(key) && defaults.$key.exists('link') && defaults.$key.link == 'icon' %]
-        [% escape_html(value) %] <img class="not-clickable" src="[% logo_path_prefix %][% value | html %]" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
+        [% escape_html(value) %] <img class="not-clickable" src="[% logo_path_prefix %][% value | uri %]" width="20" height="20" alt='[% key %]' title='[% key %]' style="vertical-align: middle;">
     [% ELSIF defaults.exists(key) && defaults.$key.exists('link') %]
         <a class="link" href="conf.cgi?sub=objects&amp;type=[% defaults.$key.link %]&amp;data.name=[% value | uri %]">[% value | html %]</a>
     [% ELSE %]

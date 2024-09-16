@@ -128,7 +128,7 @@ sub check_templates {
                 if($key =~ m/^(href|src)$/mx) {
                     if($var =~ m/
                                      \|\s*uri
-                                    |\|\s*html
+                                #   |\|\s*html # must not use html in urls, does not escpace plus properly
                                     |escape_html\(
                                     |full_uri\(
                                     |short_uri\(
@@ -142,6 +142,12 @@ sub check_templates {
                         $escaped_keys->{$escaped_var} = $linenr;
                         next;
                     }
+
+                    # special case is src/href as one string, this one can use html filter instead of uri as well
+                    if($value =~ m/\|\s*html/mx && $value =~ m/^"\[%.*?%\]"$/mx) {
+                        next;
+                    }
+
                     fail(sprintf("%s:%d uses variable '%s' without uri/html filter in: %s=%s", $file, $linenr, $var, $key, $value));
                     $failed++;
                 }

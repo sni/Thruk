@@ -21,7 +21,7 @@
   %]
   <div class="card w-full h-full flexcol flex-nowrap gap-0 overflow-hidden">
     <div class="head justify-between">
-      <a href="[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink | html %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link | html %][% END %]" onclick="return confirm_discard_changes()" class="button header-button rounded w-[70px]" title="Go back">
+      <a href="[% IF c.req.parameters.exists('backlink') %][% c.req.parameters.backlink | html %][% ELSIF show_object && back == "edit" %]conf.cgi?sub=objects&amp;data.id=[% object.get_id() %][% ELSE %]conf.cgi?sub=objects&amp;action=browser#[% file_link | uri %][% END %]" onclick="return confirm_discard_changes()" class="button header-button rounded w-[70px]" title="Go back">
         <i class="uil uil-angle-double-left"></i>Back
       </a>
       <h3>

@@ -57,7 +57,7 @@
                   [% IF has_contact %]Yes[% ELSE %]No[% END %]
                   [% IF backends_with_obj_config.keys.size > 0 %]
                     [% IF has_contact %]
-                      - <a class="button w-full" href="conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% user_name | html %]">edit in config tool</a>
+                      - <a class="button w-full" href="conf.cgi?sub=objects&amp;type=contact&amp;data.name=[% user_name | uri %]">edit in config tool</a>
                     [% ELSE %]
                       - <a class="button w-full" href="conf.cgi?sub=objects&amp;action=new&amp;type=contact&amp;obj.contact_name=[% user_name | uri %]">create</a>
                     [% END %]

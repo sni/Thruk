@@ -98,7 +98,7 @@
         <td class='[% class %] name'>
           <div class="status col_host_name flex items-center min-w-max">
             <div class="flex-1">
-              <a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key | html %]" title="[% h.address | html %] - [% h.alias | html %]">[% _host(h) | html %]</a>
+              <a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]&amp;backend=[% h.peer_key | uri %]" title="[% h.address | html %] - [% h.alias | html %]">[% _host(h) | html %]</a>
             </div>
                 [% PROCESS _status_host_attributes hostprefix="" host=h host_comment_count=comment_count with_status=1 %]
           </div>
