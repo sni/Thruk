@@ -80,13 +80,13 @@ END
   [% IF yes %]
     [% IF type == "service" %]
       [% IF !command_disabled(c, soff) %]
-        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% soff %]&amp;host=[% obj.host_name | uri %]&amp;service=[% obj.description | uri %]&amp;backend=[% peer_key %]'><div class='badge ENABLED'>ENABLED</div></a>
+        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=[% soff %]&amp;host=[% obj.host_name | uri %]&amp;service=[% obj.description | uri %]&amp;backend=[% peer_key %]"><div class='badge ENABLED'>ENABLED</div></a>
       [% ELSE %]
         <div class='badge ENABLED'>ENABLED</div>
       [% END %]
     [% ELSE %]
       [% IF !command_disabled(c, hoff) %]
-        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% hoff %]&amp;host=[% obj.name | uri %]&backend=[% peer_key %]'><div class='badge ENABLED'>ENABLED</div></a>
+        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=[% hoff %]&amp;host=[% obj.name | uri %]&backend=[% peer_key %]"><div class='badge ENABLED'>ENABLED</div></a>
       [% ELSE %]
         <div class='badge ENABLED'>ENABLED</div>
       [% END %]
@@ -94,13 +94,13 @@ END
   [% ELSE %]
     [% IF type == "service" %]
       [% IF !command_disabled(c, son) %]
-        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% son %]&amp;host=[% obj.host_name | uri %]&amp;service=[% obj.description | uri %]&amp;backend=[% peer_key %]'><div class='badge DISABLED'>DISABLED</div></a>
+        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=[% son %]&amp;host=[% obj.host_name | uri %]&amp;service=[% obj.description | uri %]&amp;backend=[% peer_key %]"><div class='badge DISABLED'>DISABLED</div></a>
       [% ELSE %]
         <div class='badge DISABLED'>DISABLED</div>
       [% END %]
     [% ELSE %]
       [% IF !command_disabled(c, hon) %]
-        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% hon %]&amp;host=[% obj.name | uri %]&backend=[% peer_key %]'><div class='badge DISABLED'>DISABLED</div></a>
+        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=[% hon %]&amp;host=[% obj.name | uri %]&backend=[% peer_key %]"><div class='badge DISABLED'>DISABLED</div></a>
       [% ELSE %]
         <div class='badge DISABLED'>DISABLED</div>
       [% END %]
