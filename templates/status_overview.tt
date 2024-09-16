@@ -1,5 +1,6 @@
 ﻿[% PROCESS _header.tt %]
 [% PROCESS _sounds.tt %]
+[% PROCESS _blocks.tt %]
 
   [% WRAPPER _status_totals_header.tt %]
     <div class="card overflow-hidden">
@@ -110,11 +111,8 @@
                         <div class="flex-1">
                           <a href="status.cgi?host=[% host_name | uri %]&amp;style=detail" title="[% h.address | html %]">[% _host(h) | html %]</a>
                         </div>
-                        [% IF h.icon_image_expanded %]
-                          <div class="flex pl-1.5">
-                            <a href="extinfo.cgi?type=1&amp;host=[% host_name | uri %]"><img src='[% logo_path_prefix %][% h.icon_image_expanded %]' alt="[% h.icon_image_alt | html %]" title="[% h.icon_image_alt | html %]" width="20" height="20"></a>
-                          </div>
-                        [% END %]
+                        [% SET host_comment_count = h.comments.size %]
+                        [% PROCESS _status_host_attributes hostprefix="" host=h host_comment_count=host_comment_count with_status=0 %]
                       </div>
                     </td>
                     [% IF h.has_been_checked == 0 %]
@@ -143,15 +141,6 @@
                     </td>
                     <td class='actions'>
                       <div class="flex gap-x-1 justify-center">
-                        [% IF h.notes_url_expanded %]
-                        <a href='[% l = set_target_link(h.notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'>
-                          <i class="fa-solid fa-clipboard clickable" title='View Extra Host Notes'></i>
-                        </a>
-                        [% END %]
-                        [% IF h.action_url_expanded %]
-                          [% action_url = proxifiy_url(c, h, get_action_url(c, 2, 1, h.action_url_expanded , h)) %]
-                          <a href='[% l = set_target_link(action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]'><i class="fa-solid fa-chart-line clickable" title='Show Performance Chart'></i></a>
-                        [% END %]
                         <a href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]"><i class="fa-solid fa-magnifying-glass-arrow-right" title='View Extended Information For This Host'></i></a>
                         <a href="status.cgi?host=[% h.name | uri %]"><i class="fa-solid fa-bars" title='View Service Details For This Host'></i></a>
                       </div>

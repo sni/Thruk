@@ -711,7 +711,7 @@ sub _process_overview_page {
     my $host_data;
     my $services_data;
     my $tmp_host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
-                                           columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address alias has_been_checked name state display_name custom_variable_names custom_variable_values/ ] );
+                                           columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address alias has_been_checked name state display_name custom_variable_names custom_variable_values comments is_executing notifications_enabled check_type active_checks_enabled is_flapping acknowledged scheduled_downtime_depth/ ] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
             $host_data->{ $host->{'name'} } = $host;
@@ -874,7 +874,7 @@ sub _process_grid_page {
     my($host_data, $services_data) = _fill_host_services_hashes($c,
                                             [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
                                             [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
-                                            0, # only name/description columes
+                                            1, # all columes
                                     );
 
     # get all host/service groups
@@ -1604,7 +1604,7 @@ sub _fill_host_services_hashes {
     my($c, $hostfilter, $servicefilter, $all_columns) = @_;
 
     my $host_data;
-    my $tmp_host_data = $c->db->get_hosts( filter => $hostfilter, columns => $all_columns ? [qw/name state alias address display_name icon_image_expanded icon_image_alt notes_url_expanded action_url_expanded/] : [qw/name/] );
+    my $tmp_host_data = $c->db->get_hosts( filter => $hostfilter, columns => $all_columns ? [qw/name state alias address display_name icon_image_expanded icon_image_alt notes_url_expanded action_url_expanded comments is_executing notifications_enabled check_type active_checks_enabled is_flapping acknowledged scheduled_downtime_depth/] : [qw/name/] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
             $host_data->{ $host->{'name'} } = $host;
