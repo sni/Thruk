@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - show host attributes on grid/overview pages
+          - make status badges toggle buttons
 
 
 3.18     Tue Sep 10 22:30:40 CEST 2024

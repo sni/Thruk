@@ -76,6 +76,38 @@ END
   </a>
 [% END %]
 
+[% BLOCK _toggle_badge %]
+  [% IF yes %]
+    [% IF type == "service" %]
+      [% IF !command_disabled(c, soff) %]
+        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% soff %]&amp;host=[% obj.host_name | uri %]&amp;service=[% obj.description | uri %]&amp;backend=[% peer_key %]'><div class='badge ENABLED'>ENABLED</div></a>
+      [% ELSE %]
+        <div class='badge ENABLED'>ENABLED</div>
+      [% END %]
+    [% ELSE %]
+      [% IF !command_disabled(c, hoff) %]
+        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% hoff %]&amp;host=[% obj.name | uri %]&backend=[% peer_key %]'><div class='badge ENABLED'>ENABLED</div></a>
+      [% ELSE %]
+        <div class='badge ENABLED'>ENABLED</div>
+      [% END %]
+    [% END %]
+  [% ELSE %]
+    [% IF type == "service" %]
+      [% IF !command_disabled(c, son) %]
+        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% son %]&amp;host=[% obj.host_name | uri %]&amp;service=[% obj.description | uri %]&amp;backend=[% peer_key %]'><div class='badge DISABLED'>DISABLED</div></a>
+      [% ELSE %]
+        <div class='badge DISABLED'>DISABLED</div>
+      [% END %]
+    [% ELSE %]
+      [% IF !command_disabled(c, hon) %]
+        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% hon %]&amp;host=[% obj.name | uri %]&backend=[% peer_key %]'><div class='badge DISABLED'>DISABLED</div></a>
+      [% ELSE %]
+        <div class='badge DISABLED'>DISABLED</div>
+      [% END %]
+    [% END %]
+  [% END %]
+[% END %]
+
 [% IF stale_hint %]
 <div class="card alert w-auto red relative shadow-none flexcol gap-1 flex-nowrap justify-center p-2 m-2">
   <h3>Stale [% type | html %] detected</h3>
@@ -390,41 +422,25 @@ END
   <tr class="border-t borderDefault">
     <th class='pt-1'>Active Checks</th>
     <td class='pt-1'>
-      [% IF obj.checks_enabled %]
-        <div class='badge ENABLED'>ENABLED</div>
-      [% ELSE %]
-        <div class='badge DISABLED'>DISABLED</div>
-      [% END %]
+      [% PROCESS _toggle_badge yes=obj.checks_enabled son=5 soff=6 hon=47 hoff=48 %]
     </td>
   </tr>
   <tr>
     <th>Passive Checks</th>
     <td>
-      [% IF obj.accept_passive_checks %]
-        <div class='badge ENABLED'>ENABLED</div>
-      [% ELSE %]
-        <div class='badge DISABLED'>DISABLED</div>
-      [% END %]
+      [% PROCESS _toggle_badge yes=obj.accept_passive_checks son=39 soff=40 hon=92 hoff=93 %]
     </td>
   </tr>
   <tr>
     <th>Obsessing</th>
     <td>
-      [% IF obsess %]
-      <div class='badge ENABLED'>ENABLED</div>
-      [% ELSE %]
-      <div class='badge DISABLED'>DISABLED</div>
-      [% END %]
+      [% PROCESS _toggle_badge yes=obsess son=99 soff=100 hon=101 hoff=102 %]
     </td>
   </tr>
   <tr>
     <th>Notifications</th>
     <td>
-      [% IF obj.notifications_enabled %]
-        <div class='badge ENABLED'>ENABLED</div>
-      [% ELSE %]
-        <div class='badge DISABLED'>DISABLED</div>
-      [% END %]
+      [% PROCESS _toggle_badge yes=obj.notifications_enabled son=22 soff=23 hon=24 hoff=25 %]
     </td>
   </tr>
   <tr>
@@ -432,24 +448,18 @@ END
     <td class='eventHandler'>
       [% IF !obj.event_handler %]
         <div class='badge'>UNUSED</div>
-      [% ELSIF obj.event_handler_enabled %]
-        <div class='badge ENABLED'>ENABLED</div>
+      [% ELSE %]
+        [% PROCESS _toggle_badge yes=obj.event_handler_enabled son=45 soff=46 hon=43 hoff=44 %]
         [% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
           <div>([% obj.event_handler %])</div>
         [% END %]
-      [% ELSE %]
-        <div class='badge DISABLED'>DISABLED</div>
       [% END %]
     </td>
   </tr>
   <tr>
     <th>Flap Detection</th>
     <td>
-      [% IF obj.flap_detection_enabled %]
-        <div class='badge ENABLED'>ENABLED</div>
-      [% ELSE %]
-        <div class='badge DISABLED'>DISABLED</div>
-      [% END %]
+      [% PROCESS _toggle_badge yes=obj.flap_detection_enabled son=59 soff=60 hon=57 hoff=58 %]
     </td>
   </tr>
 </table>
