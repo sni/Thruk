@@ -20,7 +20,7 @@
       [% IF show_object && object.get_id() != "new" %]
         <hr class="mt-0.5 pt-0.5">
         <div>
-          <a href="status.cgi?style=[% IF type == "host" %]host[% END %]detail&dfl_s0_type=[% type | html %]&dfl_s0_op=%3D&dfl_s0_value=[% object.get_name() | html %]">
+          <a href="status.cgi?style=[% IF type == "host" %]host[% END %]detail&dfl_s0_type=[% type | uri %]&dfl_s0_op=%3D&dfl_s0_value=[% object.get_name() | uri %]">
             <i class="fa-solid fa-magnifying-glass-arrow-right"></i>
             Show live objects
           </a>

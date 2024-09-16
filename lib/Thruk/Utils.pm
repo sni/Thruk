@@ -1860,6 +1860,7 @@ sub get_action_url {
         }
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/&/&amp;/gmx;
+        $action_url =~ s/\+/%2B/gmx;
         return($action_url);
     }
     elsif($action_url =~ m/\/histou\.js\?/mx || $action_url =~ m/\/grafana\//mx) {

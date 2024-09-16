@@ -308,11 +308,12 @@ ex.: /thruk/cgi-bin/status.cgi?params...
 
 =cut
 sub uri {
-    my($c) = @_;
+    my($c, $uri) = @_;
     carp("no c") unless defined $c;
-    my $uri = $c->stash->{original_uri} ? $c->stash->{original_uri} : $c->req->uri->as_string();
-    $uri    =~ s/^(http|https):\/\/.*?\//\//gmx;
-    $uri    = &escape_html($uri);
+    $uri = $uri // $c->stash->{original_uri} ? $c->stash->{original_uri} : $c->req->uri->as_string();
+    $uri =~ s/^(http|https):\/\/.*?\//\//gmxo;
+    $uri = &escape_html($uri);
+    $uri =~ s/\+/%2B/gmxo; # replace plus symbol in url
     return $uri;
 }
 
