@@ -105,13 +105,7 @@
     <th>Notifications Enabled?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.enable_notifications %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_notifications off=11 on=12 %]
     </td>
     [% END %]
   </tr>
@@ -119,13 +113,7 @@
     <th>Service Checks Being Executed?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.execute_service_checks %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.execute_service_checks off=36 on=35 %]
     </td>
     [% END %]
   </tr>
@@ -133,13 +121,7 @@
     <th>Passive Service Checks Being Accepted?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.accept_passive_service_checks %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.accept_passive_service_checks off=38 on=37 %]
     </td>
     [% END %]
   </tr>
@@ -147,13 +129,7 @@
     <th>Host Checks Being Executed?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.execute_host_checks %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.execute_host_checks off=89 on=88 %]
     </td>
     [% END %]
   </tr>
@@ -161,13 +137,7 @@
     <th>Passive Host Checks Being Accepted?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.accept_passive_host_checks %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.accept_passive_host_checks off=91 on=90 %]
     </td>
     [% END %]
   </tr>
@@ -175,13 +145,7 @@
     <th>Event Handlers Enabled?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.enable_event_handlers %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_event_handlers off=42 on=41 %]
     </td>
     [% END %]
   </tr>
@@ -189,13 +153,7 @@
     <th>Obsessing Over Services?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.obsess_over_services %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.obsess_over_services off=50 on=49 %]
     </td>
     [% END %]
   </tr>
@@ -203,13 +161,7 @@
     <th>Obsessing Over Hosts?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.obsess_over_hosts %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.obsess_over_hosts off=95 on=94 %]
     </td>
     [% END %]
   </tr>
@@ -217,13 +169,7 @@
     <th>Flap Detection Enabled?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.enable_flap_detection %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_flap_detection off=62 on=61 %]
     </td>
     [% END %]
   </tr>
@@ -231,13 +177,7 @@
     <th>Performance Data Being Processed?</th>
     [% FOREACH pd IN tmpbackends %]
     <td>
-      [% IF backend_detail.$pd.running %]
-        [% IF pi_detail.$pd.process_performance_data %]
-        <div class='YES badge'>YES</div>
-        [% ELSE %]
-        <div class='NO badge'>NO</div>
-        [% END %]
-      [% END %]
+      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.process_performance_data off=83 on=82 %]
     </td>
     [% END %]
   </tr>

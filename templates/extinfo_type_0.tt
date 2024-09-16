@@ -14,6 +14,24 @@
   </div>
 </div>
 
+[% BLOCK _toggle_badge %]
+  [% IF backend_detail.$pd.running %]
+    [% IF yes %]
+      [% IF !command_disabled(c, off) %]
+        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% off %]&backend=[% pd %]'><div class='YES badge'>YES</div></a>
+      [% ELSE %]
+        <div class='YES badge'>YES</div>
+      [% END %]
+    [% ELSE %]
+      [% IF !command_disabled(c, on) %]
+        <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=[% on%]&backend=[% pd %]'><div class='NO badge'>NO</div></a>
+      [% ELSE %]
+        <div class='NO badge'>NO</div>
+      [% END %]
+    [% END %]
+  [% END %]
+[% END %]
+
 <div class="flexrow">
   <div class="card overflow-hidden min-w-[420px]">
     <div class="head justify-between gap-x-1">
