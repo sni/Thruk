@@ -125,8 +125,8 @@ sub index {
         }
     }
 
-    # simply redirect if already authenticated
-    if($has_query && $referer && $c->cookies('thruk_auth') && $c->authenticate()) {
+    # simply redirect if already authenticated, but only if it looks like a valid url
+    if($has_query && $referer && $referer =~ m%/thruk/%mx && $c->cookies('thruk_auth') && $c->authenticate()) {
         $referer = '/'.$referer if $referer !~ m|^/|mx;
         return $c->redirect_to($referer);
     }
