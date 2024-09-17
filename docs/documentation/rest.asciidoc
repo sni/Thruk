@@ -386,6 +386,15 @@ Those columns can be used for filtering or to only select specific custom values
 ]
 ------
 
+[TIP]
+.Host custom variables
+=======
+Host custom variables are accessible with the _HOST prefix for example like.:
+
+`%> thruk r '/services?columns=_HOSTWORKER&description'`
+=======
+
+
 == Functions
 
 === Transformation Functions
