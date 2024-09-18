@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/305-controller_rest_commands.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 1062;
+    plan tests => 1083;
 
     use lib('t');
     require TestUtils;
@@ -67,6 +67,7 @@ for my $type (sort keys %{$cmds}) {
                 number            => "10",
                 attempts          => "0",
                 hostgroup_name    => "Everything",
+                log               => "Example Log;Text;time: ".time(),
              },
         };
         TestUtils::test_page(%{$test});
