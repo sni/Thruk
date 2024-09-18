@@ -834,7 +834,7 @@ sub get_toolkit_config {
                     'get_broadcasts'                => \&Thruk::Utils::Broadcast::get_broadcasts,
                     'command_disabled'              => \&Thruk::Utils::command_disabled,
                     'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,
-                    'get_remote_thruk_url'          => \&Thruk::Utils::get_remote_thruk_url,
+                    'get_remote_thruk_url_path'     => \&Thruk::Utils::get_remote_thruk_url_path,
                     'basename'                      => \&Thruk::Base::basename,
                     'debug_details'                 => \&get_debug_details,
                     'format_date'                   => \&Thruk::Utils::format_date,

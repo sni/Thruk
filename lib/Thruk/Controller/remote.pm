@@ -25,7 +25,31 @@ Thruk Controller.
 
 ##########################################################
 sub index {
-    my($c) = @_;
+    my($c, $path_info) = @_;
+
+    # proxy request
+    if($c->req->header('X-Thruk-Passthrough')) {
+        if(!$c->user_exists) {
+            $c->authenticate(skip_db_access => 1);
+        }
+        if(!$c->user_exists) {
+            $c->res->code(401);
+            return $c->render("text" => 'not authorized');
+        }
+# TODO: check why changes constantly
+        $c->user->set_dynamic_attributes($c);
+        require Thruk::Context;
+        require Thruk::Utils::CLI;
+        my $url = Thruk::Context::translate_request_path($c->req->header('X-Thruk-Passthrough'), $c->config);
+        my @res = Thruk::Utils::CLI::request_url($c, $url, undef, $c->req->method, $c->req->parameters);
+        if($res[1] && $res[1]->{'headers'}) {
+            $c->res->headers($res[1]->{'headers'}->clone());
+        }
+        $c->res->body($res[1]->{'result'} // $res[2]);
+        $c->res->code($res[0]);
+        $c->{'rendered'} = 1;
+        return;
+    }
 
     Thruk::Utils::check_pid_file($c);
 

@@ -464,6 +464,22 @@ sub _internal_request {
     delete $Thruk::thruk->{'TRANSFER_USER'} if $app->{'thruk'};
     $Thruk::thruk->{'TRANSFER_USER'} = $user if defined $user;
 
+    # serve static files internally
+    if($url =~ m%/thruk/(vendor|javascript|themes)/%mx) {
+        my $file = Thruk->config->{home}.'/root'.$url;
+        if(-f $file) {
+            require Plack::MIME;
+            my $content_type = Plack::MIME->mime_type($file) || 'text/plain';
+            return(undef, undef,
+                HTTP::Response->new(
+                    200, "OK",
+                    HTTP::Headers->new( Content_Type => $content_type ),
+                    Thruk::Utils::IO::read($file),
+                ),
+            );
+        }
+    }
+
     my $request = HTTP::Request->new($method, $url);
     $request->method(uc($method));
     if($postdata) {

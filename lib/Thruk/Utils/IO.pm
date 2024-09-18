@@ -793,6 +793,7 @@ options are:
     - no_decode             skip decoding
     - timeout               kill the command after the timeout (seconds)
     - no_touch_signals      do not change signal handler
+    - env                   environment variables
 
 =cut
 
@@ -855,6 +856,9 @@ sub cmd {
     local $ENV{REMOTE_USER_EMAIL} = $c->user->{'email'} if $c && $c->user;
     local $ENV{REMOTE_USER_ALIAS} = $c->user->{'alias'} if $c && $c->user;
     local $ENV{THRUK_REQ_URL}     = "".$c->req->uri if $c;
+
+    # set additional environment variables but keep local env
+    local %ENV = (%{$options->{'env'}}, %ENV) if $options->{'env'};
 
     if($options->{'detached'}) {
         confess("stdin not supported for detached commands") if $options->{'stdin'};

@@ -2079,13 +2079,7 @@ sub peer_address_list {
     my $peer = $c->db->get_peer_by_key($id);
     confess("got no peer for id: ".$id) unless $peer;
 
-    my $mainAddr = $peer->{'addr'};
-    my($proto, $host, $site) = Thruk::Utils::get_remote_thruk_url_full($c, $id);
-    my $http = "";
-    if($host) {
-        $http = CORE::sprintf('%s://%s/%s', $proto, $host, $site);
-        $mainAddr = $http;
-    }
+    my($host, $mainAddr) = Thruk::Utils::get_remote_thruk_hostname($c, $id);
     my $full = [];
     if($peer->{'fed_info'}) {
         for my $url (@{$peer->{'fed_info'}->{'addr'}}) {
@@ -2095,7 +2089,12 @@ sub peer_address_list {
         }
     }
 
-    return([$mainAddr, $http, $full]);
+    $mainAddr = $peer->{'addr'} unless $mainAddr;
+
+    $mainAddr =~ s|cgi-bin\/remote\.cgi$||gmx;
+    $mainAddr =~ s|thruk/?$||gmx;
+
+    return([$mainAddr, $full]);
 }
 
 ########################################

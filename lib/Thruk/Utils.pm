@@ -1302,7 +1302,7 @@ returns url with optional proxy prepended
 sub proxifiy_me {
     my($c, $peer_id) = @_;
     return unless $peer_id;
-    my $thruk_url = get_remote_thruk_url($c, $peer_id);
+    my $thruk_url = get_remote_thruk_url_path($c, $peer_id);
     return unless $thruk_url;
     my $url = $c->req->uri;
     $url    =~ s|^https?://[^/]+/|/|mx;
@@ -1314,61 +1314,140 @@ sub proxifiy_me {
 
 ########################################
 
-=head2 get_remote_thruk_url
+=head2 get_remote_thruk_url_path
 
-  get_remote_thruk_url($c, $peer_key, [$full])
+  get_remote_thruk_url_path($c, $peer_key)
 
-return url for remote thruk installation
+returns path of last http address/thruk instance in chain
 
 =cut
-sub get_remote_thruk_url {
+sub get_remote_thruk_url_path {
     my($c, $id, $full) = @_;
     my $peer = $c->db->get_peer_by_key($id);
     confess("got no peer for id: ".$id) unless $peer;
     my $url = "";
     if($peer->{'fed_info'} && $peer->{'fed_info'}->{'addr'}) {
-        # use last address which starts with http
         for my $u (reverse @{$peer->{'fed_info'}->{'addr'}}) {
-            if($u =~ m|^https?:|mx) {
+            if($u =~ m%^https?:%mx) {
                 $url = $u;
                 last;
             }
         }
     }
-    if($peer->{'type'} eq 'http' && (!$url || $url !~ /^https?:/mx)) {
-        $url = $peer->{'addr'};
-    }
-    return($url || "") if $full;
-    if($url) {
-        if($url !~ m/^https?:\/\//mx) {
-            return("");
+    if(!$url || $url !~ m/^https?:\/\//mx) {
+        for my $u (reverse @{$peer->peer_list()}) {
+            if($u =~ m%^https?:%mx) {
+                $url = $u;
+                last;
+            }
         }
-        $url =~ s|^https?://[^/]*/?|/|gmx;
-        $url =~ s|cgi-bin\/remote\.cgi$||gmx;
-        $url =~ s|thruk/?$||gmx;
-        $url =~ s|/$||gmx;
-        $url = $url.'/thruk/';
     }
-    return($url || "");
+    if(!$url || $url !~ m/^https?:\/\//mx) {
+        return("");
+    }
+
+    $url =~ s|^https?://[^/]*/?|/|gmx;
+    $url =~ s|cgi-bin\/remote\.cgi$||gmx;
+    $url =~ s|thruk/?$||gmx;
+    $url =~ s|/$||gmx;
+    $url = $url.'/thruk/';
+
+    return($url);
 }
 
 ########################################
 
-=head2 get_remote_thruk_url_full
+=head2 get_remote_thruk_hostname
 
-  get_remote_thruk_url_full($c, $peer_key)
+  get_remote_thruk_hostname($c, $peer_key)
 
-returns ($proto, $hostname, $site)
+returns hostname and url of last none-local address
 
 =cut
-sub get_remote_thruk_url_full {
+sub get_remote_thruk_hostname {
     my($c, $id) = @_;
-    my $url = get_remote_thruk_url($c, $id, 1);
+
+    my $peer = $c->db->get_peer_by_key($id);
+    confess("got no peer for id: ".$id) unless $peer;
+
+    my $url = "";
+    if($peer->{'fed_info'} && $peer->{'fed_info'}->{'addr'}) {
+        for my $u (reverse @{$peer->{'fed_info'}->{'addr'}}) {
+            next if $u =~ m%(127\.0\.0\.|localhost|::1|^/)%mx;
+            if($u =~ m%^(https?:|.*:\d+)%mx) {
+                $url = $u;
+                last;
+            }
+        }
+    }
+
+    if(!$url) {
+        for my $u (reverse @{$peer->peer_list()}) {
+            next if $u =~ m%(127\.0\.0\.|localhost|::1|^/)%mx;
+            if($u =~ m%^(https?:|.*:\d+)%mx) {
+                $url = $u;
+                last;
+            }
+        }
+    }
+
     return unless $url;
 
     if($url =~ m|^(https?)://([^/]+)/([^/]+)/|gmx) {
-        return($1, $2, $3);
+        return($2, $url);
     }
+
+    if($url =~ m|^(.*):(\d+)|gmx) {
+        return($1, $url);
+    }
+
+    return;
+}
+
+########################################
+
+=head2 get_remote_thruk_site_name
+
+  get_remote_thruk_site_name($c, $peer_key)
+
+returns site name of peer
+
+=cut
+sub get_remote_thruk_site_name {
+    my($c, $id) = @_;
+
+    my $peer = $c->db->get_peer_by_key($id);
+    confess("got no peer for id: ".$id) unless $peer;
+
+    my $url = "";
+    if($peer->{'fed_info'} && $peer->{'fed_info'}->{'addr'}) {
+        for my $u (reverse @{$peer->{'fed_info'}->{'addr'}}) {
+            if($u =~ m%^(https?:|/omd/sites/)%mx) {
+                $url = $u;
+                last;
+            }
+        }
+    }
+
+    if(!$url) {
+        for my $u (reverse @{$peer->peer_list()}) {
+            if($u =~ m%^(https?:|/omd/sites/)%mx) {
+                $url = $u;
+                last;
+            }
+        }
+    }
+
+    return unless $url;
+
+    if($url =~ m|^(https?)://([^/]+)/([^/]+)/|gmx) {
+        return($3);
+    }
+
+    if($url =~ m|^/omd/sites/([^/]+)/|gmx) {
+        return($1);
+    }
+
     return;
 }
 

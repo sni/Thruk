@@ -327,22 +327,27 @@ return result of cmd
 
 =cut
 sub cmd {
-    my($self, $c, $cmd, $background_options) = @_;
+    my($self, $c, $cmd, $background_options, $env) = @_;
     my($rc, $out) = (0, "");
     if($background_options) {
         $background_options->{"background"} = 1;
         $background_options->{"cmd"}        = $cmd;
+        $background_options->{"env"}        = $env;
     }
     if($self->{'type'} eq 'http') {
-        if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
+        # forward by http federation
+        if($self->{'federation'}
+            && scalar @{$self->{'fed_info'}->{'type'}} >= 2
+            && $self->{'fed_info'}->{'type'}->[1] eq 'http'
+        ) {
             require Thruk::Utils;
-            my $url = Thruk::Utils::get_remote_thruk_url($c, $self->{'key'});
+            my $url = Thruk::Utils::get_remote_thruk_url_path($c, $self->{'key'});
 
             my $options = {
                 'action'      => 'raw',
                 'sub'         => 'Thruk::Utils::IO::cmd',
                 'remote_name' => $self->{'class'}->{'remote_name'},
-                'args'        => [$cmd],
+                'args'        => [$cmd, { env => $env }],
             };
             if($background_options) {
                 $options->{'sub'}  = 'Thruk::Utils::External::cmd';
@@ -359,7 +364,7 @@ sub cmd {
             my $req    = HTTP::Request->new('POST', $url.'cgi-bin/remote.cgi', $header, $postdata);
 
             require Thruk::Controller::proxy;
-            my $res    = Thruk::Controller::proxy::proxy_request($c, $self->{'key'}, $url.'cgi-bin/remote.cgi', $req);
+            my $res = Thruk::Controller::proxy::proxy_request($c, $self->{'key'}, $url.'cgi-bin/remote.cgi', $req);
             my $result;
             eval {
                 $result = Cpanel::JSON::XS::decode_json($res->content());
@@ -368,31 +373,39 @@ sub cmd {
             if($err) {
                 die(Thruk::Utils::http_response_error($res));
             }
+            if(ref $result->{'output'} ne 'ARRAY') {
+                $out = $result->{'output'};
+                $rc  = -1;
+                return($rc, $out);
+            }
             ($rc, $out) = @{$result->{'output'}};
             if($background_options) {
                 ($out) = @{$result->{'output'}};
             }
-        } else {
-            if($background_options) {
-                ($out) = @{$self->{'class'}->request("Thruk::Utils::External::cmd", ['Thruk::Context', $background_options], { timeout => 120 })};
-            } else {
-                ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", [$cmd], { timeout => 120 })};
-            }
+            return($rc, $out);
         }
 
-    } elsif(my $http_peer = $self->get_http_fallback_peer()) {
+        if($background_options) {
+            ($out) = @{$self->{'class'}->request("Thruk::Utils::External::cmd", ['Thruk::Context', $background_options], { timeout => 120 })};
+        } else {
+            ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", [$cmd, { env => $env }], { timeout => 120 })};
+        }
+        return($rc, $out);
+
+    }
+
+    if(my $http_peer = $self->get_http_fallback_peer()) {
         my @args = @_;
         shift @args;
         return($http_peer->cmd(@args));
     }
-    else {
-        if($background_options) {
-            require Thruk::Utils::External;
-            $out = Thruk::Utils::External::cmd($c, $background_options);
-        } else {
-            require Thruk::Utils::IO;
-            ($rc, $out) = Thruk::Utils::IO::cmd($cmd);
-        }
+
+    if($background_options) {
+        require Thruk::Utils::External;
+        $out = Thruk::Utils::External::cmd($c, $background_options);
+    } else {
+        require Thruk::Utils::IO;
+        ($rc, $out) = Thruk::Utils::IO::cmd($cmd, { env => $env });
     }
 
     return($rc, $out);
@@ -413,7 +426,7 @@ sub rpc {
     if($self->{'type'} eq 'http') {
         if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
             require Thruk::Utils;
-            my $url = Thruk::Utils::get_remote_thruk_url($c, $self->{'key'});
+            my $url = Thruk::Utils::get_remote_thruk_url_path($c, $self->{'key'});
 
             my $options = {
                 'action'      => 'raw',
@@ -480,7 +493,7 @@ sub job_data {
     if($self->{'type'} eq 'http') {
         if($self->{'federation'} && scalar @{$self->{'fed_info'}->{'type'}} >= 2 && $self->{'fed_info'}->{'type'}->[1] eq 'http') {
             require Thruk::Utils;
-            my $url = Thruk::Utils::get_remote_thruk_url($c, $self->{'key'});
+            my $url = Thruk::Utils::get_remote_thruk_url_path($c, $self->{'key'});
 
             my $options = {
                 'action'      => 'raw',
@@ -510,6 +523,43 @@ sub job_data {
         return($http_peer->job_data(@args));
     }
     return($data);
+}
+
+##########################################################
+
+=head2 is_peer_machine_reachable_by_http
+
+  is_peer_machine_reachable_by_http()
+
+returns true if there is a thruk instance reachable by http for this peer
+
+=cut
+sub is_peer_machine_reachable_by_http {
+    my($self) = @_;
+
+    return if $self->is_local();
+
+    # check the last/final address in a federation setup and check whether it connects locally or not
+    if($self->{'federation'}) {
+        my $final_addr = $self->{'fed_info'}->{'addr'}->[scalar @{$self->{'fed_info'}->{'addr'}} - 1];
+        if($final_addr =~ m%^https?:%mx) {
+            return 1; # a final http address is ok
+        }
+        if($final_addr =~ m%:%mx) {
+            return; # final tcp connection does not work
+        }
+        # probably a final local unix address
+        return 1;
+    }
+
+    # nonlocal http connection
+    if($self->{'type'} eq 'http') {
+        return 1;
+    }
+
+    # TODO: what if there is a fallback http peer
+
+    return;
 }
 
 ##########################################################

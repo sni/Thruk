@@ -113,10 +113,11 @@ sub cmd {
                     $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
                 }
             }
-            if(!$facts || $facts->{'last_error'}) {
-                _error("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_error'}//'unknown error'));
+            if(!$facts || $facts->{'last_error'} || $facts->{'last_facts_error'}) {
+                _error("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_facts_error'}//$facts->{'last_error'}//'unknown error'));
+            } else {
+                _info("%s updated %s sucessfully: OK\n", $peer->{'name'}, $mode);
             }
-            _info("%s updated %s sucessfully: OK\n", $peer->{'name'}, $mode);
         });
         return("", 0);
     } else {

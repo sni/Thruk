@@ -39,7 +39,7 @@
     </td>
     <td title="id: [% pd %]">
       <b>
-      [% remote_thruk_url = get_remote_thruk_url(c, pd); IF remote_thruk_url %]
+      [% remote_thruk_url = get_remote_thruk_url_path(c, pd); IF remote_thruk_url %]
       <a href="proxy.cgi/[% pd %][% remote_thruk_url %]" target="_blank">
       [% END %]
       [% IF backend_detail.$pd.name %]
@@ -150,11 +150,11 @@
     [% END %]
     <td>
       [% plist = peer_address_list(pd) %]
-      [% IF plist.2.size > 1 %]
-      <span title="[% FOREACH addr IN plist.2; addr | html %]&#013;[% END %]">
+      [% IF plist.1.size > 1 %]
+      <span title="[% FOREACH addr IN plist.1; addr | html %]&#013;[% END %]">
       [% END %]
       [% plist.0 | html %]
-      [% IF plist.2.size > 1 %]
+      [% IF plist.1.size > 1 %]
       </span>
       [% END %]
     </td>

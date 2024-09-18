@@ -46,6 +46,9 @@ sub index {
         return $c->redirect_to($url);
     }
 
+    $c->authenticate() unless $c->user_exists();
+    return $c->detach('/error/index/100') unless $c->user_exists();
+
     my $res = proxy_request($c, $site, $url, $c->req);
 
     $c->res->status($res->code);
@@ -81,13 +84,21 @@ sub proxy_request {
     my $request_url = Thruk::Utils::absolute_url($peer->{'addr'}, $url, 1);
 
     # federated peers forward to the next hop
-    my $passthrough;
+    my($passthrough, $add_key);
     if($peer->{'federation'} && scalar @{$peer->{'fed_info'}->{'type'}} >= 2 && $peer->{'fed_info'}->{'type'}->[1] eq 'http') {
         $request_url = $peer->{'addr'};
         $request_url =~ s|/cgi\-bin/remote\.cgi$||gmx;
         $request_url =~ s|/thruk/?$||gmx;
-        $request_url = $request_url.'/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'};
+        $request_url = $request_url.'/thruk/cgi-bin/remote.cgi/'.$peer->{'key'};
         $passthrough = '/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
+    } else {
+        ## TODO: only if normal http request fails or so...
+        #$request_url = $peer->{'addr'};
+        #$request_url =~ s|/cgi\-bin/remote\.cgi$||gmx;
+        #$request_url =~ s|/thruk/?$||gmx;
+        #$request_url = $request_url.'/thruk/cgi-bin/remote.cgi';
+        #$passthrough = $url;
+        #$add_key = 1;
     }
 
     if($base_req->{'env'}->{'QUERY_STRING'}) {
@@ -106,6 +117,10 @@ sub proxy_request {
     }
     if($passthrough) {
         $req->header('X-Thruk-Passthrough', $passthrough);
+    }
+    if($add_key) {
+        $req->header('X-Thruk-Auth-Key', $peer->{'class'}->{'auth'});
+        $req->header('X-Thruk-Auth-User', $c->user->{'username'}) if $c->user_exists;
     }
     my $ua = Thruk::UserAgent->new({}, $c->config);
     $ua->max_redirect(0);

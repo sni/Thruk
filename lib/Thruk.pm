@@ -96,7 +96,7 @@ sub startup {
         $app = Plack::Middleware::Static->wrap($app,
                     path         => sub {
                                           my $p = Thruk::Context::translate_request_path($_, config());
-                                          return if $p =~ m%^/thruk/cgi\-bin/proxy\.cgi%mx;
+                                          return if $p =~ m%^/thruk/cgi\-bin/(remote|proxy)\.cgi%mx;
                                           $p =~ /\.(css|png|js|gif|jpg|ico|html|wav|mp3|ogg|ttf|svg|woff|woff2|eot|map)$/mx;
                                         },
                     root         => './root/',
@@ -190,6 +190,7 @@ sub _build_app {
         [ '^/thruk/r/v1.*'                   ,'Thruk::Controller::rest_v1::index' ],
         [ '^/thruk/r/.*'                     ,'Thruk::Controller::rest_v1::index' ],
         [ '^/thruk/cgi-bin/proxy.cgi/.*'     ,'Thruk::Controller::proxy::index' ],
+        [ '^/thruk/cgi-bin/remote.cgi/.*'    ,'Thruk::Controller::remote::index' ],
     ];
 
     Thruk::Utils::Status::add_view({'group' => 'Main',

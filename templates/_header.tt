@@ -68,7 +68,7 @@
             </div>
             <button class="noprint big primary round" title="reload page" id="refresh_button" onClick="refresh_button()"><i class="uil uil-sync"></i></button>
             [%- IF c.user_exists || c.errored -%]
-              <button class="noprint big primary round"  title="user preferences" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"><i class="uil uil-cog"></i></button>
+              <button class="noprint big primary round"  title="user preferences" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"[% IF !c.user_exists %] disabled[% END %]><i class="uil uil-cog"></i></button>
               [%- IF (cookie_auth && show_logout_button) || c.errored -%]
                 <form action="[% IF c.config.logout_link; c.config.logout_link; ELSE %][% url_prefix %]cgi-bin/login.cgi?logout[% END %]" method='POST' target='_top' style="display: initial;">
                   <button class="noprint big primary round" title="sign out"><i class="uil uil-signout"></i></button>

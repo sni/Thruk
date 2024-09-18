@@ -15,17 +15,16 @@ This plugin allows you to control nodes (OMD / OS) from within Thruk.
 ## Installation
 
 This plugin requires OMD ([omd.consol.de](https://omd.consol.de)).
-All steps have to be done as site user:
 
-    %> cd etc/thruk/plugins-enabled/
-    %> git clone https://github.com/sni/thruk-plugin-node-control.git node-control
-    %> omd reload apache
+This is a core plugin, so it is shipped with Thruk and can simply
+be enabled by running: `thruk plugins enable node-control` or
+from the plugins section in the config tool.
 
-You now have a new menu item under System -> Node Control.
+It worked if you have a new menu item under `System` -> `Node Control`.
 
 ## Setup
 
-The controlled sites need to have sudo permissions for omd and their package
+The controlled sites need to have (optional) sudo permissions for omd and their package
 manager.
 
 - Debian: `siteuser  ALL=(ALL) NOPASSWD: /usr/bin/omd, NOPASSWD:SETENV: /usr/bin/apt-get`
@@ -36,11 +35,21 @@ manager.
 Optional ssh login helps starting services if http connection does not work, for
 ex. because the site is stopped.
 
+Without sudo permissions you can only update to existing omd versions.
+
 ## Configuration
 
     <Component Thruk::Plugin::NodeControl>
+      # command will be run on the local node prior the update. Exit code != 0 will abort the update
+      #hook_update_pre_local  =
+
+      # command will be run on the remote node prior the update. Exit code != 0 will abort the update
       #hook_update_pre  = if [ $(git status --porcelain 2>&1 | wc -l) -gt 0 ]; then echo "omd home not clean"; git status --porcelain 2>&1; exit 1; fi
+      # command will be run on the remote node after the update
       #hook_update_post = git add . && git commit -a -m "update to omd $(omd version -b)"
+
+      # command will be run on the local node after the update.
+      #hook_update_post_local  =
 
       # set to 0 to disable ssh fallback in case http connection fails
       #ssh_fallback = 1
@@ -74,3 +83,23 @@ ex. because the site is stopped.
 
 Configure hooks to automatically checkin the version update into git. Requires
 git and the omd site in a git repository.
+
+## Hooks
+
+Hooks will be run in this order:
+
+- `hook_update_pre_local`:  command will be run on the **local** node **prior** the update.
+- `hook_update_pre`:        command will be run on the **remote** node **prior** the update.
+- `hook_update_post`:       command will be run on the **remote** node **after** the update.
+- `hook_update_post_local`: command will be run on the **local** node **after** the update.
+
+The pre hooks can abort the update process by exiting != 0.
+
+All hooks can make use of the following environment variables:
+
+- `PEER_NAME`:   name of the backend as set in the thruk.conf.
+- `PEER_KEY`:    internal id of the backend.
+- `HOST_NAME`:   remote host name of this backend.
+- `OMD_SITE`:    site name which will be updated.
+- `OMD_VERSION`: current omd version that site is running.
+- `OMD_UPDATE`:  omd version that'll be used for the update.

@@ -151,7 +151,7 @@ sub get_server {
         updating                => $facts->{'updating'} || 0,
         os_updating             => $facts->{'os_updating'} || 0,
         os_sec_updating         => $facts->{'os_sec_updating'} || 0,
-        host_name               => $facts->{'ansible_facts'}->{'ansible_fqdn'} // $peer->{'name'},
+        host_name               => $facts->{'ansible_facts'}->{'ansible_fqdn'},
         omd_version             => $facts->{'omd_version'} // '',
         omd_versions            => $facts->{'omd_versions'} // [],
         omd_cleanable           => $facts->{'omd_cleanable'} // [],
@@ -176,13 +176,15 @@ sub get_server {
     };
 
     # add fallback site name and address
-    if(!$server->{'omd_site'}) {
-        my(undef, $host, $site) = Thruk::Utils::get_remote_thruk_url_full($c, $peer->{'key'});
-        if($host) {
-            $server->{'host_name'} = $host;
-            $server->{'omd_site'}  = $site;
-        }
+    if(!$server->{'host_name'}) {
+        my($host, undef) = Thruk::Utils::get_remote_thruk_hostname($c, $peer->{'key'});
+        $server->{'host_name'} = $host if $host;
     }
+    if(!$server->{'omd_site'}) {
+        my $site = Thruk::Utils::get_remote_thruk_site_name($c, $peer->{'key'});
+        $server->{'omd_site'}  = $site if $site;
+    }
+    $server->{'host_name'} = $peer->{'name'} unless $server->{'host_name'};
 
     # remove current default from cleanable
     if($server->{'omd_cleanable'}) {
@@ -197,7 +199,7 @@ sub get_server {
 
 =head2 ansible_get_facts
 
-  ansible_get_facts($c, $peer)
+  ansible_get_facts($c, $peer, [$refresh])
 
 return ansible gather facts
 
@@ -485,11 +487,20 @@ sub omd_update {
     my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
     my $f      = Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 1, 'last_error' => '' }, { pretty => 1, allow_empty => 1 });
     my $config = config($c);
+    my $env    = _get_hook_env($c, $peer, $version);
+
+    if($config->{'hook_update_pre_local'}) {
+        my($rc, $out) = Thruk::Utils::IO::cmd($config->{'hook_update_pre_local'}, { env => $env });
+        if($rc != 0) {
+            Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 0, 'last_error' => sprintf("update canceled by local pre hook (rc: %d): %s", $rc, $out) }, { pretty => 1, allow_empty => 1 });
+            return;
+        }
+    }
 
     if($config->{'hook_update_pre'}) {
-        my($rc, $out) = _remote_cmd($c, $peer, $config->{'hook_update_pre'});
+        my($rc, $out) = _remote_cmd($c, $peer, $config->{'hook_update_pre'}, undef, $env);
         if($rc != 0) {
-            Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 0, 'last_error' => "update canceled by pre hook: ".$out }, { pretty => 1, allow_empty => 1 });
+            Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 0, 'last_error' => sprintf("update canceled by pre hook (rc: %d): %s", $rc, $out) }, { pretty => 1, allow_empty => 1 });
             return;
         }
     }
@@ -508,20 +519,16 @@ sub _omd_update_step2 {
     my $peer   = $c->db->get_peer_by_key($peerkey);
     my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
     my $config = config($c);
+    my $env    = _get_hook_env($c, $peer, $version);
 
     my($rc, $job);
     eval {
         my $root   = Thruk::Base::dirname(__FILE__);
         my $script = Thruk::Utils::IO::read($root."/../../../scripts/omd_update.sh");
         $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/omd_update.sh', $script);
+        $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/omd_update_post.sh', ($config->{'hook_update_post'} || ""));
 
-        if($config->{'hook_update_post'}) {
-            $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/omd_update_post.sh', $config->{'hook_update_post'});
-        } else {
-            $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/omd_update_post.sh', "");
-        }
-
-        ($rc, $job) = _remote_cmd($c, $peer, 'OMD_UPDATE="'.$version.'" bash var/tmp/omd_update.sh', { message => 'Updating Site To '.$version });
+        ($rc, $job) = _remote_cmd($c, $peer, 'OMD_UPDATE="'.$version.'" bash var/tmp/omd_update.sh', { message => 'Updating Site To '.$version, env => $env });
     };
     if($@) {
         Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 0, 'last_error' => $@ }, { pretty => 1, allow_empty => 1 });
@@ -535,6 +542,10 @@ sub _omd_update_step2 {
     if($jobdata && $jobdata->{'rc'} ne "0") {
         update_runtime_data($c, $peer, 1);
         return;
+    }
+
+    if($config->{'hook_update_post_local'}) {
+        Thruk::Utils::IO::cmd($config->{'hook_update_post_local'}, { env => $env, print_prefix => "" });
     }
 
     update_runtime_data($c, $peer, 1);
@@ -748,33 +759,50 @@ sub omd_cleanup {
 
 ##########################################################
 sub _remote_cmd {
-    my($c, $peer, $cmd, $background_options) = @_;
-    my($rc, $out);
-    eval {
-        ($rc, $out) = $peer->cmd($c, $cmd, $background_options);
-    };
-    my $err = $@;
-    if($err) {
-        # fallback to ssh if possible
-        my $facts     = ansible_get_facts($c, $peer, 0);
-        my $host_name = $facts->{'ansible_facts'}->{'ansible_fqdn'};
-        my $config    = config($c);
-        if(!$config->{'ssh_fallback'}) {
-            die("http(s) connection failed\n".$err);
-        } elsif($host_name && !$background_options) {
-            _warn("remote cmd failed, trying ssh fallback: %s", $err);
-            _debug("fallback to ssh");
-            ($rc, $out) = Thruk::Utils::IO::cmd($c, "ansible all -i $host_name, -m shell -a \"".$cmd."\"");
-            if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
-                die("http(s) and ssh connection failed\nhttp(s):\n".$err."\n\nssh:\n".$out);
-            }
-            $out =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=\d\s+>>//gmx;
+    my($c, $peer, $cmd, $background_options, $env) = @_;
+    my($rc, $out, $err);
+
+    if($peer->is_local() || $peer->is_peer_machine_reachable_by_http()) {
+        eval {
+            ($rc, $out) = $peer->cmd($c, $cmd, $background_options, $env);
+        };
+        $err = $@;
+        if(!$err) {
             return($rc, $out);
-        } else {
-            die("http(s) connection failed\n".$err);
         }
     }
-    return($rc, $out);
+
+    # fallback to ssh if possible
+    my $facts     = ansible_get_facts($c, $peer, 0);
+    my $host_name = $facts->{'ansible_facts'}->{'ansible_fqdn'};
+    my $config    = config($c);
+    if(!$config->{'ssh_fallback'}) {
+        die("http(s) connection failed\n".$err) if $err;
+        die("no http(s) control connection available\n");
+    }
+
+    if(!$host_name) {
+        my $server = get_server($c, $peer, $config);
+        $host_name = $server->{'host_name'};
+    }
+
+    if($host_name && !$background_options) {
+        _warn("remote cmd failed, trying ssh fallback: %s", $err) if $err;
+        _debug("fallback to ssh");
+        my $env_vars = "";
+        for my $key (sort keys %{$env}) {
+            $env_vars .= " --extra-vars $key=\"".$env->{$key}."\"";
+        }
+        ($rc, $out) = Thruk::Utils::IO::cmd($c, "ansible all -i $host_name, -m shell -a \"".$cmd."\"".$env_vars);
+        if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
+            die("http(s) and ssh connection failed\nhttp(s):\n".$err."\n\nssh:\n".$out) if $err;
+            die("ssh connection failed\n".$out);
+        }
+        $out =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=\d\s+>>//gmx;
+        return($rc, $out);
+    }
+
+    die("http(s) connection failed\n".$err);
 }
 
 ##########################################################
@@ -961,6 +989,22 @@ sub _wait_for_job {
         print $jobdata->{'stderr'},"\n" if $jobdata->{'stderr'};
     }
     return($jobdata);
+}
+
+##########################################################
+sub _get_hook_env {
+    my($c, $peer, $version) = @_;
+    my $config = config($c);
+    my $server = get_server($c, $peer, $config);
+    my $env = {
+        'PEER_NAME'   => $peer->{'name'}          // '',
+        'PEER_KEY'    => $peer->{'key'}           // '',
+        'HOST_NAME'   => $server->{'host_name'}   // '',
+        'OMD_SITE'    => $server->{'omd_site'}    // '',
+        'OMD_VERSION' => $server->{'omd_version'} // '',
+        'OMD_UPDATE'  => $version                 // '',
+    };
+    return($env);
 }
 
 ##########################################################
