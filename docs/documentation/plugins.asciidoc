@@ -46,6 +46,25 @@ Builtin Core Plugins
 --------------------
 
 
+Agents
+~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Agent configuration for SNClient+ agents in Naemon.
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The agent plugin creates and manages the naemon configuration for link:https://github.com/ConSol-Monitoring/snclient[SNClient] agents.
+
+++++
+<a title="agents" rel="lightbox[plugins]" href="plugins/agents1.png"><img src="plugins/agents1.png" alt="agents plugin " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
 Business Process
 ~~~~~~~~~~~~~~~~
 
