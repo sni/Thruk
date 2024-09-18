@@ -16,15 +16,15 @@ OMD, the plugins folder is in $OMD_ROOT/etc/thruk/plugins.
 Make sure you restart Thruk / Apache after enabling / disabling
 plugins.
 
-WARNING: With Thruk 2.0 a few minor changes are required for plugins. If you
+NOTE: With Thruk 2.0 a few minor changes are required for plugins. If you
 have own custom plugins, the link:thruk_2_0_migration_guide.html[Migration Guide] will
 help you getting them to work with Thruk 2.0.
 
 Later versions of Thruk have a plugins manager included in the config
 tool and you can manage your plugins there.
 
-Example of a plugins folder with all except the mobile plugin (which is not
-yet finished) enabled.
+Example of a plugins folder with some plugins enabled.
+
 ++++
 <pre style="line-height:18px;">
  plugins
@@ -39,29 +39,6 @@ yet finished) enabled.
      ├── reportss         -> ../plugins-available/reports2
      └── node-control     -> ../plugins-available/node-control
 </pre>
-++++
-
-
-Installation
-------------
-Installation of a plugin is easy:
-
-.Installation
-. Unpack the plugin in 'plugins-available' directory.
-. Create a symlink in 'plugins-enabled' which points to the plugin.
-. Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
-
-.Deactivate
-. Remove the symlink from 'plugins-enabled'
-. Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
-
-.Uninstall
-. Remove plugin from 'plugins-available'
-
-Since version 1.36 you may use the Plugin Manager from the 'config
-tool' plugin to select your plugins.
-++++
-<a title="plugin manager" rel="lightbox[plugins]" href="plugins/pluginmanager.png"><img src="plugins/pluginmanager.png" alt="config tool " width="30%" height="30%" /></a>
 ++++
 
 
@@ -138,6 +115,28 @@ default.
 
 
 
+Editor
+~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Generic Text Editor
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The editor plugin allows you to edit all types of text files. And provides a
+way to define further custom actions for each file type, like syntax check
+etc...
+
+++++
+<a title="editor" rel="lightbox[plugins]" href="plugins/editor1.png"><img src="plugins/editor1.png" alt="editor plugin" width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+
 Mine Map
 ~~~~~~~~
 
@@ -157,6 +156,29 @@ set of hosts with lots of common services.
 
 ++++
 <a title="mine map" rel="lightbox[plugins]" href="plugins/mine-map1.png"><img src="plugins/mine-map1.png" alt="mine map " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
+
+
+
+
+
+Node-Control
+~~~~~~~~~~~~
+
+----
+ Author:      Sven Nierlein
+ Description: Install OMD/OS Updates
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The node control plugin allows you to control omd nodes and install/update new
+omd versions. The plugin also supports installing os updates and shows a brief
+summary of the main node ressouces.
+
+++++
+<a title="node-control" rel="lightbox[plugins]" href="plugins/node-control1.png"><img src="plugins/node-control1.png" alt="reporting " width="30%" height="30%" /></a>
+<a title="node-control" rel="lightbox[plugins]" href="plugins/node-control2.png"><img src="plugins/node-control2.png" alt="reporting " width="30%" height="30%" /></a>
 <br style="clear: both;">
 ++++
 
@@ -208,8 +230,6 @@ thruk command line tool. link:reporting.html[Read more]
 
 
 
-
-
 Shinken Features
 ~~~~~~~~~~~~~~~~
 
@@ -237,47 +257,6 @@ priority.
 
 Additional Plugins
 ------------------
-
-
-Editor
-~~~~~~
-
-----
- Author:      Sven Nierlein
- Description: Generic Text Editor
- Download:    https://github.com/sni/thruk-plugin-editor
-----
-
-The editor plugin allows you to edit all types of text files. And provides a
-way to define further custom actions for each file type, like syntax check
-etc...
-
-++++
-<a title="editor" rel="lightbox[plugins]" href="plugins/editor1.png"><img src="plugins/editor1.png" alt="editor plugin" width="30%" height="30%" /></a>
-<br style="clear: both;">
-++++
-
-
-
-Node-Control
-~~~~~~~~~~~~
-
-----
- Author:      Sven Nierlein
- Description: Install OMD/OS Updates
- Download:    https://github.com/sni/thruk-plugin-node-control
-----
-
-The node control plugin allows you to control omd nodes and install/update new
-omd versions. The plugin also supports installing os updates and shows a brief
-summary of the main node ressouces.
-
-++++
-<a title="node-control" rel="lightbox[plugins]" href="plugins/node-control1.png"><img src="plugins/node-control1.png" alt="reporting " width="30%" height="30%" /></a>
-<a title="node-control" rel="lightbox[plugins]" href="plugins/node-control2.png"><img src="plugins/node-control2.png" alt="reporting " width="30%" height="30%" /></a>
-<br style="clear: both;">
-++++
-
 
 
 Woshsh
@@ -337,6 +316,30 @@ The pansnaps plugin allows you to export panorama dashboards as static images.
 ++++
 
 
+
+
+
+Installation
+------------
+Installation of a plugin is easy:
+
+.Installation
+. Unpack the plugin in 'plugins-available' directory.
+. Create a symlink in 'plugins-enabled' which points to the plugin.
+. Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
+
+.Deactivate
+. Remove the symlink from 'plugins-enabled'
+. Restart Thruk (if you use mod_fastcgi) or your webserver (if you use mod_fcgid)
+
+.Uninstall
+. Remove plugin from 'plugins-available'
+
+Since version 1.36 you may use the Plugin Manager from the 'config
+tool' plugin to select your plugins.
+++++
+<a title="plugin manager" rel="lightbox[plugins]" href="plugins/pluginmanager.png"><img src="plugins/pluginmanager.png" alt="config tool " width="30%" height="30%" /></a>
+++++
 
 
 
