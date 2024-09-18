@@ -193,9 +193,10 @@ sub _rest_get_external_command {
         }
     }
 
-    my $cmd_line = "COMMAND [".time()."] ".uc($cmd->{'name'});
+    my $cmd_line = "COMMAND [".time()."] ".($cmd->{'cmdname'} // uc($cmd->{'name'}));
     if(scalar @cmd_args > 0) {
-        $cmd_line .= ';'.join(';', @cmd_args);
+        $cmd_line .= ';' unless $cmd->{'cmdname'}; # only add leading ; for normal commands
+        $cmd_line .= join(';', @cmd_args);
     }
     my $cmd_list = [$cmd_line];
 
@@ -587,6 +588,13 @@ __DATA__
 #
 # See http://www.naemon.io/documentation/developer/externalcommands/enable_passive_host_checks.html for details.
 
+# REST PATH: POST /hosts/<name>/cmd/note
+# Add host note to core log.
+#
+# Required arguments:
+#
+#   * log
+#
 # REST PATH: POST /hosts/<name>/cmd/process_host_check_result
 # Sends the PROCESS_HOST_CHECK_RESULT command.
 #
@@ -967,6 +975,13 @@ __DATA__
 #
 # See http://www.naemon.io/documentation/developer/externalcommands/enable_svc_notifications.html for details.
 
+# REST PATH: POST /services/<host>/<service>/cmd/note
+# Add service note to core log.
+#
+# Required arguments:
+#
+#   * log
+#
 # REST PATH: POST /services/<host>/<service>/cmd/process_service_check_result
 # Sends the PROCESS_SERVICE_CHECK_RESULT command.
 #
@@ -1558,6 +1573,15 @@ __DATA__
 #
 # See http://www.naemon.io/documentation/developer/externalcommands/enable_service_freshness_checks.html for details.
 
+# REST PATH: POST /system/cmd/log
+# Add custom log entry to core log.
+#
+# Required arguments:
+#
+#   * log
+#
+# See http://www.naemon.io/documentation/developer/externalcommands/log.html for details.
+
 # REST PATH: POST /system/cmd/read_state_information
 # Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care.
 #
@@ -1758,6 +1782,7 @@ __DATA__
   "enable_host_svc_checks":{"args":[],"name":"enable_host_svc_checks","nr":"15","required":[]},
   "enable_host_svc_notifications":{"args":[],"name":"enable_host_svc_notifications","nr":"28","required":[]},
   "enable_passive_host_checks":{"args":[],"name":"enable_passive_host_checks","nr":"92","required":[]},
+  "note":{"args":["log"],"cmdname":"LOG;HOST NOTE: ","docs":"Add host note to core log.","name":"note","nr":-1,"required":["log"],"thrukcmd":1},
   "process_host_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_host_check_result","nr":"87","required":["plugin_state","plugin_output"]},
   "remove_host_acknowledgement":{"args":[],"name":"remove_host_acknowledgement","nr":"51","required":[]},
   "schedule_and_propagate_host_downtime":{"args":["start_time","end_time","fixed","triggered_by","duration","comment_author","comment_data"],"name":"schedule_and_propagate_host_downtime","nr":"55","required":["comment_data"]},
@@ -1815,6 +1840,7 @@ __DATA__
   "enable_svc_event_handler":{"args":[],"name":"enable_svc_event_handler","nr":"45","required":[]},
   "enable_svc_flap_detection":{"args":[],"name":"enable_svc_flap_detection","nr":"59","required":[]},
   "enable_svc_notifications":{"args":[],"name":"enable_svc_notifications","nr":"22","required":[]},
+  "note":{"args":["log"],"cmdname":"LOG;SERVICE NOTE: ","docs":"Add service note to core log.","name":"note","nr":-1,"required":["log"],"thrukcmd":1},
   "process_service_check_result":{"args":["plugin_state","plugin_output","performance_data"],"name":"process_service_check_result","nr":"30","required":["plugin_state","plugin_output"]},
   "remove_svc_acknowledgement":{"args":[],"name":"remove_svc_acknowledgement","nr":"52","required":[]},
   "schedule_forced_svc_check":{"args":["start_time"],"name":"schedule_forced_svc_check","nr":"7","required":[]},
@@ -1840,6 +1866,7 @@ __DATA__
   "enable_notifications":{"args":[],"name":"enable_notifications","nr":"12","required":[]},
   "enable_performance_data":{"args":[],"name":"enable_performance_data","nr":"82","required":[]},
   "enable_service_freshness_checks":{"args":[],"docs":"Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.","name":"enable_service_freshness_checks","nr":-1,"required":[]},
+  "log":{"args":["log"],"docs":"Add custom log entry to core log.","name":"log","nr":-1,"required":["log"]},
   "read_state_information":{"args":[],"docs":"Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care.","name":"read_state_information","nr":-1,"required":[]},
   "restart_process":{"args":[],"name":"restart_process","nr":"13","required":[]},
   "restart_program":{"args":[],"docs":"Restarts the Naemon process.","name":"restart_program","nr":-1,"required":[]},

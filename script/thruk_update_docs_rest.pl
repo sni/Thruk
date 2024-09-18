@@ -88,6 +88,7 @@ sub _update_cmds {
             #'CHANGE_HOST_EVENT_HANDLER'                   => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the event handler command for a particular host to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started."},
             #'CHANGE_HOST_CHECK_COMMAND'                   => {"args" => ["checkcommand"], "required" => ["checkcommand"], "docs" => "Changes the check command for a particular host to be that specified by the \'check_command\' option. The \'check_command\' option specifies the short name of the command that should be used as the new host check command. The command must have been configured in Naemon before it was last (re)started."},
             'CHANGE_CUSTOM_HOST_VAR'                      => {"args" => ["name", "value"], "required" => ["name", "value"], "docs" => "Changes the value of a custom host variable."},
+            'NOTE'                                        => {"args" => ["log"], "required" => ["log"], "docs" => "Add host note to core log.", "thrukcmd" => 1, 'cmdname' => 'LOG;HOST NOTE: '  },
         },
         'hostgroups' => {
             'ENABLE_HOSTGROUP_PASSIVE_SVC_CHECKS'         => {"docs" => "Enables passive checks for all services associated with hosts in a particular hostgroup."},
@@ -109,6 +110,7 @@ sub _update_cmds {
             'CHANGE_NORMAL_SVC_CHECK_INTERVAL'            => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the normal (regularly scheduled) check interval for a particular service"},
             'CHANGE_MAX_SVC_CHECK_ATTEMPTS'               => {"args" => ["attempts"], "required" => ["attempts"], "docs" => "Changes the maximum number of check attempts (retries) for a particular service."},
             'CHANGE_CUSTOM_SVC_VAR'                       => {"args" => ["name", "value"], "required" => ["name", "value"], "docs" => "Changes the value of a custom service variable."},
+            'NOTE'                                        => {"args" => ["log"], "required" => ["log"], "docs" => "Add service note to core log.", "thrukcmd" => 1, 'cmdname' => 'LOG;SERVICE NOTE: ' },
         },
         'servicegroups' => {
             'ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS'      => {"docs" => "Enables the acceptance and processing of passive checks for all services in a particular servicegroup."},
@@ -127,6 +129,7 @@ sub _update_cmds {
             'DISABLE_HOST_FRESHNESS_CHECKS'               => {"docs" => "Disables freshness checks of all hosts on a program-wide basis."},
             'CHANGE_GLOBAL_SVC_EVENT_HANDLER'             => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global service event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
             'CHANGE_GLOBAL_HOST_EVENT_HANDLER'            => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global host event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new host event handler. The command must have been configured in Naemon before it was last (re)started."},
+            'LOG'                                         => {"args" => ["log"], "required" => ["log"], "docs" => "Add custom log entry to core log."},
         },
         'all_host_service' => {
             'DEL_DOWNTIME_BY_START_TIME_COMMENT'          => {"args" => ["start_time", "comment"], "required" => [], "docs" => "This command deletes all downtimes matching the specified filters."},

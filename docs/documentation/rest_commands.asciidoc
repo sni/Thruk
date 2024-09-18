@@ -633,6 +633,15 @@ This command does not require any arguments.
 
 See http://www.naemon.io/documentation/developer/externalcommands/enable_passive_host_checks.html for details.
 
+=== POST /hosts/<name>/cmd/note
+
+Add host note to core log.
+
+Required arguments:
+
+  * log
+
+
 === POST /hosts/<name>/cmd/process_host_check_result
 
 Sends the PROCESS_HOST_CHECK_RESULT command.
@@ -1189,6 +1198,15 @@ This command does not require any arguments.
 
 See http://www.naemon.io/documentation/developer/externalcommands/enable_svc_notifications.html for details.
 
+=== POST /services/<host>/<service>/cmd/note
+
+Add service note to core log.
+
+Required arguments:
+
+  * log
+
+
 === POST /services/<host>/<service>/cmd/process_service_check_result
 
 Sends the PROCESS_SERVICE_CHECK_RESULT command.
@@ -1485,6 +1503,16 @@ Enables freshness checks of all services on a program-wide basis. Individual ser
 This command does not require any arguments.
 
 See http://www.naemon.io/documentation/developer/externalcommands/enable_service_freshness_checks.html for details.
+
+=== POST /system/cmd/log
+
+Add custom log entry to core log.
+
+Required arguments:
+
+  * log
+
+See http://www.naemon.io/documentation/developer/externalcommands/log.html for details.
 
 === POST /system/cmd/read_state_information
 
