@@ -203,6 +203,23 @@ enable_watcher:
 		done; \
 	done
 
+cron_stop:
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	for svc in $$(docker compose config --services | sort); do \
+		index=0; \
+		for container in $$(docker compose ps -q $$svc); do \
+			index=$$(( index + 1 )); \
+			echo "*** $${svc}_$${index}"; \
+			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
+				echo "***"; \
+				echo "*** $${svc}_$${index}"; \
+				docker exec -t --user root $$container omd stop demo crontab; \
+				echo "***"; \
+			fi; \
+		done; \
+	done
+
+
 extra_wait_start:
 
 extra_clean:
