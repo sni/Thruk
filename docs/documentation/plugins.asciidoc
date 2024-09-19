@@ -57,6 +57,8 @@ Agents
 
 The agent plugin creates and manages the naemon configuration for link:https://github.com/ConSol-Monitoring/snclient[SNClient] agents.
 
+A detailed documention is available on the link:plugins/agents/[Agents plugin] page.
+
 ++++
 <a title="agents" rel="lightbox[plugins]" href="plugins/agents1.png"><img src="plugins/agents1.png" alt="agents plugin " width="30%" height="30%" /></a>
 <br style="clear: both;">

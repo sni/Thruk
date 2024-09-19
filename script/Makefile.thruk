@@ -62,6 +62,10 @@ docs:
 	script/thruk_update_docs.sh
 	script/thruk_update_docs_rest.pl
 
+docs_server:
+	$(MAKE) -C docs server
+	$(MAKE) -C docs clean
+
 staticfiles:
 	script/thruk_create_combined_static_content.pl
 
