@@ -206,7 +206,16 @@ sub _cleanup_response {
             # if its thruk itself, insert a message at the top
             if($body =~ m/(site_panel_container|id="mainframe")/mx) {
                 my $header = "";
-                $c->stash->{'proxy_peer'}   = $peer;
+                # we actually connect to the last http peer in chain, so show that name
+                my $proxy_peer = $peer->{'name'};
+                if($peer->{'fed_info'}) {
+                    for(my $x = 0; $x < scalar @{$peer->{'fed_info'}->{'type'}}; $x++) {
+                        if($peer->{'fed_info'}->{'type'}->[$x] eq 'http') {
+                            $proxy_peer = $peer->{'fed_info'}->{'name'}->[$x];
+                        }
+                    }
+                }
+                $c->stash->{'proxy_peer'}   = $proxy_peer;
                 $c->stash->{'local_prefix'} = "###local_prefix###";
                 Thruk::Views::ToolkitRenderer::render($c, "_proxy_header.tt", $c->stash, \$header);
                 $body =~ s/<\/body>/$header<\/body>/gmx;

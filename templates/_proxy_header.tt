@@ -1,7 +1,7 @@
 ﻿<div style="position: absolute; top: 7px; left: 50%; right: 50%; width: 200px; height: 24px; line-height: 24px; border: 0; z-index: 101; transform: translate(-50%, -50%); background-color: #d9d9d9; color: #5f6268; text-align: center; border-radius: 4px; font-size: 14px; font-weight: bold;" class="proxy_header">
   <div style="display: flex; flex-wrap: nowrap; column-gap: 0px; justify-content: space-between; position: relative; top: 2px;" onmouseover="document.getElementById('proxy_header_back').style.display='';" onmouseout="document.getElementById('proxy_header_back').style.display='none';">
     <span style="width: 40px;"></span>
-    <span>[% proxy_peer.name %]</span>
+    <span>[% proxy_peer %]</span>
     <span style="width: 40px;"><a href="[% local_prefix | html %]" target="_parent" class="link" style="display: none;" id="proxy_header_back">back</a></span>
   </div>
 </div>
