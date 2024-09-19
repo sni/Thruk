@@ -197,8 +197,6 @@ plugins/plugins-available/agents/lib/Thruk/Controller/agents.pm
 plugins/plugins-available/agents/lib/Thruk/Utils/Agents.pm
 plugins/plugins-available/agents/lib/Thruk/Utils/CLI/Agents.pm
 plugins/plugins-available/agents/preview.png
-plugins/plugins-available/agents/README
-plugins/plugins-available/agents/README.md
 plugins/plugins-available/agents/root/images/snclient.png
 plugins/plugins-available/agents/root/images/snclient_dark.png
 plugins/plugins-available/agents/routes
@@ -394,8 +392,6 @@ plugins/plugins-available/editor/lib/Thruk/Controller/editor.pm
 plugins/plugins-available/editor/lib/Thruk/Controller/Rest/V1/editor.pm
 plugins/plugins-available/editor/LICENSE
 plugins/plugins-available/editor/preview.png
-plugins/plugins-available/editor/README
-plugins/plugins-available/editor/README.md
 plugins/plugins-available/editor/root/editor.css
 plugins/plugins-available/editor/root/editor.js
 plugins/plugins-available/editor/routes
@@ -415,8 +411,6 @@ plugins/plugins-available/node-control/lib/Thruk/NodeControl/Utils.pm
 plugins/plugins-available/node-control/lib/Thruk/Utils/CLI/Nc.pm
 plugins/plugins-available/node-control/lib/Thruk/Utils/CLI/Nodecontrol.pm
 plugins/plugins-available/node-control/preview.png
-plugins/plugins-available/node-control/README
-plugins/plugins-available/node-control/README.md
 plugins/plugins-available/node-control/root/node_control.js
 plugins/plugins-available/node-control/routes
 plugins/plugins-available/node-control/scripts/omd_update.sh
