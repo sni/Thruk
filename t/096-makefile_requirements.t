@@ -17,6 +17,7 @@ my $replace = {
     'Hash::MultiValue'                            => 'Plack',
     'Plack::Response'                             => 'Plack',
     'Plack::Request'                              => 'Plack',
+    'Plack::MIME'                                 => 'Plack',
     'Plack::Util::Accessor'                       => 'Plack',
     'Plack::Middleware::ContentLength'            => 'Plack',
     'Plack::Middleware::Lint'                     => 'Plack',
@@ -30,6 +31,7 @@ my $replace = {
     'Template::Plugin::Date'                      => 'Template',
     'Date::Manip::TZ'                             => 'Date::Manip',
     'GD::Image'                                   => 'GD',
+    'HTTP::Headers'                               => 'HTTP::Request',
 };
 
 # first get all we have already

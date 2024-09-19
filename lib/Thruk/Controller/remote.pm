@@ -25,7 +25,7 @@ Thruk Controller.
 
 ##########################################################
 sub index {
-    my($c, $path_info) = @_;
+    my($c) = @_;
 
     # proxy request
     if($c->req->header('X-Thruk-Passthrough')) {

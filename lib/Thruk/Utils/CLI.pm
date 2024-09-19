@@ -469,6 +469,8 @@ sub _internal_request {
         my $file = Thruk->config->{home}.'/root'.$url;
         if(-f $file) {
             require Plack::MIME;
+            require HTTP::Response;
+            require HTTP::Headers;
             my $content_type = Plack::MIME->mime_type($file) || 'text/plain';
             return(undef, undef,
                 HTTP::Response->new(

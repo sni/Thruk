@@ -327,6 +327,7 @@ return result of cmd
 
 =cut
 sub cmd {
+    my @args = @_;
     my($self, $c, $cmd, $background_options, $env) = @_;
     my($rc, $out) = (0, "");
     if($background_options) {
@@ -407,7 +408,6 @@ sub cmd {
     }
 
     if(my $http_peer = $self->get_http_fallback_peer()) {
-        my @args = @_;
         shift @args;
         return($http_peer->cmd(@args));
     }

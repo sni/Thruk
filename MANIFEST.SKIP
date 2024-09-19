@@ -49,6 +49,7 @@ docs/development
 docs/documentation/(?!(configuration|cgi-cfg).asciidoc)
 docs/.thruk_org
 docs/docker-compose.yaml
+docs/Makefile
 docs/images
 plugins/plugins-available/conf/test.pl
 plugins/plugins-available/conf/tmon.out
