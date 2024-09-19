@@ -113,6 +113,6 @@ All hooks can make use of the following environment variables:
 - `PEER_NAME`:   name of the backend as set in the thruk.conf.
 - `PEER_KEY`:    internal id of the backend.
 - `HOST_NAME`:   remote host name of this backend.
-- `OMD_SITE`:    site name which will be updated.
+- `SITE_NAME`:   site name which will be updated.
 - `OMD_VERSION`: current omd version that site is running.
 - `OMD_UPDATE`:  omd version that'll be used for the update.

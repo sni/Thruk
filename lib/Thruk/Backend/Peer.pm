@@ -343,11 +343,17 @@ sub cmd {
             require Thruk::Utils;
             my $url = Thruk::Utils::get_remote_thruk_url_path($c, $self->{'key'});
 
+            my $comm = [$cmd];
+            # setting env requires Thruk <= 3.20
+            my $v_num = $self->get_remote_thruk_version($c);
+            if($v_num && Thruk::Utils::version_compare($v_num, '3.19.20240920')) {
+                $comm = [$cmd, { env => $env }];
+            }
             my $options = {
                 'action'      => 'raw',
                 'sub'         => 'Thruk::Utils::IO::cmd',
                 'remote_name' => $self->{'class'}->{'remote_name'},
-                'args'        => [$cmd], # , { env => $env }], # TODO: env not supported by old Thruk <= 3.20
+                'args'        => $comm,
             };
             if($background_options) {
                 $options->{'sub'}  = 'Thruk::Utils::External::cmd';
@@ -388,9 +394,13 @@ sub cmd {
         if($background_options) {
             ($out) = @{$self->{'class'}->request("Thruk::Utils::External::cmd", ['Thruk::Context', $background_options], { timeout => 120 })};
         } else {
-            # TODO: env not supported by old Thruk <= 3.20
-            #($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", [$cmd, { env => $env }], { timeout => 120 })};
-            ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", [$cmd], { timeout => 120 })};
+            my $comm = [$cmd];
+            # setting env requires Thruk <= 3.20
+            my $v_num = $self->get_remote_thruk_version($c);
+            if($v_num && Thruk::Utils::version_compare($v_num, '3.19.20240920')) {
+                $comm = [$cmd, { env => $env }];
+            }
+            ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", $comm, { timeout => 120 })};
         }
         return($rc, $out);
 

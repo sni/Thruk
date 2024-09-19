@@ -1000,7 +1000,7 @@ sub _get_hook_env {
         'PEER_NAME'   => $peer->{'name'}          // '',
         'PEER_KEY'    => $peer->{'key'}           // '',
         'HOST_NAME'   => $server->{'host_name'}   // '',
-        'OMD_SITE'    => $server->{'omd_site'}    // '',
+        'SITE_NAME'   => $server->{'omd_site'}    // '',
         'OMD_VERSION' => $server->{'omd_version'} // '',
         'OMD_UPDATE'  => $version                 // '',
     };
