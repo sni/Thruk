@@ -557,7 +557,9 @@ sub is_peer_machine_reachable_by_http {
         return 1;
     }
 
-    # TODO: what if there is a fallback http peer
+    if($self->get_http_fallback_peer()) {
+        return 1;
+    }
 
     return;
 }
