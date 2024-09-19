@@ -186,6 +186,23 @@ update:
 	if $$(grep FROM */Dockerfile | awk '{ print $$2 }' | grep local/ >/dev/null); then make -C ../_common update; fi
 	@echo "### $@: $$(date "+%FT%T.%N")"
 
+enable_watcher:
+	@echo "### $@: $$(date "+%FT%T.%N")"
+	for svc in $$(docker compose config --services | sort); do \
+		index=0; \
+		for container in $$(docker compose ps -q $$svc); do \
+			index=$$(( index + 1 )); \
+			echo "*** $${svc}_$${index}"; \
+			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
+				echo "***"; \
+				echo "*** $${svc}_$${index}"; \
+				docker exec -t --user root $$container rm -f /omd/sites/demo/.THRUK_RESTARTER_DISABLED; \
+				docker exec -t --user root $$container omd reload demo apache; \
+				echo "***"; \
+			fi; \
+		done; \
+	done
+
 extra_wait_start:
 
 extra_clean:
