@@ -329,11 +329,11 @@ sub _ansible_available_packages {
 
     my $pkgs;
     if($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'yum') {
-        (undef, $pkgs) = _remote_cmd($c, $peer, 'yum search omd-');
+        (undef, $pkgs) = _remote_cmd($c, $peer, 'yum search omd- 2>/dev/null');
     } elsif($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'dnf') {
-        (undef, $pkgs) = _remote_cmd($c, $peer, 'dnf search omd-');
+        (undef, $pkgs) = _remote_cmd($c, $peer, 'dnf search omd- 2>/dev/null');
     } elsif($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'apt') {
-        (undef, $pkgs) = _remote_cmd($c, $peer, 'apt-cache search omd-');
+        (undef, $pkgs) = _remote_cmd($c, $peer, 'apt-cache search omd- 2>/dev/null');
     } else {
         die("unknown package manager: ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}//'none');
     }
@@ -808,7 +808,7 @@ sub _remote_cmd {
 ##########################################################
 sub _ansible_adhoc_cmd {
     my($c, $peer, $args) = @_;
-    my($rc, $data) = _remote_cmd($c, $peer, 'ansible all -i localhost, -c local '.$args);
+    my($rc, $data) = _remote_cmd($c, $peer, 'ansible all -i localhost, -c local '.$args." 2>/dev/null");
     if($rc != 0) {
         die("ansible failed: rc $rc ".$data);
     }

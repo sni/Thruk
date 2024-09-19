@@ -36,7 +36,6 @@ sub index {
             $c->res->code(401);
             return $c->render("text" => 'not authorized');
         }
-# TODO: check why changes constantly
         $c->user->set_dynamic_attributes($c);
         require Thruk::Context;
         require Thruk::Utils::CLI;

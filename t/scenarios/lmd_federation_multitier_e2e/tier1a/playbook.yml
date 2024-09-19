@@ -29,6 +29,9 @@
       owner: demo
       group: demo
 
+  - name: create symlink to agents plugin
+    shell: "ln -sfn /thruk/plugins/plugins-available/node-control /opt/omd/sites/demo/etc/thruk/plugins-enabled/node-control"
+
   - copy:
       src: "/root/1.tbp"
       dest: "/omd/sites/demo/etc/thruk/bp/1.tbp"

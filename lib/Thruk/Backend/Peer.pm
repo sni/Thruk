@@ -347,7 +347,7 @@ sub cmd {
                 'action'      => 'raw',
                 'sub'         => 'Thruk::Utils::IO::cmd',
                 'remote_name' => $self->{'class'}->{'remote_name'},
-                'args'        => [$cmd, { env => $env }],
+                'args'        => [$cmd], # , { env => $env }], # TODO: env not supported by old Thruk <= 3.20
             };
             if($background_options) {
                 $options->{'sub'}  = 'Thruk::Utils::External::cmd';
@@ -388,7 +388,9 @@ sub cmd {
         if($background_options) {
             ($out) = @{$self->{'class'}->request("Thruk::Utils::External::cmd", ['Thruk::Context', $background_options], { timeout => 120 })};
         } else {
-            ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", [$cmd, { env => $env }], { timeout => 120 })};
+            # TODO: env not supported by old Thruk <= 3.20
+            #($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", [$cmd, { env => $env }], { timeout => 120 })};
+            ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", [$cmd], { timeout => 120 })};
         }
         return($rc, $out);
 
@@ -561,6 +563,26 @@ sub is_peer_machine_reachable_by_http {
         return 1;
     }
 
+    return;
+}
+
+##########################################################
+
+=head2 get_remote_thruk_version
+
+  get_remote_thruk_version()
+
+returns version of remote thruk instance
+
+=cut
+sub get_remote_thruk_version {
+    my($self, $c) = @_;
+    my $key = $self->{'key'};
+    if($c->stash->{'pi_detail'}->{$key}
+       && $c->stash->{'pi_detail'}->{$key}->{'thruk'}
+       && $c->stash->{'pi_detail'}->{$key}->{'thruk'}->{'thruk_version'}) {
+       return($c->stash->{'pi_detail'}->{$key}->{'thruk'}->{'thruk_version'});
+    }
     return;
 }
 

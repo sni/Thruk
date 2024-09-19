@@ -2,6 +2,7 @@ package Thruk::Controller::proxy;
 
 use warnings;
 use strict;
+use Carp qw/confess/;
 use Cpanel::JSON::XS ();
 use HTTP::Request 6.12 ();
 
@@ -77,7 +78,11 @@ sub proxy_request {
         die("no such peer: ".$site) unless $peer;
     }
     if($peer->{'type'} ne 'http') {
-        die("peer has type: ".$peer->{'type'});
+        if(my $http_peer = $peer->get_http_fallback_peer()) {
+            $peer = $http_peer;
+        } else {
+            confess("peer has type: ".$peer->{'type'});
+        }
     }
 
     my $session_id  = $c->cookies('thruk_auth') || $peer->{'class'}->propagate_session_file($c);
@@ -89,7 +94,8 @@ sub proxy_request {
         $request_url = $peer->{'addr'};
         $request_url =~ s|/cgi\-bin/remote\.cgi$||gmx;
         $request_url =~ s|/thruk/?$||gmx;
-        $request_url = $request_url.'/thruk/cgi-bin/remote.cgi/'.$peer->{'key'};
+        # TODO: passthrough remote.cgi
+        $request_url = $request_url.'/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'};
         $passthrough = '/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
     } else {
         ## TODO: only if normal http request fails or so...
@@ -115,6 +121,8 @@ sub proxy_request {
     for my $h (qw/host via x-forwarded-for referer/) {
         $req->header($h, undef);
     }
+
+    $req->header('X-Thruk-Passthrough', undef);
     if($passthrough) {
         $req->header('X-Thruk-Passthrough', $passthrough);
     }

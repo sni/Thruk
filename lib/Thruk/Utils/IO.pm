@@ -811,7 +811,7 @@ sub cmd {
     #confess("cmd options have been migrated to hash") if(scalar @_ > 2);
 
     $options = {} unless defined $options;
-    Thruk::Base::validate_options($options, [qw/stdin print_prefix output_prefix detached no_decode timeout no_touch_signals/]);
+    Thruk::Base::validate_options($options, [qw/stdin print_prefix output_prefix detached no_decode timeout no_touch_signals env/]);
 
     my $c = $Thruk::Globals::c || undef;
     my $t1 = [gettimeofday];
