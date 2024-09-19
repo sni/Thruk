@@ -94,11 +94,10 @@ sub proxy_request {
         $request_url = $peer->{'addr'};
         $request_url =~ s|/cgi\-bin/remote\.cgi$||gmx;
         $request_url =~ s|/thruk/?$||gmx;
-        # TODO: passthrough remote.cgi
         $request_url = $request_url.'/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'};
         $passthrough = '/thruk/cgi-bin/proxy.cgi/'.$peer->{'key'}.$url;
     } else {
-        ## TODO: only if normal http request fails or so...
+        ## only if normal http request fails or so...
         #$request_url = $peer->{'addr'};
         #$request_url =~ s|/cgi\-bin/remote\.cgi$||gmx;
         #$request_url =~ s|/thruk/?$||gmx;
