@@ -57,7 +57,7 @@ Agents
 
 The agent plugin creates and manages the naemon configuration for link:https://github.com/ConSol-Monitoring/snclient[SNClient] agents.
 
-A detailed documention is available on the link:plugins/agents/[Agents plugin] page.
+A detailed documention is available on the link:plugins/agents/[agents plugin] page.
 
 ++++
 <a title="agents" rel="lightbox[plugins]" href="plugins/agents1.png"><img src="plugins/agents1.png" alt="agents plugin " width="30%" height="30%" /></a>
@@ -149,7 +149,7 @@ The editor plugin allows you to edit all types of text files. And provides a
 way to define further custom actions for each file type, like syntax check
 etc...
 
-A detailed documention is available on the link:plugins/editor/[Editor plugin] page.
+A detailed documention is available on the link:plugins/editor/[editor plugin] page.
 
 ++++
 <a title="editor" rel="lightbox[plugins]" href="plugins/editor1.png"><img src="plugins/editor1.png" alt="editor plugin" width="30%" height="30%" /></a>
@@ -198,6 +198,8 @@ Node-Control
 The node control plugin allows you to control omd nodes and install/update new
 omd versions. The plugin also supports installing os updates and shows a brief
 summary of the main node ressouces.
+
+A detailed documention is available on the link:plugins/node-control/[node-control plugin] page.
 
 ++++
 <a title="node-control" rel="lightbox[plugins]" href="plugins/node-control1.png"><img src="plugins/node-control1.png" alt="reporting " width="30%" height="30%" /></a>
