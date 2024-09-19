@@ -149,6 +149,8 @@ The editor plugin allows you to edit all types of text files. And provides a
 way to define further custom actions for each file type, like syntax check
 etc...
 
+A detailed documention is available on the link:plugins/editor/[Editor plugin] page.
+
 ++++
 <a title="editor" rel="lightbox[plugins]" href="plugins/editor1.png"><img src="plugins/editor1.png" alt="editor plugin" width="30%" height="30%" /></a>
 <br style="clear: both;">
