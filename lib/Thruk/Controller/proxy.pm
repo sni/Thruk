@@ -207,7 +207,7 @@ sub _cleanup_response {
                 my $header = "";
                 # we actually connect to the last http peer in chain, so show that name
                 my $proxy_peer = $peer->{'name'};
-                if($peer->{'fed_info'}) {
+                if($peer->{'federation'} && $peer->{'fed_info'}->{'type'}) {
                     for(my $x = 0; $x < scalar @{$peer->{'fed_info'}->{'type'}}; $x++) {
                         if($peer->{'fed_info'}->{'type'}->[$x] eq 'http') {
                             $proxy_peer = $peer->{'fed_info'}->{'name'}->[$x];

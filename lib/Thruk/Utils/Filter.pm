@@ -2081,7 +2081,7 @@ sub peer_address_list {
 
     my($host, $mainAddr) = Thruk::Utils::get_remote_thruk_hostname($c, $id);
     my $full = [];
-    if($peer->{'fed_info'}) {
+    if($peer->{'federation'} && $peer->{'fed_info'}) {
         for my $url (@{$peer->{'fed_info'}->{'addr'}}) {
             $url =~ s|cgi-bin\/remote\.cgi$||gmx;
             $url =~ s|thruk/?$||gmx;
