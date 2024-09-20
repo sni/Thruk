@@ -1279,7 +1279,7 @@ sub js_init {
         tab              => 'current',
         launch_arg       => ["--password-store=basic", "--remote-allow-origins=*"],
     );
-    $mech->get_local("./data/blank.html");
+    $mech->get_local(-f "./data/blank.html" ? "./data/blank.html" : "../../data/blank.html");
     $mech->clear_js_errors();
 
     my $console = $mech->add_listener('Runtime.consoleAPICalled', sub {
