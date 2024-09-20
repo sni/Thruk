@@ -1199,6 +1199,39 @@ ex.:
   commandline_obfuscate_pattern = /(check_.*\--pw )(\S+)/$1"***"/
   commandline_obfuscate_pattern = /(check_.*\"password\": )(\S+)/$1"***"/
 
+Another way is to create a `_OBFUSCATE_REGEXP` custom variable which will then be used
+for its host/service. The syntax is slightly different, you only set the regexp
+pattern which will be replaced:
+
+ex.:
+
+  define host {
+    host_name          test
+    _OBFUSCATE_REGEXP  pass\W+
+  }
+
+The password can be base64 encoded to mitigate escaping issues. Encode the regexp
+and add the `b64:` prefix.
+
+  %>echo -n "password" | base64
+  cGFzc3dvcmQ=
+
+then use this in your naemon configuration:
+
+  define host {
+    host_name          test
+    _OBFUSCATE_REGEXP  b64:cGFzc3dvcmQ=
+  }
+
+If regular expressions are not required, you can use the `_OBFUSCATE_STRING` custom
+variable. This is a simple text replacement with no regular expressions.
+
+ex.:
+
+  define host {
+    host_name          test
+    _OBFUSCATE_STRING  password
+  }
 
 
 === show_full_commandline_source

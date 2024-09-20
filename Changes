@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - show host attributes on grid/overview pages
           - make status badges toggle buttons
+          - add support for base64 encoded obfuscate pattern
           - Rest:
             - add support for host/service note commands
               ex.: /hosts/<name>/cmd/note

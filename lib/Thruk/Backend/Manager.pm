@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp qw/confess croak/;
 use Data::Dumper qw/Dumper/;
+use MIME::Base64 ();
 use Scalar::Util qw/looks_like_number/;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -1402,17 +1403,28 @@ sub _get_obfuscated_string {
         return $string;
     }
 
-    if (defined $macros->{'$_SERVICEOBFUSCATE_ME$'}) {
+    # regexp pattern
+    for my $m ($macros->{'$_SERVICEOBFUSCATE_ME$'}, $macros->{'$_HOSTOBFUSCATE_ME$'}, $macros->{'$_SERVICEOBFUSCATE_REGEXP$'}, $macros->{'$_HOSTOBFUSCATE_REGEXP$'}, $macros->{'$_SERVICEOBFUSCATE_REGEX$'}, $macros->{'$_HOSTOBFUSCATE_REGEX$'}) {
+        next unless defined $m;
+        if($m =~ m/^(b64|base64):(.*)$/gmx) {
+            $m = MIME::Base64::decode_base64($2);
+        }
         eval {
             ## no critic
-            $string =~ s/$macros->{'$_SERVICEOBFUSCATE_ME$'}/\*\*\*/g;
+            $string =~ s/$m/\*\*\*/g;
             ## use critic
         };
     }
-    if (defined $macros->{'$_HOSTOBFUSCATE_ME$'}) {
+
+    # string pattern
+    for my $m ($macros->{'$_SERVICEOBFUSCATE_STRING$'}, $macros->{'$_HOSTOBFUSCATE_STRING$'}, $macros->{'$_SERVICEOBFUSCATE_STR$'}, $macros->{'$_HOSTOBFUSCATE_STR$'}) {
+        next unless defined $m;
+        if($m =~ m/^(b64|base64):(.*)$/gmx) {
+            $m = MIME::Base64::decode_base64($2);
+        }
         eval {
             ## no critic
-            $string =~ s/$macros->{'$_HOSTOBFUSCATE_ME$'}/\*\*\*/g;
+            $string =~ s/\Q$m\E/\*\*\*/g;
             ## use critic
         };
     }

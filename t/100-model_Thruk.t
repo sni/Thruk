@@ -9,7 +9,7 @@ use Thruk::Utils ();
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 42;
+    plan tests => 46;
 }
 
 BEGIN {
@@ -203,6 +203,54 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p tes
 $c->{'config'}->{'expand_user_macros'} = ["ALL"];
 $cmd = $b->expand_command(
     'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_ME'], 'custom_variable_values' => ['password']))},
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$ -p "password"',
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p "***"', 'expanded command: '.$cmd->{'line_expanded'});
+
+################################################################################
+# test obfuscation (from host macro)
+$c->{'config'}->{'expand_user_macros'} = ["ALL"];
+$cmd = $b->expand_command(
+    'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_REGEXP'], 'custom_variable_values' => ['pa.*ord']))},
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$ -p "password"',
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p "***"', 'expanded command: '.$cmd->{'line_expanded'});
+
+################################################################################
+# test obfuscation (from host macro)
+$c->{'config'}->{'expand_user_macros'} = ["ALL"];
+$cmd = $b->expand_command(
+    'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_STRING'], 'custom_variable_values' => ['*as+w$r/']))},
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$ -p "*as+w$r/"',
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p "***"', 'expanded command: '.$cmd->{'line_expanded'});
+
+################################################################################
+# test base64 obfuscation (from host macro)
+$c->{'config'}->{'expand_user_macros'} = ["ALL"];
+$cmd = $b->expand_command(
+    'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_ME'], 'custom_variable_values' => ['b64:cGFzc3dvcmQ=']))},
+    'command' => {
+        'name' => 'check_test',
+        'line' => '$USER1$/check_test -H $HOSTNAME$ -p "password"',
+    },
+);
+is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p "***"', 'expanded command: '.$cmd->{'line_expanded'});
+
+################################################################################
+# test base64 obfuscation (from host macro)
+$c->{'config'}->{'expand_user_macros'} = ["ALL"];
+$cmd = $b->expand_command(
+    'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_STR'], 'custom_variable_values' => ['b64:cGFzc3dvcmQ=']))},
     'command' => {
         'name' => 'check_test',
         'line' => '$USER1$/check_test -H $HOSTNAME$ -p "password"',
