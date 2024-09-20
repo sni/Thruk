@@ -118,6 +118,10 @@ sub _fetch_results {
                 _debug($opt->{'result'});
                 next;
             }
+
+            # plus symbols from the command line are probably meant as plus
+            # is a space is meant, simply use a space or %20
+            $url =~ s/\+/%2B/gmx;
         }
 
         $url =~ s|^/||gmx;

@@ -1031,7 +1031,7 @@ sub _get_transformed_row_value {
 
     my $val = $row->{$col->{'orig'}} // $row->{$col->{'column'}};
     for my $f (@{$col->{'func'}}) {
-        $val = _apply_data_function($col, $f, $val);
+        $val = _apply_data_function($col, $f, $val, $row);
     }
 
     return $val;
@@ -1039,7 +1039,7 @@ sub _get_transformed_row_value {
 
 ##########################################################
 sub _apply_data_function {
-    my($col, $f, $val) = @_;
+    my($col, $f, $val, $row) = @_;
     my($name, $args) = @{$f};
     if($name eq 'lower' || $name eq 'lc') {
         return lc($val // '');
@@ -1091,10 +1091,71 @@ sub _apply_data_function {
         return $val;
     }
 
+    # more generic calculation function
+    if($name eq '_calc') {
+        return(&_apply_calc_column($args->[0], $row));
+    }
+
     return $val if $aggregation_functions->{$name};
     return $val if $disaggregation_functions->{$name};
 
     die("unknown function: ".$name);
+}
+
+##########################################################
+sub _apply_calc_column {
+    my($expr, $row) = @_;
+
+    # split expr into token
+    my @token = split(/\s*([\+\*\-\/])\s*/mx, $expr);
+    return 0 unless scalar @token > 0;
+    my $first = shift @token;
+    my $res   = &_extract_val($first, $row);
+    while(scalar @token > 1) {
+        my $op  = shift @token;
+        my $num = shift @token;
+        my $val = &_extract_val($num, $row);
+        if(   $op eq '+') { $res += $val; }
+        elsif($op eq '-') { $res -= $val; }
+        elsif($op eq '*') { $res *= $val; }
+        elsif($op eq '/') { $res = $res / $val; }
+        else { die("unknown operator: $op in '$expr'"); }
+    }
+
+    die("missing value at end of expression in '$expr'") if scalar @token > 0;
+
+    return($res);
+}
+
+##########################################################
+sub _extract_val {
+    my($name, $row) = @_;
+    return($row->{$name}) if exists $row->{$name};
+    return(0+$name) if $name =~ m/^(\d+)|(\d+\.\d+)$/mx;
+    return(0);
+}
+
+##########################################################
+# returns columns required from calculations
+sub _get_calc_required_columns {
+    my($c) = @_;
+
+    my $extra = [];
+    for my $col (@{get_request_columns($c, STRUCT) || []}) {
+        if(scalar @{$col->{'func'}} > 0 && $col->{'func'}->[0]->[0] eq '_calc') {
+            my $arg = $col->{'func'}->[0]->[1]->[0];
+            my @token = split(/\s*([\+\*\-\/])\s*/mx, $arg);
+            for my $t (@token) {
+                next if $t eq '+';
+                next if $t eq '-';
+                next if $t eq '*';
+                next if $t eq '/';
+                push @{$extra}, $t;
+            }
+        }
+    }
+
+    return $extra;
 }
 
 ##########################################################
@@ -1196,6 +1257,7 @@ sub _livestatus_options {
         }
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
+            push @{$columns}, @{_get_calc_required_columns($c)};
             $columns = Thruk::Base::array_uniq($columns);
             my $ref_columns;
             if($type eq 'hosts') {
@@ -2830,6 +2892,10 @@ sub _parse_columns_data {
             }
             $name = shift @arg;
             push(@{$functions}, [$f, \@arg]);
+        }
+        if(scalar @{$functions} == 0 && $name =~ m/[\+\*\-\/]/gmx) {
+            my $f = "_calc";
+            push(@{$functions}, [$f, [$name]]);
         }
         # functions must be applied in reverse order
         @{$functions} = reverse @{$functions};
