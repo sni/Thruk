@@ -1229,6 +1229,7 @@ displays commandline for check command of given hosts.
 |error                             |            |          | contains the error if expanding failed for some reason
 |host_name                         |            |          | host name
 |peer_key                          |            |          | backend id when having multiple sites connected
+|peer_name                         |            |          | name of remote site
 |===========================================
 
 
@@ -1627,6 +1628,7 @@ displays commandline for check command of given services.
 |error                             |            |          | contains the error if expanding failed for some reason
 |host_name                         |            |          | host name
 |peer_key                          |            |          | backend id when having multiple sites connected
+|peer_name                         |            |          | name of remote site
 |service_description               |            |          | service name
 |===========================================
 

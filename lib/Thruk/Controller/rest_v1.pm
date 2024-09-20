@@ -1452,6 +1452,9 @@ sub _expand_perfdata_and_custom_vars {
         if($row->{'downtimes_with_info'}) {
             _add_comment_downtimes($row, 'downtimes_info', $row->{'downtimes_with_info'});
         }
+        if($row->{'peer_key'} && !$row->{'peer_name'}) {
+            $row->{'peer_name'} = Thruk::Utils::Filter::peer_name($row);
+        }
     }
     return($data);
 }
@@ -2131,6 +2134,7 @@ sub _rest_get_livestatus_hosts_commandline {
             'error'         => $command->{'note'},
             'host_name'     => $hst->{'name'},
             'peer_key'      => $hst->{'peer_key'},
+            'peer_name'     => Thruk::Utils::Filter::peer_name($hst),
         };
     }
     return($data);
@@ -2225,6 +2229,7 @@ sub _rest_get_livestatus_services_commandline {
             'host_name'           => $svc->{'host_name'},
             'service_description' => $svc->{'description'},
             'peer_key'            => $svc->{'peer_key'},
+            'peer_name'           => Thruk::Utils::Filter::peer_name($svc),
         };
     }
     return($data);

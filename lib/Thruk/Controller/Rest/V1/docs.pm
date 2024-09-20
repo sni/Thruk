@@ -916,6 +916,12 @@ __DATA__
      "name": "peer_key",
      "type": "",
      "unit": ""
+    },
+    {
+     "description": "name of remote site",
+     "name": "peer_name",
+     "type": "",
+     "unit": ""
     }
    ]
   }
@@ -1688,6 +1694,12 @@ __DATA__
     {
      "description": "backend id when having multiple sites connected",
      "name": "peer_key",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "name of remote site",
+     "name": "peer_name",
      "type": "",
      "unit": ""
     },
