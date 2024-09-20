@@ -1199,6 +1199,7 @@ ex.:
   commandline_obfuscate_pattern = /(check_.*\--pw )(\S+)/$1"***"/
   commandline_obfuscate_pattern = /(check_.*\"password\": )(\S+)/$1"***"/
 
+{% include new_since.ad version="3.20" %}
 Another way is to create a `_OBFUSCATE_REGEXP` custom variable which will then be used
 for its host/service. The syntax is slightly different, you only set the regexp
 pattern which will be replaced:
@@ -1224,7 +1225,8 @@ then use this in your naemon configuration:
   }
 
 If regular expressions are not required, you can use the `_OBFUSCATE_STRING` custom
-variable. This is a simple text replacement with no regular expressions.
+variable. This is a simple text replacement with no regular expressions. This also
+supports the optional base64 encoding.
 
 ex.:
 
