@@ -356,6 +356,9 @@ sub read_job {
     if($rc !~ m/^\d*$/mx) { $rc = -1; }
     my($hostid, $hostname) = split(/\n/mx, $host);
 
+    $out = Thruk::Utils::Encode::decode_any($out);
+    $err = Thruk::Utils::Encode::decode_any($err);
+
     $remaining = -1 unless defined $remaining;
     my $job   = {
         'id'         => $id,
