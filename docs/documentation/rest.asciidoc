@@ -1052,6 +1052,46 @@ see https://www.naemon.io/documentation/usersguide/livestatus.html#hostgroups fo
 lists hostgroups for given name.
 alias for /hostgroups?name=<name>
 
+=== GET /hostgroups/<name>/availability
+
+list availability for this hostgroup.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|host                              |            |          | host name
+|scheduled_time_down               | number     | s        | total seconds in state down (during downtimes)
+|scheduled_time_down_percent       | number     | %        | time down in percent of total time (during downtimes)
+|scheduled_time_indeterminate      | number     | s        | total seconds unknown (during downtimes)
+|scheduled_time_indeterminate_percent | number     | %        | time unknown in percent of total time (during downtimes)
+|scheduled_time_unreachable        | number     | s        | total seconds in state unreachable (during downtimes)
+|scheduled_time_unreachable_percent | number     | %        | time unreachable in percent of total time (during downtimes)
+|scheduled_time_up                 | number     | s        | total seconds in state up (during downtimes)
+|scheduled_time_up_percent         | number     | %        | time up in percent of total time (during downtimes)
+|time_down                         | number     | s        | total seconds in state down
+|time_down_percent                 | number     | %        | time down in percent of total time
+|time_indeterminate_nodata         | number     | s        | total seconds without any data
+|time_indeterminate_nodata_percent | number     | %        | time without any data in percent of total time
+|time_indeterminate_notrunning     | number     | s        | total seconds during core not running
+|time_indeterminate_notrunning_percent | number     | %        | time during core not running in percent of total time
+|time_indeterminate_outside_timeperiod | number     | s        | total seconds outside the given timeperiod
+|time_indeterminate_outside_timeperiod_percent | number     | %        | time outside the given timeperiod in percent of total time
+|time_unreachable                  | number     | s        | total seconds in state unreachable
+|time_unreachable_percent          | number     | %        | time unreachable in percent of total time
+|time_up                           | number     | s        | total seconds in state up
+|time_up_percent                   | number     | %        | time up in percent of total time
+|===========================================
+
+
 === POST /hostgroups/<name>/cmd/...
 
 external commands are documented in detail on a separate commands page.
@@ -1299,6 +1339,49 @@ Optional arguments:
 lists services for given host.
 alias for /services?host_name=<name>
 
+=== GET /hosts/availability
+
+list availability for all hosts.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+supports hostgroup filter, ex. GET /hosts/availability?hostgroup=foo
+
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|host                              |            |          | host name
+|scheduled_time_down               | number     | s        | total seconds in state down (during downtimes)
+|scheduled_time_down_percent       | number     | %        | time down in percent of total time (during downtimes)
+|scheduled_time_indeterminate      | number     | s        | total seconds unknown (during downtimes)
+|scheduled_time_indeterminate_percent | number     | %        | time unknown in percent of total time (during downtimes)
+|scheduled_time_unreachable        | number     | s        | total seconds in state unreachable (during downtimes)
+|scheduled_time_unreachable_percent | number     | %        | time unreachable in percent of total time (during downtimes)
+|scheduled_time_up                 | number     | s        | total seconds in state up (during downtimes)
+|scheduled_time_up_percent         | number     | %        | time up in percent of total time (during downtimes)
+|time_down                         | number     | s        | total seconds in state down
+|time_down_percent                 | number     | %        | time down in percent of total time
+|time_indeterminate_nodata         | number     | s        | total seconds without any data
+|time_indeterminate_nodata_percent | number     | %        | time without any data in percent of total time
+|time_indeterminate_notrunning     | number     | s        | total seconds during core not running
+|time_indeterminate_notrunning_percent | number     | %        | time during core not running in percent of total time
+|time_indeterminate_outside_timeperiod | number     | s        | total seconds outside the given timeperiod
+|time_indeterminate_outside_timeperiod_percent | number     | %        | time outside the given timeperiod in percent of total time
+|time_unreachable                  | number     | s        | total seconds in state unreachable
+|time_unreachable_percent          | number     | %        | time unreachable in percent of total time
+|time_up                           | number     | s        | total seconds in state up
+|time_up_percent                   | number     | %        | time up in percent of total time
+|===========================================
+
+
 === GET /hosts/outages
 
 list of outages for all hosts.
@@ -1462,6 +1545,51 @@ see https://www.naemon.io/documentation/usersguide/livestatus.html#servicegroups
 
 lists servicegroups for given name.
 alias for /servicegroups?name=<name>
+
+=== GET /servicegroups/<name>/availability
+
+list availability for this servicegroup.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|host                              |            |          | host name
+|scheduled_time_critical           | number     | s        | total seconds in state critical (during downtimes)
+|scheduled_time_critical_percent   | number     | %        | time critical in percent of total time (during downtimes)
+|scheduled_time_indeterminate      | number     | s        | total seconds unknown (during downtimes)
+|scheduled_time_indeterminate_percent | number     | %        | time unknown in percent of total time (during downtimes)
+|scheduled_time_ok                 | number     | s        | total seconds in state ok (during downtimes)
+|scheduled_time_ok_percent         | number     | %        | time ok in percent of total time (during downtimes)
+|scheduled_time_unknown            | number     | s        | total seconds in state unknown (during downtimes)
+|scheduled_time_unknown_percent    | number     | %        | time unknown in percent of total time (during downtimes)
+|scheduled_time_warning            | number     | s        | total seconds in state warning (during downtimes)
+|scheduled_time_warning_percent    | number     | %        | time warning in percent of total time (during downtimes)
+|service                           |            |          | service description
+|time_critical                     | number     | s        | total seconds in state critical
+|time_critical_percent             | number     | %        | time critical in percent of total time
+|time_indeterminate_nodata         | number     | s        | total seconds without any data
+|time_indeterminate_nodata_percent | number     | %        | time without any data in percent of total time (during downtimes)
+|time_indeterminate_notrunning     | number     | s        | total seconds during core not running
+|time_indeterminate_notrunning_percent | number     | %        | time during core not running in percent of total time
+|time_indeterminate_outside_timeperiod | number     | s        | total seconds outside the given timeperiod
+|time_indeterminate_outside_timeperiod_percent | number     | %        | time outside the given timeperiod in percent of total time
+|time_ok                           | number     | s        | total seconds in state ok
+|time_ok_percent                   | number     | %        | time ok in percent of total time
+|time_unknown                      | number     | s        | total seconds in state unknown
+|time_unknown_percent              | number     | %        | time unknown in percent of total time
+|time_warning                      | number     | s        | total seconds in state warning
+|time_warning_percent              | number     | %        | time warning in percent of total time
+|===========================================
+
 
 === POST /servicegroups/<name>/cmd/...
 
@@ -1687,6 +1815,51 @@ Optional arguments:
 |service                           |            |          | service description (only for service outages)
 |start                             | time       |          | unix timestamp of outage start
 |type                              |            |          | log entry type
+|===========================================
+
+
+=== GET /services/availability
+
+list availability for all services.
+
+Optional arguments:
+
+  * type              - both | hosts | services
+  * timeperiod        - last24hours | lastmonth | thismonth | ...
+  * start             - unix timestamp
+  * end               - unix timestamp
+  * withdowntimes     - 0/1 wheter downtimes should count as outages
+  * includesoftstates - 0/1 wheter soft states should be used as well
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|host                              |            |          | host name
+|scheduled_time_critical           | number     | s        | total seconds in state critical (during downtimes)
+|scheduled_time_critical_percent   | number     | %        | time critical in percent of total time (during downtimes)
+|scheduled_time_indeterminate      | number     | s        | total seconds unknown (during downtimes)
+|scheduled_time_indeterminate_percent | number     | %        | time unknown in percent of total time (during downtimes)
+|scheduled_time_ok                 | number     | s        | total seconds in state ok (during downtimes)
+|scheduled_time_ok_percent         | number     | %        | time ok in percent of total time (during downtimes)
+|scheduled_time_unknown            | number     | s        | total seconds in state unknown (during downtimes)
+|scheduled_time_unknown_percent    | number     | %        | time unknown in percent of total time (during downtimes)
+|scheduled_time_warning            | number     | s        | total seconds in state warning (during downtimes)
+|scheduled_time_warning_percent    | number     | %        | time warning in percent of total time (during downtimes)
+|service                           |            |          | service description
+|time_critical                     | number     | s        | total seconds in state critical
+|time_critical_percent             | number     | %        | time critical in percent of total time
+|time_indeterminate_nodata         | number     | s        | total seconds without any data
+|time_indeterminate_nodata_percent | number     | %        | time without any data in percent of total time (during downtimes)
+|time_indeterminate_notrunning     | number     | s        | total seconds during core not running
+|time_indeterminate_notrunning_percent | number     | %        | time during core not running in percent of total time
+|time_indeterminate_outside_timeperiod | number     | s        | total seconds outside the given timeperiod
+|time_indeterminate_outside_timeperiod_percent | number     | %        | time outside the given timeperiod in percent of total time
+|time_ok                           | number     | s        | total seconds in state ok
+|time_ok_percent                   | number     | %        | time ok in percent of total time
+|time_unknown                      | number     | s        | total seconds in state unknown
+|time_unknown_percent              | number     | %        | time unknown in percent of total time
+|time_warning                      | number     | s        | total seconds in state warning
+|time_warning_percent              | number     | %        | time warning in percent of total time
 |===========================================
 
 

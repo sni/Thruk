@@ -698,6 +698,138 @@ __DATA__
    ]
   }
  },
+ "/hostgroups/<name>/availability": {
+  "GET": {
+   "columns": [
+    {
+     "description": "host name",
+     "name": "host",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "total seconds in state down (during downtimes)",
+     "name": "scheduled_time_down",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time down in percent of total time (during downtimes)",
+     "name": "scheduled_time_down_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds unknown (during downtimes)",
+     "name": "scheduled_time_indeterminate",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unknown in percent of total time (during downtimes)",
+     "name": "scheduled_time_indeterminate_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state unreachable (during downtimes)",
+     "name": "scheduled_time_unreachable",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unreachable in percent of total time (during downtimes)",
+     "name": "scheduled_time_unreachable_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state up (during downtimes)",
+     "name": "scheduled_time_up",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time up in percent of total time (during downtimes)",
+     "name": "scheduled_time_up_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state down",
+     "name": "time_down",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time down in percent of total time",
+     "name": "time_down_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds without any data",
+     "name": "time_indeterminate_nodata",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time without any data in percent of total time",
+     "name": "time_indeterminate_nodata_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds during core not running",
+     "name": "time_indeterminate_notrunning",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time during core not running in percent of total time",
+     "name": "time_indeterminate_notrunning_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds outside the given timeperiod",
+     "name": "time_indeterminate_outside_timeperiod",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time outside the given timeperiod in percent of total time",
+     "name": "time_indeterminate_outside_timeperiod_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state unreachable",
+     "name": "time_unreachable",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unreachable in percent of total time",
+     "name": "time_unreachable_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state up",
+     "name": "time_up",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time up in percent of total time",
+     "name": "time_up_percent",
+     "type": "number",
+     "unit": "%"
+    }
+   ]
+  }
+ },
  "/hostgroups/<name>/outages": {
   "GET": {
    "columns": [
@@ -976,6 +1108,138 @@ __DATA__
      "name": "type",
      "type": "",
      "unit": ""
+    }
+   ]
+  }
+ },
+ "/hosts/availability": {
+  "GET": {
+   "columns": [
+    {
+     "description": "host name",
+     "name": "host",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "total seconds in state down (during downtimes)",
+     "name": "scheduled_time_down",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time down in percent of total time (during downtimes)",
+     "name": "scheduled_time_down_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds unknown (during downtimes)",
+     "name": "scheduled_time_indeterminate",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unknown in percent of total time (during downtimes)",
+     "name": "scheduled_time_indeterminate_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state unreachable (during downtimes)",
+     "name": "scheduled_time_unreachable",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unreachable in percent of total time (during downtimes)",
+     "name": "scheduled_time_unreachable_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state up (during downtimes)",
+     "name": "scheduled_time_up",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time up in percent of total time (during downtimes)",
+     "name": "scheduled_time_up_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state down",
+     "name": "time_down",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time down in percent of total time",
+     "name": "time_down_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds without any data",
+     "name": "time_indeterminate_nodata",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time without any data in percent of total time",
+     "name": "time_indeterminate_nodata_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds during core not running",
+     "name": "time_indeterminate_notrunning",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time during core not running in percent of total time",
+     "name": "time_indeterminate_notrunning_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds outside the given timeperiod",
+     "name": "time_indeterminate_outside_timeperiod",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time outside the given timeperiod in percent of total time",
+     "name": "time_indeterminate_outside_timeperiod_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state unreachable",
+     "name": "time_unreachable",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unreachable in percent of total time",
+     "name": "time_unreachable_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state up",
+     "name": "time_up",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time up in percent of total time",
+     "name": "time_up_percent",
+     "type": "number",
+     "unit": "%"
     }
    ]
   }
@@ -1454,6 +1718,168 @@ __DATA__
    ]
   }
  },
+ "/servicegroups/<name>/availability": {
+  "GET": {
+   "columns": [
+    {
+     "description": "host name",
+     "name": "host",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "total seconds in state critical (during downtimes)",
+     "name": "scheduled_time_critical",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time critical in percent of total time (during downtimes)",
+     "name": "scheduled_time_critical_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds unknown (during downtimes)",
+     "name": "scheduled_time_indeterminate",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unknown in percent of total time (during downtimes)",
+     "name": "scheduled_time_indeterminate_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state ok (during downtimes)",
+     "name": "scheduled_time_ok",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time ok in percent of total time (during downtimes)",
+     "name": "scheduled_time_ok_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state unknown (during downtimes)",
+     "name": "scheduled_time_unknown",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unknown in percent of total time (during downtimes)",
+     "name": "scheduled_time_unknown_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state warning (during downtimes)",
+     "name": "scheduled_time_warning",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time warning in percent of total time (during downtimes)",
+     "name": "scheduled_time_warning_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "service description",
+     "name": "service",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "total seconds in state critical",
+     "name": "time_critical",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time critical in percent of total time",
+     "name": "time_critical_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds without any data",
+     "name": "time_indeterminate_nodata",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time without any data in percent of total time (during downtimes)",
+     "name": "time_indeterminate_nodata_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds during core not running",
+     "name": "time_indeterminate_notrunning",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time during core not running in percent of total time",
+     "name": "time_indeterminate_notrunning_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds outside the given timeperiod",
+     "name": "time_indeterminate_outside_timeperiod",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time outside the given timeperiod in percent of total time",
+     "name": "time_indeterminate_outside_timeperiod_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state ok",
+     "name": "time_ok",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time ok in percent of total time",
+     "name": "time_ok_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state unknown",
+     "name": "time_unknown",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unknown in percent of total time",
+     "name": "time_unknown_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state warning",
+     "name": "time_warning",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time warning in percent of total time",
+     "name": "time_warning_percent",
+     "type": "number",
+     "unit": "%"
+    }
+   ]
+  }
+ },
  "/servicegroups/<name>/outages": {
   "GET": {
    "columns": [
@@ -1768,6 +2194,168 @@ __DATA__
      "name": "type",
      "type": "",
      "unit": ""
+    }
+   ]
+  }
+ },
+ "/services/availability": {
+  "GET": {
+   "columns": [
+    {
+     "description": "host name",
+     "name": "host",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "total seconds in state critical (during downtimes)",
+     "name": "scheduled_time_critical",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time critical in percent of total time (during downtimes)",
+     "name": "scheduled_time_critical_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds unknown (during downtimes)",
+     "name": "scheduled_time_indeterminate",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unknown in percent of total time (during downtimes)",
+     "name": "scheduled_time_indeterminate_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state ok (during downtimes)",
+     "name": "scheduled_time_ok",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time ok in percent of total time (during downtimes)",
+     "name": "scheduled_time_ok_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state unknown (during downtimes)",
+     "name": "scheduled_time_unknown",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unknown in percent of total time (during downtimes)",
+     "name": "scheduled_time_unknown_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state warning (during downtimes)",
+     "name": "scheduled_time_warning",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time warning in percent of total time (during downtimes)",
+     "name": "scheduled_time_warning_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "service description",
+     "name": "service",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "total seconds in state critical",
+     "name": "time_critical",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time critical in percent of total time",
+     "name": "time_critical_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds without any data",
+     "name": "time_indeterminate_nodata",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time without any data in percent of total time (during downtimes)",
+     "name": "time_indeterminate_nodata_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds during core not running",
+     "name": "time_indeterminate_notrunning",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time during core not running in percent of total time",
+     "name": "time_indeterminate_notrunning_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds outside the given timeperiod",
+     "name": "time_indeterminate_outside_timeperiod",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time outside the given timeperiod in percent of total time",
+     "name": "time_indeterminate_outside_timeperiod_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state ok",
+     "name": "time_ok",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time ok in percent of total time",
+     "name": "time_ok_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state unknown",
+     "name": "time_unknown",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time unknown in percent of total time",
+     "name": "time_unknown_percent",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "total seconds in state warning",
+     "name": "time_warning",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "time warning in percent of total time",
+     "name": "time_warning_percent",
+     "type": "number",
+     "unit": "%"
     }
    ]
   }

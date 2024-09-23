@@ -75,6 +75,46 @@ sub _rest_get_host_outages {
 }
 
 ##########################################################
+# REST PATH: GET /hosts/availability
+# list availability for all hosts.
+#
+# Optional arguments:
+#
+#   * type              - both | hosts | services
+#   * timeperiod        - last24hours | lastmonth | thismonth | ...
+#   * start             - unix timestamp
+#   * end               - unix timestamp
+#   * withdowntimes     - 0/1 wheter downtimes should count as outages
+#   * includesoftstates - 0/1 wheter soft states should be used as well
+#
+# supports hostgroup filter, ex. GET /hosts/availability?hostgroup=foo
+#
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/hosts?/availability$%mx, \&_rest_get_hosts_availability, undef, 1);
+sub _rest_get_hosts_availability {
+    my($c) = @_;
+    if(!$c->req->parameters->{'type'}) {
+        $c->req->parameters->{'type'} = "hosts";
+    }
+    my $avail = _rest_availability($c);
+    my $res = [];
+
+    for my $host (sort keys %{$avail->{'avail'}->{'hosts'}}) {
+        $avail->{'avail'}->{'hosts'}->{$host}->{'host'} = $host;
+        push @{$res}, $avail->{'avail'}->{'hosts'}->{$host};
+    }
+    for my $host (sort keys %{$avail->{'avail'}->{'services'}}) {
+        for my $svc (sort keys %{$avail->{'avail'}->{'services'}->{$host}}) {
+            $avail->{'avail'}->{'services'}->{$host}->{$svc}->{'host'} = $host;
+            $avail->{'avail'}->{'services'}->{$host}->{$svc}->{'service'} = $svc;
+            push @{$res}, $avail->{'avail'}->{'services'}->{$host}->{$svc};
+        }
+    }
+
+    _rest_outages_clean_param($c);
+    return($res);
+}
+
+##########################################################
 # REST PATH: GET /hosts/<name>/availability
 # list availability for this host.
 #
@@ -120,6 +160,45 @@ sub _rest_get_hostgroup_outages {
 }
 
 ##########################################################
+# REST PATH: GET /hostgroups/<name>/availability
+# list availability for this hostgroup.
+#
+# Optional arguments:
+#
+#   * type              - both | hosts | services
+#   * timeperiod        - last24hours | lastmonth | thismonth | ...
+#   * start             - unix timestamp
+#   * end               - unix timestamp
+#   * withdowntimes     - 0/1 wheter downtimes should count as outages
+#   * includesoftstates - 0/1 wheter soft states should be used as well
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/hostgroups?/([^/]+)/availability$%mx, \&_rest_get_hostgroup_availability);
+sub _rest_get_hostgroup_availability {
+    my($c, undef, $group) = @_;
+    if(!$c->req->parameters->{'type'}) {
+        $c->req->parameters->{'type'} = "hosts";
+    }
+    $c->req->parameters->{'hostgroup'} = $group;
+    my $avail = _rest_availability($c);
+    delete $c->req->parameters->{'hostgroup'};
+    my $res = [];
+
+    for my $host (sort keys %{$avail->{'avail'}->{'hosts'}}) {
+        $avail->{'avail'}->{'hosts'}->{$host}->{'host'} = $host;
+        push @{$res}, $avail->{'avail'}->{'hosts'}->{$host};
+    }
+    for my $host (sort keys %{$avail->{'avail'}->{'services'}}) {
+        for my $svc (sort keys %{$avail->{'avail'}->{'services'}->{$host}}) {
+            $avail->{'avail'}->{'services'}->{$host}->{$svc}->{'host'} = $host;
+            $avail->{'avail'}->{'services'}->{$host}->{$svc}->{'service'} = $svc;
+            push @{$res}, $avail->{'avail'}->{'services'}->{$host}->{$svc};
+        }
+    }
+
+    _rest_outages_clean_param($c);
+    return($res);
+}
+
+##########################################################
 # REST PATH: GET /services/outages
 # list of outages for all services.
 #
@@ -142,6 +221,44 @@ sub _rest_get_services_outages {
     delete $c->req->parameters->{'host'};
     _rest_outages_clean_param($c);
     return($outages);
+}
+
+##########################################################
+# REST PATH: GET /services/availability
+# list availability for all services.
+#
+# Optional arguments:
+#
+#   * type              - both | hosts | services
+#   * timeperiod        - last24hours | lastmonth | thismonth | ...
+#   * start             - unix timestamp
+#   * end               - unix timestamp
+#   * withdowntimes     - 0/1 wheter downtimes should count as outages
+#   * includesoftstates - 0/1 wheter soft states should be used as well
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/services?/availability$%mx, \&_rest_get_services_availability, undef, 1);
+sub _rest_get_services_availability {
+    my($c) = @_;
+    if(!$c->req->parameters->{'type'}) {
+        $c->req->parameters->{'type'} = "services";
+    }
+
+    my $avail = _rest_availability($c);
+    my $res = [];
+
+    for my $host (sort keys %{$avail->{'avail'}->{'hosts'}}) {
+        $avail->{'avail'}->{'hosts'}->{$host}->{'host'} = $host;
+        push @{$res}, $avail->{'avail'}->{'hosts'}->{$host};
+    }
+    for my $host (sort keys %{$avail->{'avail'}->{'services'}}) {
+        for my $svc (sort keys %{$avail->{'avail'}->{'services'}->{$host}}) {
+            $avail->{'avail'}->{'services'}->{$host}->{$svc}->{'host'} = $host;
+            $avail->{'avail'}->{'services'}->{$host}->{$svc}->{'service'} = $svc;
+            push @{$res}, $avail->{'avail'}->{'services'}->{$host}->{$svc};
+        }
+    }
+
+    _rest_outages_clean_param($c);
+    return($res);
 }
 
 ##########################################################
@@ -216,6 +333,45 @@ sub _rest_get_servicegroup_outages {
     delete $c->req->parameters->{'servicegroup'};
     _rest_outages_clean_param($c);
     return($outages);
+}
+
+##########################################################
+# REST PATH: GET /servicegroups/<name>/availability
+# list availability for this servicegroup.
+#
+# Optional arguments:
+#
+#   * type              - both | hosts | services
+#   * timeperiod        - last24hours | lastmonth | thismonth | ...
+#   * start             - unix timestamp
+#   * end               - unix timestamp
+#   * withdowntimes     - 0/1 wheter downtimes should count as outages
+#   * includesoftstates - 0/1 wheter soft states should be used as well
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/servicegroups?/([^/]+)/availability$%mx, \&_rest_get_servicegroup_availability);
+sub _rest_get_servicegroup_availability {
+    my($c, undef, $group) = @_;
+    if(!$c->req->parameters->{'type'}) {
+        $c->req->parameters->{'type'} = "services";
+    }
+    $c->req->parameters->{'servicegroup'} = $group;
+    my $avail = _rest_availability($c);
+    delete $c->req->parameters->{'servicegroup'};
+    my $res = [];
+
+    for my $host (sort keys %{$avail->{'avail'}->{'hosts'}}) {
+        $avail->{'avail'}->{'hosts'}->{$host}->{'host'} = $host;
+        push @{$res}, $avail->{'avail'}->{'hosts'}->{$host};
+    }
+    for my $host (sort keys %{$avail->{'avail'}->{'services'}}) {
+        for my $svc (sort keys %{$avail->{'avail'}->{'services'}->{$host}}) {
+            $avail->{'avail'}->{'services'}->{$host}->{$svc}->{'host'} = $host;
+            $avail->{'avail'}->{'services'}->{$host}->{$svc}->{'service'} = $svc;
+            push @{$res}, $avail->{'avail'}->{'services'}->{$host}->{$svc};
+        }
+    }
+
+    _rest_outages_clean_param($c);
+    return($res);
 }
 
 ##########################################################
@@ -416,7 +572,9 @@ sub _rest_outages_clean_param {
     my($c) = @_;
     # cleanup parameters, would affect post rendering
     for my $param (qw/outages type s_filter h_filter include_host_services
-                      start end timeperiod t1 t2 withdowntimes includesoftstates/) {
+                      start end timeperiod t1 t2 withdowntimes includesoftstates
+                      hostgroup servicegroup
+                     /) {
         delete $c->req->parameters->{$param};
     }
     return;

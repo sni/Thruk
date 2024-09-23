@@ -9,6 +9,7 @@ next:
               ex.: /hosts/<name>/cmd/note
               and  /services/<host>/<service>/cmd/note
             - add new endpoint /system/cmd/log
+            - add more availability endpoint ex. /hostgroup/.../availability
             - add support for simple calculations in columns
 
 3.18     Tue Sep 10 22:30:40 CEST 2024

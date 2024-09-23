@@ -8,7 +8,7 @@ use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 564;
+    plan tests => 580;
 }
 
 BEGIN {
@@ -38,6 +38,7 @@ my $list_pages = [
     '/downtimes',
     '/hostgroups',
     '/hosts',
+    '/hosts/availability',
     '/hosts/'.uri_escape($host),
     '/hosts/'.uri_escape($host).'/services',
     '/hosts/outages',
@@ -48,6 +49,7 @@ my $list_pages = [
     '/processinfo',
     '/servicegroups',
     '/services',
+    '/services/availability',
     '/services/outages',
     '/services/'.uri_escape($host).'/'.uri_escape($service),
     '/services/'.uri_escape($host).'/'.uri_escape($service).'/outages',
