@@ -395,6 +395,18 @@ Host custom variables are accessible with the _HOST prefix for example like.:
 =======
 
 
+== Calculations
+
+Simple calculations (`+`, `-`, `*`, `/`) can be achieved by using those operators
+in the columns selection.
+
+ex.: sum the number of problems for each host
+
+------
+  %> thruk r '/hosts?columns=name,num_services_crit+num_services_unknown+num_services_warn as num_services_problems'
+------
+
+
 == Functions
 
 === Transformation Functions
