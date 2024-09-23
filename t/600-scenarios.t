@@ -95,7 +95,7 @@ sub _run {
     ok(1, "$dir: running make $step");
     my($rc, $out) = Thruk::Utils::IO::cmd([$make, $step], {
         print_prefix  => ($verbose ? '## ' : undef),
-        output_prefix => Thruk::Utils::Log::time_prefix(),
+        output_prefix => \&Thruk::Utils::Log::time_prefix,
     });
     is($rc, 0, sprintf("step %s complete, rc=%d duration=%.1fsec", $step, $rc, tv_interval ($t0)));
     if($out =~ m/^\[.*?\](FROM.*version:.*)$/mx) {

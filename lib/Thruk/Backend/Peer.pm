@@ -333,7 +333,7 @@ sub cmd {
     if($background_options) {
         $background_options->{"background"} = 1;
         $background_options->{"cmd"}        = $cmd;
-        $background_options->{"env"}        = $env;
+        $background_options->{"env"}        = $env if $env;
     }
     if($self->{'type'} eq 'http') {
         # forward by http federation

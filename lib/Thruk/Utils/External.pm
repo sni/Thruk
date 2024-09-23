@@ -94,6 +94,7 @@ sub cmd {
             clean        => "remove job after displaying it if true"
             render       => "set to a true value to render page immediatly"
             show_output  => show console with output
+            log_archive  => store stdout/stderr with this filename
         }
     )
 
@@ -200,6 +201,7 @@ sub perl {
     $err = $@ unless $err;
     $c->stats->profile(end => 'External::perl');
     save_profile($c, $dir);
+    _save_log_archive($c, $dir, $conf->{'log_archive'}) if $conf->{'log_archive'};
     if($err) {
         eval {
             Thruk::Utils::IO::write($dir."/stderr", "ERROR: perl eval failed:\n".$err, undef, 1);
@@ -338,7 +340,7 @@ sub read_job {
 
     my $start = -e $job_dir.'/start'    ? (stat(_))[9] : 0;
     my $end   = -e $job_dir.'/rc'       ? (stat(_))[9] : 0;
-    my $rc    =  Thruk::Utils::IO::saferead($job_dir.'/rc')       // '';
+    my $rc    =  Thruk::Utils::IO::saferead($job_dir.'/rc')       // ''; # 0 is OK, everything else is an error (exit code)
     my $res   =  Thruk::Utils::IO::saferead($job_dir.'/perl_res') // '';
     my $out   =  Thruk::Utils::IO::saferead($job_dir.'/stdout')   // '';
     my $err   =  Thruk::Utils::IO::saferead($job_dir.'/stderr')   // '';
@@ -350,6 +352,7 @@ sub read_job {
         $cmd =~ s%^\$VAR1\s*=\s*%%gmx;
         $cmd =~ s%\n$%%gmx;
     }
+    chomp($rc);
     if($rc !~ m/^\d*$/mx) { $rc = -1; }
     my($hostid, $hostname) = split(/\n/mx, $host);
 
@@ -358,20 +361,20 @@ sub read_job {
         'id'         => $id,
         'pid'        => $pid,
         'user'       => $user,
-        'host_id'    => $hostid // "",
+        'host_id'    => $hostid   // "",
         'host_name'  => $hostname // "",
         'cmd'        => $cmd,
-        'rc'         => $rc // '',
+        'rc'         => $rc  // '',
         'perl_res'   => $res // '',
         'stdout'     => $out // '',
         'stderr'     => $err // '',
         'is_running' => 0+$is_running,
         'time'       => 0+$time,
         'start'      => 0+($start || 0),
-        'end'        => 0+($end || 0),
+        'end'        => 0+($end   || 0),
         'percent'    => 0+$percent,
-        'message'    => $message // '',
-        'forward'    => $forward // '',
+        'message'    => $message     // '',
+        'forward'    => $forward     // '',
         'show_output'=> $show_output // 0,
         'remaining'  => 0+$remaining,
     };
@@ -768,6 +771,18 @@ sub save_profile {
         Thruk::Utils::IO::json_lock_store($file, $db_profile, { pretty => 1 });
         delete $c->stash->{'db_profiles'};
     }
+
+    return;
+}
+
+##############################################
+# save stdout and stderr into new logfile
+sub _save_log_archive {
+    my($c, $job_dir, $logfile) = @_;
+
+    my $out = Thruk::Utils::IO::saferead($job_dir.'/stdout') // '';
+    my $err = Thruk::Utils::IO::saferead($job_dir.'/stderr') // '';
+    Thruk::Utils::IO::write($logfile, $out.$err);
 
     return;
 }

@@ -2,6 +2,7 @@
 - hosts: all
   roles:
     - role: common
+    - role: node_control_client
   tasks:
   - name: "omd config change"
     shell: "omd config demo change"

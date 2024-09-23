@@ -301,7 +301,7 @@ sub _audit_log {
 =cut
 sub time_prefix {
     my($seconds, $microseconds) = Time::HiRes::gettimeofday;
-    return(sprintf("[%s,%s]",
+    return(sprintf("[%s,%s] ",
         POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime($seconds)),
         substr(sprintf("%06s", $microseconds), 0, 3),
     ));
@@ -336,6 +336,39 @@ sub wrap_stdout2log {
 sub wrap_stdout2log_stop {
     ## no critic
     select *STDOUT;
+    ## use critic
+    return;
+}
+
+##############################################
+
+=head2 wrap_stderr2log
+
+    wrap stderr to warn logger. everything printed to stderr will be logged
+    with info level to stdout.
+
+=cut
+sub wrap_stderr2log {
+    my($capture, $tmp);
+    ## no critic
+    open($capture, '>', \$tmp) or die("cannot open stdout capture: $!");
+    tie *$capture, 'Thruk::Utils::Log', (*STDERR);
+    select $capture;
+    STDERR->autoflush(1);
+    ## use critic
+    return($capture);
+}
+
+##############################################
+
+=head2 wrap_stderr2log_stop
+
+    stop wrapping stderr
+
+=cut
+sub wrap_stderr2log_stop {
+    ## no critic
+    select *STERR;
     ## use critic
     return;
 }

@@ -12,7 +12,7 @@ if [ -n "$DRYRUN" -a "$DRYRUN" != "0" ]; then
     exit 1
 fi
 
-echo "[$(date)] updating site $(id -un) from $(omd version -b) to version $OMD_UPDATE..."
+echo "*** updating site $(id -un) from $(omd version -b) to version $OMD_UPDATE..."
 
 omd stop
 # make sure it is stopped
@@ -59,17 +59,7 @@ fi
 
 if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
     omd start
-    echo "[$(date)] update finished: $(omd version -b)"
-
-    # run post hook if available
-    RC=0
-    if [ -e "${OMD_ROOT}/var/tmp/omd_update_post.sh" ]; then
-        echo "[$(date)] starting post update hook"
-        bash -x ${OMD_ROOT}/var/tmp/omd_update_post.sh
-        RC=$?
-        rm -f ${OMD_ROOT}/var/tmp/omd_update_post.sh
-        echo "[$(date)] post update hook exited: $RC"
-    fi
+    echo "*** update finished: $(omd version -b)"
 
     # exit tmux again
     if command -v tmux >/dev/null 2>&1; then

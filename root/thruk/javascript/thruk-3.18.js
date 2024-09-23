@@ -3929,7 +3929,27 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
     head.find("I.fa-check").remove();
     head.find("I.fa-exclamation").remove();
     jQuery('#'+divid).text(data.stdout+data.stderr);
-    jQuery("#"+divid).scrollTop(jQuery("#"+divid).prop("scrollHeight"));
+
+    // check if text area should scroll
+    var scroll = jQuery("#"+divid).data("scroll");
+    if(scroll === "0") {}
+    else if(scroll === "1") {
+        jQuery("#"+divid).scrollTop(jQuery("#"+divid).prop("scrollHeight"));
+    } else {
+        scroll = jQuery("#"+divid).data("scroll", "1");
+        jQuery("#"+divid).on("mousewheel DOMMouseScroll", function() {
+            // disable auto scrolling unless scrolled all to the bottom
+            var scrollHeight   = jQuery("#"+divid).scrollTop()+jQuery("#"+divid).height() + 20; // maybe due to border or scrollbar
+            var scrollPosition = jQuery("#"+divid).prop("scrollHeight");
+            if(scrollHeight >= scrollPosition) {
+                // scrolled to bottom, enable again
+                jQuery("#"+divid).data("scroll", "1");
+            } else {
+                // disabled auto scroll
+                jQuery("#"+divid).data("scroll", "0");
+            }
+        })
+    }
 
     if(data['is_running']) {
         head.prepend('<div class="spinner mr-2"><\/div>');
