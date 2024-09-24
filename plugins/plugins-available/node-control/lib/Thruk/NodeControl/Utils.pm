@@ -552,12 +552,11 @@ sub _omd_update_step2 {
 
     if($config->{'hook_update_pre'}) {
         print "*** hook_update_pre:\n";
-        my($rc, $out) = _remote_cmd($c, $peer, $config->{'hook_update_pre'}, undef, $env, 1);
+        my($rc, $out) = _remote_cmd($c, $peer, $config->{'hook_update_pre'}, undef, $env);
         print "*** rc:$rc\n";
         print "*** output:\n".$out."\n";
         if($rc != 0) {
             return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d): %s", $rc, $out));
-
         }
     }
 
@@ -565,7 +564,7 @@ sub _omd_update_step2 {
     eval {
         my $script = Thruk::Utils::IO::read($config->{'omd_update_script'});
         $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/omd_update.sh', $script);
-        ($rc, $job) = _remote_cmd($c, $peer, 'OMD_UPDATE="'.$version.'" bash var/tmp/omd_update.sh', { env => $env }, undef, $env, 1);
+        ($rc, $job) = _remote_cmd($c, $peer, 'OMD_UPDATE="'.$version.'" bash var/tmp/omd_update.sh', { env => $env }, undef, $env);
     };
     if($@) {
         return _set_job_errored($c, 'updating', $peer->{'key'}, $@);
@@ -579,7 +578,7 @@ sub _omd_update_step2 {
 
     if($config->{'hook_update_post'}) {
         print "*** hook_update_post:\n";
-        my($rc, $out) = _remote_cmd($c, $peer, $config->{'hook_update_post'}, undef, $env, 1);
+        my($rc, $out) = _remote_cmd($c, $peer, $config->{'hook_update_post'}, undef, $env);
         print "*** rc: $rc\n";
         print "*** output:\n".$out."\n";
     }

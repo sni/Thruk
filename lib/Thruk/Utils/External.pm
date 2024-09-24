@@ -1287,6 +1287,7 @@ sub wrap_prefix_output {
 
     STDOUT->autoflush(1);
     STDERR->autoflush(1);
+    $fh->autoflush(1);
 
     return;
 }
