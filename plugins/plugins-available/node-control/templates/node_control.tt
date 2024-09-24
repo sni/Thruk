@@ -82,7 +82,7 @@
           <th class="w-24">Disk</th>
           <th class="w-8 not-hoverable">
             <div class="flexrow flex-nowrap gap-x-1">
-              <a href="#" onclick="nc_run_all(this, '.js-update-btn', {action: 'update'}); return false;"><i class="fa-solid fa-arrows-rotate text-sm" title="Update facts for all visible servers"></i></a>
+              <a class="ml-6" href="#" onclick="nc_run_all(this, '.js-update-btn', {action: 'update'}); return false;"><i class="fa-solid fa-arrows-rotate text-sm" title="Update facts for all visible servers"></i></a>
               [% IF show_pkg_install && show_all_button %]
                 <a href="#" onclick="confirm('really install omd v[% omd_default_version_label | html %] pkg on all visible servers?') && nc_run_all(this, '.js-install-btn', {action: 'omd_install'}); return false;"><i class="fa-solid fa-truck-arrow-right text-sm" title="install omd v[% omd_default_version_label | html %] for all visible servers"></i></a>
               [% END %]
@@ -193,6 +193,28 @@
                 <input type="hidden" name="peer" value="[% s.peer_key | html %]">
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                 <div class="flexrow flex-nowrap gap-1">
+                  [% IF s.logs.size > 0 %]
+                    <script>
+                      logs_menu['[% s.peer_key | html %]'] = [
+                        [% FOREACH l = s.logs.keys.sort %]
+                          {
+                              'icon':  "fa-file-lines",
+                              'label': "[% l | html %].log",
+                              'href':  "node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]",
+                              'onclick': "openModalWindowUrl('node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]&modal=1'); return false;"
+                          }[% UNLESS loop.last %],[% END %]
+                        [% END %]
+                      ];
+                    </script>
+                    <a href="#" class="" title="show logs of last tasks" onclick="show_action_menu(this, logs_menu['[% s.peer_key | html %]'],null, null, null, null, 'b-l'); return false;">
+                      <i class="fa-solid fa-file-lines"></i>
+                    </a>
+                  [% ELSE %]
+                    <a href="#" class="disabled not-clickable" title="no logs available" onclick="return false;">
+                      <i class="fa-solid fa-file-lines"></i>
+                    </a>
+                  [% END %]
+
                   [% IF s.gathering %]
                     <div class="spinner" style="margin-right: 3px;" title="site is gathering facts right now"></div>
                   [% ELSE %]
@@ -238,22 +260,6 @@
                     <div class="spinner clickable" style="margin-right: 3px;" title="site is updating right now" onclick="showJobOutputPopup('[% s.run_all | html %]','[% s.peer_key | html %]')"></div>
                   [% ELSE %]
                     <a href="#" class="js-run-all-btn [% IF !show_all_btn %]invisible[% END %]" onclick="confirm('install,update,cleanup to omd v[% omd_default_version_label | html %] on [% s.host_name | html %]?') && nc_action_with_popup(this, {action: 'omd_install_update_cleanup'}, '[% s.peer_key | html %]'); return false;"><i class="fa-solid fa-arrows-up-to-line text-sm" title="Run omd install,update,cleanup"></i></a>
-                  [% END %]
-
-                  [% IF s.logs.size > 0 %]
-                    <script>
-                      logs_menu['[% s.peer_key | html %]'] = [
-                        [% FOREACH l = s.logs.keys.sort %]
-                          {
-                              'icon':  "fa-file-lines",
-                              'label': "[% l | html %].log",
-                              'href':  "node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]",
-                              'onclick': "openModalWindowUrl('node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]&modal=1'); return false;"
-                          }[% UNLESS loop.last %],[% END %]
-                        [% END %]
-                      ];
-                    </script>
-                    <i class="fa-solid fa-file-lines clickable" title="show logs of last tasks" onclick="show_action_menu(this, logs_menu['[% s.peer_key | html %]'],null, null, null, null, 'b-l'); return false;"></i>
                   [% END %]
                 </div>
               </form>
