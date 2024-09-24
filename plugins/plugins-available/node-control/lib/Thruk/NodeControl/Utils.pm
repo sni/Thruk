@@ -3,6 +3,7 @@ package Thruk::NodeControl::Utils;
 use warnings;
 use strict;
 use Carp;
+use Cwd qw/abs_path/;
 use Cpanel::JSON::XS ();
 use Time::HiRes qw/sleep/;
 
@@ -565,10 +566,8 @@ sub _omd_update_step2 {
 
     my($rc);
     eval {
-        my $root   = Thruk::Base::dirname(__FILE__);
-        my $script = Thruk::Utils::IO::read($config->{'omd_update_script'} || $root."/../../../scripts/omd_update.sh");
+        my $script = Thruk::Utils::IO::read($config->{'omd_update_script'});
         $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/omd_update.sh', $script);
-
         ($rc, $job) = _remote_cmd($c, $peer, 'OMD_UPDATE="'.$version.'" bash var/tmp/omd_update.sh', { env => $env }, undef, $env, 1);
     };
     if($@) {
@@ -930,6 +929,8 @@ sub config {
         'ssh_fallback'            => 1,
         'os_updates'              => 1,
         'pkg_install'             => 1,
+        'parallel_tasks'          => 3,
+        'omd_update_script'       => abs_path(Thruk::Base::dirname(__FILE__)."/../../../scripts/omd_update.sh"),
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',
         'cmd_yum_pkg_install'     => 'sudo -n yum install -y %PKG',
         'cmd_dnf_pkg_install'     => 'sudo -n dnf install -y %PKG',
@@ -963,7 +964,6 @@ sub save_config {
     my $file = $c->config->{'var_path'}.'/node_control/_conf.json';
 
     my $allowed_keys = {
-        'parallel_tasks'        => 1,
         'omd_default_version'   => 1,
     };
 

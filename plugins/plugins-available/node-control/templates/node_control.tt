@@ -24,10 +24,6 @@
             </td>
           </tr>
           <tr>
-            <td>Parallel Tasks</td>
-            <td><input type="text" name="parallel" value="[% ms_parallel | html %]" class="w-8"></td>
-          </tr>
-          <tr>
             <td></td>
             <td>
               <input type='submit' value='Apply' class="w-24 mt-auto">

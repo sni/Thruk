@@ -61,7 +61,6 @@ sub index {
     }
     if($action eq 'save_options') {
         Thruk::NodeControl::Utils::save_config($c, {
-            'parallel_tasks'        => $c->req->parameters->{'parallel'},
             'omd_default_version'   => $c->req->parameters->{'omd_default_version'},
         });
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'settings saved sucessfully' });

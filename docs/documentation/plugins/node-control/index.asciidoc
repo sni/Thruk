@@ -78,7 +78,14 @@ Without sudo permissions you can only update to existing omd versions.
   # set to 0 to hide 'all' buttons
   #all_button = 1
 
-  cmd_omd_cleanup       = sudo -n omd cleanup
+  # number of parallel task when running actions for all hosts
+  #parallel_tasks = 3
+
+  # command used to cleanup unused omd versions
+  #cmd_omd_cleanup       = sudo -n omd cleanup
+
+  # script used to do the omd update
+  #omd_update_script     = scripts/omd_update.sh
 
   cmd_yum_pkg_install   = sudo -n yum install -y %PKG
   cmd_dnf_pkg_install   = sudo -n dnf install -y %PKG
