@@ -238,6 +238,7 @@ my $base_defaults = {
                 'bookmark'                      => undef,
                 'referer'                       => undef,
                 'autoShow'                      => undef,
+                'scrollTo'                      => undef,
                 '_'                             => undef,
     },
     'uri_filter'     => { # applied if nothing specified
