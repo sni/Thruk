@@ -475,7 +475,7 @@ sub _omd_install_step2 {
     }
 
     my $cmd = _cmd_line($config->{'cmd_'.$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}.'_pkg_install'}, { '%PKG' => $version });
-    my($rc, $job);
+    my($rc);
     eval {
         ($rc, $job) = _remote_cmd($c, $peer, $cmd, {}, undef, undef, 1);
     };
