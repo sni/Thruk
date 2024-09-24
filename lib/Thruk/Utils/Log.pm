@@ -318,7 +318,7 @@ sub time_prefix {
 sub wrap_stdout2log {
     my($capture, $tmp);
     ## no critic
-    open($capture, '>', \$tmp) or die("cannot open stdout capture: $!");
+    open($capture, '>', \$tmp) || die("cannot open stdout capture: $!");
     tie *$capture, 'Thruk::Utils::Log', (*STDOUT);
     select $capture;
     STDOUT->autoflush(1);
@@ -351,7 +351,7 @@ sub wrap_stdout2log_stop {
 sub wrap_stderr2log {
     my($capture, $tmp);
     ## no critic
-    open($capture, '>', \$tmp) or die("cannot open stdout capture: $!");
+    open($capture, '>', \$tmp) || die("cannot open stdout capture: $!");
     tie *$capture, 'Thruk::Utils::Log', (*STDERR);
     select $capture;
     STDERR->autoflush(1);
@@ -368,7 +368,7 @@ sub wrap_stderr2log {
 =cut
 sub wrap_stderr2log_stop {
     ## no critic
-    select *STERR;
+    select *STDERR;
     ## use critic
     return;
 }

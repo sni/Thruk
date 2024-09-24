@@ -14,7 +14,6 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use File::Copy qw/copy move/;
-use POSIX ();
 use Time::HiRes ();
 
 use Thruk::Timer qw/timing_breakpoint/;
@@ -365,53 +364,50 @@ sub kill_if_not_responding {
     my $ctime = (stat($pid_file))[10];
     return if($ctime > time() - 120);
 
-    my $data;
-    my $pid = fork();
-    if($pid == -1) { die("fork failed: $!"); }
+    # kill in background job
+    my $job = Thruk::Utils::External::perl($c, {
+        expr        => 'Thruk::Utils::LMD::_kill_step2($c, '.$lmd_timeout.', '.$lmd_pid.')',
+        message     => 'killing lmd',
+        timeout     => $lmd_timeout+2,
+        background  => 1,
+    });
 
-    if(!$pid) {
-        require Thruk::Utils::External;
-        Thruk::Utils::External::do_child_stuff($c, 0, 0);
-        alarm($lmd_timeout);
-        eval {
-            $data = $c->db->lmd_peer->_raw_query("GET sites\n");
-        };
-        my $err = $@;
-        alarm(0);
-        if($err) {
-            _error("lmd not responding, killing with force: err - ".$err);
-            _error($data);
-            kill('USR1', $lmd_pid);
-            sleep(1);
-            kill(2, $lmd_pid);
-            sleep(1);
-            kill(9, $lmd_pid);
-        }
-        exit 0;
-    }
+    my $extra = 5;
+    my $is_running = Thruk::Utils::External::wait_for_job($c, $job, $lmd_timeout+$extra);
 
-    my $waited = 0;
-    my $extra  = 5;
-    my $rc = -1;
-    while($waited++ <= ($lmd_timeout+$extra) && $rc != 0) {
-        POSIX::waitpid($pid, POSIX::WNOHANG);
-        $rc = $?;
-        sleep(1);
-    }
-    if($rc != 0) {
-        _error("lmd not responding, killing with force: rc - ".$rc." - ".($! || ""));
+    if($is_running) {
+        _error("lmd not responding, killing pid $lmd_pid");
         kill('USR1', $lmd_pid);
-        kill(2, $pid);
+        kill(2, $lmd_pid);
+        sleep(1);
+        kill(9, $lmd_pid);
+    }
+
+    return;
+}
+
+########################################
+sub _kill_step2 {
+    my($c, $lmd_timeout, $lmd_pid) = @_;
+
+    my $data;
+    alarm($lmd_timeout);
+    eval {
+        $data = $c->db->lmd_peer->_raw_query("GET sites\n");
+    };
+    my $err = $@;
+    alarm(0);
+    if($err) {
+        _error("lmd not responding, killing with force: err - ".$err);
+        _error($data);
+        kill('USR1', $lmd_pid);
         sleep(1);
         kill(2, $lmd_pid);
         sleep(1);
         kill(9, $lmd_pid);
-        kill(9, $pid);
-        sleep(1);
-        POSIX::waitpid(-1, POSIX::WNOHANG);
     }
 
-    return;
+    return(1);
 }
 
 ########################################

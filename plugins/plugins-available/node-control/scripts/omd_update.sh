@@ -1,14 +1,14 @@
 #!/bin/bash
 
 if [ "$OMD_UPDATE" = "" ]; then
-    echo "script requires OMD_UPDATE env variable"
+    echo "[ERROR] script requires OMD_UPDATE env variable"
     exit 1
 fi
 
 # try dry-run first (available since OMD 5.10)
 DRYRUN=$(omd -V $OMD_UPDATE update -n 2>&1 | grep "conflicts during dry run" | awk '{ print $2 }')
 if [ -n "$DRYRUN" -a "$DRYRUN" != "0" ]; then
-    echo "no automatic update possible, $DRYRUN conflict(s) found."
+    echo "[ERROR] no automatic update possible, $DRYRUN conflict(s) found."
     exit 1
 fi
 
@@ -48,25 +48,40 @@ if command -v tmux >/dev/null 2>&1; then
         sleep 1
         X=$((X+1))
         if [ $X -gt 120 ]; then
-            echo "update failed, ssh into $HOSTNAME and run 'tmux attach -t $session:$window' to manually investigate"
+            # print output of tmux session
+            tmux capture-pane -p -t $session:$window
+            echo "[ERROR] update failed, ssh into $HOSTNAME and run 'tmux attach -t $session:$window' to manually investigate"
             exit 1
         fi
     done
+    # print output of tmux session
     tmux capture-pane -p -t $session:$window
 else
     $CMD
 fi
 
 if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
-    omd start
-    echo "*** update finished: $(omd version -b)"
-
     # exit tmux again
     if command -v tmux >/dev/null 2>&1; then
         tmux send-keys -t $session:$window "exit" C-m
     fi
-    exit $RC
+
+    echo "%> omd start"
+    omd start
+
+    echo "%> omd status"
+    omd status
+
+    echo "%> omd version"
+    omd version
+
+    echo "*** update finished: $(omd version -b)"
+    exit 0
 fi
 
-echo "update failed, ssh into $HOSTNAME and run 'tmux attach -t $session:$window' to manually investigate"
+if command -v tmux >/dev/null 2>&1; then
+    echo "*** [ERROR] update failed, ssh into $HOSTNAME and run 'tmux attach -t $session:$window' to manually investigate"
+else
+    echo "*** [ERROR] update failed"
+fi
 exit 1

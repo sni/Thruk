@@ -3,9 +3,8 @@ package Thruk::NodeControl::Utils;
 use warnings;
 use strict;
 use Carp;
-use Cwd qw/abs_path/;
 use Cpanel::JSON::XS ();
-use Time::HiRes qw/sleep/;
+use Cwd qw/abs_path/;
 
 use Thruk::Constants qw/:peer_states/;
 use Thruk::Utils ();
@@ -446,10 +445,8 @@ sub omd_install {
     return if $facts->{'installing'};
     return if($facts->{'run_all'} && !$force);
 
-    my $file = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
-    my $f = Thruk::Utils::IO::json_lock_patch($file, { 'installing' => 1, 'last_error' => '' }, { pretty => 1, allow_empty => 1 });
-
     # continue in background job
+    _set_job_started($c, 'installing', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
         expr        => 'Thruk::NodeControl::Utils::_omd_install_step2($c, "'.$peer->{'key'}.'", "'.$version.'")',
         message     => 'Installing OMD '.$version,
@@ -466,32 +463,32 @@ sub _omd_install_step2 {
     my $peer   = $c->db->get_peer_by_key($peerkey);
     my $facts  = _ansible_get_facts($c, $peer, 0);
     my $config = config($c);
-    my $job    = $ENV{'THRUK_JOB_ID'};
     my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
-    my $f      = Thruk::Utils::IO::json_lock_patch($file, { 'installing' => $job, 'last_error' => '' }, { pretty => 1, allow_empty => 1 });
+
+    print "*** installing $version\n";
+    _set_job_started($c, 'installing', $peer->{'key'});
 
     if(!$config->{'cmd_'.$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}.'_pkg_install'}) {
-        Thruk::Utils::IO::json_lock_patch($file, { 'installing' => 0, 'last_error' => "package manager ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}." not supported" }, { pretty => 1, allow_empty => 1 });
-        return;
+        return _set_job_errored($c, 'installing', $peer->{'key'}, "package manager ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}." not supported");
     }
 
     my $cmd = _cmd_line($config->{'cmd_'.$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}.'_pkg_install'}, { '%PKG' => $version });
-    my($rc);
+    my($rc, $job);
     eval {
-        ($rc, $job) = _remote_cmd($c, $peer, $cmd, {}, undef, undef, 1);
+        ($rc, $job) = _remote_cmd($c, $peer, $cmd, {});
     };
     if($@) {
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'installing' => 0, 'last_error' => $@ }, { pretty => 1, allow_empty => 1 });
-        return;
+        return _set_job_errored($c, 'installing', $peer->{'key'}, $@);
     }
 
     # wait for 1800 sec
-    my $jobdata = _wait_for_job($c, $peer, $job, 2, 1800, 1);
-    if($jobdata && $jobdata->{'rc'} ne "0") {
-        update_runtime_data($c, $peer, 1);
-        return;
+    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 2, 1800, 1);
+    if(!$jobdata || $jobdata->{'rc'} ne "0") {
+        return _set_job_errored($c, 'installing', $peer->{'key'}, "pkg installation failed");
     }
 
+    _set_job_done($c, 'installing', $peer->{'key'});
+    ansible_get_facts($c, $peer, 1);
     update_runtime_data($c, $peer, 1);
     return(1);
 }
@@ -512,10 +509,8 @@ sub omd_update {
     return if $facts->{'updating'};
     return if ($facts->{'run_all'} && !$force);
 
-    my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
-    my $f      = Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 1, 'last_error' => '' }, { pretty => 1, allow_empty => 1 });
-
     # continue in background job
+    _set_job_started($c, 'updating', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
         expr        => 'Thruk::NodeControl::Utils::_omd_update_step2($c, "'.$peer->{'key'}.'", "'.$version.'")',
         message     => sprintf('updating %s on %s to omd %s', $facts->{'omd_site'}, $peer->{'name'}, $version),
@@ -538,17 +533,14 @@ sub _omd_update_step2 {
     printf("*** from: %s\n", $env->{'FROM_OMD_VERSION'} // 'unknown');
     printf("*** to:   %s\n", $version);
 
-    my $job = $ENV{'THRUK_JOB_ID'};
-    Thruk::Utils::IO::json_lock_patch($file, { 'updating' => $job, 'last_job' => $job, 'last_error' => "" }, { pretty => 1, allow_empty => 1 });
+    _set_job_started($c, 'updating', $peer->{'key'});
 
     if($config->{'hook_update_pre_local'}) {
         print "*** hook_update_pre_local:\n";
         my($rc, $out) = Thruk::Utils::IO::cmd($config->{'hook_update_pre_local'}, { env => $env, print_prefix => "" });
         print "*** hook_update_pre_local rc: $rc\n";
         if($rc != 0) {
-            print "*** -> update canceled\n";
-            Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 0, 'last_error' => sprintf("update canceled by local pre hook (rc: %d): %s", $rc, $out) }, { pretty => 1, allow_empty => 1 });
-            return;
+            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by local pre hook (rc: %d): %s", $rc, $out));
         }
     }
 
@@ -558,28 +550,25 @@ sub _omd_update_step2 {
         print "*** rc:$rc\n";
         print "*** output:\n".$out."\n";
         if($rc != 0) {
-            print "*** -> update canceled\n";
-            Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 0, 'last_error' => sprintf("update canceled by pre hook (rc: %d): %s", $rc, $out) }, { pretty => 1, allow_empty => 1 });
-            return;
+            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d): %s", $rc, $out));
+
         }
     }
 
-    my($rc);
+    my($rc, $job);
     eval {
         my $script = Thruk::Utils::IO::read($config->{'omd_update_script'});
         $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/omd_update.sh', $script);
         ($rc, $job) = _remote_cmd($c, $peer, 'OMD_UPDATE="'.$version.'" bash var/tmp/omd_update.sh', { env => $env }, undef, $env, 1);
     };
     if($@) {
-        Thruk::Utils::IO::json_lock_patch($file, { 'updating' => 0, 'last_error' => $@ }, { pretty => 1, allow_empty => 1 });
-        return;
+        return _set_job_errored($c, 'updating', $peer->{'key'}, $@);
     }
 
     # wait for 180 sec
-    my $jobdata = _wait_for_job($c, $peer, $job, 1, 180, 1);
-    if($jobdata && $jobdata->{'rc'} ne "0") {
-        update_runtime_data($c, $peer, 1);
-        return;
+    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, 180, 1);
+    if(!$jobdata || $jobdata->{'rc'} ne "0") {
+        return _set_job_errored($c, 'updating', $peer->{'key'}, "update failed");
     }
 
     if($config->{'hook_update_post'}) {
@@ -595,9 +584,10 @@ sub _omd_update_step2 {
         print "*** hook_update_post_local rc: $rc\n";
     }
 
-    update_runtime_data($c, $peer, 1);
-
     printf("*** updating %s on %s to omd %s finished\n", $facts->{'omd_site'}, $peer->{'name'}, $version);
+    _set_job_done($c, 'updating', $peer->{'key'});
+
+    update_runtime_data($c, $peer, 1);
 
     return(1);
 }
@@ -620,15 +610,12 @@ sub omd_install_update_cleanup {
     return if $facts->{'cleaning'};
     return if $facts->{'run_all'};
 
-    my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
-    my $config = config($c);
-
     # continue in background job
+    _set_job_started($c, 'run_all', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
         expr        => 'Thruk::NodeControl::Utils::_omd_install_update_cleanup_step2($c, "'.$peer->{'key'}.'", "'.$version.'")',
         background  => 1,
     });
-    Thruk::Utils::IO::json_lock_patch($file, { 'run_all' => $job, 'last_job' => $job }, { pretty => 1, allow_empty => 1 });
     return($job);
 }
 
@@ -640,45 +627,40 @@ sub _omd_install_update_cleanup_step2 {
     my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
     my $facts  = _ansible_get_facts($c, $peer, 0);
 
-    my($job, $jobdata);
+    _set_job_started($c, 'run_all', $peer->{'key'});
+
     # install omd pkg
-    print "*** installing $version\n";
     if($config->{'pkg_install'} && !grep(/$version/mx, @{$facts->{'omd_versions'} // []})) {
-        $job     = omd_install($c, $peer, $version, 1);
-        die("failed to start install") unless $job;
-        $jobdata = _wait_for_job($c, $peer, $job, 3, 1800, 1);
-        return unless $jobdata;
-        return unless $jobdata->{'rc'} eq '0';
-    } else {
-        print "*** not required, already installed\n";
+        my $job = omd_install($c, $peer, $version, 1);
+        return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to start install") unless $job;
+        my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 3, 1800, 1);
+        if(!$jobdata || $jobdata->{'rc'} ne '0') {
+            return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to install");
+        }
     }
 
     # update
     my $f = _ansible_get_facts($c, $peer, 0);
-    print "*** updating to $version\n";
     if($f->{'omd_version'} ne $version) {
-        $job  = omd_update($c, $peer, $version, 1);
-        my $f = _ansible_get_facts($c, $peer, 0);
-        if(!$job && ($f->{'last_error'}//$f->{'last_facts_error'})) {
-            print ($f->{'last_error'}//$f->{'last_facts_error'});
-            return;
+        my $job = omd_update($c, $peer, $version, 1);
+        return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to start update") unless $job;
+        my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, 180, 1);
+        if(!$jobdata || $jobdata->{'rc'} ne '0') {
+            return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to update");
         }
-        die("failed to start update") unless $job;
-        $jobdata = _wait_for_job($c, $peer, $job, 1, 180, 1);
-        return unless $jobdata;
-    } else {
-        print "*** not required, already current version\n";
     }
 
     # cleanup
     if($config->{'pkg_cleanup'}) {
-        print "*** running cleanup\n";
-        $job     = omd_cleanup($c, $peer, 1);
-        die("failed to start cleanup") unless $job;
-        $jobdata = _wait_for_job($c, $peer, $job, 3, 1800, 1);
+        my $job = omd_cleanup($c, $peer, 1);
+        return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to start cleanup") unless $job;
+        my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 3, 1800, 1);
+        if(!$jobdata || $jobdata->{'rc'} ne '0') {
+            return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to cleanup");
+        }
     }
 
-    Thruk::Utils::IO::json_lock_patch($file, { 'run_all' => 0, 'last_error' => '' }, { pretty => 1, allow_empty => 1 });
+    _set_job_done($c, 'run_all', $peer->{'key'});
 
     return(1);
 }
@@ -783,10 +765,8 @@ sub omd_cleanup {
     return if $facts->{'cleaning'};
     return if($facts->{'run_all'} && !$force);
 
-    my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
-    my $f      = Thruk::Utils::IO::json_lock_patch($file, { 'cleaning' => 1, 'last_error' => '' }, { pretty => 1, allow_empty => 1 });
-
     # continue in background job
+    _set_job_started($c, 'cleaning', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
         expr        => 'Thruk::NodeControl::Utils::_omd_cleanup_step2($c, "'.$peer->{'key'}.'")',
         message     => 'running OMD cleanup',
@@ -805,17 +785,28 @@ sub _omd_cleanup_step2 {
     my $config = config($c);
     my $cmd    = _cmd_line($config->{'cmd_omd_cleanup'});
 
+    print "*** running cleanup\n";
+    _set_job_started($c, 'cleaning', $peer->{'key'});
+
     my($rc, $job);
     eval {
         ($rc, $job) = _remote_cmd($c, $peer, $cmd, { message => 'Running OMD cleanup' });
     };
     if($@) {
-        Thruk::Utils::IO::json_lock_patch($file, { 'cleaning' => 0, 'last_error' => $@ }, { pretty => 1, allow_empty => 1 });
-        return;
+        return _set_job_errored($c, 'cleaning', $peer->{'key'}, $@);
     }
 
-    Thruk::Utils::IO::json_lock_patch($file, { 'cleaning' => $job, 'last_job' => $job, 'last_error' => "" }, { pretty => 1, allow_empty => 1 });
-    return($job);
+    # wait for 1800 sec
+    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 2, 1800, 1);
+    if(!$jobdata || $jobdata->{'rc'} ne "0") {
+        return _set_job_errored($c, 'cleaning', $peer->{'key'}, 'cleanup failed');
+    }
+
+    _set_job_done($c, 'cleaning', $peer->{'key'});
+
+    ansible_get_facts($c, $peer, 1);
+    update_runtime_data($c, $peer, 1);
+    return(1);
 }
 
 ##########################################################
@@ -905,7 +896,7 @@ sub omd_service {
         'background' => 1,
         'clean'      => 1,
     });
-    _wait_for_job($c, $peer, $job, 0.2, 90);
+    Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 0.2, 90);
     return;
 }
 
@@ -1018,7 +1009,6 @@ sub _parse_yum_check_update {
 }
 
 ##########################################################
-
 sub _cmd_line {
     my($rawcmd, $macros) = @_;
     my $cmd = $rawcmd;
@@ -1032,41 +1022,56 @@ sub _cmd_line {
 }
 
 ##########################################################
-sub _wait_for_job {
-    my($c, $peer, $job, $poll_interval, $max_wait, $print) = @_;
-    $max_wait      = 60 unless $max_wait;
-    $poll_interval =  3 unless $poll_interval;
-    my $end = time() + $max_wait;
-    my $jobdata;
+sub _set_job_started {
+    my($c, $type, $peerkey) = @_;
 
-    my($already_out, $already_err) = (0, 0);
-    my $print_remaining = sub {
-        return unless $jobdata;
-        return unless $print;
-        if($jobdata->{'stdout'}) {
-            my $out = substr($jobdata->{'stdout'}, $already_out);
-            print $out;
-            $already_out += length($out);
-        }
-        if($jobdata->{'stderr'}) {
-            my $out = substr($jobdata->{'stderr'}, $already_err);
-            print $out;
-            $already_err += length($out);
-        }
-    };
-
-    while(time() < $end) {
-        eval {
-            $jobdata = $peer->job_data($c, $job);
-        };
-        if($jobdata && !$jobdata->{'is_running'}) {
-            last;
-        }
-        &{$print_remaining}();
-        sleep($poll_interval);
+    my $file = $c->config->{'var_path'}.'/node_control/'.$peerkey.'.json';
+    my $data = { 'last_error' => '' };
+    if($ENV{'THRUK_JOB_ID'}) {
+        $data->{$type}      = $ENV{'THRUK_JOB_ID'};
+        $data->{'last_job'} = $ENV{'THRUK_JOB_ID'};
+    } else {
+        $data->{$type}      = 1;
     }
-    &{$print_remaining}();
-    return($jobdata);
+    Thruk::Utils::IO::json_lock_patch($file, $data, { pretty => 1, allow_empty => 1 });
+
+    return;
+}
+
+##########################################################
+sub _set_job_done {
+    my($c, $type, $peerkey) = @_;
+
+    my $file = $c->config->{'var_path'}.'/node_control/'.$peerkey.'.json';
+    my $data = {
+        'last_error' => '',
+    };
+    $data->{$type} = 0;
+    Thruk::Utils::IO::json_lock_patch($file, $data, { pretty => 1, allow_empty => 1 });
+
+    return;
+}
+
+##########################################################
+sub _set_job_errored {
+    my($c, $type, $peerkey, $err) = @_;
+
+    chomp($err);
+    print "*** [ERROR] $err\n";
+
+    my $file = $c->config->{'var_path'}.'/node_control/'.$peerkey.'.json';
+    my $cur  = Thruk::Utils::IO::json_lock_retrieve($file);
+    if($cur->{'last_error'}) {
+        # append error
+        $err = $cur->{'last_error'}."\n".$err;
+    }
+    my $data = {
+        'last_error' => $err,
+    };
+    $data->{$type} = 0;
+    Thruk::Utils::IO::json_lock_patch($file, $data, { pretty => 1, allow_empty => 1 });
+
+    return;
 }
 
 ##########################################################

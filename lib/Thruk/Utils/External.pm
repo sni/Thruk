@@ -73,7 +73,7 @@ sub cmd {
     my($is_parent, $parent_res) = _fork_twice($c, $id, $dir, $conf);
     return $parent_res if $is_parent;
 
-    do_child_stuff($c, $dir, $id);
+    _init_child_process($c, $dir, $id, $conf);
     $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
     exec($cmd) or exit(1); # just to be sure
 }
@@ -136,7 +136,7 @@ sub perl {
 
     my $err;
     eval {
-        do_child_stuff($c, $dir, $id);
+        _init_child_process($c, $dir, $id, $conf);
         $c->stats->profile(begin => 'External::perl');
 
         do {
@@ -163,6 +163,7 @@ sub perl {
             Thruk::Utils::IO::write($dir."/rc", ($rc ? 0 : 1));
             Thruk::Utils::IO::write($dir."/perl_res", (defined $rc && ref $rc eq '') ? Thruk::Utils::Encode::encode_utf8($rc) : "", undef, 1);
 
+            wrap_prefix_output_stop();
             open(*STDERR, '>>', '/dev/null') or _warn("cannot redirect stderr to /dev/null");
             open(*STDOUT, '>>', '/dev/null') or _warn("cannot redirect stdout to /dev/null");
         };
@@ -201,7 +202,11 @@ sub perl {
     $err = $@ unless $err;
     $c->stats->profile(end => 'External::perl');
     save_profile($c, $dir);
-    _save_log_archive($c, $dir, $conf->{'log_archive'}) if $conf->{'log_archive'};
+    wrap_prefix_output_stop();
+    if($conf->{'log_archive'}) {
+        unlink($dir."/stdout");
+        Thruk::Utils::IO::write($dir."/stdout", Thruk::Utils::IO::read($conf->{'log_archive'}));
+    }
     if($err) {
         eval {
             Thruk::Utils::IO::write($dir."/stderr", "ERROR: perl eval failed:\n".$err, undef, 1);
@@ -702,6 +707,52 @@ sub wait_for_job {
     return $is_running;
 }
 
+##########################################################
+
+=head2 wait_for_peer_job
+
+  wait_for_peer_job($c, $peer, $jobid, [$poll_interval = 3], [$max_wait = 60], [$print = 0])
+
+waits $max_wait seconds for job on peer to complete and returns the job data.
+
+=cut
+sub wait_for_peer_job {
+    my($c, $peer, $job, $poll_interval, $max_wait, $print) = @_;
+    $max_wait      = 60 unless $max_wait;
+    $poll_interval =  3 unless $poll_interval;
+    my $end = time() + $max_wait;
+    my $jobdata;
+
+    my($already_out, $already_err) = (0, 0);
+    my $print_remaining = sub {
+        return unless $jobdata;
+        return unless $print;
+        if($jobdata->{'stdout'}) {
+            my $out = substr($jobdata->{'stdout'}, $already_out);
+            print $out;
+            $already_out += length($out);
+        }
+        if($jobdata->{'stderr'}) {
+            my $out = substr($jobdata->{'stderr'}, $already_err);
+            print $out;
+            $already_err += length($out);
+        }
+    };
+
+    while(time() < $end) {
+        eval {
+            $jobdata = $peer->job_data($c, $job);
+        };
+        if($jobdata && !$jobdata->{'is_running'}) {
+            last;
+        }
+        &{$print_remaining}();
+        sleep($poll_interval);
+    }
+    &{$print_remaining}();
+    return($jobdata);
+}
+
 ##############################################
 
 =head2 update_status
@@ -779,28 +830,9 @@ sub save_profile {
 }
 
 ##############################################
-# save stdout and stderr into new logfile
-sub _save_log_archive {
-    my($c, $job_dir, $logfile) = @_;
-
-    my $out = Thruk::Utils::IO::saferead($job_dir.'/stdout') // '';
-    my $err = Thruk::Utils::IO::saferead($job_dir.'/stderr') // '';
-    Thruk::Utils::IO::write($logfile, $out.$err);
-
-    return;
-}
-
-##############################################
-
-=head2 do_child_stuff
-
-  do_child_stuff($c, $dir, $id)
-
-do all child things after a fork
-
-=cut
-sub do_child_stuff {
-    my($c, $dir, $id, $keep_stdout_err) = @_;
+# initialize children process
+sub _init_child_process {
+    my($c, $dir, $id, $conf) = @_;
 
     confess("no c") unless $c;
 
@@ -838,14 +870,19 @@ sub do_child_stuff {
     $c->{'app'}->{'pool'}->shutdown_threads() if $c->{'app'}->{'pool'};
 
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
-    unless($keep_stdout_err) {
+    if($conf->{'log_archive'}) {
+        unlink($dir."/stdout");
+        symlink($conf->{'log_archive'}, $dir."/stdout");
+        wrap_prefix_output($conf->{'log_archive'});
+    } else {
+        wrap_prefix_output_stop();
         my $fallback_log = '/dev/null';
         $fallback_log    = $c->config->{'log4perl_logfile_in_use'} if $c->config->{'log4perl_logfile_in_use'};
         $fallback_log    = $ENV{'OMD_ROOT'}.'/var/log/thruk.log' if $ENV{'OMD_ROOT'};
-        $fallback_log    = $dir."/stderr" if $dir;
-        open(*STDERR, ">>", $fallback_log) || die "can't reopen stderr to $fallback_log: $!";
         $fallback_log    = $dir."/stdout" if $dir;
         open(*STDOUT, ">>", $fallback_log) || die "can't reopen stdout to $fallback_log: $!";
+        $fallback_log    = $dir."/stderr" if $dir;
+        open(*STDERR, ">>", $fallback_log) || die "can't reopen stderr to $fallback_log: $!";
     }
 
     ## no critic
@@ -1229,6 +1266,99 @@ sub _reap_pending_childs {
     while(waitpid(-1, WNOHANG) > 0) {
     }
     return;
+}
+
+##############################################
+
+=head2 wrap_prefix_output
+
+    wrap stdout/stderr and add timestamp prefix.
+
+=cut
+sub wrap_prefix_output {
+    my($target_file) = @_;
+
+    open(my $fh, '>', $target_file) || die("cannot open log file: $target_file: $!");
+
+    ## no critic
+    tie *STDOUT, 'Thruk::Utils::External', ($fh);
+    tie *STDERR, 'Thruk::Utils::External', ($fh);
+    ## use critic
+
+    STDOUT->autoflush(1);
+    STDERR->autoflush(1);
+
+    return;
+}
+
+##############################################
+
+=head2 wrap_prefix_output_stop
+
+    stop wrapping stdout/stderr
+
+=cut
+sub wrap_prefix_output_stop {
+    untie *STDOUT;
+    untie *STDERR;
+
+    return;
+}
+
+##############################################
+sub TIEHANDLE {
+    my($class, $fh) = @_;
+    my $self = {
+        fh      => $fh,
+        newline => 1,
+    };
+    bless $self, $class;
+    return($self);
+}
+
+##############################################
+sub BINMODE {
+    my($self, $mode) = @_;
+    return binmode $self->{'fh'}, $mode;
+}
+
+##############################################
+sub PRINTF {
+    my($self, $fmt, @data) = @_;
+    return($self->PRINT(sprintf($fmt, @data)));
+}
+
+##############################################
+sub PRINT {
+    my($self, @data) = @_;
+
+    my $last_newline = $self->{'newline'};
+    $self->{'newline'} = (join("", @data) =~ m/\n$/mx) ? 1 : 0;
+
+    my $fh = $self->{'fh'};
+    if(!$last_newline && !$self->{'newline'}) {
+        # continue printing
+        CORE::print($fh @data);
+    }
+    elsif(!$self->{'newline'}) {
+        for my $msg (@data) {
+            CORE::print($fh Thruk::Utils::Log::time_prefix(), $msg);
+        }
+    }
+    else {
+        for my $msg (@data) {
+            for my $l (split/\n/mx, $msg) {
+                CORE::print($fh Thruk::Utils::Log::time_prefix(), $l, "\n");
+            }
+        }
+    }
+    return;
+}
+
+##############################################
+sub CLOSE {
+    my($self) = @_;
+    return CORE::close($self->{'fh'});
 }
 
 ##############################################
