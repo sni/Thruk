@@ -18,7 +18,7 @@
             <td>
               <select name='omd_default_version' class="w-full">
                 [% FOREACH v = omd_available_versions %]
-                  <option[% IF v == omd_default_version %] selected[% END %]>[% v | html %]</option>
+                  <option[% IF v == omd_default_version %] selected[% END %]>[% v.replace('-labs-edition', '') | html %]</option>
                 [% END %]
               </select>
             </td>
@@ -109,9 +109,9 @@
               [% END %]
             </td>
             [% IF s.omd_version && omd_default_version != s.omd_version %]
-              <td class="align-top WARNING" title="node uses an outdated omd release.">[% s.omd_version | html %]</td>
+              <td class="align-top WARNING" title="node uses an outdated omd release.">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
             [% ELSE %]
-              <td class="align-top">[% s.omd_version | html %]</td>
+              <td class="align-top">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
             [% END %]
             <td class="align-top clickable" onclick="openModalWindowUrl('node_control.cgi?action=omd_status&modal=1&peer=[% s.peer_key | html %]');">
               [% IF s.omd_status && s.omd_status.exists("OVERALL") %]
