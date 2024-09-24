@@ -23,7 +23,7 @@
             <td>
               <select name='omd_default_version' class="w-full">
                 [% FOREACH v = omd_available_versions %]
-                  <option[% IF v == omd_default_version %] selected[% END %]>v[% v.replace('-labs-edition', '') | html %]</option>
+                  <option[% IF v == omd_default_version %] selected[% END %] value="[% v | html %]">v[% v.replace('-labs-edition', '') | html %]</option>
                 [% END %]
               </select>
             </td>

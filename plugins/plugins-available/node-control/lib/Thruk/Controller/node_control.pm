@@ -51,6 +51,14 @@ sub index {
     my $action = $c->req->parameters->{'action'} || 'list';
 
     if($action && $action ne 'list') {
+        if($action eq 'save_options') {
+            Thruk::NodeControl::Utils::save_config($c, {
+                'omd_default_version'   => $c->req->parameters->{'omd_default_version'},
+            });
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'settings saved sucessfully' });
+            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/node_control.cgi");
+        }
+
         my $rc;
         eval {
             $rc = _node_action($c, $action);
@@ -64,13 +72,6 @@ sub index {
             return($c->render(json => {'success' => 0, 'error' => 'action failed'}));
         }
         return(1);
-    }
-    if($action eq 'save_options') {
-        Thruk::NodeControl::Utils::save_config($c, {
-            'omd_default_version'   => $c->req->parameters->{'omd_default_version'},
-        });
-        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'settings saved sucessfully' });
-        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/node_control.cgi");
     }
 
     my $servers = [];
