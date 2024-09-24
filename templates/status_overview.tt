@@ -104,12 +104,11 @@
               <tbody>
                 [% FOR hostname IN g.hosts.keys.sort %]
                   [% SET h = g.hosts.$hostname %]
-                  [% host_name = h.name %]
                   <tr>
                     <td class='name'>
                       <div class="flex min-w-max">
                         <div class="flex-1">
-                          <a href="status.cgi?host=[% host_name | uri %]&amp;style=detail" title="[% h.address | html %]">[% _host(h) | html %]</a>
+                          <a href="status.cgi?host=[% hostname | uri %]&amp;style=detail" title="[% h.address | html %]">[% _host(h) | html %]</a>
                         </div>
                         [% SET host_comment_count = h.comments.size %]
                         [% PROCESS _status_host_attributes hostprefix="" host=h host_comment_count=host_comment_count with_status=0 %]
@@ -131,11 +130,11 @@
                       [% ELSE %]
                         <div class="flex h-full">
                           [% grouplink = substyle _ 'group' %]
-                          [% IF h.ok       %][% SET ok_pct = h.ok / total_hosts * 100 %]<a style="width: [% ok_pct %]%" class="OK pt-0.5 min-w-[15px] px-1" href='[%       uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '2',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.ok %]</a>[% END %]
-                          [% IF h.warning  %][% SET w_pct = h.warning / total_hosts * 100 %]<a style="width: [% w_pct %]%" class="WARNING text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '4',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.warning %]</a>[% END %]
-                          [% IF h.unknown  %][% SET u_pct = h.unknown / total_hosts * 100 %]<a style="width: [% u_pct %]%" class="UNKNOWN text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '8',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.unknown %]</a>[% END %]
-                          [% IF h.critical %][% SET c_pct = h.critical / total_hosts * 100 %]<a style="width: [% c_pct %]%" class="CRITICAL textcenter pt-0.5 min-w-[15px] px-1" href='[% uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '16', 'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.critical %]</a>[% END %]
-                          [% IF h.pending  %][% SET p_pct = h.pending / total_hosts * 100 %]<a style="width: [% p_pct %]%" class="PENDING text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => host_name, 'style' => 'detail', 'servicestatustypes' => '1',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.pending %]</a>[% END %]
+                          [% IF h.ok       %][% SET ok_pct = h.ok / total_hosts * 100 %]<a style="width: [% ok_pct %]%" class="OK pt-0.5 min-w-[15px] px-1" href='[%       uri_with(c, $grouplink => g.name, 'host' => hostname, 'style' => 'detail', 'servicestatustypes' => '2',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.ok %]</a>[% END %]
+                          [% IF h.warning  %][% SET w_pct = h.warning / total_hosts * 100 %]<a style="width: [% w_pct %]%" class="WARNING text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => hostname, 'style' => 'detail', 'servicestatustypes' => '4',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.warning %]</a>[% END %]
+                          [% IF h.unknown  %][% SET u_pct = h.unknown / total_hosts * 100 %]<a style="width: [% u_pct %]%" class="UNKNOWN text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => hostname, 'style' => 'detail', 'servicestatustypes' => '8',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.unknown %]</a>[% END %]
+                          [% IF h.critical %][% SET c_pct = h.critical / total_hosts * 100 %]<a style="width: [% c_pct %]%" class="CRITICAL textcenter pt-0.5 min-w-[15px] px-1" href='[% uri_with(c, $grouplink => g.name, 'host' => hostname, 'style' => 'detail', 'servicestatustypes' => '16', 'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.critical %]</a>[% END %]
+                          [% IF h.pending  %][% SET p_pct = h.pending / total_hosts * 100 %]<a style="width: [% p_pct %]%" class="PENDING text-cnter pt-0.5 min-w-[15px] px-1" href='[%  uri_with(c, $grouplink => g.name, 'host' => hostname, 'style' => 'detail', 'servicestatustypes' => '1',  'hoststatustypes' => '15', 'serviceprops' => '0', 'hostprops' => '0' ) %]'>[% h.pending %]</a>[% END %]
                         </div>
                       [% END %]
                     </td>
