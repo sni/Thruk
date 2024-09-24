@@ -785,6 +785,23 @@ sub omd_cleanup {
 
     my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
     my $f      = Thruk::Utils::IO::json_lock_patch($file, { 'cleaning' => 1, 'last_error' => '' }, { pretty => 1, allow_empty => 1 });
+
+    # continue in background job
+    my $job = Thruk::Utils::External::perl($c, {
+        expr        => 'Thruk::NodeControl::Utils::_omd_cleanup_step2($c, "'.$peer->{'key'}.'")',
+        message     => 'running OMD cleanup',
+        background  => 1,
+        log_archive => $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_cleanup.log',
+    });
+    return($job);
+}
+
+##########################################################
+sub _omd_cleanup_step2 {
+    my($c, $peerkey) = @_;
+
+    my $peer   = $c->db->get_peer_by_key($peerkey);
+    my $file   = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
     my $config = config($c);
     my $cmd    = _cmd_line($config->{'cmd_omd_cleanup'});
 
@@ -793,7 +810,7 @@ sub omd_cleanup {
         ($rc, $job) = _remote_cmd($c, $peer, $cmd, { message => 'Running OMD cleanup' });
     };
     if($@) {
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'cleaning' => 0, 'last_error' => $@ }, { pretty => 1, allow_empty => 1 });
+        Thruk::Utils::IO::json_lock_patch($file, { 'cleaning' => 0, 'last_error' => $@ }, { pretty => 1, allow_empty => 1 });
         return;
     }
 
@@ -929,6 +946,7 @@ sub config {
         'ssh_fallback'            => 1,
         'os_updates'              => 1,
         'pkg_install'             => 1,
+        'pkg_cleanup'             => 1,
         'parallel_tasks'          => 3,
         'omd_update_script'       => abs_path(Thruk::Base::dirname(__FILE__)."/../../../scripts/omd_update.sh"),
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',

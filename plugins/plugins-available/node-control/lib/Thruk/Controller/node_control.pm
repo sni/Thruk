@@ -145,7 +145,7 @@ sub _node_action {
 
     if($action eq 'cleanup') {
         return unless Thruk::Utils::check_csrf($c);
-        return unless $config->{'pkg_cleanup'};
+        return($c->render(json => {'success' => 0, 'error' => "cleanup is disabled by config"})) unless $config->{'pkg_cleanup'};
         my $job = Thruk::NodeControl::Utils::omd_cleanup($c, $peer);
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job"}));
@@ -153,7 +153,7 @@ sub _node_action {
 
     if($action eq 'omd_install') {
         return unless Thruk::Utils::check_csrf($c);
-        return unless $config->{'pkg_install'};
+        return($c->render(json => {'success' => 0, 'error' => "pkg installation is disabled by config"})) unless $config->{'pkg_install'};
         my $job = Thruk::NodeControl::Utils::omd_install($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job"}));
@@ -175,7 +175,7 @@ sub _node_action {
 
     if($action eq 'os_update') {
         return unless Thruk::Utils::check_csrf($c);
-        return unless $config->{'os_updates'};
+        return($c->render(json => {'success' => 0, 'error' => "os updates are disabled by config"})) unless $config->{'os_updates'};
         my $job = Thruk::NodeControl::Utils::os_update($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job"}));
@@ -183,7 +183,7 @@ sub _node_action {
 
     if($action eq 'os_sec_update') {
         return unless Thruk::Utils::check_csrf($c);
-        return unless $config->{'os_updates'};
+        return($c->render(json => {'success' => 0, 'error' => "os updates are disabled by config"})) unless $config->{'os_updates'};
         my $job = Thruk::NodeControl::Utils::os_sec_update($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job" }));
