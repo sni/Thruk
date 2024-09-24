@@ -51,13 +51,19 @@ sub index {
     my $action = $c->req->parameters->{'action'} || 'list';
 
     if($action && $action ne 'list') {
+        my $rc;
         eval {
-            return(_node_action($c, $action));
+            $rc = _node_action($c, $action);
         };
         if($@) {
             _warn("action %s failed: %s", $action, $@);
             return($c->render(json => {'success' => 0, 'error' => $@}));
         }
+        if(!$rc && !$c->{'rendered'}) {
+            _warn("action %s failed", $action);
+            return($c->render(json => {'success' => 0, 'error' => 'action failed'}));
+        }
+        return(1);
     }
     if($action eq 'save_options') {
         Thruk::NodeControl::Utils::save_config($c, {
@@ -119,6 +125,18 @@ sub _node_action {
     if($action eq 'facts') {
         $c->stash->{s}          = Thruk::NodeControl::Utils::get_server($c, $peer);
         $c->stash->{template}   = 'node_control_facts.tt';
+        $c->stash->{modal}      = $c->req->parameters->{'modal'} // 0;
+        $c->stash->{no_tt_trim} = 1;
+        return 1;
+    }
+
+    if($action eq 'log') {
+        my $log = $c->req->parameters->{'type'};
+        return unless $log =~ m/^[a-z]+$/mx;
+        $c->stash->{s}          = Thruk::NodeControl::Utils::get_server($c, $peer);
+        $c->stash->{log}        = Thruk::Utils::IO::saferead_decoded($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_'.$log.'.log');
+        $c->stash->{log_type}   = $log;
+        $c->stash->{template}   = 'node_control_logs.tt';
         $c->stash->{modal}      = $c->req->parameters->{'modal'} // 0;
         $c->stash->{no_tt_trim} = 1;
         return 1;

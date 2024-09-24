@@ -1,6 +1,10 @@
 ﻿[% PROCESS _header.tt js="plugins/${plugin_name}/node_control.js" %]
 [% PROCESS _message.tt %]
 
+<script>
+  var logs_menu = {};
+</script>
+
 [% omd_default_version_label = omd_default_version.replace('-labs-edition', '') %]
 <div class="flexrow justify-between gap-x-1">
   [% PROCESS _infobox.tt %]
@@ -236,8 +240,20 @@
                     <a href="#" class="js-run-all-btn [% IF !show_all_btn %]invisible[% END %]" onclick="confirm('install,update,cleanup to omd v[% omd_default_version_label | html %] on [% s.host_name | html %]?') && nc_action_with_popup(this, {action: 'omd_install_update_cleanup'}, '[% s.peer_key | html %]'); return false;"><i class="fa-solid fa-arrows-up-to-line text-sm" title="Run omd install,update,cleanup"></i></a>
                   [% END %]
 
-                  [% IF s.last_job %]
-                    <i class="fa-solid fa-file-lines clickable" title="show output of last job" onclick="showJobOutputPopup('[% s.last_job | html %]','[% s.peer_key | html %]', '[% s.host_name | html %]')"></i>
+                  [% IF s.logs.size > 0 %]
+                    <script>
+                      logs_menu['[% s.peer_key | html %]'] = [
+                        [% FOREACH l = s.logs.keys.sort %]
+                          {
+                              'icon':  "fa-file-lines",
+                              'label': "[% l | html %].log",
+                              'href':  "node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]",
+                              'onclick': "openModalWindowUrl('node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]&modal=1'); return false;"
+                          }[% UNLESS loop.last %],[% END %]
+                        [% END %]
+                      ];
+                    </script>
+                    <i class="fa-solid fa-file-lines clickable" title="show logs of last tasks" onclick="show_action_menu(this, logs_menu['[% s.peer_key | html %]'],null, null, null, null, 'b-l'); return false;"></i>
                   [% END %]
                 </div>
               </form>

@@ -417,6 +417,7 @@ plugins/plugins-available/node-control/scripts/omd_update.sh
 plugins/plugins-available/node-control/t/controller_node-control.t
 plugins/plugins-available/node-control/templates/node_control.tt
 plugins/plugins-available/node-control/templates/node_control_facts.tt
+plugins/plugins-available/node-control/templates/node_control_logs.tt
 plugins/plugins-available/node-control/templates/node_control_omd_status.tt
 plugins/plugins-available/panorama/0.tab
 plugins/plugins-available/panorama/description.txt

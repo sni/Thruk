@@ -183,6 +183,21 @@ sub saferead {
 
 ##############################################
 
+=head2 saferead_decoded
+
+  saferead_decoded($path)
+
+safe read file and return decoded content
+
+=cut
+
+sub saferead_decoded {
+    require Thruk::Utils::Encode;
+    return Thruk::Utils::Encode::decode_any(&saferead(@_));
+}
+
+##############################################
+
 =head2 read_as_list
 
   read_as_list($path)

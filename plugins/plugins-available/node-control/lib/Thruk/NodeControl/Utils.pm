@@ -140,6 +140,11 @@ sub get_server {
     for my $errKey (qw/last_error last_facts_error/) {
         $facts->{$errKey} =~ s/\s+at\s+.*HTTP\.pm\s+line\s+\d+\.//gmx if $facts->{$errKey};
     }
+
+    # gather available logs
+    my @logs = glob($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_*.log');
+    @logs = map { my $l = $_; $l =~ s/^.*\///gmx; $l =~ s/\.log$//gmx; $l =~ s/^$peer->{'key'}_//gmx; $l; } @logs;
+
     my $server = {
         peer_key                => $peer->{'key'},
         peer_name               => $peer->{'name'},
@@ -172,6 +177,7 @@ sub get_server {
         last_error              => $facts->{'last_error'} // '',
         last_facts_error        => $facts->{'last_facts_error'} // '',
         last_job                => $facts->{'last_job'} // '',
+        logs                    => Thruk::Base::array2hash(\@logs),
         facts                   => $facts || {},
     };
 
