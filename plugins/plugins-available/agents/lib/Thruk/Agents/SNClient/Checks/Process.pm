@@ -50,11 +50,12 @@ sub get_checks {
             'name'     => 'zombie processes',
             'check'    => 'check_process',
             'args'     => {
-                    'empty-syntax' => "%(status) - no zombie processes found",
-                    'top-syntax'   => "%(status) - %(count) zombie processes found",
-                    'filter'       => "state=zombie",
-                    'empty-state'  => 0,
-                    'perf-config'  => 'rss(ignored:true) virtual(ignored:true) cpu(ignored:true)',
+                    'empty-syntax'  => "%(status) - no zombie processes found",
+                    'top-syntax'    => "%(status) - %(count) zombie processes found.%(list)",
+                    'filter'        => "state=zombie",
+                    'empty-state'   => 0,
+                    'perf-config'   => 'rss(ignored:true) virtual(ignored:true) cpu(ignored:true)',
+                    'detail-syntax' => '\\n%(process): pid: %(pid) / user: %(username) / age: %(creation_unix | age | duration)',
             },
             'parent'   => 'agent version',
         };
