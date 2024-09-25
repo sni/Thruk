@@ -355,6 +355,9 @@
     <input type="hidden" name="filter.[% key %]" value="[% paneprefix %]">
 
     <div class="w-full flexrow flex-nowrap gap-0">
+      <script>
+        var ajax_search_backend_select = 'report_backends';
+      </script>
       <div id="[% paneprefix %]filter_pane" class="flexrow flex-wrap gap-0">
         [% FOR search = get_searches(c, 'dfl_', value, 1) %]
           [% SET prefix = 's' _ loop.index %]

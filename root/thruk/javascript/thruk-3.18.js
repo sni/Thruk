@@ -8674,6 +8674,10 @@ var ajax_search = {
         } else {
             backend_select = ajax_search.backend_select;
         }
+        // global page wide override
+        if(window.ajax_search_backend_select) {
+            backend_select = window.ajax_search_backend_select;
+        }
 
         ajax_search.button_links = [];
         if(options.button_links != undefined) {
