@@ -4206,7 +4206,7 @@ function set_hash(value, nr) {
             current = "";
         }
         var tmp   = current.split('|');
-        tmp[nr-1] = value;
+        tmp[nr-1] = value.replace(/\|/g, '%7C');
         value     = tmp.join('|');
     }
     // make emtpy values nicer, trim trailing pipes
@@ -4240,7 +4240,10 @@ function get_hash(nr) {
             hash = "";
         }
         var tmp = hash.split('|');
-        return(tmp[nr-1]);
+        if(tmp[nr-1] == undefined) {
+            return;
+        }
+        return(tmp[nr-1].replace(/%7C/g, '|'));
     }
     return(hash);
 }
