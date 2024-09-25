@@ -101,7 +101,16 @@
         [% FOREACH s = data %]
           <tr class="js-tabs" id="node_row_[% s.peer_key | html %]">
             <td class="align-top js-node-row">[% IF s.section != "Default" && s.section != "" && s.section != last_section; s.section | html; END; last_section = s.section; %]</td>
-            <td class="align-top" title="[% s.peer_key | html %]">[% s.peer_name | html %]</td>
+            <td class="align-top pr-px" title="[% s.peer_key | html %]">
+              <div class="flex min-w-max">
+                <div class="flex-1">
+                  [% s.peer_name | html %]
+                </div>
+                <div class="flex pl-1.5 gap-px">
+                  [% pd = s.peer_key; IF pi_detail.$pd.enable_notifications == 0 %]<i class="fa-solid fa-bell-slash not-clickable text-sm" title="Notifications for this backend have been disabled"></i>[% END %]
+                </div>
+              </div>
+            </td>
             <td class="align-top">[% IF s.host_name %]<a class="link" target="_blank" href="//[% s.host_name | uri %][% IF s.omd_site %]/[% s.omd_site | uri; END %]/"><i class="uil uil-external-link-alt text-xs"></i>[% s.host_name | html %]</a>[% END %]</td>
             <td class="align-top">
               [% IF s.omd_site %]
