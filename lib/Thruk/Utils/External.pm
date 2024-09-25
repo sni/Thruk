@@ -1281,8 +1281,8 @@ sub wrap_prefix_output {
     open(my $fh, '>', $target_file) || die("cannot open log file: $target_file: $!");
 
     ## no critic
-    tie *STDOUT, 'Thruk::Utils::External', ($fh);
-    tie *STDERR, 'Thruk::Utils::External', ($fh);
+    tie *STDOUT, 'Thruk::Utils::External', ($fh, "");
+    tie *STDERR, 'Thruk::Utils::External', ($fh, "[E]");
     ## use critic
 
     STDOUT->autoflush(1);
@@ -1308,10 +1308,11 @@ sub wrap_prefix_output_stop {
 
 ##############################################
 sub TIEHANDLE {
-    my($class, $fh) = @_;
+    my($class, $fh, $prefix) = @_;
     my $self = {
         fh      => $fh,
         newline => 1,
+        prefix  => $prefix,
     };
     bless $self, $class;
     return($self);
@@ -1333,25 +1334,26 @@ sub PRINTF {
 sub PRINT {
     my($self, @data) = @_;
 
-    my $last_newline = $self->{'newline'};
-    $self->{'newline'} = (join("", @data) =~ m/\n$/mx) ? 1 : 0;
+    my $time           = Thruk::Utils::Log::time_prefix(); chop($time);
+    $time              = $time.$self->{'prefix'} if $self->{'prefix'};
+    $time              = $time." ";
+    my $last_newline   = $self->{'newline'};
+    my $line           = join("", @data);
+    $self->{'newline'} = ($line =~ m/\n$/mx) ? 1 : 0;
 
     my $fh = $self->{'fh'};
     if(!$last_newline && !$self->{'newline'}) {
-        # continue printing
-        CORE::print($fh @data);
+        # continue printing, previous line did not end with a newline
+        CORE::print($fh $line);
     }
     elsif(!$self->{'newline'}) {
-        for my $msg (@data) {
-            CORE::print($fh Thruk::Utils::Log::time_prefix(), $msg);
-        }
+        $line =~ s|\n|\n$time|gmx;
+        CORE::print($fh $time, $line);
     }
     else {
-        for my $msg (@data) {
-            for my $l (split/\n/mx, $msg) {
-                CORE::print($fh Thruk::Utils::Log::time_prefix(), $l, "\n");
-            }
-        }
+        chomp($line);
+        $line =~ s|\n|\n$time|gmx;
+        CORE::print($fh $last_newline ? $time : "", $line, "\n");
     }
     return;
 }

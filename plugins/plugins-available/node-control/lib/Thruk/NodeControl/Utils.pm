@@ -552,11 +552,10 @@ sub _omd_update_step2 {
 
     if($config->{'hook_update_pre'}) {
         print "*** hook_update_pre:\n";
-        my($rc, $out) = _remote_cmd($c, $peer, $config->{'hook_update_pre'}, undef, $env);
-        print "*** rc:$rc\n";
-        print "*** output:\n".$out."\n";
-        if($rc != 0) {
-            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d): %s", $rc, $out));
+        my $rc = _remote_run_hook($c, $peer, $config->{'hook_update_pre'}, $env);
+        print "*** hook_update_pre rc: $rc\n";
+        if($rc ne '0') {
+            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d)", $rc));
         }
     }
 
@@ -576,17 +575,19 @@ sub _omd_update_step2 {
         return _set_job_errored($c, 'updating', $peer->{'key'}, "update failed");
     }
 
+    my $post_hooks_failed = 0;
     if($config->{'hook_update_post'}) {
         print "*** hook_update_post:\n";
-        my($rc, $out) = _remote_cmd($c, $peer, $config->{'hook_update_post'}, undef, $env);
-        print "*** rc: $rc\n";
-        print "*** output:\n".$out."\n";
+        my $rc = _remote_run_hook($c, $peer, $config->{'hook_update_post'}, $env);
+        print "*** hook_update_post rc: $rc\n";
+        $post_hooks_failed = 1 if $rc ne '0';
     }
 
     if($config->{'hook_update_post_local'}) {
         print "*** hook_update_post_local:\n";
         my($rc, $out) = Thruk::Utils::IO::cmd($config->{'hook_update_post_local'}, { env => $env, print_prefix => "" });
         print "*** hook_update_post_local rc: $rc\n";
+        $post_hooks_failed = 1 if $rc ne '0';
     }
 
     printf("*** updating %s on %s to omd %s finished\n", $facts->{'omd_site'}, $peer->{'name'}, $version);
@@ -594,6 +595,9 @@ sub _omd_update_step2 {
 
     update_runtime_data($c, $peer, 1);
 
+    if($post_hooks_failed) {
+        return _set_job_errored($c, 'updating', $peer->{'key'}, "update successfull but post hook failed");
+    }
     return(1);
 }
 
@@ -860,6 +864,29 @@ sub _remote_cmd {
     }
 
     die("http(s) connection failed\n".$err);
+}
+
+##########################################################
+sub _remote_run_hook {
+    my($c, $peer, $hook, $env) = @_;
+
+    my $uploaded;
+    if($hook =~ m/^script:(.*)$/mx) {
+        my $script = Thruk::Utils::IO::read($1);
+        $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/hook.sh', $script);
+        $hook = 'bash var/tmp/hook.sh';
+        $uploaded = 1;
+    }
+
+    my($rc, $job) = _remote_cmd($c, $peer, $hook, { env => $env }, $env);
+
+    # wait for 300 sec
+    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, 300, 1);
+
+    _remote_cmd($c, $peer, 'rm -f var/tmp/hook.sh') if $uploaded;
+
+    return("-1") unless $jobdata;
+    return($jobdata->{'rc'});
 }
 
 ##########################################################
