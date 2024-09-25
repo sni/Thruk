@@ -938,7 +938,7 @@ sub _omd_service_cmd {
     my $peer = $c->db->get_peer_by_key($peerkey);
     my($rc, $out);
     eval {
-        ($rc, $out) = _remote_cmd($c, $peer, 'omd '.$cmd.' '.$service);
+        ($rc, $out) = _remote_cmd($c, $peer, 'omd '.$cmd.' '.$service, $service eq 'apache' ? {} : undef);
     };
     if($@) {
         _warn("omd cmd failed: %s", $@);
