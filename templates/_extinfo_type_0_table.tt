@@ -72,7 +72,7 @@
     </td>
     [% ELSE %]
     <td>
-      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_notifications off=11 on=12 %]
+      [% IF backend_detail.$pd.running; PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_notifications off=11 on=12 ; END %]
     </td>
     <td>
       [% IF backend_detail.$pd.running %]
@@ -133,19 +133,19 @@
       [% END %]
     </td>
     <td>
-      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_event_handlers off=42 on=41 %]
+      [% IF backend_detail.$pd.running; PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_event_handlers off=42 on=41; END %]
     </td>
     <td>
-      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.obsess_over_services off=50 on=49 %]
+      [% IF backend_detail.$pd.running; PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.obsess_over_services off=50 on=49; END %]
     </td>
     <td>
-      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.obsess_over_hosts off=95 on=94 %]
+      [% IF backend_detail.$pd.running; PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.obsess_over_hosts off=95 on=94; END %]
     </td>
     <td>
-      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_flap_detection off=62 on=61 %]
+      [% IF backend_detail.$pd.running; PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.enable_flap_detection off=62 on=61; END %]
     </td>
     <td>
-      [% PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.process_performance_data off=83 on=82 %]
+      [% IF backend_detail.$pd.running; PROCESS _toggle_badge pd=pd yes=pi_detail.$pd.process_performance_data off=83 on=82; END %]
     </td>
     [% END %]
     <td>

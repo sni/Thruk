@@ -107,94 +107,100 @@
                   [% s.peer_name | html %]
                 </div>
                 <div class="flex pl-1.5 gap-px">
-                  [% pd = s.peer_key; IF pi_detail.$pd.enable_notifications == 0 %]<i class="fa-solid fa-bell-slash not-clickable text-sm" title="Notifications for this backend have been disabled"></i>[% END %]
+                  [% pd = s.peer_key; IF backend_detail.$pd.disabled == 0 && pi_detail.$pd.exists('enable_notifications') && pi_detail.$pd.enable_notifications == 0 %]<i class="fa-solid fa-bell-slash not-clickable text-sm" title="Notifications for this backend have been disabled"></i>[% END %]
                 </div>
               </div>
             </td>
-            <td class="align-top">[% IF s.host_name %]<a class="link" target="_blank" href="//[% s.host_name | uri %][% IF s.omd_site %]/[% s.omd_site | uri; END %]/"><i class="uil uil-external-link-alt text-xs"></i>[% s.host_name | html %]</a>[% END %]</td>
-            <td class="align-top">
-              [% IF s.omd_site %]
-                [% remote_thruk_url = get_remote_thruk_url_path(c, s.peer_key) %]
-                <a class="link" href="[% IF remote_thruk_url %]proxy.cgi/[% s.peer_key | uri %][% remote_thruk_url %][% ELSE %][% url_prefix %][% END %]" target="_blank">
-                  <i class="fa-solid fa-desktop text-xs" title="Open site in a new tab."></i> [% s.omd_site | html %]
-                </a>
-              [% END %]
-            </td>
-            [% IF s.omd_version && omd_default_version != s.omd_version %]
-              <td class="align-top WARNING" title="node uses an outdated omd release.">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
+            [% IF backend_detail.$pd.disabled == 2 %]
+              <td class="align-top" colspan="[% IF show_os_updates %]9[% ELSE %]8[% END %]">
+                <div class='badge'>HIDDEN</div>
+              </td>
             [% ELSE %]
-              <td class="align-top">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
-            [% END %]
-            <td class="align-top clickable" onclick="openModalWindowUrl('node_control.cgi?action=omd_status&modal=1&peer=[% s.peer_key | html %]');">
-              [% IF s.omd_status && s.omd_status.exists("OVERALL") %]
-                [% IF s.omd_status.OVERALL == 0 %]
-                  <div class="badge OK">OK</div>
-                [% ELSE %]
-                  [% failed = []; %]
-                  [% FOREACH service IN s.omd_status.keys.sort %]
-                    [% IF service == "OVERALL"; NEXT; END %]
-                    [% IF s.omd_status.$service != 0; failed.push(service); END %]
-                  [% END %]
-                  [% IF failed.size == 1 %]
-                    <div class="badge WARNING">[% failed.0 %]</div>
+              <td class="align-top">[% IF s.host_name %]<a class="link" target="_blank" href="//[% s.host_name | uri %][% IF s.omd_site %]/[% s.omd_site | uri; END %]/"><i class="uil uil-external-link-alt text-xs"></i>[% s.host_name | html %]</a>[% END %]</td>
+              <td class="align-top">
+                [% IF s.omd_site %]
+                  [% remote_thruk_url = get_remote_thruk_url_path(c, s.peer_key) %]
+                  <a class="link" href="[% IF remote_thruk_url %]proxy.cgi/[% s.peer_key | uri %][% remote_thruk_url %][% ELSE %][% url_prefix %][% END %]" target="_blank">
+                    <i class="fa-solid fa-desktop text-xs" title="Open site in a new tab."></i> [% s.omd_site | html %]
+                  </a>
+                [% END %]
+              </td>
+              [% IF s.omd_version && omd_default_version != s.omd_version %]
+                <td class="align-top WARNING" title="node uses an outdated omd release.">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
+              [% ELSE %]
+                <td class="align-top">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
+              [% END %]
+              <td class="align-top clickable" onclick="openModalWindowUrl('node_control.cgi?action=omd_status&modal=1&peer=[% s.peer_key | html %]');">
+                [% IF s.omd_status && s.omd_status.exists("OVERALL") %]
+                  [% IF s.omd_status.OVERALL == 0 %]
+                    <div class="badge OK">OK</div>
                   [% ELSE %]
-                    <div class="badge WARNING">[% failed.size %] stopped</div>
+                    [% failed = []; %]
+                    [% FOREACH service IN s.omd_status.keys.sort %]
+                      [% IF service == "OVERALL"; NEXT; END %]
+                      [% IF s.omd_status.$service != 0; failed.push(service); END %]
+                    [% END %]
+                    [% IF failed.size == 1 %]
+                      <div class="badge WARNING">[% failed.0 %]</div>
+                    [% ELSE %]
+                      <div class="badge WARNING">[% failed.size %] stopped</div>
+                    [% END %]
                   [% END %]
                 [% END %]
+              </td>
+              [% IF show_os_updates %]
+              <td class="align-top">
+                <div class="flexrow flex-nowrap gap-x-1 justify-between">
+                  <span class="clickable" onclick="openModalWindowUrl('node_control.cgi?action=facts&modal=1&peer=[% s.peer_key | html %]');">[% s.os_name | html %] [% s.os_version | html %]</span>
+                  <form action="node_control.cgi" method="POST">
+                    <input type="hidden" name="peer" value="[% s.peer_key | html %]">
+                    <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+                    <div class="flexrow flex-nowrap gap-x-1">
+                      [% IF s.os_updating %]
+                        <div class="spinner clickable" onclick="showJobOutputPopup('[% s.os_updating | html %]','[% s.peer_key | html %]'); return false;"></div>
+                      [% ELSE %]
+                        <button class="round p-0 h-5 w-5 gray text-xs text-center [% IF s.os_updates.size == 0 || s.os_sec_updating %]invisible[% END %] js-os-update-btn" title="There are [% s.os_updates.size %] updates available: [% s.os_updates.join(", ").substr(0, 250) %]" onclick="return nc_action_with_popup(this, {action: 'os_update'}, '[% s.peer_key | html %]')">
+                          <i style="font-style: normal;">[% s.os_updates.size %]</i>
+                        </button>
+                      [% END %]
+                      [% IF s.os_sec_updating %]
+                        <div class="spinner clickable" style="margin-left: 3px;" onclick="showJobOutputPopup('[% s.os_sec_updating | html %]','[% s.peer_key | html %]'); return false;"></div>
+                      [% ELSE %]
+                        <button class="round p-0 h-5 w-5 red text-xs text-center [% IF s.os_security.size == 0 || s.os_updating %]invisible[% END %] js-os-sec-update-btn" title="There are [% s.os_security.size %] security updates available: [% s.os_security.join(", ").substr(0, 250) %]" onclick="return nc_action_with_popup(this, {action: 'os_sec_update'}, '[% s.peer_key | html %]')">
+                          <i style="font-style: normal;">[% s.os_security.size %]</i>
+                        </button>
+                      [% END %]
+                    </div>
+                  </form>
+                </div>
+              </td>
               [% END %]
-            </td>
-            [% IF show_os_updates %]
-            <td class="align-top">
-              <div class="flexrow flex-nowrap gap-x-1 justify-between">
-                <span class="clickable" onclick="openModalWindowUrl('node_control.cgi?action=facts&modal=1&peer=[% s.peer_key | html %]');">[% s.os_name | html %] [% s.os_version | html %]</span>
-                <form action="node_control.cgi" method="POST">
-                  <input type="hidden" name="peer" value="[% s.peer_key | html %]">
-                  <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                  <div class="flexrow flex-nowrap gap-x-1">
-                    [% IF s.os_updating %]
-                      <div class="spinner clickable" onclick="showJobOutputPopup('[% s.os_updating | html %]','[% s.peer_key | html %]'); return false;"></div>
-                    [% ELSE %]
-                      <button class="round p-0 h-5 w-5 gray text-xs text-center [% IF s.os_updates.size == 0 || s.os_sec_updating %]invisible[% END %] js-os-update-btn" title="There are [% s.os_updates.size %] updates available: [% s.os_updates.join(", ").substr(0, 250) %]" onclick="return nc_action_with_popup(this, {action: 'os_update'}, '[% s.peer_key | html %]')">
-                        <i style="font-style: normal;">[% s.os_updates.size %]</i>
-                      </button>
-                    [% END %]
-                    [% IF s.os_sec_updating %]
-                      <div class="spinner clickable" style="margin-left: 3px;" onclick="showJobOutputPopup('[% s.os_sec_updating | html %]','[% s.peer_key | html %]'); return false;"></div>
-                    [% ELSE %]
-                      <button class="round p-0 h-5 w-5 red text-xs text-center [% IF s.os_security.size == 0 || s.os_updating %]invisible[% END %] js-os-sec-update-btn" title="There are [% s.os_security.size %] security updates available: [% s.os_security.join(", ").substr(0, 250) %]" onclick="return nc_action_with_popup(this, {action: 'os_sec_update'}, '[% s.peer_key | html %]')">
-                        <i style="font-style: normal;">[% s.os_security.size %]</i>
-                      </button>
-                    [% END %]
-                  </div>
-                </form>
-              </div>
-            </td>
+              <td>[% s.machine_type %]</td>
+              <td class='align-top relative overflow-hidden'>
+                [% IF s.cpu_perc; %][%IF s.cpu_perc > 1; s.cpu_perc = 1; END %]
+                <div style='width: [% 100 * s.cpu_perc %]%; height: 100%;' class='[% IF s.cpu_perc > 0.9 %]CRITICAL[% ELSIF s.cpu_perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
+                [% END %]
+                <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.cpu_perc; sprintf("%.d", s.cpu_perc*100); "% used"; END %]">
+                  [% IF s.cpu_cores; s.cpu_cores; " Cores"; END %]
+                </span>
+              </td>
+              <td class='align-top relative overflow-hidden'>
+                [% IF s.memfree; perc = ( s.memtotal - s.memfree ) / s.memtotal %][%IF perc > 1; perc = 1; END %]
+                <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF perc > 0.9 %]CRITICAL[% ELSIF perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
+                [% END %]
+                <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.memfree; sprintf("%.d", perc*100); "% used"; END %]">
+                  [% IF s.memtotal; n = reduce_number(s.memtotal*1024*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
+                </span>
+              </td>
+              <td class='align-top relative overflow-hidden'>
+                [% IF s.omd_disk_total; perc = ( s.omd_disk_total - s.omd_disk_free ) / s.omd_disk_total %][%IF perc > 1; perc = 1; END %]
+                <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF perc > 0.9 %]CRITICAL[% ELSIF perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
+                [% END %]
+                <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.omd_disk_total %][% sprintf("%.d", perc*100) %]% used, [% n = reduce_number(s.omd_disk_free*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1) %] free[% END %]">
+                  [% IF s.omd_disk_total; n = reduce_number(s.omd_disk_total*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
+                </span>
+              </td>
             [% END %]
-            <td>[% s.machine_type %]</td>
-            <td class='align-top relative overflow-hidden'>
-              [% IF s.cpu_perc; %][%IF s.cpu_perc > 1; s.cpu_perc = 1; END %]
-              <div style='width: [% 100 * s.cpu_perc %]%; height: 100%;' class='[% IF s.cpu_perc > 0.9 %]CRITICAL[% ELSIF s.cpu_perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
-              [% END %]
-              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.cpu_perc; sprintf("%.d", s.cpu_perc*100); "% used"; END %]">
-                [% IF s.cpu_cores; s.cpu_cores; " Cores"; END %]
-              </span>
-            </td>
-            <td class='align-top relative overflow-hidden'>
-              [% IF s.memfree; perc = ( s.memtotal - s.memfree ) / s.memtotal %][%IF perc > 1; perc = 1; END %]
-              <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF perc > 0.9 %]CRITICAL[% ELSIF perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
-              [% END %]
-              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.memfree; sprintf("%.d", perc*100); "% used"; END %]">
-                [% IF s.memtotal; n = reduce_number(s.memtotal*1024*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
-              </span>
-            </td>
-            <td class='align-top relative overflow-hidden'>
-              [% IF s.omd_disk_total; perc = ( s.omd_disk_total - s.omd_disk_free ) / s.omd_disk_total %][%IF perc > 1; perc = 1; END %]
-              <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF perc > 0.9 %]CRITICAL[% ELSIF perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
-              [% END %]
-              <span class='absolute top-0 left-0' style='margin-left: 3px;' title="[% IF s.omd_disk_total %][% sprintf("%.d", perc*100) %]% used, [% n = reduce_number(s.omd_disk_free*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1) %] free[% END %]">
-                [% IF s.omd_disk_total; n = reduce_number(s.omd_disk_total*1024, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
-              </span>
-            </td>
             <td class="align-top text-center">
               <form action="node_control.cgi" method="POST">
                 <input type="hidden" name="peer" value="[% s.peer_key | html %]">
@@ -272,20 +278,22 @@
               </form>
             </td>
           </tr>
-          [% IF s.last_error %]
-            [% lines = s.last_error.split("\n") %]
-            <tr>
-              <td></td>
-              <td></td>
-              <td colspan="10" class="textALERT whitespace-pre truncate overflow-hidden [% IF lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF lines.size > 1 %]onclick="toggleElement(jQuery(this).find('SPAN')[0])"[% END %]>[% lines.shift | html %]<br><span class="hidden">[% lines.join("\n") %]</span></td>
-            </tr>
-          [% ELSIF s.last_facts_error %]
-            [% lines = s.last_facts_error.split("\n") %]
-            <tr>
-              <td></td>
-              <td></td>
-              <td colspan="10" class="textALERT whitespace-pre truncate overflow-hidden [% IF lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF lines.size > 1 %]onclick="toggleElement(jQuery(this).find('SPAN')[0])"[% END %]>[% lines.shift | html %]<br><span class="hidden">[% lines.join("\n") %]</span></td>
-            </tr>
+          [% IF backend_detail.$pd.disabled != 2 %]
+            [% IF s.last_error %]
+              [% lines = s.last_error.split("\n") %]
+              <tr>
+                <td></td>
+                <td></td>
+                <td colspan="10" class="textALERT whitespace-pre truncate overflow-hidden [% IF lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF lines.size > 1 %]onclick="toggleElement(jQuery(this).find('SPAN')[0])"[% END %]>[% lines.shift | html %]<br><span class="hidden">[% lines.join("\n") %]</span></td>
+              </tr>
+            [% ELSIF s.last_facts_error %]
+              [% lines = s.last_facts_error.split("\n") %]
+              <tr>
+                <td></td>
+                <td></td>
+                <td colspan="10" class="textALERT whitespace-pre truncate overflow-hidden [% IF lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF lines.size > 1 %]onclick="toggleElement(jQuery(this).find('SPAN')[0])"[% END %]>[% lines.shift | html %]<br><span class="hidden">[% lines.join("\n") %]</span></td>
+              </tr>
+            [% END %]
           [% END %]
         [% END %]
       </tbody>
