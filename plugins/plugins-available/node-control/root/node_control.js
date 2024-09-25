@@ -10,8 +10,6 @@ jQuery(document).ready(function() {
 
 // used for updating all (visible) servers
 function nc_run_all(mainBtn, cls, extraData) {
-    setBtnSpinner(mainBtn, true);
-
     var list = [];
     jQuery(cls).each(function(i, el) {
         if(jQuery(el).is(":visible") && !jQuery(el).hasClass("invisible")) {
@@ -19,6 +17,11 @@ function nc_run_all(mainBtn, cls, extraData) {
         }
     });
 
+    if(list.length == 0) {
+        return;
+    }
+
+    setBtnSpinner(mainBtn, true);
     var running = 0;
     var startNext = function() {
         if(list.length == 0) {
@@ -39,8 +42,7 @@ function nc_run_all(mainBtn, cls, extraData) {
             refresh_all_changed_rows_now(null, 'TD.js-node-row');
         }, extraData);
     }
-    var parallel = jQuery("INPUT[name='parallel']").val();
-    for(var x = 0; x < parallel; x++) {
+    for(var x = 0; x < ms_parallel; x++) {
         startNext();
     }
 }

@@ -3,6 +3,7 @@
 
 <script>
   var logs_menu = {};
+  var ms_parallel = [% ms_parallel | html %];
 </script>
 
 [% omd_default_version_label = omd_default_version.replace('-labs-edition', '') %]
@@ -40,9 +41,6 @@
   </div>
 </div>
 
-<script>
-  var ms_parallel = [% ms_parallel | html %];
-</script>
 [% last_section = "" %]
 
 <div class="card w-full mt-5" style="min-width: 800px;">
