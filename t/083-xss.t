@@ -32,7 +32,7 @@ my $whitelist_vars = Thruk::Base::array2hash([qw/
     c.config.jquery_ui c.config.start_page c.config.home_link
     host_health_cls service_health_cls host_perc opt_class ok_pct w_pct u_pct c_pct p_pct
     s.cpu_perc perc plugin_name plugin_editor_path shinken_features_path l.0 l.1
-    prev_host_empty color add_request_backend soff son hon hoff on off
+    prev_host_empty color add_request_backend soff son hon hoff on off skip_confirm
 /]);
 my $whitelist_regex = [
     qr/^\w+\.(id|nr)$/,
