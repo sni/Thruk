@@ -81,6 +81,9 @@ Without sudo permissions you can only update to existing omd versions.
   # number of parallel task when running actions for all hosts
   #parallel_tasks = 3
 
+  # set to 1 to not require confirm on all actions
+  #skip_confirms = 0
+
   # command used to cleanup unused omd versions
   #cmd_omd_cleanup       = sudo -n omd cleanup
 

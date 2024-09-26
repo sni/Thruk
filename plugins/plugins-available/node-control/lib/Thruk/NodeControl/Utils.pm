@@ -970,6 +970,7 @@ sub config {
         'os_updates'              => 1,
         'pkg_install'             => 1,
         'pkg_cleanup'             => 1,
+        'skip_confirms'           => 0,
         'parallel_tasks'          => 3,
         'omd_update_script'       => abs_path(Thruk::Base::dirname(__FILE__)."/../../../scripts/omd_update.sh"),
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',

@@ -47,6 +47,7 @@ sub index {
     $c->stash->{'show_pkg_install'} = $config->{'pkg_install'} // 1;
     $c->stash->{'show_pkg_cleanup'} = $config->{'pkg_cleanup'} // 1;
     $c->stash->{'show_all_button'}  = $config->{'all_button'} // 1;
+    $c->stash->{'skip_confirm'}     = $config->{'skip_confirms'} ? 'noop_' : '';
 
     my $action = $c->req->parameters->{'action'} || 'list';
 
