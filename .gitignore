@@ -79,5 +79,6 @@ plugins/plugins-available/pansnaps
 plugins/plugins-available/status-dashboard
 plugins/plugins-available/woshsh
 plugins/plugins-enabled/agents
+plugins/plugins-enabled/node-control
 !root/thruk/vendor/unicons/Makefile
 node_modules/

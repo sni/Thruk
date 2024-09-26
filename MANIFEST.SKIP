@@ -113,6 +113,7 @@ plugins/plugins-available/status-dashboard
 plugins/plugins-available/woshsh
 plugins/plugins-enabled/agents
 plugins/plugins-enabled/editor
+plugins/plugins-enabled/node-control
 ^node_modules/
 ^package-lock.json
 ^package.json
