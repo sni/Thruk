@@ -186,11 +186,14 @@ sub get_server {
         my($host, undef) = Thruk::Utils::get_remote_thruk_hostname($c, $peer->{'key'});
         $server->{'host_name'} = $host if $host;
     }
+    if(!$server->{'host_name'} && $peer->{'addr'} =~ m/^\//mx) {
+        $server->{'host_name'} = Thruk::Config::hostname();
+    }
+    $server->{'host_name'} = $peer->{'name'} unless $server->{'host_name'};
     if(!$server->{'omd_site'}) {
         my $site = Thruk::Utils::get_remote_thruk_site_name($c, $peer->{'key'});
         $server->{'omd_site'}  = $site if $site;
     }
-    $server->{'host_name'} = $peer->{'name'} unless $server->{'host_name'};
 
     # remove current default from cleanable
     if($server->{'omd_cleanable'}) {
