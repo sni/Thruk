@@ -50,8 +50,11 @@ return list of available peers
 sub get_peers {
     my($c) = @_;
     my @peers;
+    my $dups = {};
     for my $peer (@{$c->db->get_local_peers()}, @{$c->db->get_http_peers(1)}) {
         next if (defined $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
+        next if $dups->{$peer->{'key'}}; # backend can be in both lists
+        $dups->{$peer->{'key'}} = 1;
         push @peers, $peer;
     }
     return \@peers;
