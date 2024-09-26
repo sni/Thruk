@@ -7,7 +7,7 @@
 
 <div class="card w-fit h-auto [% IF modal %] shadow-float[% END %]">
   <div class="head justify-between">
-    <h3>OMD Status: [% s.host_name | html %]</h3>
+    <h3>OMD Status: [% s.host_name | html %] ([% s.omd_site | html %])</h3>
     [% IF modal %]
     <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
     [% END %]

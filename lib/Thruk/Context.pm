@@ -733,7 +733,10 @@ sub sub_request {
     };
     _debug2("sub_request to ".$url);
     my $sub_c = Thruk::Context->new($c->app, $env);
-    _set_stash_user($sub_c, $c->user, $c->user->{'auth_src'}) if $c->user;
+    if($c->user) {
+        _set_stash_user($sub_c, $c->user, $c->user->{'auth_src'});
+        $sub_c->{'session'} = $c->{'session'}; # required to validate csrf token on sub requests
+    }
 
     $sub_c->req->parameters();
     if($postdata) {

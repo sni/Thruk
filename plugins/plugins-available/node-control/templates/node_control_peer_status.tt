@@ -1,0 +1,44 @@
+﻿[% IF ! modal %]
+  [% PROCESS _header.tt %]
+  [% PROCESS _message.tt %]
+
+  [% PROCESS _infobox.tt %]
+[% END %]
+
+[% BLOCK buttongroup %]
+  <tr id="peer_status_[% s.peer_key | html %]_[% name | html %]">
+    <td class="js-omd-status-[% s.peer_key | html %]-[% name | html %]"><div class="badge w-full h-7 leading-7 [% IF status == 1 %]OK[% ELSE %]CRITICAL[% END %]">[% label | html %]</div></td>
+    <td><button onclick="nc_peer_state(this, {peer: '[% s.peer_key | html %]', type: '[% name | html %]', action: 'peer_on'});  return false;" [% IF status == 1 %]disabled[% END %]><i class="fa-solid fa-play text-sm"></i> enable</button></td>
+    <td><button onclick="nc_peer_state(this, {peer: '[% s.peer_key | html %]', type: '[% name | html %]', action: 'peer_off'}); return false;" [% IF status != 1 %]disabled[% ELSE %]class="hover-red"[% END %]><i class="fa-solid fa-power-off text-sm"></i> disable</button></td>
+  </tr>
+[% END %]
+
+<div class="card w-fit h-auto [% IF modal %] shadow-float[% END %]">
+  <div class="head justify-between">
+    <h3>Site Status: [% s.host_name | html %] ([% s.omd_site | html %])</h3>
+    [% IF modal %]
+      <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+    [% END %]
+  </div>
+  <div class="body">
+    <form action="node_control.cgi" method="POST">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <table class="w-fit mx-auto innercellborder">
+        [% pd=s.peer_key %]
+        [% PROCESS buttongroup name="notifications" label="Notifications"  status=pi_detail.$pd.enable_notifications %]
+        [% PROCESS buttongroup name="hostchecks"    label="Host Checks"    status=pi_detail.$pd.execute_host_checks %]
+        [% PROCESS buttongroup name="servicechecks" label="Service Checks" status=pi_detail.$pd.execute_service_checks %]
+        [% PROCESS buttongroup name="eventhandlers" label="Event Handler"  status=pi_detail.$pd.enable_event_handlers %]
+      </table>
+    </form>
+  </div>
+  [% IF modal %]
+    <div class="footer justify-center">
+      <button class="w-20" onclick="closeModalWindow()">OK</button>
+    </div>
+  [% END %]
+</div>
+
+[% IF ! modal %]
+  [% PROCESS _footer.tt %]
+[% END %]

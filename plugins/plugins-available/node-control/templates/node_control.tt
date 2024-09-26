@@ -101,7 +101,7 @@
         [% FOREACH s = data %]
           <tr class="js-tabs" id="node_row_[% s.peer_key | html %]">
             <td class="align-top js-node-row">[% IF s.section != "Default" && s.section != "" && s.section != last_section; s.section | html; END; last_section = s.section; %]</td>
-            <td class="align-top pr-px" title="[% s.peer_key | html %]">
+            <td class="align-top clickable pr-px" onclick="openModalWindowUrl('node_control.cgi?action=peer_status&modal=1&peer=[% s.peer_key | html %]');" title="[% s.peer_key | html %]">
               <div class="flex min-w-max">
                 <div class="flex-1">
                   [% s.peer_name | html %]

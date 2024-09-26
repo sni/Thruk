@@ -115,3 +115,17 @@ function nc_omd_service(btn, extraData) {
         refresh_all_changed_rows(null, 'TD.js-node-row');
     }, extraData);
 }
+
+// used to update peer status
+function nc_peer_state(btn, extraData) {
+    setBtnSpinner(btn, true);
+
+    var form = jQuery(btn).parents('FORM');
+    submitFormInBackground(form, function(form, success, data, textStatus, jqXHR) {
+        // update service row
+        refresh_all_changed_rows({action: 'peer_status', modal: 1, peer: extraData['peer']}, 'TD.js-omd-status-'+extraData["peer"]+'-'+extraData["type"]);
+
+        // update node row
+        refresh_all_changed_rows(null, 'TD.js-node-row');
+    }, extraData);
+}

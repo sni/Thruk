@@ -151,6 +151,19 @@ sub _node_action {
         return 1;
     }
 
+    if($action eq 'peer_status') {
+        $c->stash->{s}          = Thruk::NodeControl::Utils::get_server($c, $peer);
+        $c->stash->{template}   = 'node_control_peer_status.tt';
+        $c->stash->{modal}      = $c->req->parameters->{'modal'} // 0;
+        return 1;
+    }
+    if($action eq 'peer_on') {
+        return(_omd_peer_cmd($c, $peer, $c->req->parameters->{'type'}, "on"));
+    }
+    if($action eq 'peer_off') {
+        return(_omd_peer_cmd($c, $peer, $c->req->parameters->{'type'}, "off"));
+    }
+
     if($action eq 'omd_stop') {
         return(_omd_service_cmd($c, $peer, "stop"));
     }
@@ -220,6 +233,46 @@ sub _omd_service_cmd {
     Thruk::NodeControl::Utils::omd_service($c, $peer, $service, $cmd);
     return($c->render(json => {'success' => 1}));
 }
+
+##########################################################
+sub _omd_peer_cmd {
+    my($c, $peer, $type, $status) = @_;
+    return unless Thruk::Utils::check_csrf($c);
+
+    my $cmds = {
+        "notifications" => { "on"  => "enable_notifications",        "off" => "disable_notifications",
+                             "won" => "enable_notifications = 1",   "woff" => "enable_notifications = 0",
+                           },
+        "hostchecks"    => { "on"  => "start_executing_host_checks", "off" => "stop_executing_host_checks",
+                             "won" => "execute_host_checks = 1",    "woff" => "execute_host_checks = 0",
+                           },
+        "servicechecks" => { "on"  => "start_executing_svc_checks",  "off" => "stop_executing_svc_checks",
+                             "won" => "execute_service_checks = 1", "woff" => "execute_service_checks = 0",
+                           },
+        "eventhandlers" => { "on"  => "enable_event_handlers",       "off" => "disable_event_handlers",
+                             "won" => "enable_event_handlers = 1",  "woff" => "enable_event_handlers = 0",
+                           },
+    };
+
+    my $cmd  = $cmds->{$type}->{$status};
+    my $wait = $cmds->{$type}->{"w".$status};
+
+    my $post_token = $c->req->parameters->{'CSRFtoken'} // $c->req->parameters->{'token'};
+    my $res        = $c->sub_request('/r/system/cmd/'.$cmd, 'POST', { 'CSRFtoken' => $post_token, 'backend' => $peer->{'key'} });
+    if($res && $res->{'message'}) {
+        my $options = {
+            'header' => {
+                'WaitTimeout'   => ($c->config->{'wait_timeout'} * 1000),
+                'WaitTrigger'   => 'all',
+                'WaitCondition' => $wait,
+            },
+        };
+        $c->db->get_processinfo(columns => [ 'get_processinfo' ], options => $options, 'backend' => $peer->{'key'} );
+        return($c->render(json => {'success' => 1, 'message' => $res->{'message'}}));
+    }
+    return($c->render(json => {'success' => 0, 'error' => "command failed"}));
+}
+
 ##########################################################
 
 1;
