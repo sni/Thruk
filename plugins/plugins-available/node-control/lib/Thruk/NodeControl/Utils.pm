@@ -1093,6 +1093,7 @@ sub _set_job_started {
     my $data = { 'last_error' => '' };
     $data->{$type."_failed"} = "0";
     $data->{$type."_time"}   = time();
+    $data->{$type."_user"}   = $c->stash->{'remote_user'} // '';
     if($ENV{'THRUK_JOB_ID'}) {
         $data->{$type}      = $ENV{'THRUK_JOB_ID'};
         $data->{'last_job'} = $ENV{'THRUK_JOB_ID'};
