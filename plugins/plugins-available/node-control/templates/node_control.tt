@@ -207,12 +207,13 @@
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                 <div class="flexrow flex-nowrap gap-1">
                   [% IF s.logs.size > 0 %]
+                    [% log_failed = 0 %]
                     <script>
                       logs_menu['[% s.peer_key | html %]'] = [
                         [% FOREACH l = s.logs.keys.sort %]
                           {
-                              'icon':  "fa-file-lines",
-                              'label': "[% l | html %].log",
+                              'icon':  "fa-file-lines [% IF s.logs.$l.failed; log_failed = 1 %]textALERT[% END %]",
+                              'label': "[% l | html %].log [% IF s.logs.$l.time %]([% date_format(c, s.logs.$l.time) %])[% END %]",
                               'href':  "node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]",
                               'onclick': "openModalWindowUrl('node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]&modal=1'); return false;"
                           }[% UNLESS loop.last %],[% END %]
@@ -220,7 +221,7 @@
                       ];
                     </script>
                     <a href="#" class="" title="show logs of last tasks" onclick="show_action_menu(this, logs_menu['[% s.peer_key | html %]'],null, null, null, null, 'b-l'); return false;">
-                      <i class="fa-solid fa-file-lines"></i>
+                      <i class="fa-solid fa-file-lines [% IF log_failed == 1 %]textALERT[% END %]"></i>
                     </a>
                   [% ELSE %]
                     <a href="#" class="disabled not-clickable" title="no logs available" onclick="return false;">
@@ -258,7 +259,11 @@
                   [% IF s.updating %]
                     <div class="spinner clickable" style="margin-right: 3px;" title="site is updating omd right now" onclick="showJobOutputPopup('[% s.updating | html %]','[% s.peer_key | html %]')"></div>
                   [% ELSE %]
-                    <a href="#" class="js-omd-update-btn [% IF s.omd_version == omd_default_version || !has_installed %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="[% skip_confirm %]confirm('update to omd v[% omd_default_version_label | html %] on [% s.host_name | html %]?') && nc_action_with_popup(this, {action: 'omd_update'}, '[% s.peer_key | html %]'); return false;"><i class="fa-solid fa-square-up-right text-sm" title="update to omd v[% omd_default_version_label | html %]"></i></a>
+                    [% IF !has_installed && !show_pkg_install %]
+                      <a href="#" class="js-omd-update-btn disabled not-clickable" onclick="return false;" title="omd v[% omd_default_version_label | html %] is not available on [% s.host_name | html %]"><i class="fa-solid fa-square-up-right text-sm"></i></a>
+                    [% ELSE %]
+                      <a href="#" class="js-omd-update-btn [% IF s.omd_version == omd_default_version || !has_installed %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="[% skip_confirm %]confirm('update to omd v[% omd_default_version_label | html %] on [% s.host_name | html %]?') && nc_action_with_popup(this, {action: 'omd_update'}, '[% s.peer_key | html %]'); return false;"><i class="fa-solid fa-square-up-right text-sm" title="update to omd v[% omd_default_version_label | html %]"></i></a>
+                    [% END %]
                   [% END %]
 
                   [% IF show_pkg_cleanup %]
@@ -272,7 +277,7 @@
                   [% IF s.run_all %]
                     <div class="spinner clickable" style="margin-right: 3px;" title="site is updating right now" onclick="showJobOutputPopup('[% s.run_all | html %]','[% s.peer_key | html %]')"></div>
                   [% ELSE %]
-                    <a href="#" class="js-run-all-btn [% IF !show_all_btn %]invisible[% END %]" onclick="[% skip_confirm %]confirm('install,update,cleanup to omd v[% omd_default_version_label | html %] on [% s.host_name | html %]?') && nc_action_with_popup(this, {action: 'omd_install_update_cleanup'}, '[% s.peer_key | html %]'); return false;"><i class="fa-solid fa-arrows-up-to-line text-sm" title="run omd install,update,cleanup"></i></a>
+                    <a href="#" class="js-run-all-btn [% IF !show_all_btn || !show_all_button %]invisible[% END %]" onclick="[% skip_confirm %]confirm('install,update,cleanup to omd v[% omd_default_version_label | html %] on [% s.host_name | html %]?') && nc_action_with_popup(this, {action: 'omd_install_update_cleanup'}, '[% s.peer_key | html %]'); return false;"><i class="fa-solid fa-arrows-up-to-line text-sm" title="run omd install,update,cleanup"></i></a>
                   [% END %]
                 </div>
               </form>

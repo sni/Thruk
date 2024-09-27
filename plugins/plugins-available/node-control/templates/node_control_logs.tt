@@ -9,13 +9,22 @@
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/linedtextarea-e619e09/jquery-linedtextarea.css' />
 <div class="card w-full [% IF modal %]shadow-float[% ELSE %]mt-8[% END %] flexcol flex-nowrap gap-0" style="min-width: 1200px; min-height: 500px;">
   <div class="head justify-between">
-    <h3>[% log_type | html %].log on [% s.host_name | html %]</h3>
+    <h3>
+      <div>
+      [% IF log_meta.failed %]
+        <i class="fa-solid fa-exclamation round small red mr-2" title="[% log_type | html %] task failed"></i>
+      [% ELSE %]
+        <i class="fa-solid fa-check round small green mr-2" title="[% log_type | html %] task finished successfully"></i>
+      [% END %]
+      [% log_type | html %].log on [% s.host_name | html %] [% IF log_meta.time %](date: [% date_format(c, log_meta.time) %])[% END %]
+      </div>
+    </h3>
     [% IF modal %]
     <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
     [% END %]
   </div>
   <div class="w-full h-full flex grow overflow-hidden p-2">
-    <textarea class="w-full h-full whitespace-pre js-text-editor" wrap="off" readonly style="line-height: 15px; white-space: pre;">[% log %]</textarea>
+    <textarea class="w-full h-full whitespace-pre js-text-editor" wrap="off" readonly style="line-height: 15px; white-space: pre;">[% log_text | html %]</textarea>
   </div>
   [% IF modal %]
     <div class="footer justify-center">

@@ -43,10 +43,10 @@ sub index {
     my $parallel_actions     = $config->{'parallel_tasks'} // 3;
     $c->stash->{ms_parallel} = $parallel_actions;
 
-    $c->stash->{'show_os_updates'}  = $config->{'os_updates'} // 1;
+    $c->stash->{'show_os_updates'}  = $config->{'os_updates'}  // 1;
     $c->stash->{'show_pkg_install'} = $config->{'pkg_install'} // 1;
     $c->stash->{'show_pkg_cleanup'} = $config->{'pkg_cleanup'} // 1;
-    $c->stash->{'show_all_button'}  = $config->{'all_button'} // 1;
+    $c->stash->{'show_all_button'}  = $config->{'all_button'}  // 1;
     $c->stash->{'skip_confirm'}     = $config->{'skip_confirms'} ? 'noop_' : '';
 
     my $action = $c->req->parameters->{'action'} || 'list';
@@ -136,8 +136,10 @@ sub _node_action {
         my $log = $c->req->parameters->{'type'};
         return unless $log =~ m/^[a-z]+$/mx;
         $c->stash->{s}          = Thruk::NodeControl::Utils::get_server($c, $peer);
-        $c->stash->{log}        = Thruk::Utils::IO::saferead_decoded($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_'.$log.'.log');
         $c->stash->{log_type}   = $log;
+        $c->stash->{log_meta}   = $c->stash->{s}->{'logs'}->{$log};
+        return unless $c->stash->{log_meta};
+        $c->stash->{log_text}   = Thruk::Utils::IO::saferead_decoded($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_'.$log.'.log');
         $c->stash->{template}   = 'node_control_logs.tt';
         $c->stash->{modal}      = $c->req->parameters->{'modal'} // 0;
         $c->stash->{no_tt_trim} = 1;

@@ -230,7 +230,7 @@
   }
 
   .CONSOLE {
-    @apply !bg-[color:var(--console-bg)] !text-[color:var(--console-fg)] font-mono;
+    @apply !bg-[color:var(--console-bg)] !text-[color:var(--console-fg)] font-mono text-sm;
     &.textALERT {
       @apply !text-[color:var(--text-alert)];
     }

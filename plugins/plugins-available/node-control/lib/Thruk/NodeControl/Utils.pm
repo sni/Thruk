@@ -147,6 +147,17 @@ sub get_server {
     # gather available logs
     my @logs = glob($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_*.log');
     @logs = map { my $l = $_; $l =~ s/^.*\///gmx; $l =~ s/\.log$//gmx; $l =~ s/^$peer->{'key'}_//gmx; $l; } @logs;
+    my $logs = Thruk::Base::array2hash(\@logs);
+    for my $l (sort keys %{$logs}) {
+        my $prefix = "";
+        $prefix = "updating"    if $l eq 'update';
+        $prefix = "installiing" if $l eq 'install';
+        $prefix = "cleaning"    if $l eq 'cleanup';
+        $logs->{$l} = {
+            'failed' => $facts->{$prefix.'_failed'} // 0,
+            'time'   => $facts->{$prefix.'_time'}   // "",
+        };
+    }
 
     my $server = {
         peer_key                => $peer->{'key'},
@@ -180,7 +191,7 @@ sub get_server {
         last_error              => $facts->{'last_error'} // '',
         last_facts_error        => $facts->{'last_facts_error'} // '',
         last_job                => $facts->{'last_job'} // '',
-        logs                    => Thruk::Base::array2hash(\@logs),
+        logs                    => $logs,
         facts                   => $facts || {},
     };
 
@@ -552,7 +563,7 @@ sub _omd_update_step2 {
         my($rc, $out) = _local_run_hook($c, $config->{'hook_update_pre_local'}, $env);
         print "*** hook_update_pre_local rc: $rc\n";
         if($rc != 0) {
-            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by local pre hook (rc: %d): %s", $rc, $out));
+            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by local pre hook (rc: %d)", $rc));
         }
     }
 
@@ -1080,6 +1091,8 @@ sub _set_job_started {
 
     my $file = $c->config->{'var_path'}.'/node_control/'.$peerkey.'.json';
     my $data = { 'last_error' => '' };
+    $data->{$type."_failed"} = "0";
+    $data->{$type."_time"}   = time();
     if($ENV{'THRUK_JOB_ID'}) {
         $data->{$type}      = $ENV{'THRUK_JOB_ID'};
         $data->{'last_job'} = $ENV{'THRUK_JOB_ID'};
@@ -1122,6 +1135,7 @@ sub _set_job_errored {
         'last_error' => $err,
     };
     $data->{$type} = 0;
+    $data->{$type."_failed"} = "1";
     Thruk::Utils::IO::json_lock_patch($file, $data, { pretty => 1, allow_empty => 1 });
 
     return;

@@ -13,6 +13,7 @@ Utilities to run background processes
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Cwd qw/abs_path/;
 use Data::Dumper qw/Dumper/;
 use IO::Handle ();
 use POSIX ":sys_wait_h";
@@ -872,7 +873,7 @@ sub _init_child_process {
     # now make sure stdout and stderr point to somewhere, otherwise we get sigpipes pretty soon
     if($conf->{'log_archive'}) {
         unlink($dir."/stdout");
-        symlink($conf->{'log_archive'}, $dir."/stdout");
+        symlink(abs_path($conf->{'log_archive'}), $dir."/stdout");
         wrap_prefix_output($conf->{'log_archive'});
     } else {
         wrap_prefix_output_stop();
