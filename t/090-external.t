@@ -138,7 +138,7 @@ Thruk::Utils::External::remove_job_dir($c->config->{'var_path'}."/jobs/".$job);
 
 my $logarchive = '/tmp/test.'.$<.'.log';
 unlink($logarchive);
-$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd(["'.$cat.'", "'.$tempfile.'"]); print $out; return $rc;', background => 1, log_archive => $logarchive });
+$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd(["'.$cat.'", "'.$tempfile.'"], {no_decode => 1}); print $out; return $rc;', background => 1, log_archive => $logarchive });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile,$start,$end,$perl_res) = Thruk::Utils::External::get_result($c, $job);
 is(length($out), 10260038, "output ok");
