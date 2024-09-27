@@ -2,6 +2,7 @@ use warnings;
 use strict;
 use File::Temp qw/tempfile/;
 use Test::More;
+use utf8;
 
 use Thruk::Utils::IO ();
 
@@ -92,33 +93,35 @@ is($err, "", "err output empty");
 is($rc, 0, "exit code 0");
 
 my($fh, $tempfile) = tempfile();
+$fh->binmode(":encoding(utf-8)");
 ok(-e $tempfile, "tempfile created: ".$tempfile);
 for(1..10000) {
     print $fh "x" x 999,"\n";
 }
+print $fh "€öäüß\n";
 CORE::close($fh);
-is(-s $tempfile, 10000000, "tempfile has 10000000 bytes");
+is(-s $tempfile, 10000012, "tempfile has 10000012 bytes");
 
 $job = Thruk::Utils::External::cmd($c, { cmd => $cat.' '.$tempfile, background => 1 });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $job);
-is(length($out), 10000000, "output ok");
+is(length($out), 10000012, "output ok");
 is($err, "", "err output empty");
 is($rc, 0, "exit code 0");
 Thruk::Utils::External::remove_job_dir($c->config->{'var_path'}."/jobs/".$job);
 
-($rc, $out) = Thruk::Utils::IO::cmd($cat.' '.$tempfile);
-is(length($out), 10000000, "output ok");
-is($rc, 0, "exit code 0");
+my($rc2, $out2) = Thruk::Utils::IO::cmd($cat.' '.$tempfile, { no_decode => 1 });
+is(length($out2), 10000012, "output ok");
+is($rc2, 0, "exit code 0");
 
-($rc, $out) = Thruk::Utils::IO::cmd([$cat, $tempfile]);
-is(length($out), 10000000, "output ok");
+($rc, $out) = Thruk::Utils::IO::cmd([$cat, $tempfile], { no_decode => 1 });
+is(length($out), 10000012, "output ok");
 is($rc, 0, "exit code 0");
 
 $job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd("'.$cat.' \"'.$tempfile.'\""); print $out; return $rc;', background => 1 });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile,$start,$end,$perl_res) = Thruk::Utils::External::get_result($c, $job);
-is(length($out), 10000000, "output ok");
+is(length($out), 10000012, "output ok");
 is($err, "", "err output empty");
 is($rc, 1, "exit code 1");
 is($perl_res, 0, "perl result is 0");
@@ -127,11 +130,25 @@ Thruk::Utils::External::remove_job_dir($c->config->{'var_path'}."/jobs/".$job);
 $job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd(["'.$cat.'", "'.$tempfile.'"]); print $out; return $rc;', background => 1 });
 TestUtils::wait_for_job($job);
 ($out,$err,$time,$dir,$stash,$rc,$profile,$start,$end,$perl_res) = Thruk::Utils::External::get_result($c, $job);
-is(length($out), 10000000, "output ok");
+is(length($out), 10000012, "output ok");
 is($err, "", "err output empty");
 is($rc, 1, "exit code 1");
 is($perl_res, 0, "perl result is 0");
 Thruk::Utils::External::remove_job_dir($c->config->{'var_path'}."/jobs/".$job);
+
+my $logarchive = '/tmp/test.'.$<.'.log';
+unlink($logarchive);
+$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd(["'.$cat.'", "'.$tempfile.'"]); print $out; return $rc;', background => 1, log_archive => $logarchive });
+TestUtils::wait_for_job($job);
+($out,$err,$time,$dir,$stash,$rc,$profile,$start,$end,$perl_res) = Thruk::Utils::External::get_result($c, $job);
+is(length($out), 10260038, "output ok");
+is($err, "", "err output empty");
+is($rc, 1, "exit code 1");
+is($perl_res, 0, "perl result is 0");
+Thruk::Utils::External::remove_job_dir($c->config->{'var_path'}."/jobs/".$job);
+my @stat = stat($logarchive);
+is($stat[7], 10260038, "log size ok");
+unlink($logarchive);
 
 unlink($tempfile);
 
