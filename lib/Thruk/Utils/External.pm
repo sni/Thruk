@@ -1289,7 +1289,6 @@ sub wrap_prefix_output {
     STDOUT->autoflush(1);
     STDERR->autoflush(1);
     $fh->autoflush(1);
-    $fh->binmode(":encoding(utf-8)");
 
     return;
 }
