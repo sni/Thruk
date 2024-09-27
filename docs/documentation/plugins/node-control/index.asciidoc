@@ -55,6 +55,7 @@ Without sudo permissions you can only update to existing omd versions.
   #hook_update_pre_local  =
 
   # command will be run on the remote node prior the update. Exit code != 0 will abort the update
+  # use special syntax with script: prefix to upload local script, ex.: script:local/script.sh
   #hook_update_pre  = if [ $(git status --porcelain 2>&1 | wc -l) -gt 0 ]; then echo "omd home not clean"; git status --porcelain 2>&1; exit 1; fi
 
   # command will be run on the remote node after the update

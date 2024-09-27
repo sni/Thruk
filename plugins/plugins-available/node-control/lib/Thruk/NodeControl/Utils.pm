@@ -549,7 +549,7 @@ sub _omd_update_step2 {
 
     if($config->{'hook_update_pre_local'}) {
         print "*** hook_update_pre_local:\n";
-        my($rc, $out) = Thruk::Utils::IO::cmd($config->{'hook_update_pre_local'}, { env => $env, print_prefix => "" });
+        my($rc, $out) = _local_run_hook($c, $config->{'hook_update_pre_local'}, $env);
         print "*** hook_update_pre_local rc: $rc\n";
         if($rc != 0) {
             return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by local pre hook (rc: %d): %s", $rc, $out));
@@ -591,7 +591,7 @@ sub _omd_update_step2 {
 
     if($config->{'hook_update_post_local'}) {
         print "*** hook_update_post_local:\n";
-        my($rc, $out) = Thruk::Utils::IO::cmd($config->{'hook_update_post_local'}, { env => $env, print_prefix => "" });
+        my($rc, $out) = _local_run_hook($c, $config->{'hook_update_post_local'}, $env);
         print "*** hook_update_post_local rc: $rc\n";
         $post_hooks_failed = 1 if $rc ne '0';
     }
@@ -870,6 +870,20 @@ sub _remote_cmd {
     }
 
     die("http(s) connection failed\n".$err);
+}
+
+##########################################################
+sub _local_run_hook {
+    my($c, $hook, $env) = @_;
+
+    # remove prefix for consistency
+    if($hook =~ m/^script:(.*)$/mx) {
+        $hook = $1;
+    }
+
+    my($rc, $out) = Thruk::Utils::IO::cmd($hook, { env => $env, print_prefix => "" });
+
+    return($rc, $out);
 }
 
 ##########################################################
