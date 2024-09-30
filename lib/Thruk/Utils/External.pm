@@ -1024,6 +1024,11 @@ remove old job folders
 sub cleanup_job_folders {
     my($c, $verbose) = @_;
 
+    if(!$verbose) {
+        # only in 10% of the time
+        return if int(rand(100)) >= 90;
+    }
+
     $c->stats->profile(begin => "cleanup_job_folders");
 
     my($total, $removed) = (0, 0);
