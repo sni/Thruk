@@ -165,6 +165,8 @@ sub perl {
             Thruk::Utils::IO::write($dir."/perl_res", (defined $rc && ref $rc eq '') ? Thruk::Utils::Encode::encode_utf8($rc) : "", undef, 1);
 
             wrap_prefix_output_stop();
+            close(*STDOUT);
+            close(*STDERR);
             open(*STDERR, '>>', '/dev/null') or _warn("cannot redirect stderr to /dev/null");
             open(*STDOUT, '>>', '/dev/null') or _warn("cannot redirect stdout to /dev/null");
         };
