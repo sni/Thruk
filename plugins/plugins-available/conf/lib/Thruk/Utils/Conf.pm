@@ -404,6 +404,7 @@ sub get_component_as_string {
         $string .= "    <peer>\n";
         $string .= "        name    = ".$b->{'name'}."\n";
         $string .= "        id      = ".$b->{'id'}."\n"      if $b->{'id'};
+        $string .= "        active  = ".$b->{'active'}."\n" if defined $b->{'active'};
         $string .= "        type    = ".$b->{'type'}."\n";
         $string .= "        hidden  = ".$b->{'hidden'}."\n"  if $b->{'hidden'};
         $string .= "        groups  = ".$b->{'groups'}."\n"  if $b->{'groups'};

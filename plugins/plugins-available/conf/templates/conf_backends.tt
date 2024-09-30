@@ -36,7 +36,7 @@
       <tr>
         <td colspan=3><hr></td>
       </tr>
-      [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', id => '', hidden => 0, type => 'livestatus', section => '', file => '', lineno => '' } x = 0 %]
+      [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', id => '', hidden => 0, type => 'livestatus', section => '', file => '', lineno => '', active => 1 } x = 0 %]
       <tr>
         <td colspan=3>
           <button class="w-32 mx-auto m-2" [% IF readonly %]disabled[% ELSE %]onclick="setBtnSpinner(this);"[% END %]>
@@ -162,15 +162,12 @@
     var value = jQuery(sel).val();
     var nr    = sel.name.replace('type', '');
 
-    jQuery('.backend_conf_'+nr+'.backend_connection').hide();
     jQuery('.backend_conf_'+nr+'.backend_auth').hide();
     jQuery('.backend_conf_'+nr+'.backend_proxy').hide();
     jQuery('.backend_conf_'+nr+'.backend_remote_name').hide();
 
-    if(value == 'livestatus' || value == 'http') {
-      jQuery('.backend_conf_'+nr+'.backend_connection').show();
-    }
-    if(value == 'http') {
+    jQuery('.backend_conf_'+nr+'.backend_connection').show();
+    if(value == 'http' || value == 'configonly') {
       jQuery('.backend_conf_'+nr+'.backend_auth').show();
       jQuery('.backend_conf_'+nr+'.backend_proxy').show();
       jQuery('.backend_conf_'+nr+'.backend_remote_name').show();

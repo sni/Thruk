@@ -1,4 +1,5 @@
-﻿<tr class="backend_conf_[% x %]">
+﻿
+<tr class="backend_conf_[% x %]">
   <th class="px-2">Name</th>
   <td>
     <input type="hidden" name="id[% x %]" value="[% b.id %]">
@@ -8,6 +9,12 @@
     <button class="iconOnly hoverable w-6 h-6 ml-auto" title="remove connection" onclick="[% IF x == 0 %]conf_sites_add_hide();[% ELSE %]delete_site_row(this);[% END %]return false;">
       <i class="uil uil-times"></i>
     </button>
+  </td>
+</tr>
+<tr class="backend_conf_[% x %]">
+  <th class="px-2">Enabled</th>
+  <td>
+    <input type="checkbox" class="clickable" name="active[% x %]" id="active[% x %]" value="1" [% IF b.active %]checked[% END %] /><label class="pl-2 clickable" for="active[% x %]">Backend is active</label>
   </td>
 </tr>
 <tr class="backend_conf_[% x %]">

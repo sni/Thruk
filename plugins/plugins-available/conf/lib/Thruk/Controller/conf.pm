@@ -839,6 +839,7 @@ sub _process_backends_page {
                 'id'      => $c->req->parameters->{'id'.$x},
                 'hidden'  => defined $c->req->parameters->{'hidden'.$x} ? $c->req->parameters->{'hidden'.$x} : 0,
                 'section' => $c->req->parameters->{'section'.$x},
+                'active'  => $c->req->parameters->{'active'.$x} || 0,
                 'options' => {},
             };
             $backend->{'options'}->{'peer'}         = $c->req->parameters->{'peer'.$x}        if $c->req->parameters->{'peer'.$x};
@@ -857,6 +858,9 @@ sub _process_backends_page {
                     $p .= ':6557';
                 }
             }
+
+            # that's the default anyway
+            delete $backend->{'active'} if $backend->{'active'};
 
             # add values from existing backend config
             my $savefile = $file;
@@ -921,7 +925,7 @@ sub _process_backends_page {
     }
 
     my $backends = [];
-    my $peers    = $c->db->get_peers(1);
+    my $peers    = $c->db->get_peers(1, 1);
     $peers = [{}] if scalar @{$peers} == 0;
     for my $p (@{$peers}) {
         my $b = Thruk::Utils::IO::dclone($p->{'peer_config'});
@@ -935,6 +939,7 @@ sub _process_backends_page {
         $b->{'remote_name'} = $b->{'options'}->{'remote_name'} || '';
         $b->{'hidden'}      = $b->{'hidden'}  // 0;
         $b->{'section'}     = $b->{'section'} // '';
+        $b->{'active'}      = $b->{'active'}  // 1;
         $b->{'file'}        = $b->{'_FILE'}   // $file;
         $b->{'lineno'}      = $b->{'_LINE'}   // '';
         push @{$backends}, $b;

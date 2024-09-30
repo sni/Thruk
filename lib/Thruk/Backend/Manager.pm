@@ -205,12 +205,15 @@ returns all configured peers (except config-only)
 =cut
 
 sub get_peers {
-    my($self, $all) = @_;
-    return \@{$self->pool->{'objects'}} if $all;
-
+    my($self, $all, $inactive_too) = @_;
     my @peers;
+
+    return $self->pool->{'objects'} if($all && $inactive_too);
+
     for my $b (@{$self->pool->{'objects'}}) {
-        push @peers, $b if $b->{'addr'};
+        next if(defined $b->{'active'} && !$b->{'active'} && !$inactive_too);
+        next if(!$b->{'addr'} && !$all);
+        push @peers, $b;
     }
     return \@peers;
 }
@@ -229,7 +232,7 @@ sub get_local_peers {
     my($self) = @_;
 
     my @peers;
-    for my $b (@{$self->pool->{'objects'}}) {
+    for my $b (@{$self->get_peers()}) {
         push @peers, $b if $b->is_local();
     }
     return \@peers;
