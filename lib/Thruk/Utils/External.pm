@@ -15,6 +15,7 @@ use strict;
 use Carp qw/confess/;
 use Cwd qw/abs_path/;
 use Data::Dumper qw/Dumper/;
+use File::Copy qw/move copy/;
 use IO::Handle ();
 use POSIX ":sys_wait_h";
 use Storable ();
@@ -207,8 +208,14 @@ sub perl {
     save_profile($c, $dir);
     wrap_prefix_output_stop();
     if($conf->{'log_archive'}) {
-        unlink($dir."/stdout");
-        Thruk::Utils::IO::write($dir."/stdout", Thruk::Utils::IO::read($conf->{'log_archive'}));
+        eval {
+            copy($conf->{'log_archive'}, $dir."/stdout.new") or die("copy failed: $!");
+            unlink($dir."/stdout");
+            move($dir."/stdout.new", $dir."/stdout");
+        };
+        if($@) {
+            $err = ($err//"").$@;
+        }
     }
     if($err) {
         eval {
@@ -972,8 +979,14 @@ create job folder and return id
 sub init_external {
     my($c) = @_;
 
-    my $id  = substr(Thruk::Utils::Crypt::hexdigest($$."-".Time::HiRes::time()), 0, 5);
+    my $cutoff = 5;
+    my $id  = substr(Thruk::Utils::Crypt::hexdigest($$."-".Time::HiRes::time()), 0, $cutoff);
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
+    while(-d $dir) {
+        $cutoff++;
+        $id  = substr(Thruk::Utils::Crypt::hexdigest($$."-".Time::HiRes::time()), 0, $cutoff);
+        $dir = $c->config->{'var_path'}."/jobs/".$id;
+    }
     for my $mdir ($c->config->{'var_path'}, $c->config->{'var_path'}."/jobs", $dir) {
         if(! -d $mdir) {
             Thruk::Utils::IO::mkdir($mdir) or do {

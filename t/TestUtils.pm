@@ -26,7 +26,7 @@ use HTTP::Request ();
 use HTTP::Request::Common 6.12 qw/GET POST/;
 use Plack::Test;
 use Test::More;
-use Time::HiRes qw/sleep/;
+use Time::HiRes qw/sleep gettimeofday tv_interval/;
 use URI::Escape qw/uri_unescape/;
 
 use Thruk ();
@@ -661,7 +661,7 @@ sub wait_for_job {
     elsif($url =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
         $job = $1;
     }
-    my $start  = time();
+    my $start = [gettimeofday];
     my $config = Thruk::Config::get_config();
 
     if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'} || $joburl) {
@@ -679,8 +679,8 @@ sub wait_for_job {
                 sleep(0.1);
             }
         };
-        my $end  = time();
-        is($data->{'is_running'}, 0, 'job '.$job.' is finished in '.($end-$start).' seconds');
+        my $end = [gettimeofday];
+        is($data->{'is_running'}, 0, 'job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds');
         alarm(0);
         return;
     }
@@ -700,8 +700,8 @@ sub wait_for_job {
         }
     };
     alarm(0);
-    my $end  = time();
-    is(Thruk::Utils::External::_is_running(undef, $jobdir), 0, 'job is finished in '.($end-$start).' seconds')
+    my $end = [gettimeofday];
+    is(Thruk::Utils::External::_is_running(undef, $jobdir), 0, 'job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds')
         or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
                             scalar `uptime`,
                             scalar `ps -efl`,

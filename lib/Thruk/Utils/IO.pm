@@ -904,13 +904,13 @@ sub cmd {
         }
         CORE::close($wtr);
 
-        while(my @ready = $sel->can_read) {
-            foreach my $fh (@ready) {
+        while(my @ready = $sel->can_read()) {
+            for my $fh (@ready) {
                 my $line;
-                my $len = sysread $fh, $line, 8192;
+                my $len = sysread $fh, $line, 65536;
                 if(!defined $len){
                     die "Error from child: $!\n";
-                } elsif ($len == 0){
+                } elsif ($len == 0) {
                     $sel->remove($fh);
                     next;
                 } else {
