@@ -1115,6 +1115,31 @@ sub bail_out_cmd {
 }
 
 #########################
+
+=head2 bail_out_diag
+
+  print diagnostic output and bail out
+
+=cut
+sub bail_out_diag {
+    my($msg, @details) = @_;
+
+    diag("\n######################################################\n");
+    chomp($msg);
+    diag($msg."\n");
+    for my $d (@details) {
+        my $m = (ref $d ? Dumper($d) : $d);
+        chomp($m);
+        diag($m."\n");
+    }
+
+    diag(Carp::longmess("started here:"));
+    diag("\n######################################################\n");
+    BAIL_OUT($msg);
+    return;
+}
+
+#########################
 sub set_test_user_token {
     return if $test_token;
     $test_token = get_current_user_token();
