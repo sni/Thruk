@@ -760,6 +760,7 @@ sub wait_for_peer_job {
         sleep($poll_interval);
     }
     &{$print_remaining}();
+    chomp($jobdata->{'rc'}) if $jobdata;
     return($jobdata);
 }
 
