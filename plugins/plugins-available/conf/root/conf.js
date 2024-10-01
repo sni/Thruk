@@ -667,12 +667,10 @@ function conf_prompt_change_summary(remoteform, submit_callback) {
 }
 
 function conf_update_attr_customvar_name(inp) {
-console.log(inp);
     var row = jQuery(inp).parents("TR");
     var type = jQuery(row).find("TD.js-help-icon").data("name");
     if(type == "customvar" || type == "customvariable") {
         inp.value = inp.value.toUpperCase();
     }
-console.log(inp.value);
     jQuery(row).find("INPUT.js-attr-value").attr("name", "obj."+inp.value)
 }

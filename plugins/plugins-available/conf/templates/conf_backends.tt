@@ -165,9 +165,10 @@
     jQuery('.backend_conf_'+nr+'.backend_auth').hide();
     jQuery('.backend_conf_'+nr+'.backend_proxy').hide();
     jQuery('.backend_conf_'+nr+'.backend_remote_name').hide();
+    jQuery('.backend_conf_'+nr+'.backend_connection').hide();
 
-    jQuery('.backend_conf_'+nr+'.backend_connection').show();
-    if(value == 'http' || value == 'configonly') {
+    if(value == 'http') {
+      jQuery('.backend_conf_'+nr+'.backend_connection').show();
       jQuery('.backend_conf_'+nr+'.backend_auth').show();
       jQuery('.backend_conf_'+nr+'.backend_proxy').show();
       jQuery('.backend_conf_'+nr+'.backend_remote_name').show();
@@ -175,6 +176,7 @@
     }
 
     if(value == 'livestatus') {
+      jQuery('.backend_conf_'+nr+'.backend_connection').show();
       jQuery('INPUT[name=peer'+nr+']').attr('placeholder', 'server:6557 or socket');
     }
   }
