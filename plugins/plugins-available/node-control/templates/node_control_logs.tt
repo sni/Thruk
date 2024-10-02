@@ -11,12 +11,12 @@
   <div class="head justify-between">
     <h3>
       <div>
-      [% IF log_meta.failed %]
-        <i class="fa-solid fa-exclamation round small red mr-2" title="[% log_type | html %] task failed"></i>
-      [% ELSE %]
-        <i class="fa-solid fa-check round small green mr-2" title="[% log_type | html %] task finished successfully"></i>
-      [% END %]
-      [% log_type | html %].log on [% s.host_name | html %] [% IF log_meta.time %](date: [% date_format(c, log_meta.time) %])[% END %]
+        [% IF log_meta.failed %]
+          <div class="badge CRITICAL"><i class="fa-solid fa-exclamation small text-inherit" title="[% log_type | html %] task failed"></i>Failed</div>
+        [% ELSE %]
+          <div class="badge OK"><i class="fa-solid fa-check small text-inherit" title="[% log_type | html %] task finished successfully"></i> Success</div>
+        [% END %]
+        [% log_type | html %].log on [% s.host_name | html %] [% IF log_meta.time %](date: [% date_format(c, log_meta.time) %])[% END %]
       </div>
     </h3>
     [% IF modal %]
