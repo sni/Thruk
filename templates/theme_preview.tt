@@ -7,20 +7,32 @@
 
 <div class="flexrow justify-between">
   [% PROCESS _infobox.tt %]
-  <div class="card min-w-[150px] place-items-center grid grid-cols-1">
-    <h3 class="text-center w-full">Switch Theme</h3>
-    <div class="flex">
-      <select multiple onchange="switchTheme(this)" size="[% c.config.themes.size %]" style="scrollbar-width: none;">
-        [% FOREACH t = c.config.themes %]
-          <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
-        [% END %]
-      </select>
+  <div class="card min-w-[150px]">
+    <div class="body">
+      <table class="cellspacing">
+        <tr>
+          <th class="align-top">Switch Theme</th>
+          <td>
+            <select multiple onchange="switchTheme(this)" size="[% c.config.themes.size %]" style="scrollbar-width: none;" class="w-full">
+              [% FOREACH t = c.config.themes %]
+                <option value="[% t | html %]"[% IF t == theme %] selected[% END %]>[% t | html %]</option>
+              [% END %]
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th class="align-top">Filter Boxes</th>
+          <td>
+            <input type="text" class="w-full min-w-[120px] deletable" id="filterboxes" onkeyup="filterBoxes(this)">
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
 </div>
 
 <div class="flexrow flex-nowrap mt-5">
-  <div class="card overflow-hidden w-72">
+  <div class="card overflow-hidden w-72 js-box">
     <div class="head justify-between">
       <h3>Icons</h3>
       [% PROCESS _table_search_field.tt ids=["iconsBox"] %]
@@ -186,7 +198,7 @@
   </div>
 
   <div class="grid grid-cols-2 2xl:grid-cols-3 gap-5 h-fit">
-    <div class="card min-w-[300px]">
+    <div class="card min-w-[300px] js-box">
       <div class="head">
         <h3>Logos</h3>
       </div>
@@ -204,7 +216,7 @@
       </div>
     </div>
 
-    <div class="card min-w-[300px]">
+    <div class="card min-w-[300px] js-box">
       <div class="head">
         <h3>.card</h3>
       </div>
@@ -222,7 +234,7 @@
       </div>
     </div>
 
-    <div class="card shadow-float min-w-[300px]">
+    <div class="card shadow-float min-w-[300px] js-box">
       <div class="head">
         <h3>.card .shadow-float</h3>
       </div>
@@ -235,7 +247,7 @@
       </div>
     </div>
 
-    <div class="card min-w-[400px] text-center">
+    <div class="card min-w-[400px] text-center js-box">
       <div class="head">
         <h3 class="text-left">Host Colors</h3>
       </div>
@@ -249,7 +261,7 @@
       </table>
     </div>
 
-    <div class="card min-w-[400px] text-center">
+    <div class="card min-w-[400px] text-center js-box">
       <div class="head">
         <h3 class="text-left">Service Colors</h3>
       </div>
@@ -264,7 +276,7 @@
       </table>
     </div>
 
-    <div class="card">
+    <div class="card js-box">
       <div class="head">
         <h3>Progressbar</h3>
       </div>
@@ -284,7 +296,7 @@
       </div>
     </div>
 
-    <div class="card w-fit">
+    <div class="card w-fit js-box">
       <div class="head">
         <h3>Buttons</h3>
       </div>
@@ -384,7 +396,7 @@
       </div>
     </div>
 
-    <div class="card w-fit">
+    <div class="card w-fit js-box">
       <div class="head">
         <h3>Peer Buttons</h3>
       </div>
@@ -410,7 +422,44 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card w-fit js-box">
+      <div class="head">
+        <h3>Badges</h3>
+      </div>
+      <div class="body">
+        <table class="cellspacing">
+          <tr>
+            <th>OK</th>
+            <td><div class="badge OK">OK</button></td>
+            <td><div class="badge OK text-left"><i class="fa-solid fa-check"></i>Success</div></td>
+          </tr>
+          <tr>
+            <th>WARNING</th>
+            <td><div class="badge WARNING">WARNING</button></td>
+          </tr>
+          <tr>
+            <th>CRITICAL</th>
+            <td><div class="badge CRITICAL">CRITICAL</button></td>
+            <td><div class="badge CRITICAL text-left"><i class="fa-solid fa-exclamation"></i>Failed</div></td>
+          </tr>
+          <tr>
+            <th>UNKNOWN</th>
+            <td><div class="badge UNKNOWN">UNKNOWN</button></td>
+          </tr>
+          <tr>
+            <th>PENDING</th>
+            <td><div class="badge PENDING">PENDING</button></td>
+          </tr>
+          <tr>
+            <th>none</th>
+            <td><div class="badge">none</button></td>
+            <td><div class="badge text-left"><div class="spinner"></div>Running</div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card js-box">
       <div class="head">
         <h3>Forms</h3>
       </div>
@@ -494,28 +543,28 @@
     </div>
 
     <div class="grid gap-3 grid-cols-2 h-fit w-fit">
-      <div class="card alert red relative w-36">
+      <div class="card alert red relative w-36 js-box">
         <div class="head">
           <h3>red alert</h3>
         </div>
         <div class="body text-left">div.card.red.alert</div>
       </div>
 
-      <div class="card alert yellow relative w-36">
+      <div class="card alert yellow relative w-36 js-box">
         <div class="head">
           <h3>yellow alert</h3>
         </div>
         <div class="body text-left">div.card.yellow.alert</div>
       </div>
 
-      <div class="card alert orange relative w-36">
+      <div class="card alert orange relative w-36 js-box">
         <div class="head">
           <h3>orange alert</h3>
         </div>
         <div class="body text-left">div.card.orange.alert</div>
       </div>
 
-      <div class="card alert green relative w-36">
+      <div class="card alert green relative w-36 js-box">
         <div class="head">
           <h3>green alert</h3>
         </div>
@@ -523,7 +572,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card js-box">
       <div class="head">
         <h3>Console</h3>
       </div>
@@ -533,7 +582,7 @@
       </div>
     </div>
 
-    <div>
+    <div class="js-box">
       <div class="body">
         [% PROCESS _log_date_select.tt start=date.now-86400 end=date.now  %]
       </div>
@@ -542,7 +591,7 @@
   </div>
 </div>
 
-<div class="card w-full mt-5">
+<div class="card w-full mt-5 js-box">
   <div class="mainTableHeader">
     <div>
       <i class="fa-solid fa-bars"></i>
@@ -615,6 +664,38 @@ jQuery("#iconsBox A").click(function(evt) {
   copyCode(evt, jQuery(this).find("I").attr("class"));
   return false;
 });
+
+function filterBoxes(input) {
+  var filter = jQuery(input).val().toLowerCase();
+  set_hash(filter, 1);
+  jQuery("DIV.js-box").each(function(i, box) {
+    if(filter == "") {
+      jQuery(box).show();
+    } else {
+      var found = false;
+      jQuery(box).find("H3").each(function(i, h3) {
+        if(jQuery(h3).text().toLowerCase().indexOf(filter) > -1) {
+          found = true;
+        }
+      });
+      if(found) {
+        jQuery(box).show();
+      } else {
+        jQuery(box).hide();
+      }
+    }
+  });
+}
+
+jQuery(document).ready(function() {
+  var filter = document.getElementById("filterboxes");
+  var val    = get_hash(1);
+  if(val) {
+    jQuery(filter).val(val);
+    filterBoxes(filter);
+  }
+});
+
 </script>
 
 [% PROCESS _footer.tt %]

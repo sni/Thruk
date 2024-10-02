@@ -475,6 +475,12 @@ HR {
 
 .badge {
   @apply text-center inline-block py-[0.05rem] rounded-[3px] px-1 min-w-[5rem] bg-[color:var(--badge-bg)] text-[color:var(--badge-fg)];
+  > I {
+    @apply !text-inherit mr-1 !w-4 !h-4 !leading-[16px] !text-[12px];
+  }
+  > DIV.spinner {
+    @apply mr-1;
+  }
 }
 
 @layer base {
