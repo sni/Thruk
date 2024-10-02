@@ -247,7 +247,7 @@ sub get_peers_by_tags {
             } elsif($b->{'tags'}->{$t}) {
                 $found = 1;
             }
-        };
+        }
 
         next unless $found;
         push @peers, $b;

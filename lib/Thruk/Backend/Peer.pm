@@ -6,6 +6,7 @@ use Carp;
 use Scalar::Util qw/weaken/;
 
 use Thruk::Backend::Manager ();
+use Thruk::Base ();
 
 ## no lint
 use Thruk::Backend::Provider::Livestatus ();
