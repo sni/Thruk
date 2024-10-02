@@ -3928,9 +3928,9 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
     }
 
     var head = jQuery('#'+divid).parents('.card').find("DIV.head");
-    head.find("DIV.spinner").remove();
-    head.find("I.fa-check").remove();
-    head.find("I.fa-exclamation").remove();
+    head.find(".js-ok").addClass("hidden");
+    head.find(".js-nok").addClass("hidden");
+    head.find(".js-run").addClass("hidden");
     jQuery('#'+divid).text(data.stdout+data.stderr);
 
     // check if text area should scroll
@@ -3955,15 +3955,15 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
     }
 
     if(data['is_running']) {
-        head.prepend('<div class="spinner mr-2"><\/div>');
+        head.find(".js-run").removeClass("hidden");
         window.setTimeout(function() {
             showJobOutputPopupFetch(jobid, peerid, divid);
         }, 1000)
     } else {
         if(data['rc'] == 0) {
-            head.prepend('<i class="fa-solid fa-check round small green mr-2"><\/i>');
+            head.find(".js-ok").removeClass("hidden");
         } else {
-            head.prepend('<i class="fa-solid fa-exclamation round small red mr-2"><\/i>');
+            head.find(".js-nok").removeClass("hidden");
             jQuery('#'+divid).addClass("textALERT");
         }
     }
