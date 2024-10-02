@@ -1194,6 +1194,9 @@ TABLE.striped {
 TABLE.rowhover > TBODY > TR, TBODY.rowhover > TR {
   @apply hover:hoverBG;
 }
+TABLE.rowhover.rowhoverhighlight > TBODY > TR, TBODY.rowhover.rowhoverhighlight > TR {
+  @apply hover:bg-[color:var(--text-highlight-bg)];
+}
 
 DIV.mainTableHeader {
   @apply flex px-1.5 py-1 bgTable mt-0 rounded-t-lg;

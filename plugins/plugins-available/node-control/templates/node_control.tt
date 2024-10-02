@@ -97,7 +97,7 @@
           </th>
         </tr>
       </thead>
-      <tbody class="rowhover">
+      <tbody class="rowhover rowhoverhighlight">
         [% FOREACH s = data %]
           [%
           error_lines = [];
