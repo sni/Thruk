@@ -51,6 +51,7 @@ sub new {
         'addr'                 => $options->{'peer'},
         'auth'                 => $options->{'auth'},
         'proxy'                => $options->{'proxy'},
+        'verify'               => $options->{'verify'} // 1,
         'remote_name'          => $options->{'remote_name'} || '', # request this remote peer
         'remotekey'            => '',
     };
@@ -934,6 +935,7 @@ sub _req {
         confess($@);
     }
     Thruk::UserAgent::disable_verify_hostname_by_url($self->{'ua'}, $self->{'addr'});
+    Thruk::UserAgent::disable_verify_hostname($self->{'ua'}) if $self->{'verify'} == 0;
     my $response = _ua_post_with_timeout(
                         $self->{'ua'},
                         $self->{'addr'},

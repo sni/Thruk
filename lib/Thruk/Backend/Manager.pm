@@ -2145,11 +2145,12 @@ sub _get_result_parallel {
     }
 
     my $elapsed = tv_interval($t1);
-    my @timessorted = reverse sort { $times->{$a} <=> $times->{$b} } keys(%{$times});
-    my $slowest = sprintf("slowest site: %s -> %.4f", $timessorted[0], $times->{$timessorted[0]});
-    _add_query_stats($c, $elapsed, $function, $arg, undef, $slowest);
-
-    $c->stats->profile( comment => $slowest);
+    if(scalar keys %{$times} > 0) {
+        my @timessorted = reverse sort { $times->{$a} <=> $times->{$b} } keys(%{$times});
+        my $slowest = sprintf("slowest site: %s -> %.4f", $timessorted[0], $times->{$timessorted[0]});
+        _add_query_stats($c, $elapsed, $function, $arg, undef, $slowest);
+        $c->stats->profile( comment => $slowest);
+    }
 
     $c->stats->profile( end => "_get_result_parallel(".join(',', @{$peers}).")");
     return($result, $type, $totalsize);
