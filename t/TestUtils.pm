@@ -95,20 +95,20 @@ sub ctx_request {
 #########################
 sub get_test_servicegroup {
     my $request = _request('/thruk/r/servicegroups?columns=name&limit=1');
-    ok( $request->is_success, 'get_test_servicegroup() request succeeded' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_test_servicegroup() request succeeded' ) || bail_out_req('got no test object, cannot test.', $request);
     my $data       = decode_json($request->decoded_content || $request->content);
     my $name       = $data->[0]->{'name'};
-    isnt($name, undef, "got a servicegroup from the rest api") or bail_out_req('got no test object, cannot test.', $request);
+    isnt($name, undef, "got a servicegroup from the rest api") || bail_out_req('got no test object, cannot test.', $request);
     return($name);
 }
 
 #########################
 sub get_test_hostgroup {
     my $request = _request('/thruk/r/hostgroups?columns=name&limit=1');
-    ok( $request->is_success, 'get_test_hostgroup() request succeeded' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_test_hostgroup() request succeeded' ) || bail_out_req('got no test object, cannot test.', $request);
     my $data       = decode_json($request->decoded_content || $request->content);
     my $name       = $data->[0]->{'name'};
-    isnt($name, undef, "got a hostgroup from the rest api") or bail_out_req('got no test object, cannot test.', $request);
+    isnt($name, undef, "got a hostgroup from the rest api") || bail_out_req('got no test object, cannot test.', $request);
     return($name);
 }
 
@@ -117,10 +117,10 @@ sub get_test_user {
     our $remote_user_cache;
     return $remote_user_cache if $remote_user_cache;
     my $request = _request('/thruk/r/thruk/whoami?columns=id');
-    ok( $request->is_success, 'get_test_user() request succeeded' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_test_user() request succeeded' ) || bail_out_req('got no test object, cannot test.', $request);
     my $data       = decode_json($request->decoded_content || $request->content);
     my $name       = $data->{'id'};
-    isnt($name, undef, "got a user from the rest api") or bail_out_req('got no test object, cannot test.', $request);
+    isnt($name, undef, "got a user from the rest api") || bail_out_req('got no test object, cannot test.', $request);
     $remote_user_cache = $name;
     return($name);
 }
@@ -130,13 +130,13 @@ sub get_current_user_token {
     our $remote_user_token;
     return $remote_user_token if $remote_user_token;
     my $request = _request('/thruk/cgi-bin/user.cgi');
-    ok( $request->is_success, 'get_current_user_token() request succeeded' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_current_user_token() request succeeded' ) || bail_out_req('got no token, cannot test.', $request);
     my $page = $request->content;
     my $token;
     if($page =~ m/name="CSRFtoken"\s+value="([^"]+)"/mxo) {
         $token = $1;
     }
-    isnt($token, undef, "got a token from user.cgi") or bail_out_req('got no token, cannot test.', $request);
+    isnt($token, undef, "got a token from user.cgi") || bail_out_req('got no token, cannot test.', $request);
     $remote_user_token = $token;
     return($token);
 }
@@ -145,22 +145,22 @@ sub get_current_user_token {
 sub get_test_service {
     my $backend = shift;
     my $request = _request('/thruk/r/services?columns=host_name,description&description[nregex]=Business&limit=1'.(defined $backend ? '&backend='.$backend : ''));
-    ok( $request->is_success, 'get_test_service() request succeeded' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_test_service() request succeeded' ) || bail_out_req('got no test host, cannot test.', $request);
     my $data    = decode_json($request->decoded_content || $request->content);
     my $host    = $data->[0]->{'host_name'};
     my $service = $data->[0]->{'description'};
-    isnt($host, undef, "got a host from the rest api") or bail_out_req('got no test host, cannot test.', $request);
-    isnt($service, undef, "got a service from the rest api") or bail_out_req('got no test service, cannot test.', $request);
+    isnt($host, undef, "got a host from the rest api") || bail_out_req('got no test host, cannot test.', $request);
+    isnt($service, undef, "got a service from the rest api") || bail_out_req('got no test service, cannot test.', $request);
     return($host, $service);
 }
 
 #########################
 sub get_test_timeperiod {
     my $request = _request('/thruk/r/timeperiods?columns=name&limit=1');
-    ok( $request->is_success, 'get_test_timeperiod() request succeeded' ) or diag(Dumper($request));
+    ok( $request->is_success, 'get_test_timeperiod() request succeeded' ) || bail_out_req('got no test object, cannot test.', $request);
     my $data       = decode_json($request->decoded_content || $request->content);
     my $name       = $data->[0]->{'name'};
-    isnt($name, undef, "got a timeperiod from the rest api") or bail_out_req('got no test object, cannot test.', $request);
+    isnt($name, undef, "got a timeperiod from the rest api") || bail_out_req('got no test object, cannot test.', $request);
     return($name);
 }
 
@@ -265,7 +265,7 @@ sub test_page {
             $redirects++;
             last if $redirects > 10;
         }
-        ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) or bail_out_req('too many redirects', $request, 1);
+        ok( $redirects < 10, 'Redirect succeed after '.$redirects.' hops' ) || bail_out_req('too many redirects', $request, 1);
     }
 
     my $cleaned_content = $request->content;
@@ -378,7 +378,7 @@ sub test_page {
         }
     }
     else {
-        ok( $request->is_success, 'Request '.Thruk::Utils::Encode::encode_utf8($opts->{'url'}).' should succeed' ) or bail_out_req('request failed', $request, 1);
+        ok( $request->is_success, 'Request '.Thruk::Utils::Encode::encode_utf8($opts->{'url'}).' should succeed' ) || bail_out_req('request failed', $request, 1);
     }
 
     # text that should appear
