@@ -1440,7 +1440,7 @@ sub get_remote_thruk_site_name {
 
     return unless $url;
 
-    if($url =~ m|^(https?)://([^/]+)/([^/]+)/|gmx) {
+    if($url =~ m|^(https?)://([^/]+)/([^/]+)/?|gmx) {
         return($3);
     }
 

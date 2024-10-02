@@ -1397,6 +1397,12 @@ function toggleElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback)
   }
 }
 
+function reapplyAllStripes() {
+    jQuery('.js-striped').each(function(i, el) {
+        applyRowStripes(el);
+    });
+}
+
 /* returns true if element overflows */
 if(jQuery) { // prevent ReferenceError: jQuery is not defined during js tests
     jQuery.fn.overflown=function(){
