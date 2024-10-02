@@ -216,6 +216,8 @@ sub _initialise_peer {
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;
     $self->{'authoritive'}   = $peer_config->{'authoritive'};
+    $self->{'tags'}          = Thruk::Base::array2hash(Thruk::Base::comma_separated_list($peer_config->{'tags'}));
+    $self->{'tags'}->{'live'} = 'live' unless scalar keys %{$self->{'tags'}} > 0;
 
     # shorten backend id
     my $key = $peer_config->{'id'};

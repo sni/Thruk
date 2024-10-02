@@ -212,7 +212,44 @@ sub get_peers {
 
     for my $b (@{$self->pool->{'objects'}}) {
         next if(defined $b->{'active'} && !$b->{'active'} && !$inactive_too);
-        next if(!$b->{'addr'} && !$all);
+        next if(!$b->{'addr'} && !$all); # config-only don't have an address
+        next unless $b->{'tags'}->{'live'};
+        push @peers, $b;
+    }
+    return \@peers;
+}
+
+##########################################################
+
+=head2 get_peers_by_tags
+
+  get_peers_by_tags($tags)
+
+returns all configured peers with given tags, ex: [ 'tag1', '!tag2' ]
+
+=cut
+
+sub get_peers_by_tags {
+    my($self, $tags) = @_;
+    my @peers;
+
+    for my $b (@{$self->pool->{'objects'}}) {
+        next if(defined $b->{'active'} && !$b->{'active'});
+
+        my $found = 0;
+        for my $t (@{$tags}) {
+            if($t =~ m/^\!(.*)$/mx) {
+                my $t = $1;
+                if($b->{'tags'}->{$t}) {
+                    $found = 0;
+                    last;
+                }
+            } elsif($b->{'tags'}->{$t}) {
+                $found = 1;
+            }
+        };
+
+        next unless $found;
         push @peers, $b;
     }
     return \@peers;
