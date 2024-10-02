@@ -89,11 +89,10 @@ my $app = $c->app;
     my $res2 = $c->sub_request('/r/thruk/reports');
     is(ref $res2, 'ARRAY', 'got array from sub_request') || diag(Dumper($res2));
 
-    my $res3 = $c->sub_request('/r/hosts?limit=1&columns=name');
+    my $res3 = $c->sub_request('/r/thruk/sessions?columns=username&limit=1');
     is(ref $res3, 'ARRAY', 'got array from sub_request');
-    my $expect = -s 'thruk_local.conf' ? 1 : 0;
-    is(scalar @{$res3}, $expect, 'sending url parameters worked');
-    is(scalar keys %{$res3->[0]}, $expect, 'sending url parameters worked') || diag(Dumper($res3));
+    is(scalar @{$res3}, 1, 'sending url parameters worked');
+    is(scalar keys %{$res3->[0]}, 1, 'sending url parameters worked') || diag(Dumper($res3));
 };
 
 #########################
