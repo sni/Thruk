@@ -150,9 +150,9 @@ sub get_server {
     my $logs = Thruk::Base::array2hash(\@logs);
     for my $l (sort keys %{$logs}) {
         my $prefix = "";
-        $prefix = "updating"    if $l eq 'update';
-        $prefix = "installiing" if $l eq 'install';
-        $prefix = "cleaning"    if $l eq 'cleanup';
+        $prefix = "updating"   if $l eq 'update';
+        $prefix = "installing" if $l eq 'install';
+        $prefix = "cleaning"   if $l eq 'cleanup';
         $logs->{$l} = {
             'failed' => $facts->{$prefix.'_failed'} // 0,
             'time'   => $facts->{$prefix.'_time'}   // "",
