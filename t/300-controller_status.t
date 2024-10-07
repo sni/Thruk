@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1304;
+    plan tests => 1305;
 }
 
 BEGIN {
@@ -21,7 +21,13 @@ my $servicegroup   = TestUtils::get_test_servicegroup();
 
 my $pages = [
     '/thruk/cgi-bin/status.cgi',
-    { url => '/thruk/cgi-bin/status.cgi', like => '<input\ type="text".*?value=".*\/thruk\/cgi\-bin\/status\.cgi"\ name="bookmark">' },  # test bookmarks
+    {
+        url  => '/thruk/cgi-bin/status.cgi',
+        like => [
+            '<input\ type="text".*?value=".*\/thruk\/cgi\-bin\/status\.cgi"\ name="bookmark">', # test bookmarks
+            '<input[^>]+checkbox[^>]+_host_name[^>]+checked[^>]*>', # colum selection
+        ],
+    },
 
 # Found 0 matching services, but there are x matching hosts
     { url => '/thruk/cgi-bin/status.cgi?style=detail&dfl_s0_type=host&dfl_s0_val_pre=&dfl_s0_op=%3D&dfl_s0_value='.$host.'&dfl_s0_value_sel=5&dfl_s0_type=service&dfl_s0_val_pre=&dfl_s0_op=~&dfl_s0_value=noserviceswiththisname', unlike => 'Found 0 matching services, but there\s+is \d matching host' },
