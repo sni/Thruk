@@ -75,9 +75,18 @@ if [ "$FILEVERSION" != "$OLDFILEVERSION" ]; then
     sed -r "s/^next.*/$CHANGESHEADER/" -i Changes
     sed -r "s/^version.*/version    = $FILEVERSION/" -i dist.ini
 
-    git mv plugins/plugins-available/business_process/root/bp-${OLDFILEVERSION}.css plugins/plugins-available/business_process/root/bp-$FILEVERSION.css
-    git mv plugins/plugins-available/business_process/root/bp-${OLDFILEVERSION}.js plugins/plugins-available/business_process/root/bp-$FILEVERSION.js
-    git mv plugins/plugins-available/panorama/root/panorama-${OLDFILEVERSION}.css plugins/plugins-available/panorama/root/panorama-$FILEVERSION.css
+    # rename versioned js files
+    for JS in plugins/plugins-available/*/root/*-${OLDFILEVERSION}.js; do
+        FILE=$(echo $JS | sed -e "s|-${OLDFILEVERSION}.js|-${FILEVERSION}.js|g")
+        git mv ${JS} ${FILE}
+    done
+
+    # rename versioned css files
+    for CSS in plugins/plugins-available/*/root/*-${OLDFILEVERSION}.css; do
+        FILE=$(echo $CSS | sed -e "s|-${OLDFILEVERSION}.css|-${FILEVERSION}.css|g")
+        git mv ${CSS} ${FILE}.css
+    done
+
     git mv root/thruk/javascript/thruk-${OLDFILEVERSION}.js root/thruk/javascript/thruk-$FILEVERSION.js
     if [ -e root/thruk/cache/thruk-${OLDFILEVERSION}.js ]; then
         mv root/thruk/cache/thruk-${OLDFILEVERSION}.js root/thruk/cache/thruk-$FILEVERSION.js
@@ -93,10 +102,6 @@ if [ "$FILEVERSION" != "$OLDFILEVERSION" ]; then
     if [ -e root/thruk/cache/thruk-panorama-${OLDFILEVERSION}.js ]; then
         mv root/thruk/cache/thruk-panorama-${OLDFILEVERSION}.js root/thruk/cache/thruk-panorama-${FILEVERSION}.js
     fi
-    git add \
-        docs/manpages/nagexp.3 \
-        docs/manpages/nagimp.3 \
-        docs/manpages/naglint.3
 fi
 ./script/thruk_update_docs.sh > /dev/null
 yes n | perl Makefile.PL > /dev/null
@@ -108,5 +113,8 @@ git add                     \
     lib/Thruk/Config.pm     \
     Changes                 \
     debian/changelog        \
-    .gitignore
+    .gitignore              \
+    docs/manpages/nagexp.3  \
+    docs/manpages/nagimp.3  \
+    docs/manpages/naglint.3
 git status

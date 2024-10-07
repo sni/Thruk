@@ -283,8 +283,8 @@ plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/PerformanceDataTemplat
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/SuggestPossibleTemplates.pm
 plugins/plugins-available/conf/lib/Thruk/Utils/Conf/Tools/UnusedObjects.pm
 plugins/plugins-available/conf/preview.png
-plugins/plugins-available/conf/root/conf.css
-plugins/plugins-available/conf/root/conf.js
+plugins/plugins-available/conf/root/conf-3.18.css
+plugins/plugins-available/conf/root/conf-3.18.js
 plugins/plugins-available/conf/root/images/file.xcf
 plugins/plugins-available/conf/root/images/file_cfg.png
 plugins/plugins-available/conf/root/images/file_empty.xcf
@@ -392,8 +392,8 @@ plugins/plugins-available/editor/lib/Thruk/Controller/editor.pm
 plugins/plugins-available/editor/lib/Thruk/Controller/Rest/V1/editor.pm
 plugins/plugins-available/editor/LICENSE
 plugins/plugins-available/editor/preview.png
-plugins/plugins-available/editor/root/editor.css
-plugins/plugins-available/editor/root/editor.js
+plugins/plugins-available/editor/root/editor-3.18.css
+plugins/plugins-available/editor/root/editor-3.18.js
 plugins/plugins-available/editor/routes
 plugins/plugins-available/editor/t/controller_editor.t
 plugins/plugins-available/editor/t/data/editor.conf
@@ -411,7 +411,7 @@ plugins/plugins-available/node-control/lib/Thruk/NodeControl/Utils.pm
 plugins/plugins-available/node-control/lib/Thruk/Utils/CLI/Nc.pm
 plugins/plugins-available/node-control/lib/Thruk/Utils/CLI/Nodecontrol.pm
 plugins/plugins-available/node-control/preview.png
-plugins/plugins-available/node-control/root/node_control.js
+plugins/plugins-available/node-control/root/node_control-3.18.js
 plugins/plugins-available/node-control/routes
 plugins/plugins-available/node-control/scripts/omd_update.sh
 plugins/plugins-available/node-control/t/controller_node-control.t
@@ -602,8 +602,8 @@ plugins/plugins-available/reports2/lib/Thruk/Utils/CLI/Report.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/Reports.pm
 plugins/plugins-available/reports2/lib/Thruk/Utils/Reports/Render.pm
 plugins/plugins-available/reports2/preview.png
-plugins/plugins-available/reports2/root/reports.js
-plugins/plugins-available/reports2/root/reports_render.js
+plugins/plugins-available/reports2/root/reports-3.18.js
+plugins/plugins-available/reports2/root/reports_render-3.18.js
 plugins/plugins-available/reports2/routes
 plugins/plugins-available/reports2/t/controller_reports.t
 plugins/plugins-available/reports2/t/report_locales.t
