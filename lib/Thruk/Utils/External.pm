@@ -1059,7 +1059,7 @@ sub cleanup_job_folders {
         }
         else {
             my @stat = stat($olddir.'/');
-            if($stat[9] < $max_age_dead) {
+            if($stat[9] && $stat[9] < $max_age_dead) {
                 remove_job_dir($olddir);
                 $removed++;
                 if($verbose && -d $olddir.'/.') {
