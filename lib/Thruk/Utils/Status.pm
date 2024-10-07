@@ -2612,6 +2612,7 @@ sub sort_table_columns {
     for my $col (@{$columns}) {
         $hashed->{$col->{'field'}} = $col;
         $available->{$col->{'field'}} = 1;
+        $hashed->{$col->{'field'}}->{'checked'} = 0 if $params;
     }
 
     # add columns from request parameters
@@ -2635,7 +2636,7 @@ sub sort_table_columns {
     # add missing
     for my $col (@{$columns}) {
         if($hashed->{$col->{'field'}}) {
-            $hashed->{$col->{'field'}}->{'checked'} = 0;
+            $hashed->{$col->{'field'}}->{'checked'} = 0 unless defined $hashed->{$col->{'field'}}->{'checked'};
 
             # skip _HOST custom vars, if they have been added without HOST already
             my $field = $col->{'field'};
