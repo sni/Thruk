@@ -100,7 +100,7 @@ sub cmd {
             }
         }
 
-        scale_peers($c, $opt->{'worker'}, $peers, sub {
+        _scale_peers($c, $opt->{'worker'}, $peers, sub {
             my($peer_key) = @_;
             my $peer = $c->db->get_peer_by_key($peer_key);
             my $facts;
@@ -134,7 +134,7 @@ sub cmd {
 }
 
 ##############################################
-sub scale_peers {
+sub _scale_peers {
     my($c, $workernum, $peers, $sub) = @_;
     Thruk::Utils::scale_out(
         scale  => $workernum,
