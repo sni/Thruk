@@ -118,7 +118,7 @@ Thruk::Pool::Simple - A simple thread-pool implementation
 
   my $pool = Thruk::Pool::Simple->new(
                  size    => 3,              # number of workers
-                 handler => \&handle,       # call this sub to handle jobswork
+                 handler => \&handle,       # call this sub to handle jobs
                );
 
   $pool->add_bulk([\@arg1, \@arg2, ...])    # put some work onto the queue
@@ -132,5 +132,38 @@ without external dependencies outside core modules.
 
 Jobs can be submitted to and handled by multi-threaded workers
 managed by the pool.
+
+=head1 METHODS
+
+=head2 new
+
+    new( %options )
+
+    options:
+
+    - size    => 3,              # number of workers
+    - handler => \&handle,       # call this sub to handle jobs
+
+returns new thread pool.
+
+=head2 add_bulk
+
+    add_bulk( \@jobs )
+
+adds jobs to queue, returns nothing.
+
+=head2 remove_all
+
+    remove_all([$callback])
+
+get all results (blocks till all threads are finished).
+
+optional callback will be called with result as first argument.
+
+=head2 shutdown
+
+    shutdown()
+
+shutdown all threads, wil be called automatically at END.
 
 =cut
