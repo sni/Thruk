@@ -2,6 +2,7 @@ use warnings;
 use strict;
 use Test::More 0.96;
 
+use Thruk::Base ();
 use Thruk::Config 'noautoload';
 use Thruk::Utils::IO ();
 
@@ -55,7 +56,7 @@ TestUtils::test_command({
     cmd     => $BIN.' plugin search report -f',
     like    => ['/reports2/'],
     exit    => 0,
-});
+}) unless $filter;
 
 my $failed = {};
 for my $p (@{$plugins}) {

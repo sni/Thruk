@@ -32,6 +32,7 @@ for my $dir (@dirs) {
 
 done_testing();
 
+##########################################################
 sub check_templates {
     my($file) = @_;
     return if($filter && $file !~ m%$filter%mx);
@@ -75,6 +76,7 @@ sub check_templates {
     }
 }
 
+##########################################################
 sub _get_classes {
     my($file) = @_;
     my $content = Thruk::Utils::IO::read($file);
@@ -85,24 +87,47 @@ sub _get_classes {
         my @cl = split(/[,\>\s]/mx, $cls);
         for my $c (@cl) {
             $c = Thruk::Base::trim_whitespace($c);
+
+            # replace escaped hex numbers used at start of class name, ex.: 2xl -> .\32xl
+            $c =~ s/\.\\(\d+)/&_dec_class($1)/gemxis;
+
+            # replace \[\]
+            $c =~ s/\\\[(.*?)\\\]/[$1]/mxg;
+
+            # remove backslashes, but not before dots
+            $c =~ s/\\:/__ESCAPED_COLON__/gmx;
+            $c =~ s/\\\./__ESCAPED_DOT__/gmx;
+            $c =~ s/\\//gmx;
+
             # trim leading html tag, ex.: DIV.classname
-            $c =~ s/\\//mx;
             $c =~ s/^\w+\././mx;
+
             # remove trailing + label
-            $c =~ s/\s+\+\s+\w+//mx;
+            $c =~ s/\s*\+\s*\w+//mx;
+
             # remove [type=..]
             $c =~ s/(\w+)\[.*?\]/$1/mx;
+
             # remove :checked
             $c =~ s/:checked//mx;
+
             next if $c eq '';
             # split by dot to catch multiple classes from ex.: DIV.cls1.cls2
             for my $c1 (split/\./mx, $c) {
                 $c1 = Thruk::Base::trim_whitespace($c1);
                 $c1 =~ s/:.*$//gmx;
+                $c1 =~ s/__ESCAPED_DOT__/./gmx;
+                $c1 =~ s/__ESCAPED_COLON__/:/gmx;
                 next if $c1 eq '';
                 $classes->{$c1} = 1;
             }
         }
     }
     return($classes);
+}
+
+##########################################################
+sub _dec_class {
+    my($hex) = @_;
+    return(".".pack('H*', $hex));
 }

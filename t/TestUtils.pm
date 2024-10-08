@@ -748,8 +748,6 @@ sub test_command {
     }
 
     my($prg,$arg) = split(/\s+/, $test->{'cmd'}, 2);
-    my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, $!);
-    $test->{'test_cmd'} = $t;
 
     # wait for something?
     if(defined $test->{'waitfor'}) {
@@ -767,6 +765,7 @@ sub test_command {
         while($now <= $end) {
             alarm(15);
             $expr = $waitfor;
+            my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, $!);
             eval {
                 local $SIG{ALRM} = sub { die "timeout on cmd: ".$test->{'cmd'}."\n" };
                 $t->run(args => $arg, stdin => $test->{'stdin'});
@@ -795,6 +794,9 @@ sub test_command {
             bail_out_cmd($test, "waitfor failed");
         }
     }
+
+    my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, $!);
+    $test->{'test_cmd'} = $t;
 
     alarm(300);
     eval {

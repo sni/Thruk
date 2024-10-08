@@ -8,9 +8,6 @@ BEGIN {
     plan skip_all => 'local test only'   if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'test skipped'      if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    # enable plugin
-    `cd plugins/plugins-enabled && ln -s ../plugins-available/core_scheduling .`;
-
     plan tests => 22;
 }
 
@@ -56,6 +53,3 @@ for my $url (@{$json_hash_pages}) {
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is an hash: ".$url);
 }
-
-# restore default
-`cd plugins/plugins-enabled && rm -f core_scheduling`;

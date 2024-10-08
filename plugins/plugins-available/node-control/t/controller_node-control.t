@@ -7,9 +7,6 @@ BEGIN {
     plan skip_all => 'local test only'   if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'test skipped'      if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    # enable plugin
-    `cd plugins/plugins-enabled && ln -s ../plugins-available/node-control .`;
-
     plan tests => 12;
 }
 
@@ -30,6 +27,3 @@ TestUtils::test_page(
     'url'             => '/thruk/cgi-bin/node_control.cgi',
     'like'            => 'Node Control',
 );
-
-# restore default
-`cd plugins/plugins-enabled && rm -f node-control`;

@@ -197,8 +197,8 @@
             <tr>
               <td colspan="2" align="center">
                 <div class="flexrow flex-nowrap justify-evenly">
-                  <button class="submit w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> Discover Services</button>
-                  <button class="submit w-44 js-save-btn" name="action" value="save" onClick="saveInitialFormValues()"><i class="uil uil-save"></i> Save Changes</button>
+                  <button class="w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> Discover Services</button>
+                  <button class="w-44 js-save-btn" name="action" value="save" onClick="saveInitialFormValues()"><i class="uil uil-save"></i> Save Changes</button>
                 </div>
               </td>
             </tr>
