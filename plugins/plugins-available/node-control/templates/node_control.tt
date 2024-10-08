@@ -1,4 +1,4 @@
-﻿[% PROCESS _header.tt js="plugins/${plugin_name}/node_control.js" %]
+﻿[% PROCESS _header.tt js="plugins/${plugin_name}/node_control-${fileversion}.js" %]
 [% PROCESS _message.tt %]
 
 <script>

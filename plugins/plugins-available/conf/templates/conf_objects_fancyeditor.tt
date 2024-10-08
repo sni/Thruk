@@ -1,5 +1,5 @@
 ﻿[% WRAPPER _conf_frame.tt %]
-<link rel="stylesheet" href="[% url_prefix %]plugins/[% plugin_editor_path %]/editor.css">
+<link rel="stylesheet" href="[% url_prefix %]plugins/[% plugin_editor_path %]/editor-${fileversion}.css">
 <script src="[% url_prefix %]/vendor/ace-builds-1.4.12/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="[% url_prefix %]/vendor/ace-builds-1.4.12/src-min-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 

@@ -1,6 +1,6 @@
 ﻿[% PROCESS _header.tt
-                      css=["plugins/${plugin_name}/conf.css","vendor/linedtextarea-e619e09/jquery-linedtextarea.css", "vendor/jstree-3.3.8/themes/default/style.min.css"]
-                      js=["plugins/${plugin_name}/conf.js", "vendor/jstree-3.3.8/jstree.min.js"]
+                      css=["plugins/${plugin_name}/conf-${fileversion}.css","vendor/linedtextarea-e619e09/jquery-linedtextarea.css", "vendor/jstree-3.3.8/themes/default/style.min.css"]
+                      js=["plugins/${plugin_name}/conf-${fileversion}.js", "vendor/jstree-3.3.8/jstree.min.js"]
 %]
 [% PROCESS _message.tt %]
 [% PROCESS _blocks.tt %]

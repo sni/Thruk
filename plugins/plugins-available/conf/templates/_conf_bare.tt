@@ -5,9 +5,9 @@
     <title>[% title_prefix %][% title %]</title>
     [% PROCESS _favicon.tt %]
     [% PROCESS _common_css.tt %]
-    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/[% plugin_name %]/conf.css' />
+    <link rel='stylesheet' type='text/css' href='[% url_prefix %]plugins/[% plugin_name %]/conf-${fileversion}.css' />
     [% PROCESS _common_js_files.tt %]
-    <script src="[% url_prefix %]plugins/[% plugin_name %]/conf.js"></script>
+    <script src="[% url_prefix %]plugins/[% plugin_name %]/conf-${fileversion}.js"></script>
     [% IF c.config.useragentcompat %]<meta http-equiv="X-UA-Compatible" content="[% c.config.useragentcompat %]">[% END %]
   </head>
   <body id="config" class="config[% IF body_class %] [%+ body_class %][% END %] w-full h-full m-0 p-0 overflow-hidden" style="background: inherit;">
