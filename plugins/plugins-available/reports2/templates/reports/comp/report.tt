@@ -18,7 +18,7 @@
     [% END %]
   [% END %]
   [% PROCESS 'reports/style/custom.tt' %]
-  <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/[% plugin_name %]/reports_render-${fileversion}.js"></script>
+  <script language="javascript" type="text/javascript" src="[% url_prefix %]plugins/[% plugin_name %]/reports_render-[% fileversion %].js"></script>
 </head>
 <body>
 [% PROCESS _common_js.tt %]
