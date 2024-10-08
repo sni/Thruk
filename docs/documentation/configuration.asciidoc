@@ -291,7 +291,7 @@ Set first day of week. Used in reports.
 
 ex.:
 
-  first_day_of_week = 0
+  first_day_of_week = 1
 
 
 === report_use_temp_files

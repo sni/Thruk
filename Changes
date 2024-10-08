@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - change default first_day_of_week to monday
           - show host attributes on grid/overview pages
           - make status badges toggle buttons
           - add support for base64 encoded obfuscate pattern
