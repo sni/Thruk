@@ -455,7 +455,7 @@ sub _process_details_page {
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
-    $c->stash->{'has_user_columns'}->{'dfl_'} = $user_data->{'columns'}->{'svc'} ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'dfl_'} = ($user_data->{'columns'}->{'svc'} || $c->req->parameters->{'dfl_columns'}) ? 1 : 0;
 
     # which host to display?
     my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
@@ -604,7 +604,7 @@ sub _process_hostdetails_page {
         $has_columns = 1;
     }
     $c->stash->{'has_columns'} = $has_columns;
-    $c->stash->{'has_user_columns'}->{'dfl_'} = $user_data->{'columns'}->{'hst'} ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'dfl_'} = ($user_data->{'columns'}->{'hst'} || $c->req->parameters->{'dfl_columns'}) ? 1 : 0;
 
     # which host to display?
     my($hostfilter) = Thruk::Utils::Status::do_filter($c);
@@ -849,7 +849,7 @@ sub _process_overview_page {
     my $selected_columns = $c->req->parameters->{'ovr_columns'} || $user_data->{'columns'}->{'ovr'} || $c->config->{'default_overview_columns'};
     $c->stash->{'table_columns'}->{'ovr_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'ovr_'}, $selected_columns);
     $c->stash->{'has_columns'} = $selected_columns ? 1 : 0;
-    $c->stash->{'has_user_columns'}->{'ovr_'} = $user_data->{'columns'}->{'ovr'} ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'ovr_'} = ($user_data->{'columns'}->{'ovr'} || $c->req->parameters->{'ovr_columns'}) ? 1 : 0;
 
     my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %joined_groups)], { 'ASC' => 'name'});
     Thruk::Utils::set_paging_steps($c, Thruk::Base->config->{'group_paging_overview'});
@@ -972,7 +972,7 @@ sub _process_grid_page {
     my $selected_columns = $c->req->parameters->{'grd_columns'} || $user_data->{'columns'}->{'grd'} || $c->config->{'default_overview_columns'};
     $c->stash->{'table_columns'}->{'grd_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'grd_'}, $selected_columns);
     $c->stash->{'has_columns'} = $selected_columns ? 1 : 0;
-    $c->stash->{'has_user_columns'}->{'grd_'} = $user_data->{'columns'}->{'grd'} ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'grd_'} = ($user_data->{'columns'}->{'grd'} || $c->req->parameters->{'grd_columns'}) ? 1 : 0;
 
     return 1;
 }
@@ -1099,8 +1099,8 @@ sub _process_combined_page {
         }
     }
     $c->stash->{'has_columns'} = $has_columns;
-    $c->stash->{'has_user_columns'}->{'hst_'} = $user_data->{'columns'}->{'hst'} ? 1 : 0;
-    $c->stash->{'has_user_columns'}->{'svc_'} = $user_data->{'columns'}->{'svc'} ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'hst_'} = ($user_data->{'columns'}->{'hst'} || $c->req->parameters->{'hst_columns'}) ? 1 : 0;
+    $c->stash->{'has_user_columns'}->{'svc_'} = ($user_data->{'columns'}->{'svc'} || $c->req->parameters->{'svc_columns'}) ? 1 : 0;
 
     # which host to display?
     my($hostfilter)           = Thruk::Utils::Status::do_filter($c, 'hst_');
