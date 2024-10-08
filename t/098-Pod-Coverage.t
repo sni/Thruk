@@ -8,7 +8,7 @@ use English qw(-no_match_vars);
 use File::Spec;
 use Test::More;
 
-use lib glob("plugins/plugins-enabled/*/lib");
+use lib glob("plugins/plugins-available/*/lib");
 
 if ( not $ENV{TEST_AUTHOR} ) {
     my $msg = 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.';
@@ -24,11 +24,9 @@ if ( $EVAL_ERROR ) {
 
 eval "use Test::Pod::Coverage 1.00";
 
-my @modules = all_modules('lib', glob("plugins/plugins-enabled/*/lib"));
-for my $module (@modules) {
-    next if $module eq 'Thruk::Pool::Simple';
-
-    $module =~ s/plugins::plugins\-enabled::\w+::lib:://gmx;
+my @modules = all_modules('lib', glob("plugins/plugins-available/*/lib"));
+for my $module (sort @modules) {
+    $module =~ s/plugins::plugins\-available::[a-z0-9_-]+::lib:://gmx;
 
     # check module and skip UPPERCASE constants which are reported as fail
     pod_coverage_ok($module, { also_private => [ qr/^[A-Z_]+$/ ]});
