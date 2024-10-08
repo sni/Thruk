@@ -84,7 +84,7 @@ if [ "$FILEVERSION" != "$OLDFILEVERSION" ]; then
     # rename versioned css files
     for CSS in plugins/plugins-available/*/root/*-${OLDFILEVERSION}.css; do
         FILE=$(echo $CSS | sed -e "s|-${OLDFILEVERSION}.css|-${FILEVERSION}.css|g")
-        git mv ${CSS} ${FILE}.css
+        git mv ${CSS} ${FILE}
     done
 
     git mv root/thruk/javascript/thruk-${OLDFILEVERSION}.js root/thruk/javascript/thruk-$FILEVERSION.js
