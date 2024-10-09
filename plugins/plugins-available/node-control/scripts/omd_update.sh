@@ -6,9 +6,11 @@ if [ "$OMD_UPDATE" = "" ]; then
 fi
 
 # try dry-run first (available since OMD 5.10)
-DRYRUN=$(omd -V $OMD_UPDATE update -n 2>&1 | grep "conflicts during dry run" | awk '{ print $2 }')
-if [ -n "$DRYRUN" -a "$DRYRUN" != "0" ]; then
-    echo "[ERROR] no automatic update possible, $DRYRUN conflict(s) found."
+DRYRUN=$(omd -V $OMD_UPDATE update -n 2>&1)
+CONFLICTS=$(echo "$DRYRUN" | grep "conflicts during dry run" | awk '{ print $2 }')
+if [ -n "$CONFLICTS" -a "$CONFLICTS" != "0" ]; then
+    echo "[ERROR] no automatic update possible, $CONFLICTS conflict(s) found."
+    echo "$DRYRUN"
     exit 1
 fi
 
