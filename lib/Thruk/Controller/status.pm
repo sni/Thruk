@@ -454,7 +454,6 @@ sub _process_details_page {
 
     # which host to display?
     my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
-    return 1 if $c->stash->{'has_error'};
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
@@ -473,7 +472,7 @@ sub _process_details_page {
     };
     my $sortnum = 10;
     for my $col (@{$c->stash->{'default_columns'}->{'dfl_'}}) {
-        next if defined $col->{'sort'};
+        next if defined $col->{'sortby'};
 
         my $field = $col->{'field'};
         if($field =~ m/^cust_(.*)$/mx) {
@@ -482,10 +481,11 @@ sub _process_details_page {
         } else {
             $sortoptions->{$sortnum} = [[$field], lc($col->{"title"}) ];
         }
-        $col->{'sort'} = $sortnum;
+        $col->{'sortby'} = $sortnum;
         $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
+    return 1 if $c->stash->{'has_error'};
 
     # reverse order for duration
     my $backend_order = $order;
@@ -604,7 +604,6 @@ sub _process_hostdetails_page {
 
     # which host to display?
     my($hostfilter) = Thruk::Utils::Status::do_filter($c);
-    return 1 if $c->stash->{'has_error'};
 
     # do the sort
     my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
@@ -621,7 +620,7 @@ sub _process_hostdetails_page {
     };
     my $sortnum = 10;
     for my $col (@{$c->stash->{'default_columns'}->{'dfl_'}}) {
-        next if defined $col->{'sort'};
+        next if defined $col->{'sortby'};
 
         my $field = $col->{'field'};
         if($field =~ m/^cust_(.*)$/mx) {
@@ -630,10 +629,11 @@ sub _process_hostdetails_page {
         } else {
             $sortoptions->{$sortnum} = [[$field], lc($col->{"title"}) ];
         }
-        $col->{'sort'} = $sortnum;
+        $col->{'sortby'} = $sortnum;
         $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
+    return 1 if $c->stash->{'has_error'};
 
     # reverse order for duration
     my $backend_order = $order;
@@ -1121,7 +1121,7 @@ sub _process_combined_page {
     };
     my $sortnum = 10;
     for my $col (@{$c->stash->{'default_columns'}->{'svc_'}}) {
-        next if defined $col->{'sort'};
+        next if defined $col->{'sortby'};
 
         my $field = $col->{'field'};
         if($field =~ m/^cust_(.*)$/mx) {
@@ -1130,7 +1130,7 @@ sub _process_combined_page {
         } else {
             $sortoptions->{$sortnum} = [[$field], lc($col->{"title"}) ];
         }
-        $col->{'sort'} = $sortnum;
+        $col->{'sortby'} = $sortnum;
         $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
@@ -1171,7 +1171,7 @@ sub _process_combined_page {
     };
     $sortnum = 10;
     for my $col (@{$c->stash->{'default_columns'}->{'hst_'}}) {
-        next if defined $col->{'sort'};
+        next if defined $col->{'sortby'};
 
         my $field = $col->{'field'};
         if($field =~ m/^cust_(.*)$/mx) {
@@ -1180,7 +1180,7 @@ sub _process_combined_page {
         } else {
             $sortoptions->{$sortnum} = [[$field], lc($col->{"title"}) ];
         }
-        $col->{'sort'} = $sortnum;
+        $col->{'sortby'} = $sortnum;
         $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};

@@ -27,7 +27,7 @@
           [% center = " text-center" %]
         [% END %]
         <th class="status col_[% col.field | html %][% center %]"[% IF ! col.checked %] style="display: none;"[% END %]>
-          <a class="status col_[% col.field | html %] sort-by" href='#' data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="[% col.sort %]">[% col.title | html %]</a>
+          <a class="status col_[% col.field | html %] sort-by" href='#' data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="[% col.sortby %]">[% col.title | html %]</a>
         </th>
       [% END %]
     </tr>

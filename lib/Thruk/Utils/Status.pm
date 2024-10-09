@@ -2372,28 +2372,28 @@ sub get_host_columns {
     my $columns = [];
     if($c->stash->{'show_backends_in_table'} == 2) {
         push @{$columns},
-        { title => "Site",                 "field" => "peer_name",            "checked" => 1, sort => 7 };
+        { title => "Site",                 "field" => "peer_name",            "checked" => 1, sortby => 7 };
     }
     push @{$columns}, (
-        { title => "Host",                 "field" => "name",                 "checked" => 1, sort => 1 },
-        { title => "Status",               "field" => "state",                "checked" => 1, sort => 8 },
-        { title => "Last Check",           "field" => "last_check",           "checked" => 1, sort => 4 },
-        { title => "Duration",             "field" => "duration",             "checked" => 1, sort => 6 },
+        { title => "Host",                 "field" => "name",                 "checked" => 1, sortby => 1 },
+        { title => "Status",               "field" => "state",                "checked" => 1, sortby => 8 },
+        { title => "Last Check",           "field" => "last_check",           "checked" => 1, sortby => 4 },
+        { title => "Duration",             "field" => "duration",             "checked" => 1, sortby => 6 },
     );
     if($c->stash->{'show_host_attempts'}) {
         push @{$columns},
-        { title => "Attempt",              "field" => "current_attempt",      "checked" => 1, sort => 5 };
+        { title => "Attempt",              "field" => "current_attempt",      "checked" => 1, sortby => 5 };
     }
     if($c->stash->{'show_backends_in_table'} == 1) {
         push @{$columns},
-        { title => "Site",                 "field" => "peer_name",            "checked" => 1, sort => 7 };
+        { title => "Site",                 "field" => "peer_name",            "checked" => 1, sortby => 7 };
     }
     push @{$columns}, (
-        { title => "Status Information",   "field" => "plugin_output",        "checked" => 1, sort => 9 },
+        { title => "Status Information",   "field" => "plugin_output",        "checked" => 1, sortby => 9 },
     );
     if(!$c->stash->{'show_backends_in_table'}) {
         push @{$columns},
-        { title => "Site",                 "field" => "peer_name",            "checked" => 0, sort => 7 };
+        { title => "Site",                 "field" => "peer_name",            "checked" => 0, sortby => 7 };
     }
     if(!$c->stash->{'show_host_attempts'}) {
         push @{$columns},
@@ -2452,29 +2452,29 @@ sub get_service_columns {
     my($c) = @_;
 
     my $columns = [
-        { title => "Host",                 "field" => "host_name",            "checked" => 1, sort => 1 },
+        { title => "Host",                 "field" => "host_name",            "checked" => 1, sortby => 1 },
     ];
     if($c->stash->{'show_backends_in_table'} == 2) {
         push @{$columns},
-        { title => "Site",                 "field" => "peer_name",            "checked" => 1, sort => 7 };
+        { title => "Site",                 "field" => "peer_name",            "checked" => 1, sortby => 7 };
     }
     push @{$columns}, (
-        { title => "Service",              "field" => "description",          "checked" => 1, sort => 2 },
-        { title => "Status",               "field" => "state",                "checked" => 1, sort => 3 },
-        { title => "Last Check",           "field" => "last_check",           "checked" => 1, sort => 4 },
-        { title => "Duration",             "field" => "duration",             "checked" => 1, sort => 6 },
-        { title => "Attempt",              "field" => "current_attempt",      "checked" => 1, sort => 5 },
+        { title => "Service",              "field" => "description",          "checked" => 1, sortby => 2 },
+        { title => "Status",               "field" => "state",                "checked" => 1, sortby => 3 },
+        { title => "Last Check",           "field" => "last_check",           "checked" => 1, sortby => 4 },
+        { title => "Duration",             "field" => "duration",             "checked" => 1, sortby => 6 },
+        { title => "Attempt",              "field" => "current_attempt",      "checked" => 1, sortby => 5 },
     );
     if($c->stash->{'show_backends_in_table'} == 1) {
         push @{$columns},
-        { title => "Site",                 "field" => "peer_name",            "checked" => 1, sort => 7 };
+        { title => "Site",                 "field" => "peer_name",            "checked" => 1, sortby => 7 };
     }
     push @{$columns}, (
-        { title => "Status Information",   "field" => "plugin_output",        "checked" => 1, sort => 9 },
+        { title => "Status Information",   "field" => "plugin_output",        "checked" => 1, sortby => 9 },
     );
     if(!$c->stash->{'show_backends_in_table'}) {
         push @{$columns},
-        { title => "Site",                 "field" => "peer_name",            "checked" => 0, sort => 7 };
+        { title => "Site",                 "field" => "peer_name",            "checked" => 0, sortby => 7 };
     }
     push @{$columns}, (
         { title => "Host Address",         "field" => "host_address",         "checked" => 0 },
