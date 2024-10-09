@@ -2,120 +2,123 @@
 [% PROCESS _sounds.tt %]
 [% PROCESS _blocks.tt %]
 
-  [% WRAPPER _status_totals_header.tt %]
-  <div class="card overflow-hidden">
-    <div class="actionbox less-padding">
-      [% IF hostgroup == 'all' %]
-        <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>
-        <div><a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Host Groups</a></div>
-        <div><a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a></div>
-        <div><a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a></div>
-      [% ELSIF hostgroup != '' %]
-        <div><a href="status.cgi?hostgroup=all&amp;style=grid">View Status Grid For All Host Groups</a></div>
-        <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail">View Service Status Detail For This Host Group</a></div>
-        <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=hostdetail">View Host Status Detail For This Host Group</a></div>
-        <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview">View Status Overview For This Host Group</a></div>
-        <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary">View Status Summary For This Host Group</a></div>
-      [% ELSIF servicegroup == 'all' %]
-        <div><a href='status.cgi?servicegroup=all&amp;style=detail'>View Service Status Detail For All Service Groups</a></div>
-        <div><a href='status.cgi?servicegroup=all&amp;style=overview'>View Status Overview For All Service Groups</a></div>
-        <div><a href='status.cgi?servicegroup=all&amp;style=summary'>View Status Summary For All Service Groups</a></div>
-      [% ELSIF servicegroup != '' %]
-        <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=detail">View Service Status Detail For This Service Group</a></div>
-        <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=overview">View Status Overview For This Service Group</a></div>
-        <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=summary">View Status Summary For This Service Group</a></div>
-        <div><a href="status.cgi?servicegroup=all&amp;style=grid">View Service Status Grid For All Service Groups</a></div>
-      [% ELSE %]
-        <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>
-        <div><a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Host Groups</a></div>
-        <div><a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a></div>
-        <div><a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a></div>
-      [% END %]
-    </div>
+[% WRAPPER _status_totals_header.tt %]
+<div class="card overflow-hidden">
+  <div class="actionbox less-padding">
+    [% IF hostgroup == 'all' %]
+      <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>
+      <div><a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Host Groups</a></div>
+      <div><a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a></div>
+      <div><a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a></div>
+    [% ELSIF hostgroup != '' %]
+      <div><a href="status.cgi?hostgroup=all&amp;style=grid">View Status Grid For All Host Groups</a></div>
+      <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=detail">View Service Status Detail For This Host Group</a></div>
+      <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=hostdetail">View Host Status Detail For This Host Group</a></div>
+      <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=overview">View Status Overview For This Host Group</a></div>
+      <div><a href="status.cgi?hostgroup=[% hostgroup | uri %]&amp;style=summary">View Status Summary For This Host Group</a></div>
+    [% ELSIF servicegroup == 'all' %]
+      <div><a href='status.cgi?servicegroup=all&amp;style=detail'>View Service Status Detail For All Service Groups</a></div>
+      <div><a href='status.cgi?servicegroup=all&amp;style=overview'>View Status Overview For All Service Groups</a></div>
+      <div><a href='status.cgi?servicegroup=all&amp;style=summary'>View Status Summary For All Service Groups</a></div>
+    [% ELSIF servicegroup != '' %]
+      <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=detail">View Service Status Detail For This Service Group</a></div>
+      <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=overview">View Status Overview For This Service Group</a></div>
+      <div><a href="status.cgi?servicegroup=[% servicegroup | uri %]&amp;style=summary">View Status Summary For This Service Group</a></div>
+      <div><a href="status.cgi?servicegroup=all&amp;style=grid">View Service Status Grid For All Service Groups</a></div>
+    [% ELSE %]
+      <div><a href='status.cgi?hostgroup=all&amp;style=detail'>View Service Status Detail For All Host Groups</a></div>
+      <div><a href='status.cgi?hostgroup=all&amp;style=hostdetail'>View Host Status Detail For All Host Groups</a></div>
+      <div><a href='status.cgi?hostgroup=all&amp;style=overview'>View Status Overview For All Host Groups</a></div>
+      <div><a href='status.cgi?hostgroup=all&amp;style=summary'>View Status Summary For All Host Groups</a></div>
+    [% END %]
   </div>
+</div>
+[% END %]
+
+<h1 class="mt-2">
+  [% IF hostgroup == 'all' %]Service Grid For All Host Groups
+  [% ELSIF hostgroup != '' %]Service Grid For Host Group '[% hostgroup | html %]'
+  [% ELSIF servicegroup == 'all' %]Service Grid For All Service Groups
+  [% ELSIF servicegroup != '' %]Service Grid For Service Group '[% servicegroup | html %]'
+  [% ELSE %]Service Grid
   [% END %]
+</h1>
 
-  <h1 class="mt-2">
-    [% IF hostgroup == 'all' %]Service Grid For All Host Groups
-    [% ELSIF hostgroup != '' %]Service Grid For Host Group '[% hostgroup | html %]'
-    [% ELSIF servicegroup == 'all' %]Service Grid For All Service Groups
-    [% ELSIF servicegroup != '' %]Service Grid For Service Group '[% servicegroup | html %]'
-    [% ELSE %]Service Grid
-    [% END %]
-  </h1>
+<div class="my-2 flex gap-1">
+  [% PROCESS _add_bookmark.tt %]
+  [% PROCESS _show_link.tt %]
+  [% IF hostgroup != '' && hostgroup != 'all' %]
+    <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
+  [% ELSIF servicegroup != '' && servicegroup != 'all' %]
+    <a class="button round small" href="extinfo.cgi?type=8&amp;servicegroup=[% servicegroup | uri %]" title="send servicegroup commands"><i class="uil uil-icons"></i></a>
+  [% END %]
+</div>
 
-  <div class="my-2 flex gap-1">
-    [% PROCESS _add_bookmark.tt %]
-    [% PROCESS _show_link.tt %]
-    [% IF hostgroup != '' && hostgroup != 'all' %]
-      <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
-    [% ELSIF servicegroup != '' && servicegroup != 'all' %]
-      <a class="button round small" href="extinfo.cgi?type=8&amp;servicegroup=[% servicegroup | uri %]" title="send servicegroup commands"><i class="uil uil-icons"></i></a>
-    [% END %]
-  </div>
-
-  <div class="card w-full min-w-[420px]">
-    <div class="mainTableHeader">
-      <div>
-        <div class="flex flex-nowrap gap-x-1 items-center">
-          [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" %]
-          [% PROCESS _status_filter.tt %]
-          [% IF hostgroup != '' && hostgroup != 'all' %]
-            <a class="button round small text-sm display-filter" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
-          [% ELSIF servicegroup != '' && servicegroup != 'all' %]
-            <a class="button round small text-sm display-filter" href="extinfo.cgi?type=8&amp;servicegroup=[% servicegroup | uri %]" title="send servicegroup commands"><i class="uil uil-icons"></i></a>
-          [% END %]
-        </div>
-      </div>
-      <div>
-        [% PROCESS _pager.tt %]
-      </div>
-      <div>
-        [% PROCESS _pager_per_page.tt %]
+<div class="card w-full min-w-[420px]">
+  <div class="mainTableHeader">
+    <div>
+      <div class="flex flex-nowrap gap-x-1 items-center">
+        [% PROCESS _status_column_select.tt colprefix="ovr" columns_name="overview" %]
+        [% PROCESS _status_filter.tt %]
+        [% IF hostgroup != '' && hostgroup != 'all' %]
+          <a class="button round small text-sm display-filter" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
+        [% ELSIF servicegroup != '' && servicegroup != 'all' %]
+          <a class="button round small text-sm display-filter" href="extinfo.cgi?type=8&amp;servicegroup=[% servicegroup | uri %]" title="send servicegroup commands"><i class="uil uil-icons"></i></a>
+        [% END %]
       </div>
     </div>
+    <div>
+      [% PROCESS _pager.tt %]
+    </div>
+    <div>
+      [% PROCESS _pager_per_page.tt %]
+    </div>
+  </div>
 
-    <div class="mainTable [% IF main_table_full %]fullsize[% END %]" style="max-height: calc(100vh - 210px);">
-      [% FOR g IN data %]
-        <div>
-          <div class="p-2">
-            [% IF substyle == 'host' %]
-                <h3 class="flexrow flex-nowrap">
-                  <a href="status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %] ([% g.name | html %])</a>
-                  <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]"><i class="uil uil-icons"></i></a>
-                </h3>
-              [% ELSIF substyle == 'service' %]
-                <h3 class="flexrow flex-nowrap">
-                  <a href="status.cgi?servicegroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %] ([% g.name | html %])</a>
-                  <a class="button round small" href="extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]"><i class="uil uil-icons"></i></a>
-                </h3>
-              [% END %]
-          </div>
-          <div class="border-t">
-            <table class="status statusgroups [% paneprefix %]_table statusTable mainTable striped">
-              <thead>
-                <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable'); jQuery('#[% paneprefix %]_btn_columns_hover').show()">
-                  <th class='status col_name'>Host</th>
-                  <th class='status col_state'>Services</th>
-                  <th class='status col_actions text-center'>Actions</th>
-                  [% start_with = 3 %]
-                  [% FOREACH col = default_columns.$paneprefix %]
-                    [% IF loop.index >= start_with %]
-                      <th class="status col_[% col.field | html %]" style="display: none;">[% col.title | html %]</th>
-                    [% END %]
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %]" style="max-height: calc(100vh - 210px);">
+    [% FOR g IN data %]
+      <div>
+        <div class="p-2">
+          [% IF substyle == 'host' %]
+              <h3 class="flexrow flex-nowrap">
+                <a href="status.cgi?hostgroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %] ([% g.name | html %])</a>
+                <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% g.name | uri %]"><i class="uil uil-icons"></i></a>
+              </h3>
+            [% ELSIF substyle == 'service' %]
+              <h3 class="flexrow flex-nowrap">
+                <a href="status.cgi?servicegroup=[% g.name | uri %]&amp;style=detail">[% g.alias | html %] ([% g.name | html %])</a>
+                <a class="button round small" href="extinfo.cgi?type=8&amp;servicegroup=[% g.name | uri %]"><i class="uil uil-icons"></i></a>
+              </h3>
+            [% END %]
+        </div>
+        <div class="border-t">
+          <table class="status statusgroups [% paneprefix %]_table statusTable mainTable striped">
+            <thead>
+              <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable');">
+                [% FOREACH col = table_columns.$paneprefix %]
+                  [% center = "" %]
+                  [% IF col.field == "actions" %]
+                    [% center = " text-center" %]
                   [% END %]
-                </tr>
-              </thead>
-              <tbody>
-                [% FOR hostname IN g.hosts.keys.sort %]
-                  [% SET h = g.hosts.$hostname %]
-                  [% hoststate = '' %]
-                  [% IF h.state == 1 %]
-                    [% hoststate = 'DOWN' %]
-                  [% ELSIF h.state == 2 %]
-                    [% hoststate = 'UNREACHABLE' %]
-                  [% END %]
-                  <tr class='[% IF loop.last %]border-b[% END %]'>
+                  <th class="status col_[% col.field | html %][% center %]"[% IF ! col.checked %] style="display: none;"[% END %]>
+                    <a class="status col_[% col.field | html %]">[% col.title | html %]</a>
+                  </th>
+                [% END %]
+              </tr>
+            </thead>
+            <tbody>
+              [% FOR hostname IN g.hosts.keys.sort %]
+                [% SET h = g.hosts.$hostname %]
+                [% hoststate = '' %]
+                [% IF h.state == 1 %]
+                  [% hoststate = 'DOWN' %]
+                [% ELSIF h.state == 2 %]
+                  [% hoststate = 'UNREACHABLE' %]
+                [% END %]
+                <tr class='[% IF loop.last %]border-b[% END %]'>
+                [% FOREACH col = table_columns.$paneprefix %]
+                  [% NEXT UNLESS col.checked %]
+                  [% IF col.field == "name" %]
                     <td class='[% hoststate %] name'>
                       <div class="flex min-w-max">
                         <div class="flex-1">
@@ -125,6 +128,7 @@
                         [% PROCESS _status_host_attributes hostprefix="" host=h host_comment_count=host_comment_count with_status=0 %]
                       </div>
                     </td>
+                  [% ELSIF col.field == "state" %]
                     <td class="">
                       <div class="flex gap-0.5 flex-row flex-wrap">
                         [% FOR servicename IN h.services.keys.sort %]
@@ -144,43 +148,51 @@
                         [% END %]
                       </div>
                     </td>
+                  [% ELSIF col.field == "actions" %]
                     <td>
                       <div class="flex gap-x-1 justify-center">
                         <a href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]"><i class="fa-solid fa-magnifying-glass-arrow-right" title='View Extended Information For This Host'></i></a>
                         <a href="status.cgi?host=[% h.name | uri %]"><i class="fa-solid fa-bars" title='View Service Details For This Host'></i></a>
                       </div>
                     </td>
-                    <td class='address' style="display: none;">[% h.address | html %]</td>
-                    <td class='alias' style="display: none;">[% h.alias | html %]</td>
-                    <td class='peer_name' style="display: none;">[% peer_name(h) | html %]</td>
-                  </tr>
+                  [% ELSIF col.field == "address" %]
+                    <td class='address'>[% h.address | html %]</td>
+                  [% ELSIF col.field == "alias" %]
+                    <td class='alias'>[% h.alias | html %]</td>
+                  [% ELSIF col.field == "peer_name" %]
+                    <td class='peer_name'>[% peer_name(h) | html %]</td>
+                  [% ELSIF col.field.match('^cust_') %]
+                    [% val = "";
+                      field = col.field.replace('^cust_', '');
+                      cust_vars = get_custom_vars(c, h, '', 1);
+                      IF cust_vars.exists(field); val = cust_vars.$field;
+                      ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
+                      END;
+                    %]
+                    <td class="[% col.field | html %]">[% val %]</td>
+                  [% ELSE %]
+                    <td></td>
+                  [% END %]
                 [% END %]
-              </tbody>
-            </table>
-          </div>
+                </tr>
+              [% END %]
+            </tbody>
+          </table>
         </div>
-      [% END %]
-    </div>
-
-    <div class="mainTableFooter">
-      [% PROCESS _pager_total_items.tt %]
-    </div>
+      </div>
+    [% END %]
   </div>
 
-  <script>
-  <!--
-    if(!window.default_columns) { default_columns = {}; }
-    default_columns["[% paneprefix %]"] = "[% default_grid_columns %]";
-    jQuery(document).ready(function() {
-      [% IF has_columns %]
-      updateStatusColumns("[% paneprefix %]", false);
-      [% END %]
-      [% IF c.req.parameters.defined("autoShow") %]
-      initStatusTableColumnSorting('[% paneprefix %]', 'mainTable');
-      toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
-      [% END %]
-    });
-  -->
-  </script>
+  <div class="mainTableFooter">
+    [% PROCESS _pager_total_items.tt %]
+  </div>
+</div>
+
+<script>
+<!--
+  if(!window.default_columns) { default_columns = {}; }
+  default_columns["[% paneprefix %]"] = "[% default_grid_columns %]";
+-->
+</script>
 
 [% PROCESS _footer.tt %]

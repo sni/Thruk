@@ -3,7 +3,7 @@
   <button
     class="iconOnly"
     id="[% paneprefix %]_btn_columns_hover"
-    onclick="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;"
+    onclick="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable'); toggleElement('[% paneprefix %]_columns_select', undefined, true, undefined, reloadPage); return false;"
     title="change column visibility"
   >
     <i class="uil uil-columns"></i>
@@ -11,7 +11,7 @@
   <div class="card absolute z-30 shadow-float" style="display:none;" id="[% paneprefix %]_columns_select">
     <div class="head justify-between">
       <h3>Edit Columns</h3>
-      <button class="iconOnly p-0" onclick="toggleElement('[% paneprefix %]_columns_select', undefined, true); return false;" title="accept">
+      <button class="iconOnly p-0" onclick="toggleElement('[% paneprefix %]_columns_select', undefined, true); reloadPage(); return false;" title="accept">
         <i class="fa-solid fa-check round small green"></i>
       </button>
     </div>

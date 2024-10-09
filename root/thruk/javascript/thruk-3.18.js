@@ -445,8 +445,6 @@ function cleanUnderscore(str) {
     str = str.replace(/\&_=\d+/g, '');
     str = str.replace(/\?scrollTo=[_\d\.]+/g, '?');
     str = str.replace(/\&scrollTo=[_\d\.]+/g, '');
-    str = str.replace(/\?autoShow=\w+/g, '?');
-    str = str.replace(/\&autoShow=\w+/g, '');
     str = str.replace(/\?$/g, '');
     str = str.replace(/\?&/g, '?');
     return(str);
@@ -1857,6 +1855,8 @@ function updateUrl(newUrl) {
     try {
         history.replaceState({}, "", newUrl);
     } catch(err) { console.log(err) }
+
+    return(newUrl);
 }
 
 /* reloads the current page and adds some parameter from a hash */
@@ -4575,7 +4575,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
                         base_table.appendChild(currentHeader[el]);
                     }
                 });
-                updateStatusColumns(pane_prefix, false);
+                updateStatusColumns(pane_prefix);
             }
         })
     });
@@ -4587,7 +4587,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
             /* drag/drop changes the checkbox state, so set checked flag assuming that a moved column should be visible */
             window.setTimeout(function() {
                 jQuery(ui.item[0]).find("input").prop('checked', true);
-                updateStatusColumns(pane_prefix, false);
+                updateStatusColumns(pane_prefix);
             }, 100);
         }
     });
@@ -4757,8 +4757,6 @@ function updateStatusColumnsTable(id, table, reloadRequired) {
     var changed = false;
     if(reloadRequired == undefined) { reloadRequired = true; }
 
-    removeParams['autoShow'] = true;
-
     var firstRow = table.rows[0];
     var firstDataRow = [];
     if(table.rows.length > 1) {
@@ -4846,15 +4844,6 @@ function updateStatusColumnsTable(id, table, reloadRequired) {
             jQuery('#'+id+'columns').val(newVal);
             additionalParams[id+'columns'] = newVal;
             delete removeParams[id+'columns'];
-
-            var lenghtThresholds = table.dataset["baseColumnLength"];
-            if(reloadRequired && table.rows[1] && table.rows[1].cells.length <= lenghtThresholds) {
-                additionalParams["autoShow"] = id+"_columns_select";
-                delete removeParams['autoShow'];
-                jQuery('#'+id+"_columns_select").append("<div class='absolute top-0 left-0 h-full w-full bodyBG font-semibold opacity-95'><div class='spinner w-8 h-8'><\/div><br>fetching table...<\/div>");
-                reloadPage();
-                return;
-            }
         } else {
             jQuery('#'+id+'columns').val("");
             delete additionalParams[id+'columns'];

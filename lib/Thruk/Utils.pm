@@ -794,7 +794,7 @@ sub get_exposed_custom_vars {
         next unless $config->{$src};
         my @dfl = split(/\s*,\s*/mx, $config->{$src});
         for my $d (@dfl) {
-            if($d =~ m/^cust_([a-zA-Z0-9]+?)(:.*|)$/mx) {
+            if($d =~ m/^cust_([a-zA-Z0-9_]+?)(:.*|)$/mx) {
                 my $var  = "$1";
                 $vars->{$var} = 1;
             }

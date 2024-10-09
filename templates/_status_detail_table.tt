@@ -1,212 +1,189 @@
 ﻿[% PROCESS _blocks.tt %]
 [% PROCESS custom_perf_bar_adjustments.tt %]
 
-[% start_with = 7 %]
-[% IF show_backends_in_table == 1 || show_backends_in_table == 2 %]
-  [% start_with = start_with + 1 %]
-[% END %]
-
-<table class="[% paneprefix %]_table mainTable striped" onmouseout='reset_all_hosts_and_services();'[% IF has_columns %] style="visibility: hidden;"[% END %] data-base-column-length="[% start_with %]">
+<table class="[% paneprefix %]_table mainTable striped" onmouseout='reset_all_hosts_and_services();'>
   <thead title="click to sort, double click to rename, drag columns to reorder">
     <tr onmouseover="initStatusTableColumnSorting('[% paneprefix %]', 'mainTable');">
-      <th class="status col_host_name">
-        <a class="status col_host_name sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="1">Host</a>
-      </th>
-      [% IF show_backends_in_table == 2 %]
-      <th class='status col_peer_name text-center'>
-        <a class='status col_peer_name sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="7">Site</a>
-      </th>
-      [% END %]
-      <th class="status col_description">
-        <a class="status col_description sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="2">Service</a>
-      </th>
-      <th class="status col_state text-center">
-        <a class="status col_state sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="3">Status</a>
-      </th>
-      <th class="status col_last_check text-center">
-        <a class="status col_last_check sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="4">Last Check</a>
-      </th>
-      <th class="status col_duration text-center">
-        <a class="status col_duration sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="6">Duration</a>
-      </th>
-      <th class="status col_current_attempt text-center">
-        <a class="status col_current_attempt sort-by" href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="5">Attempt</a>
-      </th>
-      [% IF show_backends_in_table == 1 %]
-      <th class='status col_peer_name text-center'>
-        <a class='status col_peer_name sort-by' href="#" data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="7">Site</a>
-      </th>
-      [% END %]
-      <th class="status col_plugin_output">
-        <a class="status col_plugin_output sort-by" href="#"  data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="9">Status Information</a>
-      </th>
-      [% FOREACH col = default_columns.$paneprefix %]
-        [% IF loop.index >= start_with %]
-          [% center = "" %]
-          [% IF col.field == "peer_name" || col.field == "check_interval" || col.field == "check_period" || col.field == "execution_time" || col.field == "latency" || col.field == "next_check" || col.field == "notification_period" || col.field == "percent_state_change" || col.field == "in_notification_period" || col.field == "in_check_period" || col.field == "lmd_last_cache_update" || col.field == "last_state_change" %]
-            [% center = " text-center" %]
-          [% END %]
-          <th class="status col_[% col.field | html %][% center %]" style="display: none;">
-            <a class="status col_[% col.field | html %] sort-by" href='#' data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="[% loop.index + 10 %]">[% col.title | html %]</a>
-          </th>
+      [% FOREACH col = table_columns.$paneprefix %]
+        [% center = "" %]
+        [% IF
+               col.field == "check_interval"
+            || col.field == "check_period"
+            || col.field == "current_attempt"
+            || col.field == "duration"
+            || col.field == "execution_time"
+            || col.field == "in_check_period"
+            || col.field == "in_notification_period"
+            || col.field == "last_check"
+            || col.field == "last_state_change"
+            || col.field == "latency"
+            || col.field == "lmd_last_cache_update"
+            || col.field == "next_check"
+            || col.field == "notification_period"
+            || col.field == "peer_name"
+            || col.field == "percent_state_change"
+            || col.field == "state"
+          %]
+          [% center = " text-center" %]
         [% END %]
+        <th class="status col_[% col.field | html %][% center %]"[% IF ! col.checked %] style="display: none;"[% END %]>
+          <a class="status col_[% col.field | html %] sort-by" href='#' data-sort-type[% sortprefix %]="1" data-sort-option[% sortprefix %]="[% col.sort %]">[% col.title | html %]</a>
+        </th>
       [% END %]
     </tr>
   </thead>
   <tbody>
-    [% SET lasthost = '' %]
-    [% SET prev_host_empty = '' %]
-    [% FOREACH s = data %]
-      [% IF s.has_been_checked == 0 %]
-        [% state = 'PENDING' %]
-      [% ELSIF s.state == 0 %]
-        [% state = 'OK' %]
-      [% ELSIF s.state == 1 %]
-        [% state = 'WARNING' %]
-      [% ELSIF s.state == 2 %]
-        [% state = 'CRITICAL' %]
-      [% ELSIF s.state == 3 %]
-        [% state = 'UNKNOWN' %]
-      [% END %]
+    [%
+      SET lasthost = '';
+      SET prev_host_empty = '';
+    %]
 
-      [% SET comment_count = s.comments.size %]
-      [% SET peer_key      = s.peer_key %]
-      [% SET program_start = pi_detail.$peer_key.program_start %]
+    [% FOREACH s = data;
+        IF s.has_been_checked == 0;
+          state = 'PENDING';
+        ELSIF s.state == 0;
+          state = 'OK';
+        ELSIF s.state == 1;
+          state = 'WARNING';
+        ELSIF s.state == 2;
+          state = 'CRITICAL';
+        ELSIF s.state == 3;
+          state = 'UNKNOWN';
+        END;
 
-      [% rowclasses = "" %]
-      [% IF s.state_type == 1 %]
-        [% rowclasses = "hard_state" %]
-      [% ELSE %]
-        [% rowclasses = "soft_state" %]
-      [% END%]
+        SET comment_count = s.comments.size;
+        SET peer_key      = s.peer_key;
+        SET program_start = pi_detail.$peer_key.program_start;
 
+        rowclasses = "";
+        IF s.state_type == 1;
+          rowclasses = "hard_state";
+        ELSE;
+          rowclasses = "soft_state";
+        END;
+        has_bp = has_business_process(s, "host_");
+    %]
       <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %] class="[% rowclasses %]">
-        [% IF lasthost == s.host_name %]
-          [% SET prev_host_empty = "yes" %]
-        <td class='host_name col_host_name border-t-0 border-b-0 bgTable'></td>
-        [% ELSE %]
-          [% SET host_comment_count = 0 %]
-          [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
-          [% SET hoststate = '' %]
-          [% IF s.host_state == 1 %]
-            [% hoststate = 'DOWN' %]
-          [% ELSIF s.host_state == 2 %]
-            [% hoststate = 'UNREACHABLE' %]
-          [% END %]
-          [% IF prev_host_empty == "yes" %]
-            [% SET prev_host_empty = " rowOdd" %]
-          [% ELSE %]
-            [% SET prev_host_empty = '' %]
-          [% END %]
-          <td class='host_name col_host_name [% hoststate %][% prev_host_empty %]'>
-            <div class="status col_host_name flex items-center min-w-max">
-              <div class="flex-1">
-                <a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% _shost(s) | html %]</a>
-              </div>
-              [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
-            </div>
+      [% FOREACH col = table_columns.$paneprefix %]
+        [% NEXT UNLESS col.checked %]
+        [% IF col.field == "state" %]
+          <td class='state [% state %]'>
+            <div class='status col_state text-center'>[% state %]</div>
           </td>
-        [% END %]
-        [% IF show_backends_in_table == 2 %]
-        <td class='backend_[% peer_key %] peer_name text-center'>[% pi_detail.$peer_key.peer_name %]</td>
-        [% END %]
-        <td class='description'>
-          <div class="status col_description flex items-center min-w-max">
-            <div class="flex-1">
-              <a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% _service(s) | html %]</a>
-            </div>
-            [% PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
-          </div>
-        </td>
-        <td class='state [% state %]'>
-          <div class='status col_state text-center'>[% state %]</div>
-        </td>
-        <td class='last_check'>
-          <div class="status col_last_check text-center">[% last_check(c, s.last_check) %]</div>
-        </td>
-        <td class='duration' title="[% IF s.last_state_change %][% format_date(s.last_state_change, datetime_format_long) %][% ELSE %]service has never changed its state yet.[% END %]">
-          <div class='status col_duration text-center'>[% IF s.last_state_change %][% duration(date.now - s.last_state_change, 6) %][% ELSE %][% duration(date.now - program_start, 6) %]+[% END %]</div>
-        </td>
-        <td class='current_attempt'>
-          <div class="status col_current_attempt text-center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</div>
-        </td>
-        [% IF show_backends_in_table == 1 %]
-        <td class='backend_[% peer_key %] peer_name text-center'>[% pi_detail.$peer_key.peer_name %]</td>
-        [% END %]
-        [% IF s.has_been_checked == 0 %]
-          <td class='plugin_output status col_plugin_output truncate w-1/2 max-w-xs'>
-            [% IF s.active_checks_enabled == 0 %]
-              <div class="status col_plugin_output truncate">Service is not scheduled to be checked</div>
-            [% ELSE %]
-              <div class="status col_plugin_output truncate">Service check scheduled for [% format_date(s.next_check, datetime_format_long) %]</div>
-            [% END %]
-          </td>
-        [% ELSE %]
-          [% plugin_output = remove_html_comments(s.plugin_output) %]
-          [% on_demand_long_plugin_output = 0 %]
-          [% IF s.defined("has_long_plugin_output") %]
-            [% IF s.has_long_plugin_output %]
-              [% on_demand_long_plugin_output = 1 %]
-              [% long_plugin_output = "..." %]
-            [% ELSE %]
-              [% long_plugin_output = "" %]
-            [% END %]
-          [% ELSE %]
-            [% long_plugin_output = remove_html_comments(s.long_plugin_output) %]
-          [% END %]
-          [% orig_plugin_output = plugin_output %]
-          [% IF escape_html_tags %]
-            [% long_plugin_output = escape_html(long_plugin_output) %]
-            [% plugin_output      = escape_html(plugin_output) %]
-          [% END %]
-          <td class='plugin_output status col_plugin_output truncate w-1/2 max-w-xs'
-            [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
-              [% IF on_demand_long_plugin_output %]
-                onclick="return(show_plugin_output_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% escape_js(s.peer_key) %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], { 'width': 600 }));"
-              [% ELSE %]
-                onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(_shost(s))) %] - [% escape_html(escape_js(_service(s))) %]', 'width': 600 }));"
-                abbr="[% escape_html(plugin_output) %]&lt;br&gt;[% escape_html(nl2br(long_plugin_output)) %]"
-              [% END %]
-            [% END %]
-            >
-            <div class="status col_plugin_output flex items-center truncate">
-              [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
-                <div class="status col_plugin_output has_long_plugin_output font-bold link clickable flex-1 truncate">[% plugin_output | replace_links | replace_copy_paste %]</div>
-              [% ELSE %]
-                <div class="status col_plugin_output flex-1 truncate">
-                  [% plugin_output | replace_links | replace_copy_paste %]
-                </div>
-              [% END %]
-              [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
-                <br>[% nl2br(long_plugin_output) | replace_links | replace_copy_paste %]
-              [% END %]
-              <div>
-                [% PROCESS _perfdata_table add_link="1" state=s.state plugin_output=orig_plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description pnp_url=get_pnp_url(c, s, 1) %]
-              </div>
-            </div>
-          </td>
-        [% END %]
-
-        [% IF has_columns %]
-          [% IF !show_backends_in_table %]
-            <td class='backend_[% peer_key %] peer_name text-center' style="display: none;">[% pi_detail.$peer_key.peer_name %]</td>
-          [% END %]
+        [% ELSIF col.field == "host_name" %]
           [% IF lasthost == s.host_name %]
-            <td class='host_address' style="display: none;"></td>
-            <td class='host_alias' style="display: none;"></td>
-            <td class='host_parents' style="display: none;"></td>
-            <td class='host_groups' style="display: none;"></td>
+            [% prev_host_empty = "yes" %]
+            <td class='host_name col_host_name border-t-0 border-b-0 bgTable'></td>
           [% ELSE %]
-            <td class='host_address' style="display: none;">[% s.host_address | html %]</td>
-            <td class='host_alias' style="display: none;">[% s.host_alias | html %]</td>
-            <td class='host_parents' style="display: none;">[% s.host_parents.join(', ') | html %]</td>
-            <td class='host_groups' style="display: none;">[% s.host_groups.join(', ') | html %]</td>
+            [% SET host_comment_count = 0 %]
+            [% SET host_comment_count = s.host_comments.size IF s.host_comments %]
+            [% SET hoststate = '' %]
+            [% IF s.host_state == 1 %]
+              [% hoststate = 'DOWN' %]
+            [% ELSIF s.host_state == 2 %]
+              [% hoststate = 'UNREACHABLE' %]
+            [% END %]
+            [% IF prev_host_empty == "yes" %]
+              [% SET prev_host_empty = " rowOdd" %]
+            [% ELSE %]
+              [% SET prev_host_empty = '' %]
+            [% END %]
+            <td class='host_name col_host_name [% hoststate %][% prev_host_empty %]'>
+              <div class="status col_host_name flex items-center min-w-max">
+                <div class="flex-1">
+                  <a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% _shost(s) | html %]</a>
+                </div>
+                [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
+              </div>
+            </td>
           [% END %]
-          <td class='check_command' style="display: none;">[% s.check_command | strip_command_args | html %]</td>
-          <td class='check_interval text-center' style="display: none;">[% s.check_interval | html %]</td>
-          <td class='check_period text-center' style="display: none;">[% s.check_period | html %]</td>
-          <td class='contacts truncate' style="display: none;">[% s.contacts.join(', ') | html %]</td>
-          <td class='comments' style="display: none;">
+        [% ELSIF col.field == "peer_name" %]
+          <td class='backend_[% peer_key %] peer_name text-center'>[% pi_detail.$peer_key.peer_name %]</td>
+        [% ELSIF col.field == "description" %]
+          <td class='description'>
+            <div class="status col_description flex items-center min-w-max">
+              <div class="flex-1">
+                <a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% _service(s) | html %]</a>
+              </div>
+              [% PROCESS _status_service_attributes service=s service_comment_count=comment_count %]
+            </div>
+          </td>
+        [% ELSIF col.field == "last_check" %]
+          <td class='last_check'>
+            <div class="status col_last_check text-center">[% last_check(c, s.last_check) %]</div>
+          </td>
+        [% ELSIF col.field == "duration" %]
+          <td class='duration' title="[% IF s.last_state_change %][% format_date(s.last_state_change, datetime_format_long) %][% ELSE %]service has never changed its state yet.[% END %]">
+            <div class='status col_duration text-center'>[% IF s.last_state_change %][% duration(date.now - s.last_state_change, 6) %][% ELSE %][% duration(date.now - program_start, 6) %]+[% END %]</div>
+          </td>
+        [% ELSIF col.field == "current_attempt" %]
+          <td class='current_attempt'>
+            <div class="status col_current_attempt text-center">[% s.current_attempt %]/[% s.max_check_attempts %][% IF show_notification_number %] [% IF s.current_notification_number && s.current_notification_number > 0 %] <span title="This service has sent out [% s.current_notification_number %] notifications">#[% s.current_notification_number %]</span>[% END %][% IF s.first_notification_delay && s.first_notification_delay > 0 %][% first_remaining = calculate_first_notification_delay_remaining(s) %][% IF first_remaining >= 0 %] <span title="This service will send out notifications in [% first_remaining %] minutes">~[% first_remaining %]min</span>[% END %][% END %][% END %]</div>
+          </td>
+        [% ELSIF col.field == "plugin_output" %]
+          [% IF s.has_been_checked == 0 %]
+            <td class='plugin_output status col_plugin_output truncate w-1/2 max-w-xs'>
+              [% IF s.active_checks_enabled == 0 %]
+                <div class="status col_plugin_output truncate">Service is not scheduled to be checked</div>
+              [% ELSE %]
+                <div class="status col_plugin_output truncate">Service check scheduled for [% format_date(s.next_check, datetime_format_long) %]</div>
+              [% END %]
+            </td>
+          [% ELSE %]
+            [% plugin_output = remove_html_comments(s.plugin_output) %]
+            [% on_demand_long_plugin_output = 0 %]
+            [% IF s.defined("has_long_plugin_output") %]
+              [% IF s.has_long_plugin_output %]
+                [% on_demand_long_plugin_output = 1 %]
+                [% long_plugin_output = "..." %]
+              [% ELSE %]
+                [% long_plugin_output = "" %]
+              [% END %]
+            [% ELSE %]
+              [% long_plugin_output = remove_html_comments(s.long_plugin_output) %]
+            [% END %]
+            [% orig_plugin_output = plugin_output %]
+            [% IF escape_html_tags %]
+              [% long_plugin_output = escape_html(long_plugin_output) %]
+              [% plugin_output      = escape_html(plugin_output) %]
+            [% END %]
+            <td class='plugin_output status col_plugin_output truncate w-1/2 max-w-xs'
+              [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
+                [% IF on_demand_long_plugin_output %]
+                  onclick="return(show_plugin_output_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% escape_js(s.peer_key) %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], { 'width': 600 }));"
+                [% ELSE %]
+                  onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(_shost(s))) %] - [% escape_html(escape_js(_service(s))) %]', 'width': 600 }));"
+                  abbr="[% escape_html(plugin_output) %]&lt;br&gt;[% escape_html(nl2br(long_plugin_output)) %]"
+                [% END %]
+              [% END %]
+              >
+              <div class="status col_plugin_output flex items-center truncate">
+                [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
+                  <div class="status col_plugin_output has_long_plugin_output font-bold link clickable flex-1 truncate">[% plugin_output | replace_links | replace_copy_paste %]</div>
+                [% ELSE %]
+                  <div class="status col_plugin_output flex-1 truncate">
+                    [% plugin_output | replace_links | replace_copy_paste %]
+                  </div>
+                [% END %]
+                [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
+                  <br>[% nl2br(long_plugin_output) | replace_links | replace_copy_paste %]
+                [% END %]
+                <div>
+                  [% PROCESS _perfdata_table add_link="1" state=s.state plugin_output=orig_plugin_output perfdata=s.perf_data check_command=s.check_command hst=s.host_name svc=s.description pnp_url=get_pnp_url(c, s, 1) %]
+                </div>
+              </div>
+            </td>
+          [% END %]
+        [% ELSIF col.field == "check_command" %]
+          <td class='check_command'>[% s.check_command | strip_command_args | html %]</td>
+        [% ELSIF col.field == "check_interval" %]
+          <td class='check_interval text-center'>[% s.check_interval | html %]</td>
+        [% ELSIF col.field == "check_period" %]
+          <td class='check_period text-center'>[% s.check_period | html %]</td>
+        [% ELSIF col.field == "contacts" %]
+          <td class='contacts truncate'>[% s.contacts.join(', ') | html %]</td>
+        [% ELSIF col.field == "comments" %]
+          <td class='comments'>
             [% host_name = s.host_name %]
             [% IF lasthost != s.host_name %]
               [% FOREACH h_peer_key = comments_by_host.keys %]
@@ -231,32 +208,50 @@
               [% END %]
             [% END %]
           </td>
-          <td class='event_handler' style="display: none;">[% s.event_handler.replace("\!.*$", "") %]</td>
-          <td class='execution_time text-center' style="display: none;">[% sprintf('%.2f', s.execution_time || 0) %]s</td>
-          <td class='groups' style="display: none;">[% s.groups.join(', ') %]</td>
-          <td class='latency text-center' style="display: none;">[% sprintf('%.2f', s.latency || 0) %]s</td>
-          <td class='next_check text-center' style="display: none;">[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]not scheduled[% END %]</td>
-          <td class='notification_period text-center' style="display: none;">[% s.notification_period %]</td>
-          <td class='percent_state_change text-center' style="display: none;">[% sprintf('%.2f', s.percent_state_change) %]%</td>
-          <td class='in_notification_period text-center' style="display: none;">[% IF s.in_notification_period %]Yes[% ELSE %]No[% END %]</td>
-          <td class='in_check_period text-center' style="display: none;">[% IF s.in_check_period %]Yes[% ELSE %]No[% END %]</td>
-          <td class='last_state_change text-center' style="display: none;">[% last_check(c, s.last_state_change) %]</td>
-          [% IF has_lmd %]
-            <td class='lmd_last_cache_update text-center' style="display: none;">[% date_format(c, s.lmd_last_cache_update) %]</td>
-          [% END %]
-          [% FOREACH col = default_columns.$paneprefix %]
-            [% IF col.field.match('^cust_') %]
-              [% val = "";
-                field = col.field.replace('^cust_', '');
-                cust_vars = get_custom_vars(c, s, '', 1);
-                IF cust_vars.exists(field); val = cust_vars.$field;
-                ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
-                END;
-              %]
-              <td class="[% col.field | html %]" style="display: none;">[% val %]</td>
-            [% END %]
-          [% END %]
+        [% ELSIF col.field == "event_handler" %]
+          <td class='event_handler'>[% s.event_handler.replace("\!.*$", "") %]</td>
+        [% ELSIF col.field == "execution_time" %]
+          <td class='execution_time text-center'>[% sprintf('%.2f', s.execution_time || 0) %]s</td>
+        [% ELSIF col.field == "groups" %]
+          <td class='groups'>[% s.groups.join(', ') %]</td>
+        [% ELSIF col.field == "latency" %]
+          <td class='latency text-center'>[% sprintf('%.2f', s.latency || 0) %]s</td>
+        [% ELSIF col.field == "next_check" %]
+          <td class='next_check text-center'>[% IF s.next_check %][% date_format(c, s.next_check) %][% ELSE %]not scheduled[% END %]</td>
+        [% ELSIF col.field == "notification_period" %]
+          <td class='notification_period text-center'>[% s.notification_period %]</td>
+        [% ELSIF col.field == "percent_state_change" %]
+          <td class='percent_state_change text-center'>[% sprintf('%.2f', s.percent_state_change) %]%</td>
+        [% ELSIF col.field == "in_notification_period" %]
+          <td class='in_notification_period text-center'>[% IF s.in_notification_period %]Yes[% ELSE %]No[% END %]</td>
+        [% ELSIF col.field == "in_check_period" %]
+          <td class='in_check_period text-center'>[% IF s.in_check_period %]Yes[% ELSE %]No[% END %]</td>
+        [% ELSIF col.field == "last_state_change" %]
+          <td class='last_state_change text-center'>[% last_check(c, s.last_state_change) %]</td>
+        [% ELSIF col.field == "lmd_last_cache_update" && has_lmd %]
+          <td class='lmd_last_cache_update text-center'>[% date_format(c, s.lmd_last_cache_update) %]</td>
+        [% ELSIF col.field == "host_address" %]
+          <td class='host_address'>[% IF lasthost != s.host_name; s.host_address | html; END %]</td>
+        [% ELSIF col.field == "host_alias" %]
+          <td class='host_alias'>[% IF lasthost != s.host_name; s.host_alias | html; END %]</td>
+        [% ELSIF col.field == "host_parents" %]
+          <td class='host_parents'>[% IF lasthost != s.host_name; s.host_parents.join(', ') | html; END %]</td>
+        [% ELSIF col.field == "host_groups" %]
+          <td class='host_groups'>[% IF lasthost != s.host_name; s.host_groups.join(', ') | html; END %]</td>
+        [% ELSIF col.field.match('^cust_') %]
+          [% val = "";
+            field = col.field.replace('^cust_', '');
+            cust_vars = get_custom_vars(c, s, '', 1);
+            IF cust_vars.exists(field); val = cust_vars.$field;
+            ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
+            END;
+          %]
+          <td class="[% col.field | html %]">[% val %]</td>
+        [% ELSE %]
+          <td></td>
         [% END %]
+        </td>
+      [% END %]
       </tr>
       [% SET lasthost = s.host_name %]
     [% END %]
@@ -267,17 +262,5 @@
 <!--
   if(!window.default_columns) { default_columns = {}; }
   default_columns["[% paneprefix %]"] = "[% default_service_columns %]";
-  function initStatusTableServices() {
-    [% IF has_columns %]
-      updateStatusColumns("[% paneprefix %]", false);
-    [% END %]
-    [% IF c.req.parameters.defined("autoShow") %]
-      initStatusTableColumnSorting('[% paneprefix %]', 'mainTable');
-      toggleElement("[% escape_html(c.req.parameters.autoShow) %]", undefined, true);
-    [% END %]
-  }
-  jQuery(document).ready(function() {
-    initStatusTableServices();
-  });
 -->
 </script>

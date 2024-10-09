@@ -443,18 +443,13 @@ sub _process_details_page {
     $c->stash->{'auto_reload_fn'} = "explorerUpdateStatusTable" if $c->stash->{'explore'};
     $c->stash->{'status_search_add_default_filter'} = "host";
 
-    my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_service_columns($c);
     my $selected_columns = $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'};
     $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $selected_columns);
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
-    if($selected_columns) {
-        Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns =~ m/comments/imx || $c->req->parameters->{'autoShow'});
-        $has_columns = 1;
-    }
-    $c->stash->{'has_columns'} = $has_columns;
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns && $selected_columns =~ m/comments/imx);
     $c->stash->{'has_user_columns'}->{'dfl_'} = ($user_data->{'columns'}->{'svc'} || $c->req->parameters->{'dfl_columns'}) ? 1 : 0;
 
     # which host to display?
@@ -476,13 +471,19 @@ sub _process_details_page {
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
-    for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'dfl_'}}; $x++) {
-        if(!defined $sortoptions->{$x+10}) {
-            my $col = $c->stash->{'default_columns'}->{'dfl_'}->[$x];
-            my $field = $col->{'field'};
-            if($field =~ m/^cust_(.*)$/mx) { $field = "custom_variables ".uc($1); }
-            $sortoptions->{$x+10} = [[$field], lc($col->{"title"}) ];
+    my $sortnum = 10;
+    for my $col (@{$c->stash->{'default_columns'}->{'dfl_'}}) {
+        next if defined $col->{'sort'};
+
+        my $field = $col->{'field'};
+        if($field =~ m/^cust_(.*)$/mx) {
+            $field = uc($1);
+            $sortoptions->{$sortnum} = [["custom_variables ".$field, "host_custom_variables ".$field], lc($col->{"title"}) ];
+        } else {
+            $sortoptions->{$sortnum} = [[$field], lc($col->{"title"}) ];
         }
+        $col->{'sort'} = $sortnum;
+        $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
@@ -508,7 +509,7 @@ sub _process_details_page {
     } else {
         push @{$extra_columns}, 'long_plugin_output';
     }
-    push @{$extra_columns}, 'contacts' if $has_columns;
+    push @{$extra_columns}, 'contacts' if ($selected_columns && $selected_columns =~ m/contacts/imx);
 
     # get all services
     my $services = $c->db->get_services(
@@ -591,7 +592,6 @@ sub _process_hostdetails_page {
     $c->stash->{'auto_reload_fn'} = "explorerUpdateStatusTable" if $c->stash->{'explore'};
     $c->stash->{'status_search_add_default_filter'} = "host";
 
-    my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
     my $selected_columns = $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'};
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
@@ -599,11 +599,7 @@ sub _process_hostdetails_page {
     $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $selected_columns);
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
-    if($selected_columns) {
-        Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns =~ m/comments/imx || $c->req->parameters->{'autoShow'});
-        $has_columns = 1;
-    }
-    $c->stash->{'has_columns'} = $has_columns;
+    Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns && $selected_columns =~ m/comments/imx);
     $c->stash->{'has_user_columns'}->{'dfl_'} = ($user_data->{'columns'}->{'hst'} || $c->req->parameters->{'dfl_columns'}) ? 1 : 0;
 
     # which host to display?
@@ -623,13 +619,19 @@ sub _process_hostdetails_page {
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status' ],
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
-    for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'dfl_'}}; $x++) {
-        if(!defined $sortoptions->{$x+10}) {
-            my $col = $c->stash->{'default_columns'}->{'dfl_'}->[$x];
-            my $field = $col->{'field'};
-            if($field =~ m/^cust_(.*)$/mx) { $field = "custom_variables ".uc($1); }
-            $sortoptions->{$x+10} = [[$field], lc($col->{"title"}) ];
+    my $sortnum = 10;
+    for my $col (@{$c->stash->{'default_columns'}->{'dfl_'}}) {
+        next if defined $col->{'sort'};
+
+        my $field = $col->{'field'};
+        if($field =~ m/^cust_(.*)$/mx) {
+            $field = uc($1);
+            $sortoptions->{$sortnum} = [["custom_variables ".$field], lc($col->{"title"}) ];
+        } else {
+            $sortoptions->{$sortnum} = [[$field], lc($col->{"title"}) ];
         }
+        $col->{'sort'} = $sortnum;
+        $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
 
@@ -654,7 +656,7 @@ sub _process_hostdetails_page {
     } else {
         push @{$extra_columns}, 'long_plugin_output';
     }
-    push @{$extra_columns}, 'contacts' if $has_columns;
+    push @{$extra_columns}, 'contacts' if ($selected_columns && $selected_columns =~ m/contacts/imx);
 
     # get hosts
     my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns, extra_columns => $extra_columns );
@@ -848,7 +850,6 @@ sub _process_overview_page {
     $c->stash->{'default_columns'}->{'ovr_'} = Thruk::Utils::Status::get_overview_columns($c);
     my $selected_columns = $c->req->parameters->{'ovr_columns'} || $user_data->{'columns'}->{'ovr'} || $c->config->{'default_overview_columns'};
     $c->stash->{'table_columns'}->{'ovr_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'ovr_'}, $selected_columns);
-    $c->stash->{'has_columns'} = $selected_columns ? 1 : 0;
     $c->stash->{'has_user_columns'}->{'ovr_'} = ($user_data->{'columns'}->{'ovr'} || $c->req->parameters->{'ovr_columns'}) ? 1 : 0;
 
     my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %joined_groups)], { 'ASC' => 'name'});
@@ -874,7 +875,7 @@ sub _process_grid_page {
     my($host_data, $services_data) = _fill_host_services_hashes($c,
                                             [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
                                             [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
-                                            1, # all columes
+                                            1, # all columns
                                     );
 
     # get all host/service groups
@@ -953,7 +954,7 @@ sub _process_grid_page {
     ($host_data, $services_data) = _fill_host_services_hashes($c,
                                             [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
                                             [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
-                                            1, # all columes
+                                            1, # all columns
                                     );
 
     for my $group (@{$c->stash->{'data'}}) {
@@ -971,7 +972,6 @@ sub _process_grid_page {
     $c->stash->{'default_columns'}->{'grd_'} = Thruk::Utils::Status::get_grid_columns($c);
     my $selected_columns = $c->req->parameters->{'grd_columns'} || $user_data->{'columns'}->{'grd'} || $c->config->{'default_overview_columns'};
     $c->stash->{'table_columns'}->{'grd_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'grd_'}, $selected_columns);
-    $c->stash->{'has_columns'} = $selected_columns ? 1 : 0;
     $c->stash->{'has_user_columns'}->{'grd_'} = ($user_data->{'columns'}->{'grd'} || $c->req->parameters->{'grd_columns'}) ? 1 : 0;
 
     return 1;
@@ -1079,7 +1079,6 @@ sub _process_combined_page {
 
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
-    my $has_columns = 0;
     my $user_data = Thruk::Utils::get_user_data($c);
     my $selected_hst_columns = $c->req->parameters->{'hst_columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'};
     my $selected_svc_columns = $c->req->parameters->{'svc_columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'};
@@ -1091,14 +1090,12 @@ sub _process_combined_page {
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
     if($selected_hst_columns || $selected_svc_columns) {
-        $has_columns = 1;
         if(   ($selected_hst_columns && $selected_hst_columns =~ m/comments/mx)
            || ($selected_svc_columns && $selected_svc_columns =~ m/comments/mx)
-           || $c->req->parameters->{'autoShow'}) {
+        ) {
             Thruk::Utils::Status::set_comments_and_downtimes($c);
         }
     }
-    $c->stash->{'has_columns'} = $has_columns;
     $c->stash->{'has_user_columns'}->{'hst_'} = ($user_data->{'columns'}->{'hst'} || $c->req->parameters->{'hst_columns'}) ? 1 : 0;
     $c->stash->{'has_user_columns'}->{'svc_'} = ($user_data->{'columns'}->{'svc'} || $c->req->parameters->{'svc_columns'}) ? 1 : 0;
 
@@ -1122,30 +1119,39 @@ sub _process_combined_page {
         '7' => [ [ 'peer_name', 'host_name', 'description' ], 'site' ],
         '9' => [ [ 'plugin_output', 'host_name', 'description' ], 'status information' ],
     };
-    for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'svc_'}}; $x++) {
-        if(!defined $sortoptions->{$x+10}) {
-            my $col = $c->stash->{'default_columns'}->{'svc_'}->[$x];
-            my $field = $col->{'field'};
-            if($field =~ m/^cust_(.*)$/mx) { $field = "custom_variables ".uc($1); }
-            $sortoptions->{$x+10} = [[$field], lc($col->{"title"}) ];
+    my $sortnum = 10;
+    for my $col (@{$c->stash->{'default_columns'}->{'svc_'}}) {
+        next if defined $col->{'sort'};
+
+        my $field = $col->{'field'};
+        if($field =~ m/^cust_(.*)$/mx) {
+            $field = uc($1);
+            $sortoptions->{$sortnum} = [["custom_variables ".$field, "host_custom_variables ".$field], lc($col->{"title"}) ];
+        } else {
+            $sortoptions->{$sortnum} = [[$field], lc($col->{"title"}) ];
         }
+        $col->{'sort'} = $sortnum;
+        $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     $c->stash->{'svc_orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'svc_orderdir'} = $order;
 
-    my $extra_columns = [];
+    my $extra_svc_columns = [];
+    my $extra_hst_columns = [];
     if($c->config->{'use_lmd_core'} && $c->stash->{'show_long_plugin_output'} ne 'inline' && $view_mode eq 'html') {
-        push @{$extra_columns}, 'has_long_plugin_output';
+        push @{$extra_svc_columns}, 'has_long_plugin_output';
+        push @{$extra_hst_columns}, 'has_long_plugin_output';
     } else {
-        push @{$extra_columns}, 'long_plugin_output';
+        push @{$extra_svc_columns}, 'long_plugin_output';
+        push @{$extra_hst_columns}, 'long_plugin_output';
     }
-    push @{$extra_columns}, 'contacts' if $has_columns;
+    push @{$extra_svc_columns}, 'contacts' if ($selected_svc_columns && $selected_svc_columns =~ m/contacts/imx);
 
-    my $services            = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
-                                                        sort   => { $order => $sortoptions->{$sortoption}->[0] },
-                                                        extra_columns => $extra_columns,
-                                                      );
+    my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
+                                         sort   => { $order => $sortoptions->{$sortoption}->[0] },
+                                         extra_columns => $extra_svc_columns,
+                                       );
     $c->stash->{'services'} = $services;
     if( $sortoption eq "6" and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
 
@@ -1163,22 +1169,29 @@ sub _process_combined_page {
         '8' => [ [ 'has_been_checked', 'state', 'name' ], 'host status'  ],
         '9' => [ [ 'plugin_output', 'name' ], 'status information' ],
     };
-    for(my $x = 0; $x < scalar @{$c->stash->{'default_columns'}->{'hst_'}}; $x++) {
-        if(!defined $sortoptions->{$x+10}) {
-            my $col = $c->stash->{'default_columns'}->{'hst_'}->[$x];
-            my $field = $col->{'field'};
-            if($field =~ m/^cust_(.*)$/mx) { $field = "custom_variables ".uc($1); }
-            $sortoptions->{$x+10} = [[$field], lc($col->{"title"}) ];
+    $sortnum = 10;
+    for my $col (@{$c->stash->{'default_columns'}->{'hst_'}}) {
+        next if defined $col->{'sort'};
+
+        my $field = $col->{'field'};
+        if($field =~ m/^cust_(.*)$/mx) {
+            $field = uc($1);
+            $sortoptions->{$sortnum} = [["custom_variables ".$field], lc($col->{"title"}) ];
+        } else {
+            $sortoptions->{$sortnum} = [[$field], lc($col->{"title"}) ];
         }
+        $col->{'sort'} = $sortnum;
+        $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     $c->stash->{'hst_orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'hst_orderdir'} = $order;
+    push @{$extra_hst_columns}, 'contacts' if ($selected_hst_columns && $selected_hst_columns =~ m/contacts/imx);
 
-    my $hosts            = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
-                                                  sort   => { $order => $sortoptions->{$sortoption}->[0] },
-                                                        extra_columns => $extra_columns,
-                                                );
+    my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
+                                   sort   => { $order => $sortoptions->{$sortoption}->[0] },
+                                   extra_columns => $extra_hst_columns,
+                                 );
     $c->stash->{'hosts'} = $hosts;
     if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
@@ -1604,7 +1617,7 @@ sub _fill_host_services_hashes {
     my($c, $hostfilter, $servicefilter, $all_columns) = @_;
 
     my $host_data;
-    my $tmp_host_data = $c->db->get_hosts( filter => $hostfilter, columns => $all_columns ? [qw/name state alias address display_name icon_image_expanded icon_image_alt notes_url_expanded action_url_expanded comments is_executing notifications_enabled check_type active_checks_enabled is_flapping acknowledged scheduled_downtime_depth/] : [qw/name/] );
+    my $tmp_host_data = $c->db->get_hosts( filter => $hostfilter, columns => $all_columns ? undef : [qw/name/] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
             $host_data->{ $host->{'name'} } = $host;

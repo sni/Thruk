@@ -237,7 +237,6 @@ my $base_defaults = {
     'base_uri_filter' => { # always applied
                 'bookmark'                      => undef,
                 'referer'                       => undef,
-                'autoShow'                      => undef,
                 'scrollTo'                      => undef,
                 '_'                             => undef,
     },

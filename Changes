@@ -5,6 +5,8 @@ next:
           - show host attributes on grid/overview pages
           - make status badges toggle buttons
           - add support for base64 encoded obfuscate pattern
+          - reworked status page column editor
+          - improve performance when having custom column layout on status pages
           - Rest:
             - add support for host/service note commands
               ex.: /hosts/<name>/cmd/note
