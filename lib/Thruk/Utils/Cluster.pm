@@ -262,6 +262,7 @@ run something on our cluster
         - <node url>  runs job on given node[s]
     - sub: class / sub name
     - args: arguments
+    - debug_log_only: log errors as debug
 
 returns 0 if no cluster is in use and/or caller can continue locally
 returns 1 if a 'once' job runs somewhere already
@@ -269,7 +270,7 @@ returns list of results for each specified node
 
 =cut
 sub run_cluster {
-    my($self, $type, $sub, $args) = @_;
+    my($self, $type, $sub, $args, $debug_log_only) = @_;
     return 0 unless $self->is_clustered();
     return 0 if $ENV{'THRUK_SKIP_CLUSTER'};
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1;
@@ -337,17 +338,21 @@ sub run_cluster {
         my $elapsed = tv_interval($t1);
         if($err) {
             my($short, undef) = Thruk::Utils::extract_connection_error($err);
-            if(!$node->{'last_error'} && !$node->{'maintenance'}) {
-                _error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
-            } else {
+            if($debug_log_only) {
                 _debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
+            } else {
+                if(!$node->{'last_error'} && !$node->{'maintenance'}) {
+                    _error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
+                } else {
+                    _debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
+                }
+                Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
+                    $n => {
+                        last_error => ($short // $err),
+                    },
+                }, { pretty => 1, allow_empty => 1 });
+                $node->{'last_error'} = ($short // $err);
             }
-            Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
-                $n => {
-                    last_error => ($short // $err),
-                },
-            }, { pretty => 1, allow_empty => 1 });
-            $node->{'last_error'} = ($short // $err);
             _debug2(Carp::longmess("cluster error: ".$err));
         } else {
             if($sub =~ m/Cluster::pong/mx) {
@@ -399,7 +404,8 @@ cluster aware kill wrapper
 =cut
 sub kill {
     my($self, $c, $node, $sig, @pids) = @_;
-    my $res = $self->run_cluster($node, "Thruk::Utils::Cluster::kill", [$self, $c, $node, $sig, @pids]);
+    my $debug_log_only = $sig == 0;
+    my $res = $self->run_cluster($node, "Thruk::Utils::Cluster::kill", [$self, $c, $node, $sig, @pids], $debug_log_only);
     if(!$res) {
         return(CORE::kill($sig, @pids));
     }
@@ -515,7 +521,7 @@ sub heartbeat {
         next if $c->cluster->is_it_me($n);
         next if(defined $node_id && $n->{'node_id'} ne $node_id);
         _debug(sprintf("sending heartbeat: %s -> %s", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
-        $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}])->[0];
+        $nodes->{$n->{'node_id'}} = $c->cluster->run_cluster($n, "Thruk::Utils::Cluster::pong", [$c, $n->{'node_id'}, $n->{'node_url'}], 1)->[0];
         _debug(sprintf("sending heartbeat: %s -> %s: done", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
     }
     return($nodes);
