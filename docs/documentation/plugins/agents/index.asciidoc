@@ -178,8 +178,21 @@ For example:
       name    = dns           # the actual service description
       check   = check_dns     # snclient check
       args    = -H thruk.org  # check arguments
+      # add arbitray naemon config attributes here as well
+      first_notification_delay = 30
     </extra_service_checks>
 
+    # add custom service checks
+    <extra_service_checks>
+      # on which host / sections should this serice be created
+      host    = ANY
+      section = ANY
+
+      name    = ping  # the actual service description
+      check_command = check-host-alive!$HOSTADDRESS$
+      # add arbitray naemon config attributes here as well
+      first_notification_delay = 30
+    </extra_service_checks>
   </snclient>
 </Component>
 ...................................

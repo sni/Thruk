@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
+use Storable ();
 
 use Monitoring::Config::Object ();
 use Thruk::Utils ();
@@ -200,6 +201,7 @@ sub get_config_objects {
             $svc->{'conf'}->{'use'} = \@templates;
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
             my $extra = _get_extra_opts_svc($c, $svc->{'conf'}->{'service_description'}, $hostname, $section);
+            push @{$extra}, $chk->{'extra'} if $chk->{'extra'};
             if($args) { # user supplied manual overrides
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
                 $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
@@ -230,6 +232,7 @@ sub get_config_objects {
                     next if $key eq 'section';
                     next if $key eq 'host_name';
                     next if $key eq 'args';
+                    next if $key eq 'check';
                     $chk->{'svc_conf'}->{$key} = $ex->{$key};
                 }
             }
@@ -489,7 +492,7 @@ sub _extract_checks {
         }
         my $proto = "https";
         $proto = "http" if($mode && $mode eq 'http');
-        my $command = sprintf(
+        my $command = $chk->{'check_command'} // sprintf(
                 "check_thruk_agent!%s\$USER1\$/check_nsc_web %s %s -p '%s' -u '%s://%s:%s' '%s'",
                 $proxy_cmd,
                 _check_nsc_web_extra_options($c, $mode),
@@ -501,21 +504,23 @@ sub _extract_checks {
                 $chk->{'check'},
         );
         my $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_interval'} // 1;
-        if($chk->{'check'} eq 'inventory') {
-            $command  = 'check_thruk_agent!'.$proxy_cmd.'$USER4$/bin/thruk agents check inventory \'$HOSTNAME$\'';
-            $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
-        }
-        if($chk->{'check'} eq 'check_os_updates') {
-            $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'os_updates_interval'} // 60;
-        }
-        if($chk->{'args'}) {
-            if(ref $chk->{'args'} eq 'ARRAY') {
-                for my $arg (@{$chk->{'args'}}) {
-                    $command .= sprintf(" %s", $arg);
-                }
-            } else {
-                for my $arg (sort keys %{$chk->{'args'}}) {
-                    $command .= sprintf(" %s='%s'", $arg, $chk->{'args'}->{$arg});
+        if($chk->{'check'}) {
+            if($chk->{'check'} eq 'inventory') {
+                $command  = 'check_thruk_agent!'.$proxy_cmd.'$USER4$/bin/thruk agents check inventory \'$HOSTNAME$\'';
+                $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
+            }
+            if($chk->{'check'} eq 'check_os_updates') {
+                $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'os_updates_interval'} // 60;
+            }
+            if($chk->{'args'}) {
+                if(ref $chk->{'args'} eq 'ARRAY') {
+                    for my $arg (@{$chk->{'args'}}) {
+                        $command .= sprintf(" %s", $arg);
+                    }
+                } else {
+                    for my $arg (sort keys %{$chk->{'args'}}) {
+                        $command .= sprintf(" %s='%s'", $arg, $chk->{'args'}->{$arg});
+                    }
                 }
             }
         }
@@ -668,12 +673,32 @@ sub _get_extra_service_checks {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($chk->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($chk->{'section'} // 'ANY'));
 
+        # create a copy, because it will be changed in the process of creating checks
+        my $svc = Storable::dclone($chk);
+
         # args should be a list
-        $chk->{'args'} = Thruk::Base::list($chk->{'args'}) if($chk->{'args'});
+        $svc->{'args'} = Thruk::Base::list($svc->{'args'}) if($svc->{'args'});
 
-        $chk->{'id'} = "extra.".Thruk::Utils::Filter::name2id($chk->{'name'});
+        # derive id from name
+        $svc->{'id'} = "extra.".Thruk::Utils::Filter::name2id($svc->{'name'});
 
-        push @{$res}, $chk;
+        my $extra = {};
+        for my $key (keys %{$svc}) {
+            next if $key eq 'extra';
+            next if $key eq 'id';
+            next if $key eq 'name';
+            next if $key eq 'host';
+            next if $key eq 'section';
+            next if $key eq 'check';
+            next if $key eq 'args';
+
+            $extra->{$key} = $svc->{$key};
+        }
+
+        # everything else is a custom attribute
+        $svc->{'extra'} = $extra;
+
+        push @{$res}, $svc;
     }
 
     return $res;
