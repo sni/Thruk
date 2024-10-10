@@ -204,8 +204,7 @@ sub get_config_objects {
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
                 $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
             } else {
-                # check for default args
-                $args = _get_default_args($c, $svc->{'conf'}->{'service_description'}, $hostname, $section);
+                my $args;
                 for my $ex (@{$extra}) {
                     for my $key (sort keys %{$ex}) {
                         $args = $ex->{$key} if $key eq 'args';
@@ -477,6 +476,10 @@ sub _extract_checks {
         'conf'     => $hostdata,
     };
 
+    # append extra service checks
+    my $extra = _get_extra_service_checks($c, $hostname, $section);
+    push @{$checks}, @{$extra};
+
     # compute service configuration
     for my $chk (@{$checks}) {
         next if $chk->{'id'} eq '_host';
@@ -584,20 +587,6 @@ sub make_name {
 
 ##########################################################
 
-=head2 check_host_match
-
-    check_host_match($config)
-
-returns true if check is enabled on this host
-
-=cut
-sub check_host_match {
-    my($hosts) = @_;
-    return(Thruk::Utils::Agents::check_wildcard_match($Thruk::Globals::HOSTNAME, $hosts));
-}
-
-##########################################################
-
 =head2 get_disabled_config
 
     get_disabled_config($c, $key, $default)
@@ -640,28 +629,13 @@ sub _make_section_template {
 }
 
 ##########################################################
-sub _get_default_args {
-    my($c, $name, $hostname, $section) = @_;
-    my $args = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'args'});
-    my $res;
-    for my $arg (@{$args}) {
-        next unless Thruk::Utils::Agents::check_wildcard_match($name, ($arg->{'match'} // 'ANY'));
-        next unless Thruk::Agents::SNClient::check_host_match($arg->{'host'});
-        next unless Thruk::Utils::Agents::check_wildcard_match($section, ($arg->{'section'} // 'ANY'));
-        $res = $arg->{'value'};
-    }
-
-    return $res;
-}
-
-##########################################################
 sub _get_extra_opts_hst {
     my($c, $hostname, $section) = @_;
     my $opts = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'extra_host_opts'});
     my $res = [];
     for my $opt (@{$opts}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'match'} // 'ANY'));
-        next unless Thruk::Agents::SNClient::check_host_match($opt->{'host'});
+        next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($opt->{'section'} // 'ANY'));
         push @{$res}, $opt;
     }
@@ -677,9 +651,29 @@ sub _get_extra_opts_svc {
     for my $opt (@{$opts}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($name, ($opt->{'match'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($name, ($opt->{'service'} // 'ANY'));
-        next unless Thruk::Agents::SNClient::check_host_match($opt->{'host'});
+        next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($opt->{'section'} // 'ANY'));
         push @{$res}, $opt;
+    }
+
+    return $res;
+}
+
+##########################################################
+sub _get_extra_service_checks {
+    my($c, $hostname, $section) = @_;
+    my $checks = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'extra_service_checks'});
+    my $res = [];
+    for my $chk (@{$checks}) {
+        next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($chk->{'host'} // 'ANY'));
+        next unless Thruk::Utils::Agents::check_wildcard_match($section, ($chk->{'section'} // 'ANY'));
+
+        # args should be a list
+        $chk->{'args'} = Thruk::Base::list($chk->{'args'}) if($chk->{'args'});
+
+        $chk->{'id'} = "extra.".Thruk::Utils::Filter::name2id($chk->{'name'});
+
+        push @{$res}, $chk;
     }
 
     return $res;

@@ -45,7 +45,7 @@ sub get_checks {
     my $wanted = {};
     my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'service'});
     for my $cfg (@{$configs}) {
-        next unless Thruk::Agents::SNClient::check_host_match($cfg->{'host'});
+        next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($cfg->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($cfg->{'section'} // 'ANY'));
         next unless $cfg->{'service'};
         for my $n (@{Thruk::Base::list($cfg->{'service'})}) {

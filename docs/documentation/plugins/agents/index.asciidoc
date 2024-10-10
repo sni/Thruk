@@ -169,6 +169,17 @@ For example:
       # other naemon host attributes...
     </extra_host_opts>
 
+    # add custom snclient based service checks
+    <extra_service_checks>
+      # on which host / sections should this serice be created
+      host    = ANY
+      section = ANY
+
+      name    = dns           # the actual service description
+      check   = check_dns     # snclient check
+      args    = -H thruk.org  # check arguments
+    </extra_service_checks>
+
   </snclient>
 </Component>
 ...................................
