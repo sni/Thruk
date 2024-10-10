@@ -266,6 +266,7 @@ fmt:
 	./script/thruk_format_perl_modules
 
 themes:
+	rm -f themes/themes-available/*/stylesheets/*.css
 	for theme in themes/themes-available/*/Makefile; do \
 		make -C $$(dirname $$theme); \
 	done
