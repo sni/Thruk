@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 76;
+plan tests => 94;
 
 ###########################################################
 # test thruks script path
@@ -110,6 +110,27 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
     TestUtils::test_command({
         cmd     => '/usr/bin/env thruk r -vv \'/hosts?columns=name,_SITE\'',
         errlike => ['/all request columns found: name, custom_variable_values, custom_variable_names/', '/"_SITE"/', '/: null,/'],
+    });
+}
+
+###########################################################
+{
+    # make sure / columns do not interfer with calculations
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk r \'/services?columns=name,/\'',
+        like => ['/"\/"\s*:\s*\d+,/'],
+    });
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk r \'/services?columns=name,`/`\'',
+        like => ['/"\/"\s*:\s*\d+,/'],
+    });
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk r \'/services?columns=name,`/`,latency/5\'',
+        like => ['/"\/"\s*:\s*\d+,/', '/"latency\/5"/'],
+    });
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk r \'/services?columns=name,/,latency/5\'',
+        like => ['/"\/"\s*:\s*\d+,/', '/"latency\/5"/'],
     });
 }
 

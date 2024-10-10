@@ -21,6 +21,7 @@ for my $cmd (@{$cmds}) {
     chomp($line);
     $line =~ s/'.*?'//gmx;
     next if $line =~ m/nasty\ chars/mx;
+    next if $line =~ m/NO\ CRITIC\ BACKTICKS/mx;
     $line =~ s/\#.*$//gmx;
     next if($filter && $line !~ m%$filter%mx);
     next if $line =~ m%\QThruk/Utils/IO.pm:\E%mx;

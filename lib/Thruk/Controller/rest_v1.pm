@@ -2893,7 +2893,7 @@ sub _parse_columns_data {
             $name = shift @arg;
             push(@{$functions}, [$f, \@arg]);
         }
-        if(scalar @{$functions} == 0 && $name =~ m/[\+\*\-\/]/gmx) {
+        if(scalar @{$functions} == 0 && $name =~ m/.+[\+\*\-\/].+/gmx && $raw->[$x] !~ m/^`.*`$/mx) { # NO CRITIC BACKTICKS
             my $f = "_calc";
             push(@{$functions}, [$f, [$name]]);
         }
