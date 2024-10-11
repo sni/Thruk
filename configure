@@ -216,6 +216,25 @@ sub _get_os {
         } else {
             die "Unable to detect distribution and version from $release_file\n";
         }
+    } elsif(-e '/etc/os-release') {
+        my $release_file = '/etc/os-release';
+        open(my $fh, '<', $release_file) or die("cannot read $release_file: $!");
+        foreach (<$fh>) {
+            if (/^ID="?(.*?)"?$/) {
+                $os = $1;
+            }
+            if (/^VERSION_ID="?(.*?)"?$/) {
+                $version = $1;
+                $version =~ s/\..*$//gmx; # we only need the major number
+            }
+        }
+        close $fh;
+
+        if ($os && $version) {
+            return($os, 0+$version);
+        } else {
+            die "Unable to detect distribution and version from $release_file\n";
+        }
     }
 
     return($os, $version);
