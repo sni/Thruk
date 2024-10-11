@@ -103,6 +103,9 @@ if(!$options->{'nounsafeallow3f'} && !$options->{'unsafeallow3f'}) {
     if($os eq 'rhel' && $ver >= 8) {
         $options->{'unsafeallow3f'} = 1;
     }
+    if($os eq 'debian' && $ver >= 11) {
+        $options->{'unsafeallow3f'} = 1;
+    }
 }
 if($options->{'nounsafeallow3f'}) {
     $options->{'unsafeallow3f'} = '';
