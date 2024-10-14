@@ -1,4 +1,4 @@
-﻿<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css' class="maintheme" />
+﻿<link rel='stylesheet' type='text/css' href='[% url_prefix %]themes/[% theme %]/stylesheets/[% theme %].css?_v=[% fileversion %]' class="maintheme" />
 [% PROCESS _common_css_fonts.tt %]
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/daterangepicker-3.0.5/daterangepicker.css' />
 [%+ IF has_jquery_ui %]<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css' />[% END %]
