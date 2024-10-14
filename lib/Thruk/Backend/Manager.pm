@@ -131,11 +131,21 @@ calculate sections
 =cut
 
 sub update_sections {
-    my($self) = @_;
+    my($self, $backends) = @_;
 
     $self->{'sections'}       = {};
     $self->{'sections_depth'} = 0;
-    for my $peer (@{$self->get_peers(1)}) {
+
+    my $peers = [];
+    if($backends) {
+        for my $key (@{$backends}) {
+            push @{$peers}, $self->get_peer_by_key($key);
+        }
+    } else {
+        $peers = $self->get_peers(1);
+    }
+
+    for my $peer (@{$peers}) {
         my @sections = split(/\/+/mx, $peer->{'section'});
         if(scalar @sections == 0) {
             @sections = ();
@@ -233,6 +243,7 @@ sub get_peers_by_tags {
     my($self, $tags) = @_;
     my @peers;
 
+    $tags = Thruk::Base::list($tags);
     for my $b (@{$self->pool->{'objects'}}) {
         next if(defined $b->{'active'} && !$b->{'active'});
 

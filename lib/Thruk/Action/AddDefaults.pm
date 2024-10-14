@@ -754,10 +754,10 @@ sub set_configs_stash {
 
 =cut
 sub set_possible_backends {
-    my ($c,$disabled_backends) = @_;
+    my ($c,$disabled_backends, $peers) = @_;
 
     my @possible_backends;
-    for my $b (@{$c->db->get_peers($c->stash->{'config_backends_only'} || 0)}) {
+    for my $b (@{$peers // $c->db->get_peers($c->stash->{'config_backends_only'} || 0)}) {
         push @possible_backends, $b->{'key'};
     }
 
@@ -846,7 +846,7 @@ sub update_site_panel_hashes {
     }
 
     # create sections and subsection for site panel
-    $c->db->update_sections(); # need to recalculate, using the config tool removes sections without config backends
+    $c->db->update_sections($backends); # need to recalculate, using the config tool removes sections without config backends
     _calculate_section_totals($c, $c->db->{'sections'}, $backend_detail, $initial_backends);
 
     my $show_sitepanel = 'list';

@@ -49,6 +49,13 @@ sub index {
     $c->stash->{'show_all_button'}  = $config->{'all_button'}  // 1;
     $c->stash->{'skip_confirm'}     = $config->{'skip_confirms'} ? 'noop_' : '';
 
+    my $peers = Thruk::NodeControl::Utils::get_peers($c);
+    my $servers = [];
+    for my $peer (@{$peers}) {
+        push @{$servers}, Thruk::NodeControl::Utils::get_server($c, $peer, $config);
+    }
+    Thruk::Action::AddDefaults::set_possible_backends($c, undef, $peers);
+
     my $action = $c->req->parameters->{'action'} || 'list';
 
     if($action && $action ne 'list') {
@@ -73,11 +80,6 @@ sub index {
             return($c->render(json => {'success' => 0, 'error' => 'action failed'}));
         }
         return(1);
-    }
-
-    my $servers = [];
-    for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
-        push @{$servers}, Thruk::NodeControl::Utils::get_server($c, $peer, $config);
     }
 
     if(!$config->{'omd_default_version'}) {
@@ -232,8 +234,15 @@ sub _omd_service_cmd {
     my($c, $peer, $cmd) = @_;
     return unless Thruk::Utils::check_csrf($c);
     my $service = $c->req->parameters->{'service'};
-    Thruk::NodeControl::Utils::omd_service($c, $peer, $service, $cmd);
-    return($c->render(json => {'success' => 1}));
+    my $res = Thruk::NodeControl::Utils::omd_service($c, $peer, $service, $cmd);
+    if($res && $res->{'rc'} == 0) {
+        return($c->render(json => {'success' => 1}));
+    }
+    my $details = "";
+    if($res && $res->{'stderr'}) {
+        $details = "\n".$res->{'stdout'}.$res->{'stderr'};
+    }
+    return($c->render(json => {'success' => 0, 'error' => "failed to ".$cmd." ".$service.$details }));
 }
 
 ##########################################################

@@ -51,7 +51,7 @@ sub get_peers {
     my($c) = @_;
     my @peers;
     my $dups = {};
-    for my $peer (@{$c->db->get_local_peers()}, @{$c->db->get_http_peers(1)}) {
+    for my $peer (@{$c->db->get_local_peers()}, @{$c->db->get_http_peers(1)}, @{$c->db->get_peers_by_tags('node-control')}) {
         next if (defined $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
         next if $dups->{$peer->{'key'}}; # backend can be in both lists
         $dups->{$peer->{'key'}} = 1;
@@ -170,7 +170,8 @@ sub get_server {
         updating                => $facts->{'updating'}        || 0, # update job id
         os_updating             => $facts->{'os_updating'}     || 0, # os update id
         os_sec_updating         => $facts->{'os_sec_updating'} || 0, # sec update job id
-        host_name               => $facts->{'ansible_facts'}->{'ansible_fqdn'},
+        host_name               => undef,
+        ansible_fqdn            => $facts->{'ansible_facts'}->{'ansible_fqdn'},
         omd_version             => $facts->{'omd_version'} // '',
         omd_versions            => $facts->{'omd_versions'} // [],
         omd_cleanable           => $facts->{'omd_cleanable'} // [],
@@ -293,7 +294,7 @@ sub _ansible_get_facts {
     # available subsets are listed here:
     # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/setup_module.html#parameter-gather_subset
     # however, older ansible release don't support all of them and bail out
-    my $f       = _ansible_adhoc_cmd($c, $peer, "-m setup -a 'gather_subset=hardware,virtual gather_timeout=30'");
+    my $f       = _ansible_adhoc_cmd($c, $peer, "-m setup -a 'gather_subset=hardware,virtual' -a 'gather_timeout=30'");
     my $runtime = _runtime_data($c, $peer);
     my $pkgs    = _ansible_available_packages($c, $peer, $f);
     my $updates = _ansible_available_os_updates($c, $peer, $f);
@@ -327,7 +328,7 @@ sub _runtime_data {
         $runtime->{'omd_disk_free'}  = $3;
     }
 
-    my(undef, $has_tmux) = _remote_cmd($c, $peer, '/bin/sh -c "command -v tmux"');
+    my(undef, $has_tmux) = _remote_cmd($c, $peer, '/bin/sh -c \'command -v tmux\'');
     if($has_tmux =~ m/tmux$/gmx) {
         $runtime->{'has_tmux'} = $has_tmux;
     }
@@ -394,6 +395,7 @@ sub _ansible_available_packages {
         next if $in_use{$v};
         push @cleanable, $v;
     }
+    @inst = reverse sort @inst;
 
     return({ omd_packages_available => \@pkgs, omd_versions => \@inst, omd_cleanable => \@cleanable, omd_sites => \%omd_sites });
 }
@@ -840,7 +842,7 @@ sub _remote_cmd {
     my($c, $peer, $cmd, $background_options, $env) = @_;
     my($rc, $out, $err);
 
-    if($peer->is_local() || $peer->is_peer_machine_reachable_by_http()) {
+    if(!$peer->{'ssh_ok'} && ($peer->is_local() || $peer->is_peer_machine_reachable_by_http())) {
         eval {
             ($rc, $out) = $peer->cmd($c, $cmd, $background_options, $env);
         };
@@ -852,35 +854,35 @@ sub _remote_cmd {
 
     # fallback to ssh if possible
     my $facts     = ansible_get_facts($c, $peer, 0);
-    my $host_name = $facts->{'ansible_facts'}->{'ansible_fqdn'};
     my $config    = config($c);
     if(!$config->{'ssh_fallback'}) {
         die("http(s) connection failed\n".$err) if $err;
         die("no http(s) control connection available\n");
     }
 
+    my $server = get_server($c, $peer, $config);
+    my $host_name = $server->{'host_name'};
     if(!$host_name) {
-        my $server = get_server($c, $peer, $config);
-        $host_name = $server->{'host_name'};
+        die("http(s) connection failed\n".$err);
     }
 
-    if($host_name && !$background_options) {
-        _warn("remote cmd failed, trying ssh fallback: %s", $err) if $err;
-        _debug("fallback to ssh");
-        my $env_vars = "";
-        for my $key (sort keys %{$env}) {
-            $env_vars .= " --extra-vars $key=\"".$env->{$key}."\"";
-        }
-        ($rc, $out) = Thruk::Utils::IO::cmd($c, "ansible all -i $host_name, -m shell -a \"".$cmd."\"".$env_vars);
-        if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
-            die("http(s) and ssh connection failed\nhttp(s):\n".$err."\n\nssh:\n".$out) if $err;
-            die("ssh connection failed\n".$out);
-        }
-        $out =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=\d\s+>>//gmx;
-        return($rc, $out);
+    _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
+    my $env_vars = "";
+    for my $key (sort keys %{$env}) {
+        $env_vars .= " --extra-vars $key=\"".$env->{$key}."\"";
     }
-
-    die("http(s) connection failed\n".$err);
+    my $fullcmd = "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m shell -a \"".$cmd."\"".$env_vars;
+    ($rc, $out) = Thruk::Utils::IO::cmd($fullcmd, { env => { 'ANSIBLE_PYTHON_INTERPRETER' => 'auto_silent' }});
+    if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
+        die("http(s) and ssh connection failed\nhttp(s):\n".$err."\n\nssh:\n".$out) if $err;
+        die("ssh connection failed\n".$out);
+    }
+    $out =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=\d\s+>>\s*//gmx;
+    if($out =~ m/usage:\ ansible/mx) {
+        confess("ansible command failed: cmd: ".$fullcmd."\n".$out);
+    }
+    $peer->{'ssh_ok'} = 1;
+    return($rc, $out);
 }
 
 ##########################################################
@@ -923,7 +925,8 @@ sub _remote_run_hook {
 ##########################################################
 sub _ansible_adhoc_cmd {
     my($c, $peer, $args) = @_;
-    my($rc, $data) = _remote_cmd($c, $peer, 'ansible all -i localhost, -c local '.$args." 2>/dev/null");
+    my $cmd = 'ansible all -i localhost, -c local '.$args." 2>/dev/null";
+    my($rc, $data) = _remote_cmd($c, $peer, $cmd);
     if($rc != 0) {
         die("ansible failed: rc $rc ".$data);
     }
@@ -959,8 +962,9 @@ sub omd_service {
         'background' => 1,
         'clean'      => 1,
     });
-    Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 0.2, 90);
-    return;
+    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 0.2, 90);
+    delete $peer->{'ssh_ok'}; # http might work again now
+    return $jobdata;
 }
 
 ##########################################################
@@ -973,9 +977,14 @@ sub _omd_service_cmd {
     };
     if($@) {
         _warn("omd cmd failed: %s", $@);
+        return;
+    }
+    if($rc != 0) {
+        _warn("omd cmd failed: %s", $out);
+        return;
     }
     update_runtime_data($c, $peer, 1);
-    return;
+    return 1;
 }
 
 ##########################################################

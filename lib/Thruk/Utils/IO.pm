@@ -894,7 +894,7 @@ sub cmd {
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
         &timing_breakpoint('IO::cmd: '.$prog.' <args...>');
-        _debug('running cmd: '.join(' ', @{$cmd})) if $c;
+        _debug('running cmd: '.$prog.' '.join(' ', @{$cmd})) if $c;
         my($pid, $wtr, $rdr, @lines);
         $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
         my $sel = IO::Select->new;
@@ -975,6 +975,9 @@ sub cmd {
     my $elapsed = tv_interval($t1);
     $c = $c || $Thruk::Globals::c || undef;
     $c->stash->{'total_io_cmd'} += $elapsed if $c;
+
+    # log full command line of slow commands
+    $c->stats->profile(comment => join(" ", @{Thruk::Base::list($cmd)})) if($c && $elapsed > 1);
 
     return($rc, $output) if wantarray;
     return($output);

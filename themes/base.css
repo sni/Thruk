@@ -1821,7 +1821,7 @@ BODY.minimal3 {
 * feedback messages
 */
 #thruk_message {
-  @apply card shadow-float absolute p-1 z-50 min-w-full lg:min-w-[600px] max-w-[90vw] top-14 left-1/2 transform -translate-x-1/2;
+  @apply card shadow-float absolute p-1 z-[100] min-w-full lg:min-w-[600px] max-w-[90vw] top-14 left-1/2 transform -translate-x-1/2;
   >DIV {
     @apply flexrow flex-nowrap gap-2 justify-center;
   }

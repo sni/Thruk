@@ -21,16 +21,20 @@
     [% END %]
   </div>
   <div class="body">
+    [% pd=s.peer_key %]
+    [% IF !pi_detail.defined(pd) || !pi_detail.$pd.defined("enable_notifications") %]
+        <span class="textHINT">Backend status is not available.<br>Site is probably offline.</span>
+    [% ELSE %]
     <form action="node_control.cgi" method="POST">
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <table class="w-fit mx-auto innercellborder">
-        [% pd=s.peer_key %]
         [% PROCESS buttongroup name="notifications" label="Notifications"  status=pi_detail.$pd.enable_notifications %]
         [% PROCESS buttongroup name="hostchecks"    label="Host Checks"    status=pi_detail.$pd.execute_host_checks %]
         [% PROCESS buttongroup name="servicechecks" label="Service Checks" status=pi_detail.$pd.execute_service_checks %]
         [% PROCESS buttongroup name="eventhandlers" label="Event Handler"  status=pi_detail.$pd.enable_event_handlers %]
       </table>
     </form>
+    [% END %]
   </div>
   [% IF modal %]
     <div class="footer justify-center">

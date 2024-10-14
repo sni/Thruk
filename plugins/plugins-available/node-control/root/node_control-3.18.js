@@ -115,6 +115,14 @@ function nc_omd_service(btn, extraData) {
 
         // update node row
         refresh_all_changed_rows(null, 'TD.js-node-row');
+
+        if(!success) {
+            thruk_xhr_error('setting omd service failed: ', '', textStatus, jqXHR, false);
+            return;
+        }
+        if(data && data.error) {
+            thruk_message(1, data.error);
+        }
     }, extraData);
 }
 
@@ -129,5 +137,13 @@ function nc_peer_state(btn, extraData) {
 
         // update node row
         refresh_all_changed_rows(null, 'TD.js-node-row');
+
+        if(!success) {
+            thruk_xhr_error('setting peer state failed: ', '', textStatus, jqXHR, false);
+            return;
+        }
+        if(data && data.error) {
+            thruk_message(1, data.error);
+        }
     }, extraData);
 }

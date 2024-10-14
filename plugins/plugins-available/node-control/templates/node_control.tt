@@ -137,7 +137,7 @@
                 <td colspan="[% IF show_os_updates %]7[% ELSE %]6[% END %]" class="align-top textALERT whitespace-pre truncate overflow-hidden [% IF error_lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF error_lines.size > 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); reapplyAllStripes(); return false;"[% END %]>[% error_lines.0 | html; error_started = 1 %]</td>
               [% ELSE %]
                 [% IF s.omd_version && omd_default_version != s.omd_version %]
-                  <td class="align-top WARNING" title="node uses an outdated omd release.">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
+                  <td class="align-top WARNING" title="node uses an outdated omd release, available:&#013;[% s.omd_versions.join("&#013;").replace('-labs-edition', '') %]">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
                 [% ELSE %]
                   <td class="align-top">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
                 [% END %]
@@ -151,7 +151,9 @@
                         [% IF service == "OVERALL"; NEXT; END %]
                         [% IF s.omd_status.$service != 0; failed.push(service); END %]
                       [% END %]
-                      [% IF failed.size == 1 %]
+                      [% IF failed.size == s.omd_status.keys.size - 1  %]
+                        <div class="badge CRITICAL">stopped</div>
+                      [% ELSIF failed.size == 1 %]
                         <div class="badge WARNING">[% failed.0 %]</div>
                       [% ELSE %]
                         <div class="badge WARNING">[% failed.size %] stopped</div>
@@ -162,7 +164,7 @@
                 [% IF show_os_updates %]
                 <td class="align-top">
                   <div class="flexrow flex-nowrap gap-x-1 justify-between">
-                    <span class="clickable" onclick="openModalWindowUrl('node_control.cgi?action=facts&modal=1&peer=[% s.peer_key | html %]');">[% s.os_name | html %] [% s.os_version | html %]</span>
+                    <span>[% s.os_name | html %] [% s.os_version | html %]</span>
                     <form action="node_control.cgi" method="POST">
                       <input type="hidden" name="peer" value="[% s.peer_key | html %]">
                       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
@@ -186,7 +188,7 @@
                   </div>
                 </td>
                 [% END %]
-                <td>[% s.machine_type %]</td>
+                <td class="clickable" onclick="openModalWindowUrl('node_control.cgi?action=facts&modal=1&peer=[% s.peer_key | html %]');" title="show facts">[% s.machine_type %]</td>
                 <td class='align-top relative overflow-hidden'>
                   [% IF s.cpu_perc; %][%IF s.cpu_perc > 1; s.cpu_perc = 1; END %]
                   <div style='width: [% 100 * s.cpu_perc %]%; height: 100%;' class='[% IF s.cpu_perc > 0.9 %]CRITICAL[% ELSIF s.cpu_perc > 0.8 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
