@@ -1,9 +1,6 @@
-build: fonts
+all: build clean
 
-.PHONY: fonts
-
-fonts:
-	npm install --save @iconscout/unicons
+build: node_modules
 	rm -rf fonts css
 	cp -rp ./node_modules/@iconscout/unicons/fonts .
 	cp -rp ./node_modules/@iconscout/unicons/css .
@@ -20,9 +17,16 @@ fonts:
 	sed -i '/unicons-17.woff2/d' ./css/line.css
 	sed -i '/unicons-18.woff2/d' ./css/line.css
 	sed -i '/unicons-19.woff2/d' ./css/line.css
+	rm -rf unicons-*
+	set -x; VERSION=$$(npm info "@iconscout/unicons" version); \
+		mkdir -p unicons-$$VERSION; \
+		mv fonts css unicons-$$VERSION; \
+
+node_modules:
+	npm install --save @iconscout/unicons --prefix=$(shell pwd)/.
+
+clean:
 	rm -rf \
 		node_modules \
 		package.json \
 		package-lock.json
-
-clean:
