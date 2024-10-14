@@ -1101,6 +1101,7 @@ sub _read_static_content_file {
         $url =~ s|^themes/||gmx;
         my $themes_dir = $c->config->{'themes_path'} || $c->config->{'project_root'}.'/themes';
         $file = $themes_dir . '/themes-enabled/' . $url;
+        $file =~ s/\?.*$//gmx;
         if(!-e $file && defined $default) {
             $url =~ s|^Thruk/|$default/|gmx;
             # disabled theme? try available folder
