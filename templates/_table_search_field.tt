@@ -7,6 +7,7 @@
     onchange='table_search(this.id, [% encode_json_obj(ids) %], undefined, [% IF skip_hash %]false[% ELSE %]true[% END %])'
     onkeyup='table_search(this.id, [% encode_json_obj(ids) %], undefined, [% IF skip_hash %]false[% ELSE %]true[% END %])'
     onfocus='table_search(this.id, [% encode_json_obj(ids) %], true, [% IF skip_hash %]false[% ELSE %]true[% END %])'
+    autocomplete="off"
 >
 [% IF !skip_hash %]
 <script>
