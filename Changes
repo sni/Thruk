@@ -7,6 +7,7 @@ next:
           - add support for base64 encoded obfuscate pattern
           - reworked status page column editor
           - improve performance when having custom column layout on status pages
+          - reduce required queries when using lmd
           - Rest:
             - add support for host/service note commands
               ex.: /hosts/<name>/cmd/note

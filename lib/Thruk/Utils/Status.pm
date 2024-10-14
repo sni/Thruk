@@ -1729,13 +1729,28 @@ sub get_comments_filter {
     return(\@hostfilter, \@servicefilter) unless Thruk::Utils::is_valid_regular_expression( $c, $value );
 
     my $num;
-    if($value eq '') {
+
+    # LMD can simple search comments and downtimes, no need for a subquery (since version 2.2.2)
+    if($ENV{'THRUK_USE_LMD'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '2.2.2')) {
+        if($op eq '=' or $op eq '~~') {
+            push @hostfilter,          { -or  => [ comments_with_info => { $op => $value }, downtimes_with_info => { $op => $value } ]};
+            push @servicefilter,       { -or  => [ host_comments_with_info  => { $op => $value }, comments_with_info  => { $op => $value },
+                                                   host_downtimes_with_info => { $op => $value }, downtimes_with_info => { $op => $value } ]};
+        } else {
+            push @hostfilter,          { -and => [ comments_with_info => { $op => $value }, downtimes_with_info => { $op => $value } ]};
+            push @servicefilter,       { -and  => [ host_comments_with_info  => { $op => $value }, comments_with_info  => { $op => $value },
+                                                    host_downtimes_with_info => { $op => $value }, downtimes_with_info => { $op => $value } ]};
+        }
+    }
+    elsif($value eq '') {
         if($op eq '=' or $op eq '~~') {
             push @hostfilter,          { -and => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
-            push @servicefilter,       { -and => [ comments => { $op => undef }, downtimes => { $op => undef } ]};
+            push @servicefilter,       { -and => [ host_comments  => { $op => undef }, comments  => { $op => undef },
+                                                   host_downtimes => { $op => undef }, downtimes => { $op => undef } ]};
         } else {
             push @hostfilter,          { -or => [ comments => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
-            push @servicefilter,       { -or => [ comments => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
+            push @servicefilter,       { -or => [ host_comments  => { $op => { '!=' => undef }}, comments  => { $op => { '!=' => undef }},
+                                                  host_downtimes => { $op => { '!=' => undef }}, downtimes => { $op => { '!=' => undef }} ]};
         }
     }
     else {
