@@ -108,13 +108,13 @@ sub cmd {
                 $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
             }
             if($mode eq 'runtime') {
-                $facts = Thruk::NodeControl::Utils::update_runtime_data($c, $peer);
+                $facts = Thruk::NodeControl::Utils::update_runtime_data($c, $peer, 1);
                 if(!$facts->{'ansible_facts'}) {
                     $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
                 }
             }
             if(!$facts || $facts->{'last_error'} || $facts->{'last_facts_error'}) {
-                my $err = sprintf("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_facts_error'}//$facts->{'last_error'}//'unknown error'));
+                my $err = sprintf("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_facts_error'}||$facts->{'last_error'}//'unknown error'));
                 if($ENV{'THRUK_CRON'}) {
                     _warn($err); # don't fill the log with errors from cronjobs
                 } else {

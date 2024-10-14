@@ -310,36 +310,72 @@ sub _ansible_get_facts {
 sub _runtime_data {
     my($c, $peer, $skip_cpu) = @_;
     my $runtime = {};
-    my(undef, $omd_version) = _remote_cmd($c, $peer, 'omd version -b');
-    chomp($omd_version);
-    $runtime->{'omd_version'} = $omd_version;
 
-    my(undef, $omd_status) = _remote_cmd($c, $peer, 'omd status -b');
-    my %services = ($omd_status =~ m/^(\S+?)\s+(\d+)/gmx);
+    my $script = abs_path(Thruk::Base::dirname(__FILE__)."/../../../scripts/runtime.sh");
+    if($skip_cpu) {
+        $script .= " 1";
+    }
+    my($rc, $out) = _remote_script($c, $peer, $script);
+    if($rc != 0) {
+        die("failed to gather runtime data: rc ".$rc." ".$out);
+    }
+    $out =~ s/\r\n/\n/gmx;
+    my %blocks = $out =~ m/<<<([^>]+)>>>\s*(.*?)\s*<<<>>>/sgmx;
+
+    $runtime->{'omd_version'} = $blocks{'OMD VERSION'};
+
+    my %services = ($blocks{'OMD STATUS'} =~ m/^(\S+?)\s+(\d+)/gmx);
     $runtime->{'omd_status'} = \%services;
 
-    my(undef, $omd_site) = _remote_cmd($c, $peer, 'id -un');
-    chomp($omd_site);
-    $runtime->{'omd_site'} = $omd_site;
+    $runtime->{'omd_site'} = $blocks{'ID'};
 
-    my(undef, $omd_disk) = _remote_cmd($c, $peer, 'df -k version/.');
-    if($omd_disk =~ m/^.*\s+(\d+)\s+(\d+)\s+(\d+)\s+/gmx) {
+    my @inst = split/\n/mx, $blocks{'OMD VERSIONS'};
+    my $default;
+    for my $i (@inst) {
+        if($i =~ m/\Q(default)\E/mx) {
+            $i =~ s/\s*\Q(default)\E//gmx;
+            $default = $i;
+        }
+    }
+    @inst = reverse sort @inst;
+    $runtime->{'omd_versions'} = \@inst;
+
+    my %omd_sites;
+    my %in_use;
+    my $sites = $blocks{'OMD SITES'};
+    my @sites = split/\n/mx, $sites;
+    for my $s (@sites) {
+        my($name, $version, $comment) = split/\s+/mx, $s;
+        next if $version eq 'VERSION';
+        $omd_sites{$name} = $version;
+        $in_use{$version} = 1;
+    }
+    $in_use{$default} = 1 if $default;
+
+    my @cleanable;
+    for my $v (@inst) {
+        next if $in_use{$v};
+        push @cleanable, $v;
+    }
+    @inst = reverse sort @inst;
+    $runtime->{'omd_cleanable'} = \@cleanable;
+    $runtime->{'omd_sites'}     = \%omd_sites;
+
+    if($blocks{'OMD DF'} =~ m/^.*\s+(\d+)\s+(\d+)\s+(\d+)\s+/gmx) {
         $runtime->{'omd_disk_total'} = $1;
         $runtime->{'omd_disk_free'}  = $3;
     }
 
-    my(undef, $has_tmux) = _remote_cmd($c, $peer, '/bin/sh -c \'command -v tmux\'');
-    if($has_tmux =~ m/tmux$/gmx) {
-        $runtime->{'has_tmux'} = $has_tmux;
+    if($blocks{'HAS TMUX'} =~ m/tmux$/gmx) {
+        $runtime->{'has_tmux'} = $blocks{'HAS TMUX'};
     }
 
-    if(!$skip_cpu) {
-        my(undef, $omd_cpu) = _remote_cmd($c, $peer, 'top -bn2 | grep Cpu | tail -n 1');
-        if($omd_cpu =~ m/Cpu/gmx) {
-            my @val = split/\s+/mx, $omd_cpu;
-            $runtime->{'omd_cpu_perc'}  = (100-$val[7])/100;
-        }
+    if($blocks{'CPUTOP'} && $blocks{'CPUTOP'} =~ m/Cpu/gmx) {
+        my @val = split/\s+/mx, $blocks{'CPUTOP'};
+        $runtime->{'omd_cpu_perc'}  = (100-$val[7])/100;
     }
+
+
     return($runtime);
 }
 
@@ -366,38 +402,7 @@ sub _ansible_available_packages {
     @pkgs = reverse sort @pkgs;
     @pkgs = map { my $pkg = $_; $pkg =~ s/^omd\-//gmx; $pkg; } @pkgs;
 
-    # get installed omd versions
-    my $installed;
-    (undef, $installed) = _remote_cmd($c, $peer, 'omd versions');
-    my @inst = split/\n/mx, $installed;
-    my $default;
-    for my $i (@inst) {
-        if($i =~ m/\Q(default)\E/mx) {
-            $i =~ s/\s*\Q(default)\E//gmx;
-            $default = $i;
-        }
-    }
-
-    my %omd_sites;
-    my %in_use;
-    my $sites;
-    (undef, $sites) = _remote_cmd($c, $peer, 'omd sites');
-    my @sites = split/\n/mx, $sites;
-    for my $s (@sites) {
-        my($name, $version, $comment) = split/\s+/mx, $s;
-        $omd_sites{$name} = $version;
-        $in_use{$version} = 1;
-    }
-    $in_use{$default} = 1;
-
-    my @cleanable;
-    for my $v (@inst) {
-        next if $in_use{$v};
-        push @cleanable, $v;
-    }
-    @inst = reverse sort @inst;
-
-    return({ omd_packages_available => \@pkgs, omd_versions => \@inst, omd_cleanable => \@cleanable, omd_sites => \%omd_sites });
+    return({ omd_packages_available => \@pkgs });
 }
 
 ##########################################################
@@ -571,10 +576,15 @@ sub _omd_update_step2 {
 
     if($config->{'hook_update_pre'}) {
         print "*** hook_update_pre:\n";
-        my $rc = _remote_run_hook($c, $peer, $config->{'hook_update_pre'}, $env);
-        print "*** hook_update_pre rc: $rc\n";
-        if($rc ne '0') {
-            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d)", $rc));
+        eval {
+            my $rc = _remote_run_hook($c, $peer, $config->{'hook_update_pre'}, $env);
+            print "*** hook_update_pre rc: $rc\n";
+            if($rc ne '0') {
+                return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d)", $rc));
+            }
+        };
+        if($@) {
+            return _set_job_errored($c, 'updating', $peer->{'key'}, $@);
         }
     }
 
@@ -597,15 +607,27 @@ sub _omd_update_step2 {
     my $post_hooks_failed = 0;
     if($config->{'hook_update_post'}) {
         print "*** hook_update_post:\n";
-        my $rc = _remote_run_hook($c, $peer, $config->{'hook_update_post'}, $env);
-        print "*** hook_update_post rc: $rc\n";
+        my $rc = -1;
+        eval {
+            $rc = _remote_run_hook($c, $peer, $config->{'hook_update_post'}, $env);
+            print "*** hook_update_post rc: $rc\n";
+        };
+        if($@) {
+            _info("hook_update_post failed: ".$@);
+        }
         $post_hooks_failed = 1 if $rc ne '0';
     }
 
     if($config->{'hook_update_post_local'}) {
         print "*** hook_update_post_local:\n";
-        my($rc, $out) = _local_run_hook($c, $config->{'hook_update_post_local'}, $env);
-        print "*** hook_update_post_local rc: $rc\n";
+        my($rc, $out);
+        eval {
+            ($rc, $out) = _local_run_hook($c, $config->{'hook_update_post_local'}, $env);
+            print "*** hook_update_post_local rc: $rc\n";
+        };
+        if($@) {
+            _info("hook_update_post_local failed: ".$@);
+        }
         $post_hooks_failed = 1 if $rc ne '0';
     }
 
@@ -838,6 +860,7 @@ sub _omd_cleanup_step2 {
 }
 
 ##########################################################
+# run given command on remote peer
 sub _remote_cmd {
     my($c, $peer, $cmd, $background_options, $env) = @_;
     my($rc, $out, $err);
@@ -883,6 +906,79 @@ sub _remote_cmd {
     }
     $peer->{'ssh_ok'} = 1;
     return($rc, $out);
+}
+
+##########################################################
+# upload and run a local script
+sub _remote_script {
+    my($c, $peer, $script, $background_options, $env) = @_;
+    my($rc, $out, $err);
+
+    my $args;
+    ($script, $args) = split(/\s+/mx, $script, 2);
+    if(!defined $args) { $args = ""; }
+    if($args ne "") { $args = " ".$args; }
+
+    if(!$peer->{'ssh_ok'} && ($peer->is_local() || $peer->is_peer_machine_reachable_by_http())) {
+        my $script_data = Thruk::Utils::IO::read($script);
+        my $remote_path = sprintf('var/tmp/%s', Thruk::Base::basename($script));
+
+        eval {
+            $peer->rpc($c, 'Thruk::Utils::IO::write', $remote_path, $script_data);
+            ($rc, $out) = _remote_cmd($c, $peer, 'bash '.$remote_path.$args, $background_options, undef, $env);
+        };
+        $err = $@;
+        if(!$err) {
+            return($rc, $out);
+        }
+    }
+
+    # fallback to ssh if possible
+    my $facts     = ansible_get_facts($c, $peer, 0);
+    my $config    = config($c);
+    if(!$config->{'ssh_fallback'}) {
+        die("http(s) connection failed\n".$err) if $err;
+        die("no http(s) control connection available\n");
+    }
+
+    my $server = get_server($c, $peer, $config);
+    my $host_name = $server->{'host_name'};
+    if(!$host_name) {
+        die("http(s) connection failed\n".$err);
+    }
+
+    _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
+    my $env_vars = "";
+    for my $key (sort keys %{$env}) {
+        $env_vars .= " --extra-vars $key=\"".$env->{$key}."\"";
+    }
+    my $fullcmd = "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m script -a \"".$script.$args."\"".$env_vars;
+    ($rc, $out) = Thruk::Utils::IO::cmd($fullcmd, { env => { 'ANSIBLE_PYTHON_INTERPRETER' => 'auto_silent' }});
+    if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
+        die("http(s) and ssh connection failed\nhttp(s):\n".$err."\n\nssh:\n".$out) if $err;
+        die("ssh connection failed\n".$out);
+    }
+    $out =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=\d\s+>>\s*//gmx;
+    if($out =~ m/usage:\ ansible/mx) {
+        confess("ansible command failed: cmd: ".$fullcmd."\n".$out);
+    }
+
+    if($out !~ m/\Q | CHANGED =>\E/gmx) {
+        die("ansible failed: rc $rc ".$out);
+    }
+    $out =~ s/\A.*?\Q | CHANGED =>\E//sgmx;
+    my $jsonreader = Cpanel::JSON::XS->new->utf8;
+       $jsonreader->relaxed();
+    my $f;
+    eval {
+        $f = $jsonreader->decode($out);
+    };
+    if($@) {
+        die("ansible failed to parse json: ".$@);
+    }
+
+    $peer->{'ssh_ok'} = 1;
+    return($rc, $f->{'stdout'});
 }
 
 ##########################################################

@@ -414,6 +414,7 @@ plugins/plugins-available/node-control/preview.png
 plugins/plugins-available/node-control/root/node_control-3.18.js
 plugins/plugins-available/node-control/routes
 plugins/plugins-available/node-control/scripts/omd_update.sh
+plugins/plugins-available/node-control/scripts/runtime.sh
 plugins/plugins-available/node-control/t/controller_node-control.t
 plugins/plugins-available/node-control/templates/node_control.tt
 plugins/plugins-available/node-control/templates/node_control_facts.tt

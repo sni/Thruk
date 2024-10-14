@@ -37,6 +37,7 @@ sub index {
     $c->stash->{template}              = 'node_control.tt';
     $c->stash->{infoBoxTitle}          = 'Node Control';
     $c->stash->{plugin_name}           = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
+    $c->stash->{has_omd}               = $ENV{'OMD_SITE'} ? 1 : 0;
     $c->stash->{'has_jquery_ui'}       = 1;
 
     my $config               = Thruk::NodeControl::Utils::config($c);

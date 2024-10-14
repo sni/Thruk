@@ -18,11 +18,16 @@ echo "*** updating site $(id -un) from $(omd version -b) to version $OMD_UPDATE.
 echo "*** Site will be stopped during the update, so no progress can be displayed."
 echo "*** this may take a couple of minutes..."; sleep 3 # wait 3 seconds, so this message can be transfered back via http
 
-omd stop
-# make sure it is stopped
+SITE_STARTED=0
 omd status -b > /dev/null 2>&1
 if [ $? -ne 1 ]; then
+    SITE_STARTED=1
     omd stop
+    # make sure it is stopped
+    omd status -b > /dev/null 2>&1
+    if [ $? -ne 1 ]; then
+        omd stop
+    fi
 fi
 
 CMD="omd -f -V $OMD_UPDATE update --conflict=ask"
@@ -69,8 +74,12 @@ if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
         tmux -f /dev/null send-keys -t $session:$window "exit" C-m
     fi
 
-    echo "%> omd start"
-    omd start
+    if [ $SITE_STARTED = 1 ]; then
+        echo "%> omd start"
+        omd start
+    else
+        echo "SITE was not started before the update, won't start it again"
+    fi
 
     echo "%> omd status"
     omd status

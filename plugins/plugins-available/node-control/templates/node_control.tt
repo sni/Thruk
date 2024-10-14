@@ -1,6 +1,16 @@
 ﻿[% PROCESS _header.tt js="plugins/${plugin_name}/node_control-${fileversion}.js" %]
 [% PROCESS _message.tt %]
 
+[% IF !has_omd %]
+<div class="card red alert top-center w-fit text-left">
+  <div class="body textALERT">
+    <b>No OMD:</b> This plugin requires OMD to operate!<br>
+    It cannot be used with a standalone Thruk installation.<br>
+    Read more about OMD at <a href="https://omd.consol.de/" target="_blank"><i class="uil uil-external-link-alt text-sm"></i> omd.consol.de</a>.
+  </div>
+</div>
+[% END %]
+
 <script>
   var logs_menu = {};
   var ms_parallel = [% ms_parallel | html %];
