@@ -454,13 +454,15 @@ sub write_lmd_config {
     for my $key (@{$c->db->peer_order}) {
         my $peer = $c->db->peers->{$key};
         next if $peer->{'federation'};
+        next unless $peer->{'tags'}->{'live'};
+        next unless $peer->{'active'};
         $site_config .= "[[Connections]]\n";
         $site_config .= "name           = '".$peer->peer_name()."'\n";
         $site_config .= "id             = '".$key."'\n";
         $site_config .= "source         = ['".join("', '", @{$peer->peer_list()})."']\n";
         # section is supported starting with lmd 1.1.6
         if($peer->{'section'} && $peer->{'section'} ne 'Default') {
-            $site_config .= "section = '".$peer->{'section'}."'\n";
+            $site_config .= "section        = '".$peer->{'section'}."'\n";
         }
         $site_config .= "auth           = '".$peer->{'peer_config'}->{'options'}->{'auth'}."'\n"     if $peer->{'peer_config'}->{'options'}->{'auth'};
         $site_config .= "remote_name    = '".$peer->{'peer_config'}->{'options'}->{'remote_name'}."'\n" if $peer->{'peer_config'}->{'options'}->{'remote_name'};

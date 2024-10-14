@@ -1440,6 +1440,8 @@ sub check_federation_peers {
     # remove exceeding backends
     for my $key (@{$c->db->peer_order}) {
         my $peer = $c->db->peers->{$key};
+        next unless $peer->{'tags'}->{'live'};
+        next unless $peer->{'active'};
         if(!$peer->{'federation'}) {
             if(!$existing->{$key}) {
                 _warn("peer key not found, recheck lmd config: %s(%s)", $peer->{'name'}, $key);
