@@ -4,7 +4,7 @@ var ms_refresh_timer;
 jQuery(document).ready(function() {
     window.clearTimeout(ms_refresh_timer);
     ms_refresh_timer = window.setTimeout(function() {
-        refresh_all_changed_rows(null, 'TD.js-node-row');
+        refresh_all_changed_rows(null);
     }, ms_row_refresh_interval)
 });
 
@@ -90,6 +90,8 @@ function refresh_all_changed_rows(extraData, selector) {
                         }
                     }
                 });
+                table.dataset["search"] = "";
+                jQuery("#table_search_input").focus();
                 applyRowStripes(table);
             }
             rows = jQuery("DIV.spinner").parents("TR");

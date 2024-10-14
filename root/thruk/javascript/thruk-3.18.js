@@ -3639,7 +3639,7 @@ function do_table_search(preserve_hash) {
     if(value == undefined) {
         return;
     }
-    value    = value.toLowerCase();
+    value = value.toLowerCase();
     if(preserve_hash) {
         set_hash(value, 2);
     }
