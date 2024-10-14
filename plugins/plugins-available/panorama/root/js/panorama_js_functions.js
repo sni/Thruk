@@ -1256,7 +1256,7 @@ var TP = {
     /* called on body unload */
     unload: function() {
         TP.isUnloading = true;
-        cookieSave("thruk_screen", JSON.stringify(getScreenData()));
+        cookieSaveScreenSize();
     },
     deleteDowntime: function(id, panelId, type) {
         var panel = Ext.getCmp(panelId);

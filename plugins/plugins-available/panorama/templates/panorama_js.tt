@@ -27,7 +27,7 @@ Ext.QuickTips.init();
 
 Ext.onReady(function() {
     cookieSave("thruk_tz", getBrowserTimezone());
-    cookieSave("thruk_screen", JSON.stringify(getScreenData()));
+    cookieSaveScreenSize();
 
     /* main viewport */
     if(one_tab_only) {
