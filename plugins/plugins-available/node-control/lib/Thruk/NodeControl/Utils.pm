@@ -576,23 +576,22 @@ sub _omd_update_step2 {
 
     if($config->{'hook_update_pre'}) {
         print "*** hook_update_pre:\n";
+        my $rc;
         eval {
-            my $rc = _remote_run_hook($c, $peer, $config->{'hook_update_pre'}, $env);
+            $rc = _remote_run_hook($c, $peer, $config->{'hook_update_pre'}, $env);
             print "*** hook_update_pre rc: $rc\n";
-            if($rc ne '0') {
-                return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d)", $rc));
-            }
         };
         if($@) {
             return _set_job_errored($c, 'updating', $peer->{'key'}, $@);
+        }
+        if($rc ne '0') {
+            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d)", $rc));
         }
     }
 
     my($rc, $job);
     eval {
-        my $script = Thruk::Utils::IO::read($config->{'omd_update_script'});
-        $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/omd_update.sh', $script);
-        ($rc, $job) = _remote_cmd($c, $peer, 'OMD_UPDATE="'.$version.'" bash var/tmp/omd_update.sh', { env => $env }, undef, $env);
+        ($rc, $job) = _remote_script($c, $peer, $config->{'omd_update_script'}, { env => $env }, $env);
     };
     if($@) {
         return _set_job_errored($c, 'updating', $peer->{'key'}, $@);
@@ -865,12 +864,19 @@ sub _remote_cmd {
     my($c, $peer, $cmd, $background_options, $env) = @_;
     my($rc, $out, $err);
 
+    if($env) {
+        for my $key (sort keys %{$env}) {
+            $cmd = sprintf('%s="%s" %s', $key, $env->{$key}, $cmd);
+        }
+    }
+
     if(!$peer->{'ssh_ok'} && ($peer->is_local() || $peer->is_peer_machine_reachable_by_http())) {
         eval {
             ($rc, $out) = $peer->cmd($c, $cmd, $background_options, $env);
         };
         $err = $@;
         if(!$err) {
+            ($rc, $out) = _convert_ansible_script_result($rc, $out) unless $background_options;
             return($rc, $out);
         }
     }
@@ -890,22 +896,10 @@ sub _remote_cmd {
     }
 
     _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
-    my $env_vars = "";
-    for my $key (sort keys %{$env}) {
-        $env_vars .= " --extra-vars $key=\"".$env->{$key}."\"";
-    }
-    my $fullcmd = "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m shell -a \"".$cmd."\"".$env_vars;
-    ($rc, $out) = Thruk::Utils::IO::cmd($fullcmd, { env => { 'ANSIBLE_PYTHON_INTERPRETER' => 'auto_silent' }});
-    if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
-        die("http(s) and ssh connection failed\nhttp(s):\n".$err."\n\nssh:\n".$out) if $err;
-        die("ssh connection failed\n".$out);
-    }
-    $out =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=\d\s+>>\s*//gmx;
-    if($out =~ m/usage:\ ansible/mx) {
-        confess("ansible command failed: cmd: ".$fullcmd."\n".$out);
-    }
-    $peer->{'ssh_ok'} = 1;
-    return($rc, $out);
+
+    $cmd =~ s/"/\\"/gmx;
+    my $fullcmd = "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m shell -a \"".$cmd."\"";
+    return(_ansible_cmd($c, $peer, $fullcmd, $background_options, $err));
 }
 
 ##########################################################
@@ -922,10 +916,15 @@ sub _remote_script {
     if(!$peer->{'ssh_ok'} && ($peer->is_local() || $peer->is_peer_machine_reachable_by_http())) {
         my $script_data = Thruk::Utils::IO::read($script);
         my $remote_path = sprintf('var/tmp/%s', Thruk::Base::basename($script));
-
+        my $cmd = 'bash '.$remote_path.$args;
+        if($env) {
+            for my $key (sort keys %{$env}) {
+                $cmd = sprintf('%s="%s" %s', $key, $env->{$key}, $cmd);
+            }
+        }
         eval {
             $peer->rpc($c, 'Thruk::Utils::IO::write', $remote_path, $script_data);
-            ($rc, $out) = _remote_cmd($c, $peer, 'bash '.$remote_path.$args, $background_options, undef, $env);
+            ($rc, $out) = _remote_cmd($c, $peer, $cmd, $background_options, undef, $env);
         };
         $err = $@;
         if(!$err) {
@@ -948,37 +947,40 @@ sub _remote_script {
     }
 
     _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
-    my $env_vars = "";
-    for my $key (sort keys %{$env}) {
-        $env_vars .= " --extra-vars $key=\"".$env->{$key}."\"";
+
+    if($env) {
+        # upload script and use the shell module, the scripts module cannot set env variables
+        my $tmpscript = "var/tmp/".Thruk::Base::basename($script);
+        my($rc, $out) = _ansible_cmd($c, $peer, "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m copy -a \"src=".$script." dest=".$tmpscript." mode=0700\"", undef, $err);
+        if($rc != 0) {
+            die($out);
+        }
+        return(_remote_cmd($c, $peer, 'bash '.$tmpscript.$args, $background_options, $env));
     }
-    my $fullcmd = "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m script -a \"".$script.$args."\"".$env_vars;
-    ($rc, $out) = Thruk::Utils::IO::cmd($fullcmd, { env => { 'ANSIBLE_PYTHON_INTERPRETER' => 'auto_silent' }});
+
+    my $fullcmd = "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m script -a \"".$script.$args."\"";
+    return(_ansible_cmd($c, $peer, $fullcmd, $background_options, $err));
+}
+
+##########################################################
+sub _ansible_cmd {
+    my($c, $peer, $fullcmd, $background_options, $http_err) = @_;
+    if($background_options) {
+        $background_options->{"background"} = 1;
+        $background_options->{"cmd"}        = $fullcmd;
+        $background_options->{"env"}        = { 'ANSIBLE_PYTHON_INTERPRETER' => 'auto_silent' };
+        my $job = Thruk::Utils::External::cmd($c, $background_options);
+        return(0, $job);
+    }
+
+    my($rc, $out) = Thruk::Utils::IO::cmd($fullcmd, { env => { 'ANSIBLE_PYTHON_INTERPRETER' => 'auto_silent' }});
     if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
-        die("http(s) and ssh connection failed\nhttp(s):\n".$err."\n\nssh:\n".$out) if $err;
+        die("http(s) and ssh connection failed\nhttp(s):\n".$http_err."\n\nssh:\n".$out) if $http_err;
         die("ssh connection failed\n".$out);
     }
-    $out =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=\d\s+>>\s*//gmx;
-    if($out =~ m/usage:\ ansible/mx) {
-        confess("ansible command failed: cmd: ".$fullcmd."\n".$out);
-    }
-
-    if($out !~ m/\Q | CHANGED =>\E/gmx) {
-        die("ansible failed: rc $rc ".$out);
-    }
-    $out =~ s/\A.*?\Q | CHANGED =>\E//sgmx;
-    my $jsonreader = Cpanel::JSON::XS->new->utf8;
-       $jsonreader->relaxed();
-    my $f;
-    eval {
-        $f = $jsonreader->decode($out);
-    };
-    if($@) {
-        die("ansible failed to parse json: ".$@);
-    }
-
+    ($rc, $out) = _convert_ansible_script_result($rc, $out);
     $peer->{'ssh_ok'} = 1;
-    return($rc, $f->{'stdout'});
+    return($rc, $out);
 }
 
 ##########################################################
@@ -999,23 +1001,21 @@ sub _local_run_hook {
 sub _remote_run_hook {
     my($c, $peer, $hook, $env) = @_;
 
-    my $uploaded;
+    my $timeout = 300;
+    my($rc, $out, $job, $jobdata);
     if($hook =~ m/^script:(.*)$/mx) {
-        my $script = Thruk::Utils::IO::read($1);
-        $peer->rpc($c, 'Thruk::Utils::IO::write', 'var/tmp/hook.sh', $script);
-        $hook = 'bash var/tmp/hook.sh';
-        $uploaded = 1;
+        my $script = $1;
+        ($rc, $job) = _remote_script($c, $peer, $script, { env => $env }, $env);
+        $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, $timeout);
+        ($rc, $out) = _convert_ansible_script_result($rc, $jobdata);
+        print $out;
+    } else {
+        ($rc, $job) = _remote_cmd($c, $peer, $hook, { env => $env }, $env);
+        $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, $timeout, 1);
+        ($rc, $out) = _convert_ansible_script_result($rc, $jobdata);
     }
 
-    my($rc, $job) = _remote_cmd($c, $peer, $hook, { env => $env }, $env);
-
-    # wait for 300 sec
-    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, 300, 1);
-
-    _remote_cmd($c, $peer, 'rm -f var/tmp/hook.sh') if $uploaded;
-
-    return("-1") unless $jobdata;
-    return($jobdata->{'rc'});
+    return($rc);
 }
 
 ##########################################################
@@ -1026,20 +1026,7 @@ sub _ansible_adhoc_cmd {
     if($rc != 0) {
         die("ansible failed: rc $rc ".$data);
     }
-    if($data !~ m/\Qlocalhost | SUCCESS =>\E/gmx) {
-        die("ansible failed: rc $rc ".$data);
-    }
-    $data =~ s/\A.*?\Qlocalhost | SUCCESS =>\E//sgmx;
-    my $jsonreader = Cpanel::JSON::XS->new->utf8;
-       $jsonreader->relaxed();
-    my $f;
-    eval {
-        $f = $jsonreader->decode($data);
-    };
-    if($@) {
-        die("ansible failed to parse json: ".$@);
-    }
-    return($f);
+    return($data);
 }
 
 ##########################################################
@@ -1245,6 +1232,50 @@ sub _set_job_errored {
     Thruk::Utils::IO::json_lock_patch($file, $data, { pretty => 1, allow_empty => 1 });
 
     return;
+}
+
+##########################################################
+sub _convert_ansible_script_result {
+    my($rc, $data) = @_;
+
+    # job result?
+    if(ref $data eq 'HASH') {
+        if(defined $data->{'rc'} && defined $data->{'stdout'}) {
+            $rc   = $data->{'rc'};
+            $data = $data->{'stdout'};
+        }
+    }
+
+    return(-1, "") unless $data;
+
+    if($data =~ m/usage:\ ansible/mx) {
+        confess("ansible command failed: ".$data);
+    }
+
+    # output: demo@test.local | FAILED! => {       # script module
+    if($data =~ s/\A.*?\s+\|\s+([^=]+)\s+=>\s(\{.*\})\s*\Z//sgmx) {
+        my($state, $msg) = ($1, $2);
+        my $jsonreader = Cpanel::JSON::XS->new->utf8;
+        $jsonreader->relaxed();
+        my $f;
+        eval {
+            $f = $jsonreader->decode($msg);
+        };
+        if($@) {
+            die("ansible failed to parse json: ".$@);
+        }
+        return($f->{'rc'}, $f->{'stdout'}) if defined $f->{'stdout'};
+        die($f->{'msg'}) if(defined $f->{'msg'} && $state eq 'FAILED!');
+        return($rc, $f);
+    }
+
+    # output: demo@test.local | CHANGED | rc=0 >>  # shell module
+    if($data =~ s/^.*?\s+\|\s+.*?\s+\|\s+rc=(\d)\s+>>\s*//gmx) {
+        $rc = $1;
+        return($rc, $data);
+    }
+
+    return($rc, $data);
 }
 
 ##########################################################

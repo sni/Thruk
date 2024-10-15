@@ -409,7 +409,6 @@ sub cmd {
             ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", $comm, { timeout => 120 })};
         }
         return($rc, $out);
-
     }
 
     if(my $http_peer = $self->get_http_fallback_peer()) {

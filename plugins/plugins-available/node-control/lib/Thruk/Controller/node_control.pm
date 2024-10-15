@@ -143,6 +143,7 @@ sub _node_action {
         $c->stash->{log_meta}   = $c->stash->{s}->{'logs'}->{$log};
         return unless $c->stash->{log_meta};
         $c->stash->{log_text}   = Thruk::Utils::IO::saferead_decoded($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_'.$log.'.log');
+        $c->stash->{log_text}   =~ s/^.*?\[/[/gmx; # clear rubbish at start of lines
         $c->stash->{template}   = 'node_control_logs.tt';
         $c->stash->{modal}      = $c->req->parameters->{'modal'} // 0;
         $c->stash->{no_tt_trim} = 1;

@@ -108,7 +108,7 @@ sub cmd {
                 $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
             }
             if($mode eq 'runtime') {
-                $facts = Thruk::NodeControl::Utils::update_runtime_data($c, $peer, 1);
+                $facts = Thruk::NodeControl::Utils::update_runtime_data($c, $peer);
                 if(!$facts->{'ansible_facts'}) {
                     $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
                 }
