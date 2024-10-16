@@ -239,8 +239,10 @@ sub ansible_get_facts {
     eval {
         $f = _ansible_get_facts($c, $peer, $refresh);
     };
-    if($@) {
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_facts_error' => $@ }, { pretty => 1, allow_empty => 1 });
+    my $err = $@;
+    if($err) {
+        $err =~ s/\s+at\s+.*?\.pm\ line\ \d+\.$//gmx;
+        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_facts_error' => $err }, { pretty => 1, allow_empty => 1 });
     }
     return($f);
 }
@@ -269,6 +271,7 @@ sub update_runtime_data {
     };
     my $err = $@;
     if($err) {
+        $err =~ s/\s+at\s+.*?\.pm\ line\ \d+\.$//gmx;
         $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => $err }, { pretty => 1, allow_empty => 1 });
     } else {
         $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => '', %{$runtime}  }, { pretty => 1, allow_empty => 1 });
@@ -397,7 +400,7 @@ sub _ansible_available_packages {
     } else {
         die("unknown package manager: ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}//'none');
     }
-    my @pkgs = ($pkgs =~ m/^(omd\-\S+?)(?:\s|\.x86_64)/gmx);
+    my @pkgs = ($pkgs =~ m/^(omd\-\S+?)(?:\s|\.x86_64|\.aarch64)/gmx);
     @pkgs = grep(!/^(omd-labs-edition|omd-daily)/mx, @pkgs); # remove meta packages
     @pkgs = reverse sort @pkgs;
     @pkgs = map { my $pkg = $_; $pkg =~ s/^omd\-//gmx; $pkg; } @pkgs;
@@ -885,14 +888,13 @@ sub _remote_cmd {
     my $facts     = ansible_get_facts($c, $peer, 0);
     my $config    = config($c);
     if(!$config->{'ssh_fallback'}) {
-        die("http(s) connection failed\n".$err) if $err;
-        die("no http(s) control connection available\n");
+        _die_connection_error($peer, $err);
     }
 
     my $server = get_server($c, $peer, $config);
     my $host_name = $server->{'host_name'};
     if(!$host_name) {
-        die("http(s) connection failed\n".$err);
+        _die_connection_error($peer, $err);
     }
 
     _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
@@ -936,14 +938,13 @@ sub _remote_script {
     my $facts     = ansible_get_facts($c, $peer, 0);
     my $config    = config($c);
     if(!$config->{'ssh_fallback'}) {
-        die("http(s) connection failed\n".$err) if $err;
-        die("no http(s) control connection available\n");
+        _die_connection_error($peer, $err);
     }
 
     my $server = get_server($c, $peer, $config);
     my $host_name = $server->{'host_name'};
     if(!$host_name) {
-        die("http(s) connection failed\n".$err);
+        _die_connection_error($peer, $err);
     }
 
     _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
@@ -975,8 +976,7 @@ sub _ansible_cmd {
 
     my($rc, $out) = Thruk::Utils::IO::cmd($fullcmd, { env => { 'ANSIBLE_PYTHON_INTERPRETER' => 'auto_silent' }});
     if($out =~ m/^.*?\s+\|\s+UNREACHABLE.*?=>/mx) {
-        die("http(s) and ssh connection failed\nhttp(s):\n".$http_err."\n\nssh:\n".$out) if $http_err;
-        die("ssh connection failed\n".$out);
+        _die_connection_error($peer, $http_err, $out);
     }
     ($rc, $out) = _convert_ansible_script_result($rc, $out);
     $peer->{'ssh_ok'} = 1;
@@ -1081,6 +1081,9 @@ return node control config
 =cut
 sub config {
     my($c) = @_;
+    $c = $Thruk::Globals::c unless $c;
+    return($c->stash->{'_node_config'}) if $c->stash->{'_node_config'};
+
     my $file = $c->config->{'var_path'}.'/node_control/_conf.json';
     my $var;
     if(-e $file) {
@@ -1111,6 +1114,7 @@ sub config {
     # merge var into config
     my $conf = {%{$defaults}, %{$c->config->{'Thruk::Plugin::NodeControl'}//{}}, %{$var//{}}};
 
+    $c->stash->{'_node_config'} = $conf;
     return($conf);
 }
 
@@ -1216,6 +1220,9 @@ sub _set_job_errored {
     my($c, $type, $peerkey, $err) = @_;
 
     chomp($err);
+    _debug($err);
+    $err =~ s/\s+at\s+.*?\.pm\ line\ \d+\.$//gmx;
+
     print "*** [ERROR] $err\n";
 
     my $file = $c->config->{'var_path'}.'/node_control/'.$peerkey.'.json';
@@ -1276,6 +1283,20 @@ sub _convert_ansible_script_result {
     }
 
     return($rc, $data);
+}
+
+##########################################################
+sub _die_connection_error {
+    my($peer, $http_err, $ssh_err) = @_;
+
+    if(($http_err//'') =~ m/^OMD:/mx) {
+        die($http_err);
+    }
+
+    die("http(s) and ssh connection failed\nhttp(s):\n".$http_err."\n\nssh:\n".$ssh_err) if($http_err && $ssh_err);
+    die("http(s) connection failed\n".$http_err) if $http_err;
+    die("ssh connection failed\n".$ssh_err) if $ssh_err;
+    die("no http(s) control connection available.\n");
 }
 
 ##########################################################

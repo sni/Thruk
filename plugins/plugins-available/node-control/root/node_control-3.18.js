@@ -80,6 +80,7 @@ function refresh_all_changed_rows(extraData, selector) {
         complete: function(data, textStatus, jqXHR) {
             if(data && data.responseText) {
                 var table = jQuery(rows[0]).parents('TABLE')[0];
+                if(!table) { return; }
                 jQuery(rows).each(function(i, el) {
                     if(el.id && data.responseText.match(el.id)) {
                         var newRow = jQuery(data.responseText).find('#'+el.id);
