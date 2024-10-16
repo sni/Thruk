@@ -114,8 +114,6 @@
           error_started = 0;
           IF s.last_error;
             error_lines = s.last_error.split("\n");
-          ELSIF s.last_facts_error;
-            error_lines = s.last_facts_error.split("\n");
           END %]
           <tr class="js-tabs" id="node_row_[% s.peer_key | html %]">
             <td class="align-top js-node-row">[% IF s.section != "Default" && s.section != "" && s.section != last_section; s.section | html; END; last_section = s.section; %]</td>
@@ -143,7 +141,7 @@
                   </a>
                 [% END %]
               </td>
-              [% IF error_lines.size > 0 || s.last_facts_error && !s.omd_site && !s.omd_version %]
+              [% IF error_lines.size > 0 %]
                 <td colspan="[% IF show_os_updates %]7[% ELSE %]6[% END %]" class="align-top textALERT whitespace-pre truncate overflow-hidden [% IF error_lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF error_lines.size > 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); reapplyAllStripes(); return false;"[% END %]>[% error_lines.0 | html; error_started = 1 %]</td>
               [% ELSE %]
                 [% IF s.omd_version && omd_default_version != s.omd_version %]
@@ -312,7 +310,11 @@
               <tr class="hidden" id="errors_[% s.peer_key | html %]">
                 <td></td>
                 <td></td>
-                <td colspan="10" class="textALERT whitespace-pre truncate overflow-hidden" style="max-width: 60vw;">[% error_lines.join("\n") %]</td>
+                <td colspan="10" class="textALERT whitespace-pre truncate overflow-hidden" style="max-width: 60vw;">[%
+                  ts = "[" _ date_format(c, s.last_error_ts) _ "] ";
+                  ts;
+                  error_lines.join("\n" _ ts)
+                %]</td>
               </tr>
             [% END %]
           [% END %]

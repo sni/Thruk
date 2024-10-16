@@ -113,6 +113,7 @@ sub get_server {
             $facts->{$key} = 0;
             if($data->{'rc'} != 0) {
                 $facts->{'last_error'} = $data->{'stdout'}.$data->{'stderr'};
+                $facts->{'last_error_ts'} = time();
             }
             $facts->{'last_job'} = $job;
             $save_required = 1;
@@ -140,9 +141,7 @@ sub get_server {
         $facts->{'gathering'} = 1;
     }
 
-    for my $errKey (qw/last_error last_facts_error/) {
-        $facts->{$errKey} =~ s/\s+at\s+.*HTTP\.pm\s+line\s+\d+\.//gmx if $facts->{$errKey};
-    }
+    $facts->{'last_error'} =~ s/\s+at\s+.*(Utils|HTTP)\.pm\s+line\s+\d+\.//gmx if $facts->{'last_error'};
 
     # gather available logs
     my @logs = glob($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_*.log');
@@ -190,7 +189,7 @@ sub get_server {
         omd_disk_free           => $facts->{'omd_disk_free'} // '',
         omd_available_versions  => $facts->{'omd_packages_available'} // [],
         last_error              => $facts->{'last_error'} // '',
-        last_facts_error        => $facts->{'last_facts_error'} // '',
+        last_error_ts           => $facts->{'last_error_ts'} // '',
         last_job                => $facts->{'last_job'} // '',
         logs                    => $logs,
         facts                   => $facts || {},
@@ -241,8 +240,7 @@ sub ansible_get_facts {
     };
     my $err = $@;
     if($err) {
-        $err =~ s/\s+at\s+.*?\.pm\ line\ \d+\.$//gmx;
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_facts_error' => $err }, { pretty => 1, allow_empty => 1 });
+        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => $err, 'last_error_ts' => time() }, { pretty => 1, allow_empty => 1 });
     }
     return($f);
 }
@@ -271,8 +269,7 @@ sub update_runtime_data {
     };
     my $err = $@;
     if($err) {
-        $err =~ s/\s+at\s+.*?\.pm\ line\ \d+\.$//gmx;
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => $err }, { pretty => 1, allow_empty => 1 });
+        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => $err, 'last_error_ts' => time() }, { pretty => 1, allow_empty => 1 });
     } else {
         $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => '', %{$runtime}  }, { pretty => 1, allow_empty => 1 });
     }
@@ -292,7 +289,7 @@ sub _ansible_get_facts {
 
     my $prev = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => $$ }, { pretty => 1, allow_empty => 1 });
     $prev->{'gathering'}  = 0;
-    $prev->{'last_facts_error'} = "";
+    $prev->{'last_error'} = "";
 
     # available subsets are listed here:
     # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/setup_module.html#parameter-gather_subset
@@ -751,7 +748,7 @@ sub os_update {
         die("starting job failed") unless $job;
     };
     if($@) {
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'os_updating' => 0, 'last_error' => $@ }, { pretty => 1, allow_empty => 1 });
+        $f = Thruk::Utils::IO::json_lock_patch($file, { 'os_updating' => 0, 'last_error' => $@, 'last_error_ts' => time() }, { pretty => 1, allow_empty => 1 });
         return;
     }
 
@@ -793,7 +790,7 @@ sub os_sec_update {
         die("starting job failed") unless $job;
     };
     if($@) {
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'os_sec_updating' => 0, 'last_error' => $@ }, { pretty => 1, allow_empty => 1 });
+        $f = Thruk::Utils::IO::json_lock_patch($file, { 'os_sec_updating' => 0, 'last_error' => $@, 'last_error_ts' => time() }, { pretty => 1, allow_empty => 1 });
         return;
     }
 
@@ -1221,7 +1218,6 @@ sub _set_job_errored {
 
     chomp($err);
     _debug($err);
-    $err =~ s/\s+at\s+.*?\.pm\ line\ \d+\.$//gmx;
 
     print "*** [ERROR] $err\n";
 
@@ -1232,7 +1228,8 @@ sub _set_job_errored {
         $err = $cur->{'last_error'}."\n".$err;
     }
     my $data = {
-        'last_error' => $err,
+        'last_error'    => $err,
+        'last_error_ts' => time()
     };
     $data->{$type} = 0;
     $data->{$type."_failed"} = "1";
@@ -1290,6 +1287,7 @@ sub _die_connection_error {
     my($peer, $http_err, $ssh_err) = @_;
 
     if(($http_err//'') =~ m/^OMD:/mx) {
+        die($http_err."\nssh failed: ".$ssh_err) if $ssh_err;
         die($http_err);
     }
 
