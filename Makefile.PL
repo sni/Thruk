@@ -148,6 +148,8 @@ eval {
 WriteAll;
 
 ##################################
+my $uname = `uname -s`; chomp($uname);
+##################################
 # patch our makefile
 print `./script/thruk_patch_makefile.pl`;
 
@@ -160,9 +162,11 @@ if($? != 0) {
   die("failed to build themes");
 }
 
-print `./script/thruk_set_standard_header`;
-if($? != 0) {
-  die("failed to update standard headers");
+if($uname eq 'Linux') {
+  print `./script/thruk_set_standard_header`;
+  if($? != 0) {
+    die("failed to update standard headers");
+  }
 }
 
 print "finished\n";
