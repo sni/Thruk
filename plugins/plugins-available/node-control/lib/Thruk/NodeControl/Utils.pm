@@ -1229,7 +1229,7 @@ sub _set_job_errored {
     }
     my $data = {
         'last_error'    => $err,
-        'last_error_ts' => time()
+        'last_error_ts' => time(),
     };
     $data->{$type} = 0;
     $data->{$type."_failed"} = "1";
