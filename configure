@@ -204,6 +204,7 @@ exit;
 # try to detect os and version
 sub _get_os {
     my($os, $version) = ("", 0);
+    local $/ = undef;
 
     # right now, we only need rhel/rocky/alma
     if(-e '/etc/redhat-release') {
@@ -217,26 +218,28 @@ sub _get_os {
             $version =~ s/\..*$//gmx; # we only need the major number
             return("rhel", 0+$version);
         } else {
-            die "Unable to detect distribution and version from $release_file\n";
+            die(sprintf("Unable to detect distribution and version from %s\n%s", $release_file, $release_info));
         }
     } elsif(-e '/etc/os-release') {
         my $release_file = '/etc/os-release';
         open(my $fh, '<', $release_file) or die("cannot read $release_file: $!");
-        foreach (<$fh>) {
-            if (/^ID="?(.*?)"?$/) {
+        my $release_info = <$fh>;
+        close $fh;
+
+        for my $line (split/\n/mx, $release_info) {
+            if($line =~ /^ID="?(.*?)"?$/mx) {
                 $os = $1;
             }
-            if (/^VERSION_ID="?(.*?)"?$/) {
+            if($line =~ /^VERSION_ID="?(.*?)"?$/mx) {
                 $version = $1;
                 $version =~ s/\..*$//gmx; # we only need the major number
             }
         }
-        close $fh;
 
         if ($os && $version) {
             return($os, 0+$version);
         } else {
-            die "Unable to detect distribution and version from $release_file\n";
+            die(sprintf("Unable to detect distribution and version from %s\n%s", $release_file, $release_info));
         }
     }
 
