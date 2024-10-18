@@ -103,7 +103,7 @@ if(!$options->{'nounsafeallow3f'} && !$options->{'unsafeallow3f'}) {
     if($os eq 'rhel' && $ver >= 8) {
         $options->{'unsafeallow3f'} = 1;
     }
-    if($os eq 'debian' && $ver >= 11) {
+    if($os eq 'debian' && ($ver eq 'sid' || $ver >= 11)) {
         $options->{'unsafeallow3f'} = 1;
     }
 }
@@ -218,7 +218,7 @@ sub _get_os {
             $version =~ s/\..*$//gmx; # we only need the major number
             return("rhel", 0+$version);
         } else {
-            die(sprintf("Unable to detect distribution and version from %s\n%s", $release_file, $release_info));
+            die(sprintf("Unable to detect distribution and version from %s:\n%s", $release_file, $release_info));
         }
     } elsif(-e '/etc/os-release') {
         my $release_file = '/etc/os-release';
@@ -234,12 +234,16 @@ sub _get_os {
                 $version = $1;
                 $version =~ s/\..*$//gmx; # we only need the major number
             }
+            if($line =~ /^PRETTY_NAME=.*\/sid$/mx) {
+                $version = "sid";
+            }
         }
 
         if ($os && $version) {
+            return($os, $version) if $version eq 'sid';
             return($os, 0+$version);
         } else {
-            die(sprintf("Unable to detect distribution and version from %s\n%s", $release_file, $release_info));
+            die(sprintf("Unable to detect distribution and version from %s:\n%s", $release_file, $release_info));
         }
     }
 
