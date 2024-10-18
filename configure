@@ -234,7 +234,7 @@ sub _get_os {
                 $version = $1;
                 $version =~ s/\..*$//gmx; # we only need the major number
             }
-            if($line =~ /^PRETTY_NAME=.*\/sid$/mx) {
+            if($line =~ /^PRETTY_NAME=.*\/sid\"$/mx) {
                 $version = "sid";
             }
         }
