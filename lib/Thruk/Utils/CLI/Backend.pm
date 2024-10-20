@@ -55,26 +55,36 @@ sub cmd {
 
     my $backends;
     if(!defined $opt->{'backends'} || scalar @{$opt->{'backends'}} == 0) {
-        $c->db->enable_backends();
+        my @args;
+        if(Thruk::Base::array_contains(['-a', '--all'], $commandoptions)) {
+            @args = (1, 1);
+        }
+        my $peers = $c->db->get_peers(@args);
+        my @keys;
+        for my $peer (@{$peers}) {
+            push @keys, $peer->{'key'};
+        }
+        $c->stash->{'backends'} = \@keys;
     } else {
         ($backends) = $c->db->select_backends();
         $backends = Thruk::Base::array2hash($backends);
+        Thruk::Action::AddDefaults::set_possible_backends($c, {});
     }
-    Thruk::Action::AddDefaults::set_possible_backends($c, {});
     my @data;
     for my $key (@{$c->stash->{'backends'}}) {
         next if($backends && !$backends->{$key});
         my $peer = $c->db->get_peer_by_key($key);
         my $addr = $c->stash->{'backend_detail'}->{$key}->{'addr'};
-        $addr    =~ s|/cgi-bin/remote.cgi$||mx;
+        $addr    =~ s|/cgi-bin/remote.cgi$||mx if $addr;
         my $error = defined $c->stash->{'backend_detail'}->{$key}->{'last_error'} ? $c->stash->{'backend_detail'}->{$key}->{'last_error'} : '';
+        $peer->{'hidden'} = 1 if $peer->{'type'} eq 'configonly';
         chomp($error);
         push @data, {
             Key     => $key,
             Section => $peer->{'section'},
-            Name    => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            Name    => $c->stash->{'backend_detail'}->{$key}->{'name'} // $peer->{'name'},
             Enabled => (!defined $peer->{'hidden'} || $peer->{'hidden'} == 0) ? 'Yes' : 'No',
-            Address => $addr,
+            Address => $addr || $peer->{'peer_config'}->{'options'}->{'host_name'},
             Version => _get_peer_version($c, $key),
             Status  => $error || 'OK',
         };

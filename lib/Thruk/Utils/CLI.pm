@@ -623,7 +623,7 @@ sub _run_commands {
 
     # convert -l to expaned command
     if(defined $opt->{'listbackends'}) {
-        if(scalar @{$opt->{'commandoptions'}} == 0) {
+        if(scalar @{$opt->{'commandoptions'}} == 0 || $opt->{'commandoptions'}->[0] =~ /^(-a|--all)$/mx) {
             unshift @{$opt->{'commandoptions'}}, 'backend', 'list';
         } else {
             push @{$opt->{'commandoptions'}}, '-l'; # make -l usable by plugins again

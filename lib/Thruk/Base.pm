@@ -250,17 +250,19 @@ sub array_remove {
 
 =head2 array_contains
 
-  array_contains($el, $list)
+  array_contains($search, $list)
 
-returns true if element is found in list.
+returns true if any of elements is found in list.
 
 =cut
 
 sub array_contains {
-    my($el, $array) = @_;
+    my($els, $array) = @_;
 
-    for my $l (@{$array}) {
-        return 1 if $l eq $el;
+    for my $el (@{Thruk::Base::list($els)}) {
+        for my $l (@{$array}) {
+            return 1 if $l eq $el;
+        }
     }
     return;
 }

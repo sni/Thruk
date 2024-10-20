@@ -1370,6 +1370,10 @@ sub get_remote_thruk_hostname {
     my $peer = $c->db->get_peer_by_key($id);
     confess("got no peer for id: ".$id) unless $peer;
 
+    if($peer->{'peer_config'}->{'options'}->{'host_name'}) {
+        return($peer->{'peer_config'}->{'options'}->{'host_name'});
+    }
+
     my $url = "";
     if($peer->{'fed_info'} && $peer->{'fed_info'}->{'addr'}) {
         for my $u (reverse @{$peer->{'fed_info'}->{'addr'}}) {
@@ -1418,6 +1422,10 @@ sub get_remote_thruk_site_name {
 
     my $peer = $c->db->get_peer_by_key($id);
     confess("got no peer for id: ".$id) unless $peer;
+
+    if($peer->{'peer_config'}->{'options'}->{'site_name'}) {
+        return($peer->{'peer_config'}->{'options'}->{'site_name'});
+    }
 
     my $url = "";
     if($peer->{'fed_info'} && $peer->{'fed_info'}->{'addr'}) {

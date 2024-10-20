@@ -132,7 +132,7 @@ returns true if backend is local
 sub is_local {
     my($self) = @_;
     for my $addr (@{$self->peer_list()}) {
-        return 1 if $addr !~ m/:/mx;
+        return 1 if($addr && $addr !~ m/:/mx);
     }
     return;
 }
