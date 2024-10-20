@@ -161,6 +161,7 @@ sub get_server {
     my $server = {
         peer_key                => $peer->{'key'},
         peer_name               => $peer->{'name'},
+        peer_type               => $peer->{'type'} // '',
         section                 => $peer->{'section'},
         gathering               => $facts->{'gathering'}       || 0, # job id of current gathering job or 0
         cleaning                => $facts->{'cleaning'}        || 0, # cleaning job id

@@ -134,11 +134,17 @@
             [% ELSE %]
               <td class="align-top">[% IF s.host_name %]<a class="link" target="_blank" href="//[% s.host_name | uri %][% IF s.omd_site %]/[% s.omd_site | uri; END %]/"><i class="uil uil-external-link-alt text-xs"></i>[% s.host_name | html %]</a>[% END %]</td>
               <td class="align-top">
-                [% IF s.omd_site %]
-                  [% remote_thruk_url = get_remote_thruk_url_path(c, s.peer_key) %]
-                  <a class="link" href="[% IF remote_thruk_url %]proxy.cgi/[% s.peer_key | uri %][% remote_thruk_url %][% ELSE %][% url_prefix %][% END %]" target="_blank">
-                    <i class="fa-solid fa-desktop text-xs" title="Open site in a new tab."></i> [% s.omd_site | html %]
-                  </a>
+                [% IF s.peer_type == "configonly" %]
+                  <span title="no web interface available">
+                    <i class="fa-solid fa-desktop text-xs invisible"></i> [% s.omd_site | html %]
+                  </span>
+                [% ELSE %]
+                  [% IF s.omd_site %]
+                    [% remote_thruk_url = get_remote_thruk_url_path(c, s.peer_key) %]
+                    <a class="link" href="[% IF remote_thruk_url %]proxy.cgi/[% s.peer_key | uri %][% remote_thruk_url %][% ELSE %][% url_prefix %][% END %]" target="_blank">
+                      <i class="fa-solid fa-desktop text-xs" title="Open site in a new tab."></i> [% s.omd_site | html %]
+                    </a>
+                  [% END %]
                 [% END %]
               </td>
               [% IF error_lines.size > 0 %]
