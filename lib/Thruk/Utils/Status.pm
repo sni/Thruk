@@ -2635,6 +2635,14 @@ sub sort_table_columns {
     if($params) {
         for my $param (split/,/mx, $params) {
             my($key,$title) = split(/:/mx, $param, 2);
+            if($key eq 'peer_name?') {
+                $key = 'peer_name';
+                # only show if there is more than one backend
+                my $c = $Thruk::Globals::c;
+                if(scalar @{$c->stash->{'backends'}} <= 1) {
+                    next;
+                }
+            }
             if($hashed->{$key}) {
                 $hashed->{$key}->{'checked'} = 1;
                 if(defined $title) {

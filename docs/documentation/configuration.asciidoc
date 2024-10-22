@@ -1108,6 +1108,8 @@ ex.:
 List of default columns on service details page.
 Determines which columns and the order of the displayed columns.
 See an example on the link:dynamic-views.html[Dynamic Views] page.
+Use ex.: `peer_name:site` to always show the site name column or optional
+only if there is more than one backend with the `?` as in `peer_name?:site`.
 
 ex.:
 
