@@ -56,12 +56,14 @@ sub cmd {
     my $backends;
     if(!defined $opt->{'backends'} || scalar @{$opt->{'backends'}} == 0) {
         my @args;
-        if(Thruk::Base::array_contains(['-a', '--all'], $commandoptions)) {
+        my $all = Thruk::Base::array_contains(['-a', '--all'], $commandoptions);
+        if($all) {
             @args = (1, 1);
         }
         my $peers = $c->db->get_peers(@args);
         my @keys;
         for my $peer (@{$peers}) {
+            next if(!$all && $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
             push @keys, $peer->{'key'};
         }
         $c->stash->{'backends'} = \@keys;
