@@ -18,6 +18,11 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
       owner: demo
       group: demo
+  - name: Increase default load limit
+    replace:
+      path: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      regexp: '(check_local_load\!5,5,5\!10,10,10)'
+      replace: 'check_local_load!99,99,99!99,99,99'
   - name: copy naemon test.cfg
     copy:
       src: /root/test.cfg
