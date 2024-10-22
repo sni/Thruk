@@ -1305,6 +1305,9 @@ sub _livestatus_options {
                         $found = 0;
                         last;
                     }
+                    if($col eq 'peer_name' || $col eq 'peer_key') {
+                        next;
+                    }
                     if(!$ref_columns->{$col} && $ref_columns->{'perf_data'}) {
                         # add perf data column if available, since this is the only column (along with custom vars) which gets expanded later
                         $col = "perf_data" if ! grep { $_ eq 'perf_data' } @{$columns};
