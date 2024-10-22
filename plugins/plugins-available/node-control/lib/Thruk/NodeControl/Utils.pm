@@ -867,7 +867,7 @@ sub _remote_cmd {
 
     if($env) {
         for my $key (sort keys %{$env}) {
-            $cmd = sprintf('%s="%s" %s', $key, $env->{$key}, $cmd);
+            $cmd = sprintf('export %s="%s"; %s', $key, $env->{$key}, $cmd);
         }
     }
 
@@ -919,7 +919,7 @@ sub _remote_script {
         my $cmd = 'bash '.$remote_path.$args;
         if($env) {
             for my $key (sort keys %{$env}) {
-                $cmd = sprintf('%s="%s" %s', $key, $env->{$key}, $cmd);
+                $cmd = sprintf('export %s="%s"; %s', $key, $env->{$key}, $cmd);
             }
         }
         eval {
