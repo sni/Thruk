@@ -32,11 +32,11 @@ TestUtils::test_command({
     });
     TestUtils::test_command({
         cmd     => "/thruk/script/check_thruk_rest -o '{STATUS} - {up}/{total} hosts are available' -w up:1:10 -c up:1:10 /hosts/totals",
-        like    => ['/OK - \d/2 hosts are available/'],
+        like    => ['/OK - \d/3 hosts are available/'],
     });
     TestUtils::test_command({
         cmd     => "/thruk/script/check_thruk_rest -o '{STATUS} - {up}/{total} hosts are available' -w up:1:10 -c up:10:20 /hosts/totals",
-        like    => ['/CRITICAL - \d/2 hosts are available/'],
+        like    => ['/CRITICAL - \d/3 hosts are available/'],
         exit    => 2,
     });
     TestUtils::test_command({

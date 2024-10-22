@@ -164,7 +164,7 @@ for my $test (@{$pages}) {
     $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
     is(scalar keys %{$tstdata}, 5, "got result");
     is($tstdata->{'min(state)'}, 0, "got min state");
-    is($tstdata->{'count(state)'}, 2, "got count state");
+    is($tstdata->{'count(state)'}, 3, "got count state");
 };
 
 ################################################################################
