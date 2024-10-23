@@ -292,6 +292,7 @@ sub get_processinfo {
                 push @{$options{'columns'}}, 'lmd_last_cache_update';
             }
         }
+        $options{'columns'} = $self->_clean_columns("processinfo", $options{'columns'});
 
         $options{'options'}->{AddPeer} = 1 unless defined $options{'options'}->{AddPeer};
         $options{'options'}->{rename}  = { 'livestatus_version' => 'data_source_version' };
@@ -452,6 +453,7 @@ sub get_hosts {
             push @{$options{'columns'}},  qw/depends_exec depends_notify/;
         }
     }
+    $options{'columns'} = $self->_clean_columns("hosts", $options{'columns'});
 
     # get result
     my $data = $self->_get_table('hosts', \%options);
@@ -489,6 +491,7 @@ sub get_hosts_by_servicequery {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("services", $options{'columns'});
 
     my $data = $self->_get_table('services', \%options);
     unless(wantarray) {
@@ -545,6 +548,7 @@ sub get_hostgroups {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("hostgroups", $options{'columns'});
     return $self->_get_table('hostgroups', \%options);
 }
 
@@ -622,6 +626,7 @@ sub get_services {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("services", $options{'columns'});
 
 
     if($self->{'lmd_optimizations'}) {
@@ -722,6 +727,7 @@ sub get_servicegroups {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("servicegroups", $options{'columns'});
     return $self->_get_table('servicegroups', \%options);
 }
 
@@ -786,6 +792,7 @@ sub get_comments {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("comments", $options{'columns'});
     my $data = $self->_get_table('comments', \%options);
 
     # set total size
@@ -834,6 +841,7 @@ sub get_downtimes {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("downtimes", $options{'columns'});
     my $data = $self->_get_table('downtimes', \%options);
 
     # set total size
@@ -884,6 +892,7 @@ sub get_contactgroups {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("contactgroups", $options{'columns'});
 
     # get result
     my $data = $self->_get_table('contactgroups', \%options);
@@ -937,6 +946,7 @@ sub get_logs {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("logs", $options{'columns'});
 
     if(!wantarray && !$options{'file'}) {
         confess("get_logs() should not be called in scalar context unless using the file option");
@@ -976,6 +986,7 @@ sub get_timeperiods {
             push @{$options{'columns'}}, qw/exclusions/;
         }
     }
+    $options{'columns'} = $self->_clean_columns("timeperiods", $options{'columns'});
 
     return $self->_get_table('timeperiods', \%options);
 }
@@ -1026,6 +1037,7 @@ sub get_commands {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("commands", $options{'columns'});
     return $self->_get_table('commands', \%options);
 }
 
@@ -1064,6 +1076,7 @@ sub get_contacts {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};
         }
     }
+    $options{'columns'} = $self->_clean_columns("contacts", $options{'columns'});
 
     # get result
     my $data = $self->_get_table('contacts', \%options);
@@ -2105,5 +2118,36 @@ sub _add_service_prefix {
     }
     return($newlist);
 }
+
+##########################################################
+sub _clean_columns {
+    my($self, $table, $columns) = @_;
+
+    # last_update is a naemon / lmd specific column
+    if(!$self->{'lmd_optimizations'} && !$self->{'naemon_optimizations'}) {
+        $columns = Thruk::Base::array_remove($columns, "last_update");
+    }
+
+    if($table eq 'contacts') {
+        # icinga 2 does not know about those columns
+        if(!$self->{'lmd_optimizations'} && !$self->{'naemon_optimizations'}) {
+            $columns = Thruk::Base::array_remove($columns, "id");
+            $columns = Thruk::Base::array_remove($columns, "groups");
+            $columns = Thruk::Base::array_remove($columns, "custom_variable_names");
+            $columns = Thruk::Base::array_remove($columns, "custom_variable_values");
+            $columns = Thruk::Base::array_remove($columns, "host_notification_commands");
+            $columns = Thruk::Base::array_remove($columns, "service_notification_commands");
+            $columns = Thruk::Base::array_remove($columns, "address1");
+            $columns = Thruk::Base::array_remove($columns, "address2");
+            $columns = Thruk::Base::array_remove($columns, "address3");
+            $columns = Thruk::Base::array_remove($columns, "address4");
+            $columns = Thruk::Base::array_remove($columns, "address5");
+        }
+    }
+
+    return($columns);
+}
+
+##########################################################
 
 1;

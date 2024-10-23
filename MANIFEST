@@ -2724,6 +2724,7 @@ t/scenarios/backend_icinga2/omd/more_hosts.conf
 t/scenarios/backend_icinga2/omd/playbook.yml
 t/scenarios/backend_icinga2/t/100-backend_icinga.t
 t/scenarios/backend_icinga2/t/300-controller_extinfo.t
+t/scenarios/backend_icinga2/t/300-controller_rest_v1.t
 t/scenarios/backend_icinga2/t/300-controller_status.t
 t/scenarios/backend_icinga2/t/300-controller_tac.t
 t/scenarios/backend_icinga2/thruk.conf

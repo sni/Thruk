@@ -2,6 +2,7 @@
 - hosts: all
   roles:
     - role: common
+    - role: thruk_developer
   tasks:
   - name: "omd config change"
     shell: "omd config demo change"
