@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 101;
+plan tests => 230;
 
 ###########################################################
 # test thruks script path
@@ -46,6 +46,10 @@ sub _run_tests {
     ];
 
     for my $re (@{$regex}) {
+        TestUtils::test_command({
+            cmd  => '/usr/bin/env thruk r \'/sites/ALL/hosts?columns=name,peer_name&name[regex]='.$re.'\'',
+            like => ['/"name" : "UPPERCASE"/'],
+        });
         TestUtils::test_page(
             url  => 'http://localhost/demo/thruk/r/sites/ALL/hosts?columns=name,peer_name&name[regex]='.$re,
             like => ['"name" : "UPPERCASE"'],
