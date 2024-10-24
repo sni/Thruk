@@ -1,17 +1,21 @@
-﻿<div class="card mx-auto mt-2 max-w-full">
-  <div class="head justify-between">
-    <h3>Stacktrace</h3>
+﻿[% DEFAULT id="" %]
+[% DEFAULT clickable="0" %]
+<div class="card mx-auto mt-2 max-w-full[% IF clickable %] w-full[% END %]" [% IF id != "" %] id="[% id %]"[% END %]>
+  <div class="head">
+    <h3 class="grow[% IF clickable %] clickable[% END %]"[% IF clickable %] onclick='toggleElement("[% id %]nicestack")'[% END %]>
+      Stacktrace
+    </h3>
     <div class="flexrow gap-1">
-      <button class="hoverable p-2 iconOnly" onclick='toggleElement("rawstack");toggleElement("nicestack"); return false;' title="show raw stacktrace">
+      <button class="hoverable p-2 iconOnly" onclick='toggleElement("[% id %]rawstack");toggleElement("[% id %]nicestack"); return false;' title="show raw stacktrace">
         <i class="fa-solid fa-code"></i>
       </button>
-      <button class="hoverable p-2 iconOnly" onclick='hideElement("rawstack");showElement("nicestack");nice_stacktrace_expand(); return false;' title="expand stacktrace">
+      <button class="hoverable p-2 iconOnly" onclick='hideElement("[% id %]rawstack");showElement("[% id %]nicestack");nice_stacktrace_expand(); return false;' title="expand stacktrace">
         <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
       </button>
     </div>
   </div>
-  <div id="rawstack" style="display:none;" class="whitespace-pre font-mono p-2 overflow-auto">[% escape_html(stacktrace) %]</div>
-  <div id="nicestack">
+  <div id="[% id %]rawstack" style="display:none;" class="whitespace-pre font-mono p-2 overflow-auto">[% escape_html(stacktrace) %]</div>
+  <div id="[% id %]nicestack" class="[% IF clickable %]hidden[% END %]"">
     [% nice_stacktrace(escape_html(stacktrace)) %]
   </div>
 </div>

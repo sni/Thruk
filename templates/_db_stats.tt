@@ -16,7 +16,7 @@
           <div class="flexrow gap-x-1 justify-between">
             <span>[% pf.function %]</span>
             [% IF pf.defined("debug_hint") %]
-            <span class="textHINTsoft">[% pf.debug_hint %]</span>
+              <span class="textHINTsoft">[% pf.debug_hint %]</span>
             [% END %]
           </div>
         </td>
@@ -55,7 +55,11 @@
         <tr style='display:none;' class='js-pstack-details js-pstack-[% row_id %]'>
           <td colspan="4" class="border-t-0 mb-2">
             <div style="width: 790px;" class="m-2 stack-embedded">
-              [% PROCESS _stacktrace.tt stacktrace=pf.stack %]
+              [% PROCESS _stacktrace.tt
+                  stacktrace=pf.stack
+                  id="s" _ loop.index
+                  clickable="1"
+              %]
             </div>
           </td>
         </tr>
