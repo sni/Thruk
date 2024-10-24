@@ -58,6 +58,60 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
     }
     //console.debug("response:", response.url(), response.status());
   })
+
+  // extract panelId parameter from url
+  let urlObj   = new URL(url);
+  let panelId  = urlObj.searchParams.get('panelId');
+  let hostname = urlObj.searchParams.get('host');
+  let service  = urlObj.searchParams.get('service');
+  if(panelId && !panelId.match(/^[0-9]+$/)) {
+    var random     = Number(Math.random() * 100000).toFixed(0);
+    var source_url = url.replace(/\/grafana\/(d|dashboard|dashboard-solo)\/script\/histou\.js\?/, '/histou/index.php?_='+random+'&').replace('&disablePanelTitle', '');
+    if(source_url.match("/histou/index.php")) {
+      await page.goto(source_url);
+
+      let data = await page.content();
+      data = data.replace(/^[\s\S]*<br>\{/, '{');
+      data = data.replace(/<br><\/pre>.*/, '');
+      data = data.replace(/\n/g, '');
+      eval('data = '+data+";");
+      data.rows.forEach(function(row, i) {
+          row.panels.forEach(function(panel, j) {
+            var title = panel.title;
+            title = title.replace(hostname+' ', '');
+            title = title.replace(service+' ', '');
+            title = title.replace(/^check_\S+ /, '');
+            if(panel.id==panelId || title == panelId) {
+              urlObj.searchParams.set('panelId', panel.id);
+              url = urlObj.toString();
+            }
+          });
+      });
+    } else {
+      // extract panels from plain grafana dashboard
+      var matches = source_url.match(/(?:d|d-solo|dashboard)\/([^\/]+)\//);
+      if(matches && matches[1]) {
+        var dashboard_id = matches[1];
+        var api_url = source_url.replace(/\/grafana\/.*$/, '/grafana/api/dashboards/uid/'+dashboard_id)
+        await page.goto(api_url);
+
+        let data = await page.content();
+        data = data.replace(/.*<pre>/, '');
+        data = data.replace(/<\/pre>.*/, '');
+        data = data.replace(/\n/g, '');
+        eval('data = '+data+";");
+        if(data && data["dashboard"] && data["dashboard"]["panels"]) {
+          data.dashboard.panels.forEach(function(panel, j) {
+            if(panel.id==panelId || panel.title.match(panelId)) {
+              urlObj.searchParams.set('panelId', panel.id);
+              url = urlObj.toString();
+            }
+          });
+        }
+      }
+    }
+  };
+
   await page.goto(url);
   if(url.match(/histou\.js\?/) || url.match(/\/grafana\//)) {
     var errorMsg;

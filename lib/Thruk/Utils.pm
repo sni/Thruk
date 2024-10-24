@@ -818,6 +818,11 @@ sub get_custom_vars {
     $add_action_menu = 1 unless defined $add_action_menu;
 
     my %hash;
+    if($data->{'custom_variables'}) {
+        for my $key (keys %{$data->{'custom_variables'}}) {
+            $hash{$key} = $data->{'custom_variables'}->{$key};
+        }
+    }
 
     if(   defined $data
       and defined $data->{$prefix.'custom_variable_names'}

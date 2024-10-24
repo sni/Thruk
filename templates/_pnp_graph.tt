@@ -1,6 +1,6 @@
 ﻿[% USE date %]
 <script>
-  var pnp_source = [% pnp_source %];
+  var pnp_source = "[% pnp_source %]";
   var pnp_url    = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550";
 
   /* try to fetch sources */
@@ -17,7 +17,7 @@
       var has_graphs = false;
       jQuery('#pnp_source_select').find('option').remove();
       jQuery(sources).each(function(x, s) {
-          jQuery('#pnp_source_select').append('<option value="'+x+'"'+(x==pnp_source ? ' selected' : '')+'>'+s.ds_name+'<\/option>');
+          jQuery('#pnp_source_select').append('<option value="'+x+'"'+((x==pnp_source || s.ds_name == pnp_source) ? ' selected' : '')+'>'+s.ds_name+'<\/option>');
           has_graphs = true;
       });
       /* only useful for multiple sources */
@@ -49,10 +49,10 @@
     <span id="pnp_th5" class="tabs text-center w-[18%]" onclick="return set_png_img(-30067200, '', this.id, pnp_source)">year</span>
     <span              class="tabs text-center w-12"    onclick="return move_png_img( 0.5)"><i class="uil uil-angle-right text-lg contents"></i></span>
   </div>
-  <div id="pnp_graph_pane" class="relative justify-center min-h-[100px]">
+  <div id="pnp_graph_pane" class="relative justify-center min-h-[160px]">
     <a href="[% url_prefix %]#[% pnp_url %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness" class="w-full">
       <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
-      <img id="pnpimg" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550" alt="pnp graph" class="mx-auto">
+      <img id="pnpimg" style="display:none;" src="[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&view=1&graph_width=550" alt="pnp graph" class="mx-auto">
       <div id="pnperr" style="display:none" class="textALERT text-center py-2">Could not retrieve graph data</div>
       <iframe id="pnp_iframe" src="#" class="w-full h-[270px] p-0 m-0 mx-auto hidden"></iframe>
     </a>
@@ -78,5 +78,30 @@
       pnp_source = values[3];
     }
   }
-  set_png_img(pnp_start, pnp_end, pnp_id, pnp_source, true);
+
+  if(jQuery.isNumeric(pnp_source)) {
+    set_png_img(pnp_start, pnp_end, pnp_id, pnp_source, true);
+  } else {
+    // fetch id for source name
+    var source_url = pnp_url.replace(/\/image\?/, '/json?');
+    jQuery('#pnpwaitimg').css('display', 'block');
+    jQuery.ajax({
+        url: source_url,
+        type: 'POST',
+        xhrFields: {
+            withCredentials: true
+        },
+        success: function(data) {
+            if(!data.match(/^\[/)) { return; }
+            var sources = eval(data);
+            jQuery(sources).each(function(x, s) {
+                if(x==pnp_source || s.ds_name == pnp_source) {
+                    set_png_img(pnp_start, pnp_end, pnp_id, x);
+                    return false;
+                }
+            });
+        },
+        error: ajax_xhr_error_logonly
+    });
+  }
 </script>

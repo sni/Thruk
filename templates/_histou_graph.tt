@@ -3,7 +3,7 @@
 <script>
   var histou_url        = "[% histou_url %]";
   var histou_frame_url  = "[% histou_frame_url %]";
-  var histou_source     = [% histou_source %];
+  var histou_source     = "[% histou_source %]";
   var random            = Number(Math.random() * 100000).toFixed(0);
 
   /* try to fetch sources */
@@ -27,8 +27,8 @@
               var title = panel.title;
               title = title.replace('[% escape_js(hst) %] ', '');
               title = title.replace('[% escape_js(svc) %] ', '');
-              title = title.replace('check_thruk_agent ', '');
-              jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+(panel.id==histou_source ? ' selected' : '')+'>'+title+'<\/option>');
+              title = title.replace(/^check_\S+ /, '');
+              jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+((panel.id==histou_source || title == histou_source) ? ' selected' : '')+'>'+title+'<\/option>');
               has_graphs++;
             });
         });
@@ -42,7 +42,7 @@
     });
   } else {
     // extract panels from plain grafana dashboard
-    var matches = source_url.match(/(?:d|dashboard)\/([^\/]+)\//);
+    var matches = source_url.match(/(?:d|d-solo|dashboard)\/([^\/]+)\//);
     if(matches && matches[1]) {
       var dashboard_id = matches[1];
       var api_url = source_url.replace(/\/grafana\/.*$/, '/grafana/api/dashboards/uid/'+dashboard_id)
@@ -57,7 +57,7 @@
           jQuery('#histou_source_select').find('option').remove();
           if(data && data["dashboard"] && data["dashboard"]["panels"]) {
             jQuery(data.dashboard.panels).each(function(j, panel) {
-              jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+(panel.id==histou_source ? ' selected' : '')+'>'+panel.title+'<\/option>');
+              jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+((panel.id==histou_source || panel.title.match(histou_source)) ? ' selected' : '')+'>'+panel.title+'<\/option>');
               has_graphs++;
             });
           }
@@ -94,7 +94,7 @@
   </div>
   <div class="h-[262px] relative justify-center">
     <a id="histou_graph_link" href="[% url_prefix %]#[% histou_url %]" class="clickable absolute top-0 left-0 w-full h-full z-40"></a>
-    <div id="histou_graph_pane" class="relative w-full h-full overflow-hidden">
+    <div id="histou_graph_pane" style="display:none;" class="relative w-full h-full overflow-hidden">
       <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
       <iframe id="histou_iframe" src="[% histou_frame_url %]" class="w-full h-[270px] p-0 m-0 mx-auto"></iframe>
     </div>
@@ -120,5 +120,64 @@
       histou_source = values[3];
     }
   }
-  set_histou_img(histou_start, histou_end, histou_id, histou_source, true);
+
+
+  if(jQuery.isNumeric(histou_source)) {
+    set_histou_img(histou_start, histou_end, histou_id, histou_source, true);
+  } else {
+    // fetch id for source name
+    var source_url = histou_url.replace(/\/grafana\/(d|dashboard|dashboard-solo)\/script\/histou\.js\?/, '/histou/index.php?_='+random+'&');
+    jQuery('#pnpwaitimg').css('display', 'block');
+    if(source_url.match("/histou/index.php")) {
+      jQuery.ajax({
+        url: source_url,
+        type: 'POST',
+        xhrFields: {
+          withCredentials: true
+        },
+        success: function(data) {
+          data = data.replace(/^[\s\S]*<br>\{/, '{');
+          data = data.replace(/<br><\/pre>$/, '');
+          data = data.replace(/\n/g, '');
+          eval('data = '+data+";");
+          jQuery(data.rows).each(function(i, row) {
+              jQuery(row.panels).each(function(j, panel) {
+                var title = panel.title;
+                title = title.replace('[% escape_js(hst) %] ', '');
+                title = title.replace('[% escape_js(svc) %] ', '');
+                title = title.replace(/^check_\S+ /, '');
+                if(panel.id==histou_source || title == histou_source) {
+                  set_histou_img(histou_start, histou_end, histou_id, panel.id);
+                }
+              });
+          });
+        },
+        error: ajax_xhr_error_logonly
+      });
+    } else {
+      // extract panels from plain grafana dashboard
+      var matches = source_url.match(/(?:d|d-solo|dashboard)\/([^\/]+)\//);
+      if(matches && matches[1]) {
+        var dashboard_id = matches[1];
+        var api_url = source_url.replace(/\/grafana\/.*$/, '/grafana/api/dashboards/uid/'+dashboard_id)
+        jQuery.ajax({
+          url: api_url,
+          type: 'GET',
+          xhrFields: {
+            withCredentials: true
+          },
+          success: function(data) {
+            if(data && data["dashboard"] && data["dashboard"]["panels"]) {
+              jQuery(data.dashboard.panels).each(function(j, panel) {
+                if(panel.id==histou_source || panel.title.match(histou_source)) {
+                  set_histou_img(histou_start, histou_end, histou_id, panel.id);
+                }
+              });
+            }
+          },
+          error: ajax_xhr_error_logonly
+        });
+      }
+    }
+  }
 </script>

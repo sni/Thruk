@@ -9949,6 +9949,7 @@ function set_histou_img(start, end, id, source, skip_hash) {
     //add timerange to iconlink, so the target graph matches the preview
     jQuery("#histou_graph_link").attr("href", url_prefix + "#" + histou_url + getParamFrom + getParamTo);
 
+    jQuery('#histou_graph_pane').css('display', '');
     jQuery('#pnpwaitimg').css('display', 'block');
 
     jQuery('#histou_iframe').one("load", function() {
