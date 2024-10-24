@@ -149,6 +149,7 @@ sub get_checks {
                 'args'     => $args,
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($p),
+                '_GRAPH_SOURCE' => 'cpu',
             };
         }
     }

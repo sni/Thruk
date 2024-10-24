@@ -39,6 +39,7 @@ sub get_checks {
             'args'      => { "inet" => $conn->{'inet'} },
             'info'      => Thruk::Agents::SNClient::make_info($conn),
             'disabled'  => Thruk::Utils::Agents::check_disable($conn, $disabled_config, 'connections'),
+            '_GRAPH_SOURCE' => 'total',
         };
     }
 

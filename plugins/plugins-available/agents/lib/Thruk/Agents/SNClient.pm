@@ -538,6 +538,7 @@ sub _extract_checks {
             '_AGENT_AUTO_CHECK'   => $chk->{'id'},
         };
         $chk->{'svc_conf'}->{'parents'} = $chk->{'parent'} if $chk->{'parent'};
+        $chk->{'svc_conf'}->{'_GRAPH_SOURCE'} = $chk->{'_GRAPH_SOURCE'} if $chk->{'_GRAPH_SOURCE'};
         $chk->{'args'} = "";
 
         for my $attr (qw/contacts contactgroups/) {

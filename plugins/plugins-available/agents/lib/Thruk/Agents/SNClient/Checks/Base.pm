@@ -34,6 +34,7 @@ sub get_checks {
         'name'      => 'agent inventory',
         'check'     => 'inventory',
         'parent'    => 'agent version',
+        '_GRAPH_SOURCE' => 'duration',
     };
     push @{$checks}, {
         'id'        => 'version',

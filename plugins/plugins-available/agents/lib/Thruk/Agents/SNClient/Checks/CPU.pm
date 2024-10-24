@@ -33,6 +33,7 @@ sub get_checks {
             'check'     => 'check_cpu',
             'parent'    => 'agent version',
             'info'      => Thruk::Agents::SNClient::make_info($inventory->{'cpu'}->[0]),
+            '_GRAPH_SOURCE' => 'total',
         };
     }
     if($inventory->{'cpu_utilization'}) {
@@ -42,6 +43,7 @@ sub get_checks {
             'check'     => 'check_cpu_utilization',
             'parent'    => 'agent version',
             'info'      => Thruk::Agents::SNClient::make_info($inventory->{'cpu_utilization'}->[0]),
+            '_GRAPH_SOURCE' => 'total',
         };
     }
 
