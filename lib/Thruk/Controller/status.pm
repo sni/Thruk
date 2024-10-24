@@ -712,8 +712,7 @@ sub _process_overview_page {
     # we need the hostname, address etc...
     my $host_data;
     my $services_data;
-    my $tmp_host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
-                                           columns => [ qw /action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address alias has_been_checked name state display_name custom_variable_names custom_variable_values comments is_executing notifications_enabled check_type active_checks_enabled is_flapping acknowledged scheduled_downtime_depth/ ] );
+    my $tmp_host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
             $host_data->{ $host->{'name'} } = $host;
