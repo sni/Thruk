@@ -9872,6 +9872,7 @@ function set_png_img(start, end, id, source, skip_hash) {
     jQuery("#pnp_iframe").addClass("hidden");
 
     jQuery('#pnpimg').one("load", function() {
+        jQuery('#pnpimg').css('display' , '');
         jQuery('#pnpimg').css('opacity' , '');
         jQuery('#pnperr').css('display' , 'none');
         jQuery('#pnpwaitimg').css({'display': 'none'});
@@ -9915,12 +9916,12 @@ function set_png_img(start, end, id, source, skip_hash) {
 function move_png_img(factor) {
     var urlArgs = new Object(toQueryParams(jQuery('#pnpimg').attr('src')));
 
-    var start = urlArgs["start"];
-    var end   = urlArgs["end"];
-    var diff  = end - start;
+    var start = toUnixtime(urlArgs["start"]);
+    var end   = toUnixtime(urlArgs["end"]);
 
-    start = parseInt(diff * factor) + parseInt(start);
-    end   = parseInt(diff * factor) + parseInt(end);
+    var diff = end - start;
+    start    = parseInt(diff * factor) + parseInt(start);
+    end      = parseInt(diff * factor) + parseInt(end);
 
     return set_png_img(start, end);
 }
@@ -9933,8 +9934,8 @@ function set_histou_img(start, end, id, source, skip_hash) {
     histou_start = start;
     histou_end   = end;
 
-    var getParamFrom = "&from=" + (start*1000);
-    var getParamTo = "&to=" + (end*1000);
+    var getParamFrom = "&from=" + (toUnixtime(start)*1000);
+    var getParamTo = "&to=" + (toUnixtime(end)*1000);
     var newUrl = histou_frame_url + getParamFrom + getParamTo + '&panelId='+source;
 
     if(theme.match(/dark/i)) {
@@ -9986,15 +9987,22 @@ function set_histou_img(start, end, id, source, skip_hash) {
 function move_histou_img(factor) {
     var urlArgs = new Object(toQueryParams(jQuery('#histou_iframe').attr('src')));
 
-    var start = urlArgs["from"];
-    var end   = urlArgs["to"];
-    var diff  = end - start;
+    var start = toUnixtime(urlArgs["from"]);
+    var end   = toUnixtime(urlArgs["to"]);
 
-    start = (parseInt(diff * factor) + parseInt(start)) / 1000;
-    end   = (parseInt(diff * factor) + parseInt(end))   / 1000;
+    var diff = end - start;
+    start    = (parseInt(diff * factor) + parseInt(start)) / 1000;
+    end      = (parseInt(diff * factor) + parseInt(end))   / 1000;
 
     return set_histou_img(start, end);
 }
+
+function toUnixtime(ts) {
+    if(ts == 0) { ts   = Math.floor(Date.now() / 1000); }
+    if(ts < 0)  { ts   = Math.floor(Date.now() / 1000) - (-1*ts);   }
+    return(ts);
+}
+
 
 /*******************************************************************************
 88888888888 db  8b           d8 88   ,ad8888ba,   ,ad8888ba,   888b      88
