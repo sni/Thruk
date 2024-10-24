@@ -49,42 +49,47 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
   if(url.match(/^https?:/)) {
     await page.setCookie({name: "thruk_auth", value: sessionid, url: url});
   }
-  page.on('response', (response) => {
+  page.on('response', async (response) => {
     const status = response.status();
     if(status >= 500 && status <= 520) {
       console.error("url "+response.url()+" failed with status: "+status+". Aborting...");
+      await browser.close();
       process.exit(2);
     }
     //console.debug("response:", response.url(), response.status());
   })
   await page.goto(url);
   if(url.match(/histou\.js\?/) || url.match(/\/grafana\//)) {
+    var errorMsg;
     await Promise.race([
-      page.waitForSelector('#loginuser', {timeout: 0}).then(() => {
-        console.error("login window present, export failed");
-        process.exit(2);
+      page.waitForSelector('#loginuser', {timeout: 0}).then(async () => {
+        errorMsg = "login window present, export failed";
       }),
       page.waitForSelector('div.alert-error', {timeout: 0}).then(async () => {
         console.error("alert message found, export failed");
         let element = await page.$('div.alert-error')
         let value = await page.evaluate(el => el.textContent, element)
-        console.error(value);
-        process.exit(2);
+        errorMsg = value;
       }),
       page.waitForSelector('DIV.markdown-html H1', {timeout: 0}).then(async () => {
         console.error("alert message found, export failed:");
         let element = await page.$('DIV.markdown-html H1')
         let value = await page.evaluate(el => el.textContent, element)
-        console.error(value);
-        process.exit(2);
+        errorMsg = value;
       }),
       page.waitForSelector('DIV.flot-text, p.panel-text-content, DIV.uplot', {timeout: waitTimeout}).then(() => {
         console.log("chart panel found, export OK");
       }, async () => {
-        console.error("timeout while waiting for chart, export failed");
-        process.exit(2);
+        if(!errorMsg) {
+          errorMsg = "timeout while waiting for chart, export failed";
+        }
       })
     ]);
+    if(errorMsg) {
+        console.log(errorMsg)
+        await browser.close();
+        process.exit(2);
+    }
   }
 
 
