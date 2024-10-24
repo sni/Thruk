@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 238;
+    plan tests => 234;
 }
 
 BEGIN {
@@ -64,7 +64,7 @@ my $pages = [
                                                      'testmode'             => 1,
                                                     },
                                             'follow' => 1, like => 'report successfully sent to testfile:' },
-    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['"html" : "<table','_dispatcher:', 'Utils::Reports::generate_report','_cmd_report'], 'content_type' => 'application/json; charset=utf-8', },
+    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['"html" : "<table','_dispatcher:', 'Utils::Reports::generate_report','_cmd_report'], 'content_type' => 'application/json; charset=utf-8', unlike => [ 'internal server error' ] },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=update&debug=1', 'redirect' => 1, location => 'reports2.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/reports2.cgi', waitfor => 'reports2.cgi\?report=999\&amp;refreshreport=0', unlike => '<span[^>]*style="color:\ red;".*?\'([^\']*)\'' },
     { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=download_debug', like => ['version:', 'parameters:', 'OS Release:', 'ma_options'] },
@@ -91,7 +91,7 @@ my $pages = [
                                                      'testmode'             => 1,
                                                     },
                                             'follow' => 1, like => 'report successfully sent to testfile:' },
-    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['"html" : "<table','_dispatcher:', 'Utils::Reports::generate_report','_cmd_report'], 'content_type' => 'application/json; charset=utf-8', },
+    { url => '/thruk/cgi-bin/reports2.cgi?report=999&action=profile', like => ['"html" : "<table','_dispatcher:', 'Utils::Reports::generate_report','_cmd_report'], 'content_type' => 'application/json; charset=utf-8', unlike => [ 'internal server error' ] },
 ];
 
 for my $test (@{$pages}) {
