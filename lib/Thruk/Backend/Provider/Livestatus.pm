@@ -7,6 +7,7 @@ use Data::Dumper qw/Dumper/;
 use POSIX ();
 
 use Monitoring::Livestatus::Class::Lite ();
+use Thruk::Base ();
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils::IO ();
 
