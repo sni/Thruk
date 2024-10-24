@@ -287,74 +287,74 @@ sub save_bp_objects {
     my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
 
     # check if something changed
-    if($new_hex ne $old_hex) {
-        _debug(sprintf("moving %s to %s", $filename, $file));
-        if(!move($filename, $file)) {
-            return(1, 'move '.$filename.' to '.$file.' failed: '.$!);
-        }
-        my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
-        if(!$result_backend) {
-            my $peer_key = $c->db->peer_order->[0];
-            $result_backend = $c->db->get_peer_by_key($peer_key)->peer_name;
-        }
-
-        if($skip_reload) {
-            return(0, "bp objects written, reload skipped.");
-        }
-
-        # and reload
-        my $pkey;
-        if($result_backend) {
-            my $peer = $c->db->get_peer_by_key($result_backend);
-            if($peer) {
-                $pkey = $peer->peer_key();
-                if(!$c->stash->{'has_proc_info'} || !$c->stash->{'backend_detail'}->{$pkey}) {
-                    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
-                }
-                if(!defined $c->stash->{'backend_detail'}->{$pkey} || !$c->stash->{'backend_detail'}->{$pkey}->{'running'}) {
-                    return(0, "reload skipped, backend offline");
-                }
-            }
-        }
-
-        my $last_reload = time();
-        if($pkey) {
-            $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
-            if(!$last_reload) {
-                my $processinfo = $c->db->get_processinfo(backends => $pkey);
-                $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
-            }
-            sleep(1) if int($last_reload) == int(time());
-        }
-
-        my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
-        my $reloaded = 0;
-        if($cmd) {
-            ($rc, $msg) = Thruk::Utils::IO::cmd($cmd." 2>&1");
-            $reloaded = 1;
-        }
-        elsif($result_backend) {
-            # restart by livestatus
-            die("no backend found by name ".$result_backend) unless $pkey;
-            my $options = {
-                'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
-                'backend' => [ $pkey ],
-            };
-            $c->db->send_command( %{$options} );
-            ($rc, $msg) = (0, 'business process saved and core restarted');
-            $reloaded = 1;
-        }
-        if($rc == 0 && $reloaded) {
-            my $core_reloaded = Thruk::Utils::wait_after_reload($c, $pkey, $last_reload);
-            if(!$core_reloaded) {
-                ($rc, $msg) = (1, 'business process saved but core failed to restart');
-            }
-        }
-    } else {
+    if($new_hex eq $old_hex) {
         _debug(sprintf("no differences in %s and %s", $filename, $file));
         # discard file
         unlink($filename);
-        $msg = "no reload required";
+        return(0, "no reload required");
+    }
+
+    _debug(sprintf("moving %s to %s", $filename, $file));
+    if(!move($filename, $file)) {
+        return(1, 'move '.$filename.' to '.$file.' failed: '.$!);
+    }
+    my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
+    if(!$result_backend) {
+        my $peer_key = $c->db->peer_order->[0];
+        $result_backend = $c->db->get_peer_by_key($peer_key)->peer_name;
+    }
+
+    if($skip_reload) {
+        return(0, "bp objects written, reload skipped.");
+    }
+
+    # and reload
+    my $pkey;
+    if($result_backend) {
+        my $peer = $c->db->get_peer_by_key($result_backend);
+        if($peer) {
+            $pkey = $peer->peer_key();
+            if(!$c->stash->{'has_proc_info'} || !$c->stash->{'backend_detail'}->{$pkey}) {
+                Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
+            }
+            if(!defined $c->stash->{'backend_detail'}->{$pkey} || !$c->stash->{'backend_detail'}->{$pkey}->{'running'}) {
+                return(0, "reload skipped, backend offline");
+            }
+        }
+    }
+
+    my $last_reload = time();
+    if($pkey) {
+        $last_reload = $c->stash->{'pi_detail'}->{$pkey}->{'program_start'};
+        if(!$last_reload) {
+            my $processinfo = $c->db->get_processinfo(backends => $pkey);
+            $last_reload = ($processinfo->{$pkey} && $processinfo->{$pkey}->{'program_start'}) || (time());
+        }
+        sleep(1) if int($last_reload) == int(time());
+    }
+
+    my $cmd = $c->config->{'Thruk::Plugin::BP'}->{'objects_reload_cmd'};
+    my $reloaded = 0;
+    if($cmd) {
+        ($rc, $msg) = Thruk::Utils::IO::cmd($cmd." 2>&1");
+        $reloaded = 1;
+    }
+    elsif($result_backend) {
+        # restart by livestatus
+        die("no backend found by name ".$result_backend) unless $pkey;
+        my $options = {
+            'command' => sprintf("COMMAND [%d] RESTART_PROCESS", time()),
+            'backend' => [ $pkey ],
+        };
+        $c->db->send_command( %{$options} );
+        ($rc, $msg) = (0, 'business process saved and core restarted');
+        $reloaded = 1;
+    }
+    if($rc == 0 && $reloaded) {
+        my $core_reloaded = Thruk::Utils::wait_after_reload($c, $pkey, $last_reload);
+        if(!$core_reloaded) {
+            ($rc, $msg) = (1, 'business process saved but core failed to restart');
+        }
     }
 
     return($rc, $msg);
