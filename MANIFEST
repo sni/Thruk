@@ -2917,6 +2917,7 @@ t/scenarios/lmd_federation_multitier_e2e/t/106-sections.t
 t/scenarios/lmd_federation_multitier_e2e/t/local/backends.t
 t/scenarios/lmd_federation_multitier_e2e/t/local/configtool.t
 t/scenarios/lmd_federation_multitier_e2e/t/local/logcache.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/node-control.t
 t/scenarios/lmd_federation_multitier_e2e/thruk.conf
 t/scenarios/lmd_federation_multitier_e2e/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/tier1a/1.tbp

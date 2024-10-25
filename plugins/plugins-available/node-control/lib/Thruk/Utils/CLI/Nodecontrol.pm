@@ -50,6 +50,8 @@ use Thruk::Utils::Log qw/:all/;
 =cut
 sub cmd {
     my($c, $action, $commandoptions, $data, $src, $global_options) = @_;
+    $data->{'all_stdout'} = 1;
+
     $c->stats->profile(begin => "_cmd_nc()");
 
     if(!$c->check_user_roles('authorized_for_admin')) {
@@ -124,8 +126,10 @@ sub cmd {
                 _info("%s updated %s sucessfully: OK\n", $peer->{'name'}, $mode);
             }
         });
+        $c->stats->profile(end => "_cmd_nc()");
         return("", 0);
     } else {
+        $c->stats->profile(end => "_cmd_nc()");
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
 
