@@ -39,6 +39,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
               '--no-sandbox',
               '--disable-gpu', // prevent hanging chrome: https://github.com/puppeteer/puppeteer/issues/13048
               '--disable-setuid-sandbox',
+              '--ignore-certificate-errors', // fix ignoreHTTPSErrors not working well: https://github.com/puppeteer/puppeteer/issues/3119
               '--window-size='+width+','+height
           ]
           // doesn't work: makes puppeteer twice as slow
