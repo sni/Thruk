@@ -393,7 +393,12 @@ sub test_page {
     # text that shouldn't appear
     if(defined $opts->{'unlike'}) {
         for my $unlike (@{_list($opts->{'unlike'})}) {
-            unlike($return->{'content'}, qr/$unlike/, "Content should not contain: ".$unlike) || bail_out_req("failed content unlike match", $request, 1);
+            my $content = $return->{'content'};
+            if($unlike eq 'HASH' || $unlike eq 'ARRAY') {
+                # remove stacktrace parts from content
+                $content =~ s%\Q<!--BEGIN STACKTRACE-->\E.*?\Q<!--END STACKTRACE-->\E%%sgmx;
+            }
+            unlike($content, qr/$unlike/, "Content should not contain: ".$unlike) || bail_out_req("failed content unlike match", $request, 1);
         }
     }
 

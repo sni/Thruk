@@ -14,8 +14,10 @@
       </button>
     </div>
   </div>
+  <!--BEGIN STACKTRACE-->
   <div id="[% id %]rawstack" style="display:none;" class="whitespace-pre font-mono p-2 overflow-auto">[% escape_html(stacktrace) %]</div>
   <div id="[% id %]nicestack" class="[% IF clickable %]hidden[% END %]">
     [% nice_stacktrace(escape_html(stacktrace)) %]
   </div>
+  <!--END STACKTRACE-->
 </div>
