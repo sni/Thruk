@@ -45,23 +45,31 @@ if command -v tmux >/dev/null 2>&1; then
     bashpid=$(tmux -f /dev/null list-panes -a -F "#{pane_pid} #{session_name}" | grep $session | awk '{ print $1 }')
     omdpid=$(ps -efl | grep $bashpid | grep omd | awk '{ print $4 }')
     X=0
-    while [ $X -lt 10 ]; do
-        omdpid=$(ps -efl | grep $bashpid | grep omd | awk '{ print $4 }')
-        sleep 1
-        X=$((X+1))
-    done
+    if [ "$omdpid" = "" ]; then
+        while [ $X -lt 10 ]; do
+            omdpid=$(ps -efl | grep $bashpid | grep omd | awk '{ print $4 }')
+            [ "$omdpid" != "" ] && break;
+            if [ $(tmux -f /dev/null capture-pane -p -t $session:$window 2>/dev/null | grep -c "Finished update") -gt 0 ]; then
+                break
+            fi
+            sleep 1
+            X=$((X+1))
+        done
+    fi
 
-    X=0
-    while kill -0 $omdpid >/dev/null 2>&1; do
-        sleep 1
-        X=$((X+1))
-        if [ $X -gt 120 ]; then
-            # print output of tmux session
-            tmux -f /dev/null capture-pane -p -t $session:$window
-            echo "[ERROR] update failed, ssh into $HOSTNAME and run 'tmux attach -t $session:$window' to manually investigate"
-            exit 1
-        fi
-    done
+    if [ "$omdpid" != "" ]; then
+        X=0
+        while kill -0 $omdpid >/dev/null 2>&1; do
+            sleep 1
+            X=$((X+1))
+            if [ $X -gt 120 ]; then
+                # print output of tmux session
+                tmux -f /dev/null capture-pane -p -t $session:$window
+                echo "[ERROR] update failed, ssh into $HOSTNAME and run 'tmux attach -t $session:$window' to manually investigate"
+                exit 1
+            fi
+        done
+    fi
     # print output of tmux session
     tmux -f /dev/null capture-pane -p -t $session:$window
 else
