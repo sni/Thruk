@@ -2,6 +2,8 @@
 - hosts: all
   roles:
     - role: common
+    - role: node_control_client
+    - role: omd_clone_fake_version
   tasks:
   - name: "omd config change"
     shell: "omd config demo change"

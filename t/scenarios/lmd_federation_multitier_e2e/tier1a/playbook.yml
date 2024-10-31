@@ -6,6 +6,7 @@
     - role: thruk_developer
     - role: thruk_plugin_editor
     - role: node_control_client
+    - role: omd_clone_fake_version
   tasks:
   - copy:
       src: "/root/thruk_local.conf"
