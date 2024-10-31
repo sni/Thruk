@@ -1,33 +1,48 @@
-- name: Create fake omd directory
+- name: create fake omd directories
   file:
-    path: "/omd/versions/{{ target_version }}"
+    path: "{{ item }}"
     state: directory
-    mode: '0755'
+    owner: root
+    group: root
+    mode: 0775
+  loop:
+    - "/omd/versions/{{ target_version }}"
+    - "/omd/versions/{{ target_version }}/bin"
+    - "/omd/versions/{{ target_version }}/skel"
+    - "/omd/versions/{{ target_version }}/share"
+    - "/omd/versions/{{ target_version }}/share/omd"
+
 - name: create symlinks
   shell:
     cmd: |
       for FILE in $(ls -1 /omd/versions/{{ source_version }}/); do
-        if [ $FILE != "bin" -a $FILE != "skel" ]; then
+        if [ $FILE != "bin" -a $FILE != "skel" -a $FILE != "share" ]; then
           ln -sfn /omd/versions/{{ source_version }}/$FILE /omd/versions/{{ target_version }}/$FILE
         fi
       done
-- name: Create omd bin
-  file:
-    path: "/omd/versions/{{ target_version }}/bin"
-    state: directory
-    mode: '0755'
-- name: Create omd skel
-  file:
-    path: "/omd/versions/{{ target_version }}/skel"
-    state: directory
-    mode: '0755'
-- name: sync bin and skel
+- name: create symlinks in share/
+  shell:
+    cmd: |
+      for FILE in $(ls -1 /omd/versions/{{ source_version }}/share); do
+        if [ $FILE != "omd" ]; then
+          ln -sfn /omd/versions/{{ source_version }}/share/$FILE /omd/versions/{{ target_version }}/share/$FILE
+        fi
+      done
+- name: sync remaining files
   shell:
     cmd: |
       rsync -a --delete /omd/versions/{{ source_version }}/bin/. /omd/versions/{{ target_version }}/bin/.
       rsync -a --delete /omd/versions/{{ source_version }}/skel/. /omd/versions/{{ target_version }}/skel/.
+      rsync -a --delete /omd/versions/{{ source_version }}/share/omd/. /omd/versions/{{ target_version }}/share/omd/.
+- name: replace version
+  shell:
+    cmd: |
       VERSION='{{ source_version }}'
       if test -L "/omd/versions/{{ source_version }}"; then
         VERSION=$(readlink /omd/versions/{{ source_version }})
       fi
-      find  /omd/versions/{{ target_version }}/bin/ /omd/versions/{{ target_version }}/skel/ -type f -exec /bin/sed -e 's%'$VERSION'%{{ target_version }}%g' -i {} \;
+      find \
+        /omd/versions/{{ target_version }}/bin/omd \
+        /omd/versions/{{ target_version }}/skel/ \
+        /omd/versions/{{ target_version }}/share/omd/*.info \
+        -type f -exec /bin/sed -e 's%'$VERSION'%{{ target_version }}%g' -i {} \;
