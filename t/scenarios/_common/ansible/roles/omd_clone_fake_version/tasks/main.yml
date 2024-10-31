@@ -1,0 +1,33 @@
+- name: Create fake omd directory
+  file:
+    path: "/omd/versions/{{ target_version }}"
+    state: directory
+    mode: '0755'
+- name: create symlinks
+  shell:
+    cmd: |
+      for FILE in $(ls -1 /omd/versions/{{ source_version }}/); do
+        if [ $FILE != "bin" -a $FILE != "skel" ]; then
+          ln -sfn /omd/versions/{{ source_version }}/$FILE /omd/versions/{{ target_version }}/$FILE
+        fi
+      done
+- name: Create omd bin
+  file:
+    path: "/omd/versions/{{ target_version }}/bin"
+    state: directory
+    mode: '0755'
+- name: Create omd skel
+  file:
+    path: "/omd/versions/{{ target_version }}/skel"
+    state: directory
+    mode: '0755'
+- name: sync bin and skel
+  shell:
+    cmd: |
+      rsync -a --delete /omd/versions/{{ source_version }}/bin/. /omd/versions/{{ target_version }}/bin/.
+      rsync -a --delete /omd/versions/{{ source_version }}/skel/. /omd/versions/{{ target_version }}/skel/.
+      VERSION='{{ source_version }}'
+      if test -L "/omd/versions/{{ source_version }}"; then
+        VERSION=$(readlink /omd/versions/{{ source_version }})
+      fi
+      find  /omd/versions/{{ target_version }}/bin/ /omd/versions/{{ target_version }}/skel/ -type f -exec /bin/sed -e 's%'$VERSION'%{{ target_version }}%g' -i {} \;
