@@ -931,6 +931,8 @@ sub _request {
         $request = HTTP::Request->new($method => $url);
     }
     $request->header("User-Agent" => $agent) if $agent;
+    $request->header('X-Thruk-Auth-Key'  => $ENV{'THRUK_TEST_AUTH_KEY'})  if $ENV{'THRUK_TEST_AUTH_KEY'};
+    $request->header('X-Thruk-Auth-User' => $ENV{'THRUK_TEST_AUTH_USER'}) if $ENV{'THRUK_TEST_AUTH_USER'};
     $cookie_jar->add_cookie_header($request);
     my $response = request($request);
     $cookie_jar->extract_cookies($response);
