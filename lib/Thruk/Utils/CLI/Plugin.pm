@@ -83,7 +83,8 @@ sub cmd {
         if($@) {
             return("enabling plugin failed: ".$@, 1);
         }
-        return("enabled plugin ".$name."\nYou need to restart the webserver to make the changes active.\n", 0);
+        my $restart_required = _restart_webserver($c) ? "" : "You need to restart the webserver to activate changes.\n";
+        return("enabled plugin ".$name."\n".$restart_required, 0);
     }
     elsif($command eq 'disable') {
         my $name = shift @{$commandoptions};
@@ -94,7 +95,8 @@ sub cmd {
         if($@) {
             return("disabling plugin failed: ".$@, 1);
         }
-        return("disabled plugin ".$name."\nYou need to restart the webserver to make the changes active.\n", 0);
+        my $restart_required = _restart_webserver($c) ? "" : "You need to restart the webserver to activate changes.\n";
+        return("disabled plugin ".$name."\n".$restart_required, 0);
     }
     elsif($command eq 'install') {
         ($output, $rc) = _plugin_install($c, $commandoptions, $globaloptions);
@@ -202,7 +204,8 @@ sub _plugin_install {
     _debug("enabling plugin");
     Thruk::Utils::Plugin::enable_plugin($c, $plugin->{'dir'});
 
-    return("Installed ".$plugin->{'name'}." ".$plugin->{'version'}." successfully\nYou need to restart the webserver to make the changes active.\n", 0);
+    my $restart_required = _restart_webserver($c) ? "" : "You need to restart the webserver to activate changes.\n";
+    return("Installed ".$plugin->{'name'}." ".$plugin->{'version'}." successfully\n".$restart_required, 0);
 }
 
 ##############################################
@@ -351,7 +354,8 @@ sub _plugin_remove {
         return("Removing plugin ".$name." failed\n", 1);
     }
 
-    return("Removed plugin ".$name." successfully\nYou need to restart the webserver to make the changes active.\n", 0);
+    my $restart_required = _restart_webserver($c) ? "" : "You need to restart the webserver to activate changes.\n";
+    return("Removed plugin ".$name." successfully\n".$restart_required, 0);
 }
 
 ##############################################
@@ -390,6 +394,20 @@ sub _plugin_update {
 ##############################################
 sub _plugin_sort {
     return($a->{'dir'} cmp $b->{'dir'} || $b->{'installed'} <=> $a->{'installed'} || Thruk::Utils::version_compare($a->{'version'}, $b->{'version'}));
+}
+
+##############################################
+sub _restart_webserver {
+    my($c) = @_;
+
+    return unless $ENV{'OMD_ROOT'};
+
+    my($rc, $out) = Thruk::Utils::IO::cmd("omd status apache && omd reload apache");
+    if($rc != 0) {
+        _warn("omd reload failed: %s", $out);
+        return;
+    }
+    return 1;
 }
 
 ##############################################
