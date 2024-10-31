@@ -31,3 +31,9 @@
       mode: 0600
       owner: demo
       group: demo
+  - name: commit changes to git
+    shell:
+      cmd: git add etc && git commit -m 'omd config'
+      chdir: "/omd/sites/demo"
+    become: yes
+    become_user: "demo"
