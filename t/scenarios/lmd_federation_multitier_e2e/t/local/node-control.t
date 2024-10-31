@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 36;
+    plan tests => 44;
 
     use lib('t');
     require TestUtils;
@@ -50,3 +50,8 @@ TestUtils::test_page(
     post     => { "action" => "omd_restart", "peer" => "tier2c", "service" => "crontab" },
     like     => ['"success" : 1'],
 );
+
+TestUtils::test_command({
+    cmd    => '/usr/bin/env thruk nc list',
+    like   => ['/tier2c/', '/Rocky/', '/Ubuntu/', '/demo/', '/OK/'],
+});

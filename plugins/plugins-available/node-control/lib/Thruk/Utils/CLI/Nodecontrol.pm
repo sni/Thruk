@@ -24,6 +24,7 @@ The nodecontrol command can start node control commands.
 
     available commands are:
 
+    - -l|list                             list available backends.
     - facts   <backendid|all>             update facts for given backend.
     - runtime <backendid|all>             update runtime data for given backend.
 
@@ -73,21 +74,45 @@ sub cmd {
     my $config = Thruk::NodeControl::Utils::config($c);
     # parse options
     my $opt = {
-      'worker' => $config->{'parallel_tasks'} // 3,
+      'worker'    => $config->{'parallel_tasks'} // 3,
+      'mode_list' => 0,
     };
     Getopt::Long::Configure('no_ignore_case');
     Getopt::Long::Configure('bundling');
     Getopt::Long::Configure('pass_through');
     Getopt::Long::GetOptionsFromArray($commandoptions,
        "w|worker=i"     => \$opt->{'worker'},
+       "l|list"         => \$opt->{'mode_list'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
 
     my $mode = shift @{$commandoptions};
     my($output, $rc) = ("", 0);
+    $mode = 'list' if $opt->{'mode_list'};
 
-    if($mode eq 'facts' || $mode eq 'runtime') {
+    if($mode eq 'list') {
+        my @data;
+        for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
+            my $s = Thruk::NodeControl::Utils::get_server($c, $peer, $config);
+            push @data, {
+                Section => $s->{'section'} eq 'Default' ? '' : $s->{'section'},
+                Name    => $peer->{'name'},
+                ID      => $peer->{'key'},
+                Host    => $s->{'host_name'},
+                Site    => $s->{'omd_site'},
+                Version => $s->{'omd_version'},
+                OS      => sprintf("%s %s", $s->{'os_name'}, $s->{'os_version'}),
+                Status  => _omd_status($s->{'omd_status'}),
+            };
+        }
+        my $output = Thruk::Utils::text_table(
+            keys => ['Name', 'Section', 'ID', 'Host', 'Site', 'Version', 'OS', 'Status'],
+            data => \@data,
+        );
+        return($output, 0);
+    }
+    elsif($mode eq 'facts' || $mode eq 'runtime') {
         my $peers = [];
         my $backend = shift @{$commandoptions};
         if($backend && $backend ne 'all') {
@@ -147,6 +172,23 @@ sub _scale_peers {
         collect => sub {},
     );
     return;
+}
+
+##############################################
+sub _omd_status {
+    my($status) = @_;
+
+    return "" unless defined $status->{'OVERALL'};
+    return "OK" if $status->{'OVERALL'} == 0;
+
+    my @failed;
+    for my $key (keys %{$status}) {
+        next if $key eq 'OVERALL';
+        if($status->{$key} == 1) {
+            push @failed, $key;
+        }
+    }
+    return "failed: ".join(', ', @failed);
 }
 
 ##############################################
