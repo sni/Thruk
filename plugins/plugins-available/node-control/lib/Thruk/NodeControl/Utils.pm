@@ -1251,7 +1251,7 @@ sub _convert_ansible_script_result {
         }
     }
 
-    return(-1, "") unless $data;
+    return(-1, "") unless defined $data;
 
     if($data =~ m/usage:\ ansible/mx) {
         confess("ansible command failed: ".$data);
