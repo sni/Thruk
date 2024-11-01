@@ -56,11 +56,12 @@ sub get_checks {
                 'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['cdrom']),
             };
         } else {
+            my $def_opts = Thruk::Agents::SNClient::default_opt($c, 'drivesize') // 'show-all freespace-ignore-reserved=false';
             push @{$checks}, {
                 'id'       => 'df.'.Thruk::Utils::Agents::to_id($drive->{'drive_or_id'}),
                 'name'     => $prefix.' '.$drive->{'drive_or_id'},
                 'check'    => 'check_drivesize',
-                'args'     => [ "drive='".$drive->{'drive_or_id'}."'", 'show-all' ],
+                'args'     => [ "drive='".$drive->{'drive_or_id'}."'", $def_opts ],
                 'parent'   => 'agent version',
                 'info'     => Thruk::Agents::SNClient::make_info($drive),
                 'disabled' => !$drive->{'drive'} ? 'drive has no name' : Thruk::Utils::Agents::check_disable($drive, $disabled_config, ['drivesize', $prefix]),

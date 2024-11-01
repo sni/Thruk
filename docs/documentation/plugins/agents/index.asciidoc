@@ -66,6 +66,11 @@ For example:
     #perf_template      = srv-perf
     #host_perf_template = host-perf
 
+    # set default options for specific check types
+    <default_opt>
+      drivesize = show-all freespace-ignore-reserved=false
+    </default_opt>
+
     # disable network checks matching these attributes
     <disable network>
       enabled != true

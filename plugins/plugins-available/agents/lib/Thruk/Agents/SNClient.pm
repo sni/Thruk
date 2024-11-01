@@ -610,6 +610,28 @@ sub get_disabled_config {
 }
 
 ##########################################################
+
+=head2 default_opt
+
+    default_opt($c, $check_type)
+
+returns default options for this check
+
+=cut
+sub default_opt {
+    my($c, $check) = @_;
+
+    my $opts = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'default_opt'});
+    my $res;
+    for my $opt (@{$opts}) {
+        next unless defined $opt->{$check};
+        $res = $opt->{$check};
+    }
+
+    return($res);
+}
+
+##########################################################
 sub _check_nsc_web_extra_options {
     my($c, $mode) = @_;
     my $options = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_nsc_web_extra_options'}

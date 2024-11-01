@@ -26,10 +26,12 @@ sub get_checks {
 
     return unless defined $inventory->{'os_updates'};
 
+    my $def_opts = Thruk::Agents::SNClient::default_opt($c, 'os_updates');
     push @{$checks}, {
         'id'       => 'os_updates',
         'name'     => 'os updates',
         'check'    => 'check_os_updates',
+        'args'     => [ $def_opts ],
         'parent'   => 'agent version',
     };
 

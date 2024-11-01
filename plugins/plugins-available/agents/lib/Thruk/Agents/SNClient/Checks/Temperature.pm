@@ -38,11 +38,12 @@ sub get_checks {
         $names->{$temp->{'name'}} = 1;
         my $name = $temp->{'name'};
         $name =~ s/temp$//gmx;
+        my $def_opts = Thruk::Agents::SNClient::default_opt($c, 'temperature');
         push @{$checks}, {
             'id'        => 'temperature.'.Thruk::Utils::Agents::to_id($temp->{'name'}),
             'name'      => 'temperature '.$name,
             'check'     => 'check_temperature',
-            'args'      => { "sensor" => $temp->{'name'} },
+            'args'      => [ "sensor='".$temp->{'name'}."'", $def_opts ],
             'parent'    => 'agent version',
             'info'      => Thruk::Agents::SNClient::make_info($temp),
             'disabled'  => Thruk::Utils::Agents::check_disable($temp, $disabled_config, 'temperature'),
