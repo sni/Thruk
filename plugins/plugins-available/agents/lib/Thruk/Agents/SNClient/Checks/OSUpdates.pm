@@ -3,6 +3,8 @@ package Thruk::Agents::SNClient::Checks::OSUpdates;
 use warnings;
 use strict;
 
+use Thruk::Agents::SNClient ();
+
 =head1 NAME
 
 Thruk::Agents::SNClient::Checks::OSUpdates - returns os_updates checks for snclient
