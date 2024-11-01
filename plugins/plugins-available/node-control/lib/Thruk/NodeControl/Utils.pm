@@ -1149,6 +1149,30 @@ sub save_config {
 
 ##########################################################
 
+=head2 get_available_omd_versions
+
+  get_available_omd_versions($c)
+
+returns omd versions which can be used to update
+
+=cut
+sub get_available_omd_versions {
+    my($c) = @_;
+    my $config = &config($c);
+
+    my $peers = &get_peers($c);
+    my $servers = [];
+    for my $peer (@{$peers}) {
+        push @{$servers}, &get_server($c, $peer, $config);
+    }
+
+    my $available_omd_versions = [$config->{'omd_default_version'}];
+    map { push @{$available_omd_versions}, @{$_->{omd_available_versions}}, @{$_->{omd_versions}} } @{$servers};
+    $available_omd_versions = [reverse sort @{Thruk::Base::array_uniq($available_omd_versions)}];
+    return $available_omd_versions;
+}
+
+##########################################################
 sub _machine_type {
     my($facts) = @_;
     if($facts->{'ansible_facts'}->{'ansible_virtualization_role'} && $facts->{'ansible_facts'}->{'ansible_virtualization_role'} eq 'guest') {

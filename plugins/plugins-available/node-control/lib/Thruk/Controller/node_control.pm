@@ -91,12 +91,9 @@ sub index {
         });
         $config->{'omd_default_version'} = $version;
     }
-    my $available_omd_versions = [$config->{'omd_default_version'}];
-    map { push @{$available_omd_versions}, @{$_->{omd_available_versions}}, @{$_->{omd_versions}} } @{$servers};
-    $available_omd_versions = [reverse sort @{Thruk::Base::array_uniq($available_omd_versions)}];
 
     $c->stash->{omd_default_version}    = $config->{'omd_default_version'},
-    $c->stash->{omd_available_versions} = $available_omd_versions;
+    $c->stash->{omd_available_versions} = Thruk::NodeControl::Utils::get_available_omd_versions($c);
 
     # sort servers by section, host_name, site
     map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};

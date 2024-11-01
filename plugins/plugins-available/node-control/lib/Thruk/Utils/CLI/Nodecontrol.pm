@@ -27,6 +27,7 @@ The nodecontrol command can start node control commands.
     - -l|list                             list available backends.
     - facts   <backendid|all>             update facts for given backend.
     - runtime <backendid|all>             update runtime data for given backend.
+    - setversion <version>                set new default omd version
 
 =back
 
@@ -91,17 +92,35 @@ sub cmd {
     my($output, $rc) = ("", 0);
     $mode = 'list' if $opt->{'mode_list'};
 
-    if($mode eq 'list') {
+    if($mode eq 'setversion') {
+        my $version = shift @{$commandoptions};
+        if(!$version) {
+            return("ERROR - no version specified\n", 1);
+        }
+        my $omd_available_versions = Thruk::NodeControl::Utils::get_available_omd_versions($c);
+        my @sel = grep { $_ =~ m/^$version/mx } @{$omd_available_versions};
+        if(scalar @sel == 0) {
+            return("ERROR - no such version available\navailable versions:\n - ".join("\n - ", @{$omd_available_versions})."\n", 1);
+        }
+        $version = $sel[0];
+        Thruk::NodeControl::Utils::save_config($c, {
+            'omd_default_version'   => $version,
+        });
+        return("default version successfully set to: $version\n", 0);
+    }
+    elsif($mode eq 'list') {
         my @data;
         for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
             my $s = Thruk::NodeControl::Utils::get_server($c, $peer, $config);
+            my $v = $s->{'omd_version'};
+            $v =~ s/-labs-edition//gmx;
             push @data, {
                 Section => $s->{'section'} eq 'Default' ? '' : $s->{'section'},
                 Name    => $peer->{'name'},
                 ID      => $peer->{'key'},
                 Host    => $s->{'host_name'},
                 Site    => $s->{'omd_site'},
-                Version => $s->{'omd_version'},
+                Version => $v,
                 OS      => sprintf("%s %s", $s->{'os_name'}, $s->{'os_version'}),
                 Status  => _omd_status($s->{'omd_status'}),
             };
