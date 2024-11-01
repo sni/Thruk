@@ -515,6 +515,7 @@ sub _extract_checks {
             if($chk->{'args'}) {
                 if(ref $chk->{'args'} eq 'ARRAY') {
                     for my $arg (@{$chk->{'args'}}) {
+                        next unless defined $arg;
                         $command .= sprintf(" %s", $arg);
                     }
                 } else {
