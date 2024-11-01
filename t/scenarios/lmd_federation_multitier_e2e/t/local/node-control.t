@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 44;
+    plan tests => 47;
 
     use lib('t');
     require TestUtils;
@@ -24,15 +24,12 @@ TestUtils::test_command({
     like => ['/\/thruk\/script\/thruk/'],
 }) or BAIL_OUT("wrong thruk path");
 
-TestUtils::test_command({
-    cmd    => '/usr/bin/env thruk nc facts tier1a',
-    errlike   => ['/tier1a updated facts sucessfully: OK/'],
-});
-
-TestUtils::test_command({
-    cmd    => '/usr/bin/env thruk nc facts tier2c',
-    errlike   => ['/tier2c updated facts sucessfully: OK/'],
-});
+for my $peer ('tier1a', 'tier2c', 'tier2e') {
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env thruk nc facts '.$peer,
+        errlike   => ['/'.$peer.' updated facts sucessfully: OK/'],
+    });
+}
 
 TestUtils::test_page(
     url      => 'https://localhost/demo/thruk/cgi-bin/node_control.cgi',
