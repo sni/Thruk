@@ -58,13 +58,13 @@
             [% IF has_sections %]
               <td>[% agent.section %]</td>
             [% END %]
-            <td class="truncate w-60 max-w-0 js-agent-row">
+            <td class="truncate w-60 max-w-max js-agent-row">
               <div class="flexrow flex-nowrap gap-x-1 justify-between">
-                <a class="link" href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]" title="edit this host">[% h.name | html %]</a>
-                <a href="status.cgi?host=[% h.name | uri %]" title="view service details for this host"><i class="fa-solid fa-bars"></i></a>
+                <a class="link truncate" href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]" title="edit this host">[% h.name | html %]</a>
+                <a class="w-5" href="status.cgi?host=[% h.name | uri %]" title="view service details for this host"><i class="fa-solid fa-bars"></i></a>
               </div>
             </td>
-            <td>
+            <td class="w-20">
               [% state  = 'PENDING' %]
               [% output = '' %]
               [% IF info.exists(hostname) %]
@@ -85,11 +85,11 @@
                 [% IF info.exists(hostname) %]<div class="w-full h-full" title="[% info.$hostname.full_version | html %]">[% info.$hostname.version | html %]</div>[% END %]
               </div>
             </td>
-            <td title="[% info.$hostname.os_version_full | html %]" class="truncate w-60 max-w-0">
+            <td title="[% info.$hostname.os_version_full | html %]" class="truncate w-60 max-w-max">
               [% info.$hostname.os_version | html %]
             </td>
             <td>[% info.$hostname.os_arch %]</td>
-            <td class='align-top relative' title="[% IF info.$hostname.cpu_perc != ''; sprintf("%d", info.$hostname.cpu_perc*100); "% used"; END %]">
+            <td class='align-top relative overflow-hidden' title="[% IF info.$hostname.cpu_perc != ''; sprintf("%d", info.$hostname.cpu_perc*100); "% used"; END %]">
               [% IF info.$hostname.cpu_perc; %]
                 [%IF info.$hostname.cpu_perc > 1; info.$hostname.cpu_perc = 1; END %]
                 <div style='width: [% 100 * info.$hostname.cpu_perc %]%; height: 100%;' class='[% IF info.$hostname.cpu_state == 2 %]CRITICAL[% ELSIF info.$hostname.cpu_state == 1 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
@@ -100,7 +100,7 @@
             </td>
             [% perc = 0; IF info.$hostname.memfree; perc = ( info.$hostname.memtotal - info.$hostname.memfree ) / info.$hostname.memtotal; END %]
             [%IF perc > 1; perc = 1; END %]
-            <td class='align-top relative' title="[% IF info.$hostname.memfree; sprintf("%.1f", perc*100); "% used"; END %]">
+            <td class='align-top relative overflow-hidden' title="[% IF info.$hostname.memfree; sprintf("%.1f", perc*100); "% used"; END %]">
               <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF info.$hostname.mem_state == 2 %]CRITICAL[% ELSIF info.$hostname.mem_state == 1 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
               <span class='absolute top-0 left-0' style='margin-left: 3px;'>
                 [% IF info.$hostname.memtotal; n = reduce_number(info.$hostname.memtotal, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
@@ -108,7 +108,7 @@
             </td>
             [% perc = 0; IF info.$hostname.disk_total; perc = ( info.$hostname.disk_total - info.$hostname.disk_free ) / info.$hostname.disk_total; END %]
             [%IF perc > 1; perc = 1; END %]
-            <td class='align-top relative' title="[% IF info.$hostname.disk_total %][% sprintf("%.1f", perc*100) %]% used, [% n = reduce_number(info.$hostname.disk_free, 'B', 1024); sprintf('%.1f %s',n.0, n.1) %] free[% END %]">
+            <td class='align-top relative overflow-hidden' title="[% IF info.$hostname.disk_total %][% sprintf("%.1f", perc*100) %]% used, [% n = reduce_number(info.$hostname.disk_free, 'B', 1024); sprintf('%.1f %s',n.0, n.1) %] free[% END %]">
               <div style='width: [% 100 * perc %]%; height: 100%;' class='[% IF info.$hostname.disk_state == 2 %]CRITICAL[% ELSIF info.$hostname.disk_state == 1 %]WARNING[% ELSE %]OK[% END %] absolute top-0 left-0'></div>
               <span class='absolute top-0 left-0' style='margin-left: 3px;'>
                 [% IF info.$hostname.disk_total; n = reduce_number(info.$hostname.disk_total, 'B', 1024); sprintf('%.1f %s',n.0, n.1); END %]
