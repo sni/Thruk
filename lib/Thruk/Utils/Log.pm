@@ -12,6 +12,7 @@ Utilities Collection for CLI logging
 
 use warnings;
 use strict;
+use Carp;
 use Cwd qw/abs_path/;
 use POSIX ();
 use Time::HiRes ();
@@ -154,7 +155,6 @@ sub _log {
         # find source of warnings like: Missing argument in sprintf
         local $SIG{__WARN__} = sub {
             my($msg) = @_;
-            require Carp;
             Carp::cluck($msg);
         };
         $line = sprintf($line, @{$data});
