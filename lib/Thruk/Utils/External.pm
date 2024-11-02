@@ -732,6 +732,10 @@ sub wait_for_peer_job {
     $poll_interval =  3 unless $poll_interval;
     my $end = time() + $max_wait;
     my $jobdata;
+    _debug("waiting for job %s on peer %s (%s), timeout: %ss",$job, $peer->{'name'}, $peer->{'key'}, $max_wait);
+    if(length($job) < 2) {
+        confess("invalid job id: $job");
+    }
 
     my($already_out, $already_err) = (0, 0);
     my $print_remaining = sub {
