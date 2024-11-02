@@ -10,7 +10,7 @@ The nodecontrol command can start node control commands.
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] nc <cmd> [-w|--worker=<nr>]
+  Usage: thruk [globaloptions] nc <cmd> [options]
 
 =head1 OPTIONS
 
@@ -24,10 +24,13 @@ The nodecontrol command can start node control commands.
 
     available commands are:
 
-    - -l|list                             list available backends.
-    - facts   <backendid|all>             update facts for given backend.
-    - runtime <backendid|all>             update runtime data for given backend.
-    - setversion <version>                set new default omd version
+    - -l|list                                      list available backends.
+    - facts   <backendid|all>  [-w|--worker=<nr>]  update facts for given backend.
+    - runtime <backendid|all>  [-w|--worker=<nr>]  update runtime data for given backend.
+    - setversion <version>                         set new default omd version
+    - install <backendid|all>                      install default omd version for given backend.
+    - update  <backendid|all>                      update default omd version for given backend.
+    - cleanup <backendid|all>                      cleanup unused omd versions for given backend.
 
 =back
 
@@ -90,6 +93,7 @@ sub cmd {
 
     my $mode = shift @{$commandoptions};
     $mode = 'list' if $opt->{'mode_list'};
+    Thruk::Base->config->{'no_external_job_forks'} = 0; # must be enabled, would break job control
 
     if($mode eq 'setversion') {
         return(_action_setversion($c, $commandoptions));
@@ -99,6 +103,9 @@ sub cmd {
     }
     elsif($mode eq 'facts' || $mode eq 'runtime') {
         return(_action_facts($c, $mode, $opt, $commandoptions));
+    }
+    elsif($mode eq 'cleanup') {
+        return(_action_cleanup($c, $opt, $commandoptions));
     }
 
     $c->stats->profile(end => "_cmd_nc()");
@@ -153,24 +160,13 @@ sub _action_list {
 ##############################################
 sub _action_facts {
     my($c, $mode, $opt, $commandoptions) = @_;
-    my $peers = [];
-    my $backend = shift @{$commandoptions};
-    if($backend && $backend ne 'all') {
-        my $peer = $c->db->get_peer_by_key($backend);
-        if(!$peer) {
-            _fatal("no such peer: ".$backend);
-        }
-        push @{$peers}, $backend;
-    } else {
-        for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
-            push @{$peers}, $peer->{'key'};
-        }
-    }
 
+    my $peers = _get_selected_peers($c, $commandoptions);
     _scale_peers($c, $opt->{'worker'}, $peers, sub {
         my($peer_key) = @_;
         my $peer = $c->db->get_peer_by_key($peer_key);
         my $facts;
+        _debug("%s start fetching %s data...\n", $peer->{'name'}, $mode);
         if($mode eq 'facts') {
             $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
         }
@@ -193,6 +189,62 @@ sub _action_facts {
     });
     $c->stats->profile(end => "_cmd_nc()");
     return("", 0);
+}
+
+##############################################
+sub _action_cleanup {
+    my($c, $opt, $commandoptions) = @_;
+
+    my $errors = 0;
+    my $peers = _get_selected_peers($c, $commandoptions);
+    for my $peer_key (@{$peers}) {
+        my $peer = $c->db->get_peer_by_key($peer_key);
+        local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
+        _debug("start cleaning up...\n");
+        my($job) = Thruk::NodeControl::Utils::omd_cleanup($c, $peer);
+        if(!$job) {
+            _error("failed to start cleanup");
+            $errors++;
+            next;
+        }
+        my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 3, 1800);
+        if(!$jobdata) {
+            _error("failed to cleanup");
+            $errors++;
+            next;
+        }
+        if($jobdata->{'rc'} ne '0') {
+            _error("failed to cleanup\n");
+            _error("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
+            _error("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
+            $errors++;
+            next;
+        }
+        _info("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
+        _info("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
+        _info("%s cleanup sucessfully: OK\n", $peer->{'name'});
+    }
+    $c->stats->profile(end => "_cmd_nc()");
+    return("", $errors > 0 ? 1 : 0);
+}
+
+##############################################
+sub _get_selected_peers {
+    my($c, $commandoptions) = @_;
+    my $peers = [];
+    my $backend = shift @{$commandoptions};
+    if($backend && $backend ne 'all') {
+        my $peer = $c->db->get_peer_by_key($backend);
+        if(!$peer) {
+            _fatal("no such peer: ".$backend);
+        }
+        push @{$peers}, $backend;
+    } else {
+        for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
+            push @{$peers}, $peer->{'key'};
+        }
+    }
+    return($peers);
 }
 
 ##############################################

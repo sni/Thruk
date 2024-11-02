@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 52;
+    plan tests => 55;
 
     use lib('t');
     require TestUtils;
@@ -56,4 +56,9 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd    => '/usr/bin/env thruk nc setversion 6.66-test',
     like   => ['/default version successfully set/', '/6.66-test/'],
+});
+
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk nc cleanup tier2a',
+    errlike => ['/tier2a cleanup sucessfully/'],
 });
