@@ -151,6 +151,12 @@ sub _log {
         require Thruk::Utils;
         return &_log($lvl, [Thruk::Utils::dump_params($line, 0, 0)], $options);
     } elsif(scalar @{$data} > 0) {
+        # find source of warnings like: Missing argument in sprintf
+        local $SIG{__WARN__} = sub {
+            my($msg) = @_;
+            require Carp;
+            Carp::cluck($msg);
+        };
         $line = sprintf($line, @{$data});
     }
     my $log = _init_logging();
@@ -203,6 +209,7 @@ sub _log {
     local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth+2;
     for my $l (split/\n/mx, $line) {
         $l = '[cron] '.$l if $ENV{'THRUK_CRON'};
+        $l = $ENV{'THRUK_LOG_PREFIX'}.$l if $ENV{'THRUK_LOG_PREFIX'};
         if(   $lvl == ERROR)   { $log->error($l); }
         elsif($lvl == WARNING) { $log->warn($l);  }
         elsif($lvl == INFO)    { $log->info($l);  }
