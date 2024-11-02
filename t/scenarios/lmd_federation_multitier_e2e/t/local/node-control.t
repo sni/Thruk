@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 55;
+    plan tests => 71;
 
     use lib('t');
     require TestUtils;
@@ -61,4 +61,22 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk nc cleanup tier2a',
     errlike => ['/tier2a cleanup sucessfully/'],
+});
+
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk nc install tier2c',
+    errlike => ['/already installed/', '/tier2c install sucessfully/'],
+});
+
+# run update to test version
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk nc update tier2c',
+    errlike => ['/updating demo on tier2c/', '/tier2c update sucessfully/', '/OMD_SITE=demo/', '/OMD_UPDATE=/'],
+});
+
+# and back...
+my $omd_version = `omd version -b`; chomp($omd_version);
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk nc update tier2c --version='.$omd_version,
+    errlike => ['/updating demo on tier2c/', '/tier2c update sucessfully/', '/OMD_SITE=demo/', '/OMD_UPDATE=/'],
 });

@@ -499,6 +499,14 @@ sub _omd_install_step2 {
     print "*** installing $version\n";
     _set_job_started($c, 'installing', $peer->{'key'});
 
+    my $tversion = $version;
+    $tversion =~ s/omd-//gmx;
+    if(grep(/^$tversion/mx, @{$facts->{'omd_versions'}})) {
+        printf("*** omd %s already installed\n", $version);
+        _set_job_done($c, 'installing', $peer->{'key'});
+        return 1;
+    }
+
     if(!$config->{'cmd_'.$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}.'_pkg_install'}) {
         return _set_job_errored($c, 'installing', $peer->{'key'}, "package manager ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}." not supported");
     }
@@ -565,6 +573,12 @@ sub _omd_update_step2 {
     printf("*** to:   %s\n", $version);
 
     _set_job_started($c, 'updating', $peer->{'key'});
+
+    if($facts->{'omd_version'} eq $version) {
+        printf("*** already at omd %s\n", $version);
+        _set_job_done($c, 'updating', $peer->{'key'});
+        return 1;
+    }
 
     if($config->{'hook_update_pre_local'}) {
         print "*** hook_update_pre_local:\n";

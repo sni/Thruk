@@ -24,13 +24,13 @@ The nodecontrol command can start node control commands.
 
     available commands are:
 
-    - -l|list                                      list available backends.
-    - facts   <backendid|all>  [-w|--worker=<nr>]  update facts for given backend.
-    - runtime <backendid|all>  [-w|--worker=<nr>]  update runtime data for given backend.
-    - setversion <version>                         set new default omd version
-    - install <backendid|all>                      install default omd version for given backend.
-    - update  <backendid|all>                      update default omd version for given backend.
-    - cleanup <backendid|all>                      cleanup unused omd versions for given backend.
+    - -l|list                                        list available backends.
+    - facts   <backendid|all>  [-w|--worker=<nr>]    update facts for given backend.
+    - runtime <backendid|all>  [-w|--worker=<nr>]    update runtime data for given backend.
+    - setversion <version>                           set new default omd version
+    - install <backendid|all>  [--version=<version]  install default omd version for given backend.
+    - update  <backendid|all>  [--version=<version]  update default omd version for given backend.
+    - cleanup <backendid|all>                        cleanup unused omd versions for given backend.
 
 =back
 
@@ -42,6 +42,7 @@ use Getopt::Long ();
 
 use Thruk::Utils ();
 use Thruk::Utils::CLI ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -79,6 +80,7 @@ sub cmd {
     # parse options
     my $opt = {
       'worker'    => $config->{'parallel_tasks'} // 3,
+      'version'   => $config->{'version'},
       'mode_list' => 0,
     };
     Getopt::Long::Configure('no_ignore_case');
@@ -87,6 +89,7 @@ sub cmd {
     Getopt::Long::GetOptionsFromArray($commandoptions,
        "w|worker=i"     => \$opt->{'worker'},
        "l|list"         => \$opt->{'mode_list'},
+       "version=s"      => \$opt->{'version'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -106,6 +109,12 @@ sub cmd {
     }
     elsif($mode eq 'cleanup') {
         return(_action_cleanup($c, $opt, $commandoptions));
+    }
+    elsif($mode eq 'install') {
+        return(_action_install($c, $opt, $commandoptions, $config));
+    }
+    elsif($mode eq 'update') {
+        return(_action_update($c, $opt, $commandoptions, $config));
     }
 
     $c->stats->profile(end => "_cmd_nc()");
@@ -189,6 +198,82 @@ sub _action_facts {
     });
     $c->stats->profile(end => "_cmd_nc()");
     return("", 0);
+}
+
+##############################################
+sub _action_install {
+    my($c, $opt, $commandoptions, $config) = @_;
+
+    my $version = $opt->{'version'} || $config->{'omd_default_version'};
+    my $errors = 0;
+    my $peers = _get_selected_peers($c, $commandoptions);
+    for my $peer_key (@{$peers}) {
+        my $peer = $c->db->get_peer_by_key($peer_key);
+        local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
+        _debug("start installing...\n");
+        my($job) = Thruk::NodeControl::Utils::omd_install($c, $peer, $version);
+        if(!$job) {
+            _error("failed to start install");
+            $errors++;
+            next;
+        }
+        my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 3, 1800);
+        if(!$jobdata) {
+            _error("failed to install");
+            $errors++;
+            next;
+        }
+        if($jobdata->{'rc'} ne '0') {
+            _error("failed to install\n");
+            _error("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
+            _error("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
+            $errors++;
+            next;
+        }
+        _info("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
+        _info("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
+        _info("%s install sucessfully: OK\n", $peer->{'name'});
+    }
+    $c->stats->profile(end => "_cmd_nc()");
+    return("", $errors > 0 ? 1 : 0);
+}
+
+##############################################
+sub _action_update {
+    my($c, $opt, $commandoptions, $config) = @_;
+
+    my $version = $opt->{'version'} || $config->{'omd_default_version'};
+    my $errors = 0;
+    my $peers = _get_selected_peers($c, $commandoptions);
+    for my $peer_key (@{$peers}) {
+        my $peer = $c->db->get_peer_by_key($peer_key);
+        local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
+        _debug("start update...\n");
+        my($job) = Thruk::NodeControl::Utils::omd_update($c, $peer, $version);
+        if(!$job) {
+            _error("failed to start update");
+            $errors++;
+            next;
+        }
+        my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 3, 1800);
+        if(!$jobdata) {
+            _error("failed to update");
+            $errors++;
+            next;
+        }
+        if($jobdata->{'rc'} ne '0') {
+            _error("failed to update\n");
+            _error("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
+            _error("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
+            $errors++;
+            next;
+        }
+        _info("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
+        _info("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
+        _info("%s update sucessfully: OK\n", $peer->{'name'});
+    }
+    $c->stats->profile(end => "_cmd_nc()");
+    return("", $errors > 0 ? 1 : 0);
 }
 
 ##############################################
