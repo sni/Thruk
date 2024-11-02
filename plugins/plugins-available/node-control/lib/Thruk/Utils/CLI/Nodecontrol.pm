@@ -89,96 +89,110 @@ sub cmd {
     };
 
     my $mode = shift @{$commandoptions};
-    my($output, $rc) = ("", 0);
     $mode = 'list' if $opt->{'mode_list'};
 
     if($mode eq 'setversion') {
-        my $version = shift @{$commandoptions};
-        if(!$version) {
-            return("ERROR - no version specified\n", 1);
-        }
-        my $omd_available_versions = Thruk::NodeControl::Utils::get_available_omd_versions($c);
-        my @sel = grep { $_ =~ m/^$version/mx } @{$omd_available_versions};
-        if(scalar @sel == 0) {
-            return("ERROR - no such version available\navailable versions:\n - ".join("\n - ", @{$omd_available_versions})."\n", 1);
-        }
-        $version = $sel[0];
-        Thruk::NodeControl::Utils::save_config($c, {
-            'omd_default_version'   => $version,
-        });
-        return("default version successfully set to: $version\n", 0);
+        return(_action_setversion($c, $commandoptions));
     }
     elsif($mode eq 'list') {
-        my @data;
-        for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
-            my $s = Thruk::NodeControl::Utils::get_server($c, $peer, $config);
-            my $v = $s->{'omd_version'};
-            $v =~ s/-labs-edition//gmx;
-            push @data, {
-                Section => $s->{'section'} eq 'Default' ? '' : $s->{'section'},
-                Name    => $peer->{'name'},
-                ID      => $peer->{'key'},
-                Host    => $s->{'host_name'},
-                Site    => $s->{'omd_site'},
-                Version => $v,
-                OS      => sprintf("%s %s", $s->{'os_name'}, $s->{'os_version'}),
-                Status  => _omd_status($s->{'omd_status'}),
-            };
-        }
-        my $output = Thruk::Utils::text_table(
-            keys => ['Name', 'Section', 'ID', 'Host', 'Site', 'Version', 'OS', 'Status'],
-            data => \@data,
-        );
-        return($output, 0);
+        return(_action_list($c, $config));
     }
     elsif($mode eq 'facts' || $mode eq 'runtime') {
-        my $peers = [];
-        my $backend = shift @{$commandoptions};
-        if($backend && $backend ne 'all') {
-            my $peer = $c->db->get_peer_by_key($backend);
-            if(!$peer) {
-                _fatal("no such peer: ".$backend);
-            }
-            push @{$peers}, $backend;
-        } else {
-            for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
-                push @{$peers}, $peer->{'key'};
-            }
-        }
-
-        _scale_peers($c, $opt->{'worker'}, $peers, sub {
-            my($peer_key) = @_;
-            my $peer = $c->db->get_peer_by_key($peer_key);
-            my $facts;
-            if($mode eq 'facts') {
-                $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
-            }
-            if($mode eq 'runtime') {
-                $facts = Thruk::NodeControl::Utils::update_runtime_data($c, $peer);
-                if(!$facts->{'ansible_facts'}) {
-                    $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
-                }
-            }
-            if(!$facts || $facts->{'last_error'}) {
-                my $err = sprintf("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_error'}//'unknown error'));
-                if($ENV{'THRUK_CRON'}) {
-                    _warn($err); # don't fill the log with errors from cronjobs
-                } else {
-                    _error($err);
-                }
-            } else {
-                _info("%s updated %s sucessfully: OK\n", $peer->{'name'}, $mode);
-            }
-        });
-        $c->stats->profile(end => "_cmd_nc()");
-        return("", 0);
-    } else {
-        $c->stats->profile(end => "_cmd_nc()");
-        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+        return(_action_facts($c, $mode, $opt, $commandoptions));
     }
 
     $c->stats->profile(end => "_cmd_nc()");
-    return($output, $rc);
+    return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+}
+
+##############################################
+sub _action_setversion {
+    my($c, $commandoptions) = @_;
+    my $version = shift @{$commandoptions};
+    if(!$version) {
+        return("ERROR - no version specified\n", 1);
+    }
+    my $omd_available_versions = Thruk::NodeControl::Utils::get_available_omd_versions($c);
+    my @sel = grep { $_ =~ m/^$version/mx } @{$omd_available_versions};
+    if(scalar @sel == 0) {
+        return("ERROR - no such version available\navailable versions:\n - ".join("\n - ", @{$omd_available_versions})."\n", 1);
+    }
+    $version = $sel[0];
+    Thruk::NodeControl::Utils::save_config($c, {
+        'omd_default_version'   => $version,
+    });
+    return("default version successfully set to: $version\n", 0);
+}
+
+##############################################
+sub _action_list {
+    my($c, $config) = @_;
+    my @data;
+    for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
+        my $s = Thruk::NodeControl::Utils::get_server($c, $peer, $config);
+        my $v = $s->{'omd_version'};
+        $v =~ s/-labs-edition//gmx;
+        push @data, {
+            Section => $s->{'section'} eq 'Default' ? '' : $s->{'section'},
+            Name    => $peer->{'name'},
+            ID      => $peer->{'key'},
+            Host    => $s->{'host_name'},
+            Site    => $s->{'omd_site'},
+            Version => $v,
+            OS      => sprintf("%s %s", $s->{'os_name'}, $s->{'os_version'}),
+            Status  => _omd_status($s->{'omd_status'}),
+        };
+    }
+    my $output = Thruk::Utils::text_table(
+        keys => ['Name', 'Section', 'ID', 'Host', 'Site', 'Version', 'OS', 'Status'],
+        data => \@data,
+    );
+    return($output, 0);
+}
+
+##############################################
+sub _action_facts {
+    my($c, $mode, $opt, $commandoptions) = @_;
+    my $peers = [];
+    my $backend = shift @{$commandoptions};
+    if($backend && $backend ne 'all') {
+        my $peer = $c->db->get_peer_by_key($backend);
+        if(!$peer) {
+            _fatal("no such peer: ".$backend);
+        }
+        push @{$peers}, $backend;
+    } else {
+        for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
+            push @{$peers}, $peer->{'key'};
+        }
+    }
+
+    _scale_peers($c, $opt->{'worker'}, $peers, sub {
+        my($peer_key) = @_;
+        my $peer = $c->db->get_peer_by_key($peer_key);
+        my $facts;
+        if($mode eq 'facts') {
+            $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
+        }
+        if($mode eq 'runtime') {
+            $facts = Thruk::NodeControl::Utils::update_runtime_data($c, $peer);
+            if(!$facts->{'ansible_facts'}) {
+                $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
+            }
+        }
+        if(!$facts || $facts->{'last_error'}) {
+            my $err = sprintf("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_error'}//'unknown error'));
+            if($ENV{'THRUK_CRON'}) {
+                _warn($err); # don't fill the log with errors from cronjobs
+            } else {
+                _error($err);
+            }
+        } else {
+            _info("%s updated %s sucessfully: OK\n", $peer->{'name'}, $mode);
+        }
+    });
+    $c->stats->profile(end => "_cmd_nc()");
+    return("", 0);
 }
 
 ##############################################
