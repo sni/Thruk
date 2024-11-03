@@ -338,13 +338,18 @@ sub run_cluster {
         my $elapsed = tv_interval($t1);
         if($err) {
             my($short, undef) = Thruk::Utils::extract_connection_error($err);
+            my $msg = sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err));
             if($debug_log_only) {
-                _debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
+                _debug($msg);
             } else {
                 if(!$node->{'last_error'} && !$node->{'maintenance'}) {
-                    _error(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
+                    if($ENV{'THRUK_CRON'}) {
+                        _warn($msg);
+                    } else {
+                        _error($msg);
+                    }
                 } else {
-                    _debug(sprintf("%s failed on %s: %s", $sub, $node->{'hostname'}, ($short // $err)));
+                    _debug($msg);
                 }
                 Thruk::Utils::IO::json_lock_patch($c->cluster->{'localstate'}, {
                     $n => {

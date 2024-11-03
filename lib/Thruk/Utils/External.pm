@@ -1118,7 +1118,7 @@ sub _is_running {
             confess('clustered _is_running requires $c') unless $c;
             my $cluster = $c->cluster;
             if($cluster->is_clustered()) {
-                my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir]);
+                my $res = $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::_is_running', [$c, $dir], 1);
                 if($res && exists $res->[0]) {
                     return($res->[0]);
                 }
