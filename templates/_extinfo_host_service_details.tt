@@ -445,15 +445,17 @@ END
   </tr>
   <tr>
     <th>Event Handler</th>
-    <td class='eventHandler'>
-      [% IF !obj.event_handler %]
-        <div class='badge'>UNUSED</div>
-      [% ELSE %]
-        [% PROCESS _toggle_badge yes=obj.event_handler_enabled son=45 soff=46 hon=43 hoff=44 %]
-        [% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
-          <div>([% obj.event_handler %])</div>
+    <td class="eventHandler">
+      <div class="flexrow gap-x-1">
+        [% IF !obj.event_handler %]
+          <div class='badge'>UNUSED</div>
+        [% ELSE %]
+          [% PROCESS _toggle_badge yes=obj.event_handler_enabled son=45 soff=46 hon=43 hoff=44 %]
+          [% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
+            <div>([% obj.event_handler %])</div>
+          [% END %]
         [% END %]
-      [% END %]
+      </div>
     </td>
   </tr>
   <tr>
