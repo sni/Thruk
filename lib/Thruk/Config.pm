@@ -682,8 +682,11 @@ sub set_default_config {
         next unless -d $folder.'/.';
         my @files = glob($folder.'/*');
         for my $file (@files) {
-            if($file =~ m%([^/]+)\.(json|js)$%mx) {
-                my $basename = $1;
+            if($file =~ m%([^/]+\.json|js)$%mx) {
+                my $filename = $1;
+                my $basename = $filename;
+                $basename =~ s%\.[^.]+$%%gmx;
+                $config->{'action_menu_items'}->{$filename} = 'file://'.$file;
                 $config->{'action_menu_items'}->{$basename} = 'file://'.$file;
             }
         }
