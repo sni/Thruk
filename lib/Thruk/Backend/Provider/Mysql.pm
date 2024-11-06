@@ -1460,7 +1460,7 @@ sub _update_logcache {
             _debug($error);
             $error = $short_err;
         }
-        _error('logcache '.$mode.' failed: '.$error) unless $error =~ m/(.*\Qplease come back later\E|\QConnection refused\E)/mx;
+        _cronerror('logcache '.$mode.' failed: '.$error); # don't fill the log with errors from cronjobs
         die($error);
     }
 

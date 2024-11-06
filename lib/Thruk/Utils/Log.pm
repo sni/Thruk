@@ -22,7 +22,7 @@ use Thruk::Base ();
 use Thruk::Utils::Encode ();
 
 use base 'Exporter';
-our @EXPORT_OK = qw(_fatal _error _warn _info _infos _infoc
+our @EXPORT_OK = qw(_fatal _error _cronerror _warn _info _infos _infoc
                     _debug _debug2 _debugs _debugc _trace _audit_log
                     _debug_http_response
                     );
@@ -65,6 +65,13 @@ sub _fatal {
 
 ##############################################
 sub _error {
+    return &_log(ERROR, \@_);
+}
+
+##############################################
+# like _error, but only emits a warning if run from cron
+sub _cronerror {
+    return &_log(WARNING, \@_) if $ENV{'THRUK_CRON'};
     return &_log(ERROR, \@_);
 }
 

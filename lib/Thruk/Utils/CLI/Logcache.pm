@@ -273,7 +273,7 @@ sub cmd {
                         $err = $short_err;
                     }
                     $err = sprintf("backend '%s' failed: %s", $backend, $err);
-                    _error($err);
+                    _cronerror($err); # don't fill the log with errors from cronjobs
                 }
                 my $elapsed = tv_interval($t1);
                 return($log_count, $plugin_ref_count, $err, $elapsed);

@@ -343,11 +343,7 @@ sub run_cluster {
                 _debug($msg);
             } else {
                 if(!$node->{'last_error'} && !$node->{'maintenance'}) {
-                    if($ENV{'THRUK_CRON'}) {
-                        _warn($msg);
-                    } else {
-                        _error($msg);
-                    }
+                    _cronerror($msg); # don't fill the log with errors from cronjobs
                 } else {
                     _debug($msg);
                 }
