@@ -1179,7 +1179,7 @@ In order to replace the user macros for commands, you have to set the
 'resource_file' in your peer config or a general resource_file option.
 
  * 0 = off, don't show the command line at all
- * 1 = show them for contacts with the role: authorized_for_configuration_information
+ * 1 = show them for contacts with the role: authorized_for_configuration_information (default)
  * 2 = show them for everyone
 
 ex.:
