@@ -15,6 +15,7 @@ next:
             - add new endpoint /system/cmd/log
             - add more availability endpoint ex. /hostgroup/.../availability
             - add support for simple calculations in columns
+            - check for nasty characters in sort columns
             - fix unknown columns when using icinga2 without lmd
           - Business Process:
             - fix saving empty file in case of full filesystem

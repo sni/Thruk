@@ -1183,6 +1183,9 @@ sub _apply_sort {
 
         $key = $alias_columns->{$key} if defined $alias_columns->{$key};
 
+        # check for nasty chars
+        die("sort key contains invalid characters") if($key =~ m/[`\$\(>]/mx);
+
         # sort numeric
         if( defined $data->[0]->{$key} and Thruk::Backend::Manager::looks_like_number($data->[0]->{$key}) ) {
             if($order eq 'asc') {
@@ -1195,9 +1198,9 @@ sub _apply_sort {
         # sort alphanumeric
         else {
             if($order eq 'asc') {
-                push @compares, '$a->{"'.$key.'"} cmp $b->{"'.$key.'"}';
+                push @compares, '$a->{\''.$key.'\'} cmp $b->{\''.$key.'\'}';
             } else {
-                push @compares, '$b->{"'.$key.'"} cmp $a->{"'.$key.'"}';
+                push @compares, '$b->{\''.$key.'\'} cmp $a->{\''.$key.'\'}';
             }
         }
     }
