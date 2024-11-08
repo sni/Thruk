@@ -2729,6 +2729,7 @@ t/scenarios/backend_icinga2/t/300-controller_extinfo.t
 t/scenarios/backend_icinga2/t/300-controller_rest_v1.t
 t/scenarios/backend_icinga2/t/300-controller_status.t
 t/scenarios/backend_icinga2/t/300-controller_tac.t
+t/scenarios/backend_icinga2/t/controller_bp.t
 t/scenarios/backend_icinga2/thruk.conf
 t/scenarios/backend_icinga2/thruk_local.conf
 t/scenarios/backend_icinga_e2e/docker-compose.yml
