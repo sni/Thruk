@@ -371,6 +371,7 @@ sub equals {
     if($number !~ m/^\-?(\d+|\d+\.\d+)%?$/mx) {
         return(3, 'threshold must be numeric');
     }
+    my $desc = '= '.$number;
     $number  = _expand_percent($number,  $total);
     if($good == 0 and $bad == 0) {
         return(3, 'no dependent nodes');
@@ -379,7 +380,8 @@ sub equals {
     if($good == $number) {
         $state = 0;
     }
-    return($state, '= '.$number, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
+    my $perfdata = sprintf('good=%d;%f;%f;0;%d', $good, $number, $number, $total);
+    return($state, $desc, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available|'.$perfdata);
 }
 
 ##########################################################
