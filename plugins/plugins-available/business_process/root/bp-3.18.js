@@ -881,6 +881,10 @@ function bp_update_status(evt, node) {
 
     // service specific things...
     var link;
+    var backend = bp_affected_peers.join(",");
+    if(host && bp_backend && host == bp_get_node('node1').label) {
+        backend = bp_backend;
+    }
     if(service) {
         // do we have a operator defined?
         var op = "=";
@@ -889,24 +893,24 @@ function bp_update_status(evt, node) {
         }
         if(op != "=") {
             var filter = service.replace(/^(w|b):/, '');
-            link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op="+encodeURIComponent(op)+"&dfl_s0_value="+filter+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Service Details'><\/i><\/a>";
+            link = "<a href='status.cgi?style=detail&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value="+host+"&dfl_s0_type=service&dfl_s0_op="+encodeURIComponent(op)+"&dfl_s0_value="+filter+"&backend="+backend+"'><i class='fa-solid fa-hand-point-right' title='Goto Service Details'><\/i><\/a>";
         } else {
-            link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Service Details'><\/i><\/a>";
+            link = "<a href='extinfo.cgi?type=2&amp;host="+host+"&service="+service+"&backend="+backend+"'><i class='fa-solid fa-hand-point-right' title='Goto Service Details'><\/i><\/a>";
         }
     }
 
     // host specific things...
     else if(host) {
-        link = "<a href='extinfo.cgi?type=1&amp;host="+host+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Host Details'><\/i><\/a>";
+        link = "<a href='extinfo.cgi?type=1&amp;host="+host+"&backend="+backend+"'><i class='fa-solid fa-hand-point-right' title='Goto Host Details'><\/i><\/a>";
     }
     // hostgroup link
     else if(n.hostgroup) {
-        link = "<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Hostgroup Details'><\/i><\/a>";
+        link = "<a href='status.cgi?style=detail&hostgroup="+n.hostgroup+"&backend="+backend+"'><i class='fa-solid fa-hand-point-right' title='Goto Hostgroup Details'><\/i><\/a>";
     }
 
     // servicegroup link
     else if(n.servicegroup) {
-        link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"&backend=ALL'><i class='fa-solid fa-hand-point-right' title='Goto Servicegroup Details'><\/i><\/a>";
+        link = "<a href='status.cgi?style=detail&servicegroup="+n.servicegroup+"&backend="+backend+"'><i class='fa-solid fa-hand-point-right' title='Goto Servicegroup Details'><\/i><\/a>";
     }
 
     else if(n.func == "statusfilter") {

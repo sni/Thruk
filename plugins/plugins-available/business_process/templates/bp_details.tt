@@ -224,7 +224,8 @@
 
 <script>
 <!--
-  var bp_backend = '[% bp_backend | uri %]';
+  var bp_backend        = '[% bp_backend | uri %]';
+  var bp_affected_peers = [% IF bp.defined("affected_peers") %][% json_encode(bp.affected_peers) %][% ELSE %]["ALL"][% END %];
   jQuery(document).ready(function() {
     bp_render('container[% bp.id %]', nodes, edges);
   });
