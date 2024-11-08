@@ -22,9 +22,8 @@
   [% IF message.2 %]
     <div class="w-full flex justify-center">
       <pre class="[% message.0 | html %]" style="display:none;" id="message_details">
-        [% FOREACH detail = thruk_message_details %]
-        [% detail %]
-        [% END %]
+[%- FOREACH detail = thruk_message_details -%][%- detail.trim %]
+[% END -%]
       </pre>
     </div>
   [% END %]

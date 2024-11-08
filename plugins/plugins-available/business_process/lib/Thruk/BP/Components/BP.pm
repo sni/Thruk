@@ -6,7 +6,7 @@ use Carp;
 use Cpanel::JSON::XS ();
 use Data::Dumper;
 use Fcntl qw/:DEFAULT/;
-use File::Copy qw/move/;
+use File::Copy qw/copy/;
 use File::Temp;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -58,6 +58,7 @@ sub new {
         'file'               => undef,
         'datafile'           => undef,
         'editfile'           => undef,
+        'backupfile'         => undef,
 
         'time'               => 0,
         'status'             => 4,
@@ -323,9 +324,10 @@ sub set_file {
     my($self, $c, $file) = @_;
     my $basename = $file;
     $basename    =~ s/^.*\///mxo;
-    $self->{'file'}     = sprintf("%s/%s", Thruk::BP::Utils::bp_base_folder($c), $basename);
-    $self->{'datafile'} = sprintf("%s/bp/%s.runtime", $c->config->{'var_path'}, $basename);
-    $self->{'editfile'} = sprintf("%s/bp/%s.edit",    $c->config->{'var_path'}, $basename);
+    $self->{'file'}       = sprintf("%s/%s", Thruk::BP::Utils::bp_base_folder($c), $basename);
+    $self->{'datafile'}   = sprintf("%s/bp/%s.runtime", $c->config->{'var_path'}, $basename);
+    $self->{'editfile'}   = sprintf("%s/bp/%s.edit",    $c->config->{'var_path'}, $basename);
+    $self->{'backupfile'} = sprintf("%s/bp/%s.bak",    $c->config->{'var_path'}, $basename);
     if($basename =~ m/^(\d+)\.tbp$/mxo) {
         $self->{'id'} = $1;
     } else {
@@ -478,9 +480,10 @@ remove business process along with all data files
 =cut
 sub remove {
     my ( $self ) = @_;
-    unlink($self->{'file'});     # may not exist, if removed before first commit
-    unlink($self->{'datafile'}); # can fail if not updated before removal
-    unlink($self->{'editfile'}); # may also not exist
+    unlink($self->{'file'});       # may not exist, if removed before first commit
+    unlink($self->{'datafile'});   # can fail if not updated before removal
+    unlink($self->{'editfile'});   # may also not exist
+    unlink($self->{'backupfile'}); # may also not exist
     unlink($self->{'datafile'}.'.edit');
     return;
 }
@@ -506,11 +509,12 @@ sub commit {
         }
     }
 
-    if(-e $self->{'editfile'}) {
-        move($self->{'editfile'}, $self->{'file'}) or die('cannot commit changes to '.$self->{'file'}.': '.$!);
-        unlink($self->{'editfile'});
+    if(-e $self->{'file'} && ! -e $self->{'backupfile'}) {
+        copy($self->{'file'}, $self->{'backupfile'}) or die('cannot backup to '.$self->{'backupfile'}.': '.$!);
     }
-    unlink($self->{'datafile'}.'.edit');
+    if(-e $self->{'editfile'}) {
+        copy($self->{'editfile'}, $self->{'file'}) or die('cannot commit changes to '.$self->{'file'}.': '.$!);
+    }
 
     # run post hook
     if($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}) {
@@ -522,6 +526,65 @@ sub commit {
             return;
         }
     }
+
+    return 1;
+}
+
+##########################################################
+
+=head2 revert
+
+revert business process to latest backup
+
+=cut
+sub revert {
+    my ( $self, $c ) = @_;
+
+    if(!-e $self->{'backupfile'}) {
+        return;
+    }
+
+    # run pre hook
+    if($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'}) {
+        local $ENV{'THRUK_BP_FILE'}  = $self->{'file'};
+        local $ENV{'THRUK_BP_STAGE'} = 'pre';
+        my($rc, $out) = Thruk::Utils::IO::cmd($c->config->{'Thruk::Plugin::BP'}->{'pre_save_cmd'});
+        if($rc != 0) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'pre save hook failed: '.$rc.': '.$out, escape => 0 });
+            return;
+        }
+    }
+
+    copy($self->{'backupfile'}, $self->{'file'}) or die('cannot revert backup to '.$self->{'file'}.': '.$!);
+    unlink($self->{'backupfile'});
+
+    # run post hook
+    if($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'}) {
+        local $ENV{'THRUK_BP_FILE'}  = $self->{'file'};
+        local $ENV{'THRUK_BP_STAGE'} = 'post';
+        my($rc, $out) = Thruk::Utils::IO::cmd($c->config->{'Thruk::Plugin::BP'}->{'post_save_cmd'});
+        if($rc != 0) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'post save hook failed: '.$rc.': '.$out, escape => 0 });
+            return;
+        }
+    }
+
+    return 1;
+}
+
+##########################################################
+
+=head2 commit_cleanup
+
+commit_cleanup cleans up after commit
+
+=cut
+sub commit_cleanup {
+    my ( $self ) = @_;
+
+    unlink($self->{'editfile'});
+    unlink($self->{'backupfile'});
+    unlink($self->{'datafile'}.'.edit');
 
     return 1;
 }

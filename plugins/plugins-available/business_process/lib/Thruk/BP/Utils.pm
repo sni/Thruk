@@ -292,7 +292,7 @@ sub save_bp_objects {
         _debug(sprintf("no differences in %s and %s", $filename, $file));
         # discard file
         unlink($filename);
-        return(0, "no reload required");
+        return(0, "no changes, no reload required");
     }
 
     _debug(sprintf("moving %s to %s", $filename, $file));
