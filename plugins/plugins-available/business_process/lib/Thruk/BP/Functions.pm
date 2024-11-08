@@ -292,24 +292,28 @@ sub at_least {
     my($warning, $critical) = @{$args};
     $critical = $warning unless defined $critical;
     my($good, $bad) = _count_good_bad($n->depends($bp));
+    my $total = $good+$bad;
     my $state = 0;
-    if($warning !~ m/^\-?\d+$/mx) {
+    if($warning !~ m/^\-?(\d+|\d+\.\d+)%?$/mx) {
         return(3, 'warning threshold must be numeric');
     }
-    if($critical !~ m/^\-?\d+$/mx) {
+    if($critical !~ m/^\-?(\d+|\d+\.\d+)%?$/mx) {
         return(3, 'critical threshold must be numeric');
     }
+    my $desc = '>= '.$warning.','.$critical;
+    if($warning eq $critical) {
+        $desc = '>= '.$critical;
+    }
+    $warning  = _expand_percent($warning,  $total);
+    $critical = _expand_percent($critical, $total);
     if($good <= $critical) {
         $state = 2;
     }
     elsif($good <= $warning) {
         $state = 1;
     }
-    my $desc = '>= '.$warning.','.$critical;
-    if($warning == $critical) {
-        $desc = '>= '.$critical;
-    }
-    return($state, $desc, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
+    my $perfdata = sprintf('good=%d;%f;%f;0;%d', $good, $warning, $critical, $total);
+    return($state, $desc, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available|'.$perfdata);
 }
 
 ##########################################################
@@ -326,12 +330,19 @@ sub not_more {
     my($c, $bp, $n, $args) = @_;
     my($warning, $critical) = @{$args};
     my($good, $bad) = _count_good_bad($n->depends($bp));
-    if($warning !~ m/^\-?\d+$/mx) {
+    my $total = $good+$bad;
+    if($warning !~ m/^\-?(\d+|\d+\.\d+)%?$/mx) {
         return(3, 'warning threshold must be numeric');
     }
-    if($critical !~ m/^\-?\d+$/mx) {
+    if($critical !~ m/^\-?(\d+|\d+\.\d+)%?$/mx) {
         return(3, 'critical threshold must be numeric');
     }
+    my $desc = '<= '.$warning.','.$critical;
+    if($warning eq $critical) {
+        $desc = '<= '.$critical;
+    }
+    $warning  = _expand_percent($warning,  $total);
+    $critical = _expand_percent($critical, $total);
     my $state = 0;
     if($good > $critical) {
         $state = 2;
@@ -339,12 +350,8 @@ sub not_more {
     elsif($good > $warning) {
         $state = 1;
     }
-
-    my $desc = '<= '.$warning.','.$critical;
-    if($warning == $critical) {
-        $desc = '<= '.$critical;
-    }
-    return($state, $desc, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available');
+    my $perfdata = sprintf('good=%d;%f;%f;0;%d', $good, $warning, $critical, $total);
+    return($state, $desc, Thruk::Utils::Filter::state2text($state).' - '.$good.'/'.($good+$bad).' nodes are available|'.$total);
 }
 
 ##########################################################
@@ -360,9 +367,11 @@ sub equals {
     my($c, $bp, $n, $args) = @_;
     my($number) = @{$args};
     my($good, $bad) = _count_good_bad($n->depends($bp));
-    if($number !~ m/^\-?\d+$/mx) {
+    my $total = $good+$bad;
+    if($number !~ m/^\-?(\d+|\d+\.\d+)%?$/mx) {
         return(3, 'threshold must be numeric');
     }
+    $number  = _expand_percent($number,  $total);
     if($good == 0 and $bad == 0) {
         return(3, 'no dependent nodes');
     }
@@ -699,6 +708,21 @@ sub _count_good_bad {
         }
     }
     return($good, $bad);
+}
+
+##########################################################
+sub _expand_percent {
+    my($number,  $total) = @_;
+
+    if($number =~ m/^(.*)%$/mx) {
+        $number = $1;
+        if($number <= 0) {
+            return(0);
+        }
+        $number = $total / 100 * $number;
+    }
+
+    return($number);
 }
 
 ##########################################################

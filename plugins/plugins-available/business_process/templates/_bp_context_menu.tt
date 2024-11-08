@@ -290,7 +290,7 @@
     %]
     <tr>
       <th class="text-right">Number</th>
-      <td><input type="text" class="w-80" value="" name="bp_arg1_equals" placeholder="threshold, ex.: 2"></td>
+      <td><input type="text" class="w-80" value="" name="bp_arg1_equals" placeholder="threshold, ex.: 2 or 30%"></td>
     </tr>
     [% END %]
 
@@ -303,11 +303,11 @@
     %]
     <tr>
       <th class="text-right">Warning</th>
-      <td><input type="text" class="w-80" value="" name="bp_arg1_not_more" placeholder="threshold, ex.: 2"></td>
+      <td><input type="text" class="w-80" value="" name="bp_arg1_not_more" placeholder="threshold, ex.: 2 or 30%"></td>
     </tr>
     <tr>
       <th class="text-right">Critical</th>
-      <td><input type="text" class="w-80" value="" name="bp_arg2_not_more" placeholder="threshold, ex.: 3"></td>
+      <td><input type="text" class="w-80" value="" name="bp_arg2_not_more" placeholder="threshold, ex.: 3 or 50%"></td>
     </tr>
     [% END %]
 
@@ -320,11 +320,11 @@
     %]
     <tr>
       <th class="text-right">Warning</th>
-      <td><input type="text" class="w-80" value="" name="bp_arg1_at_least" placeholder="threshold, ex.: 2"></td>
+      <td><input type="text" class="w-80" value="" name="bp_arg1_at_least" placeholder="threshold, ex.: 3 or 50%"></td>
     </tr>
     <tr>
       <th class="text-right">Critical</th>
-      <td><input type="text" class="w-80" value="" name="bp_arg2_at_least" placeholder="threshold, ex.: 3"></td>
+      <td><input type="text" class="w-80" value="" name="bp_arg2_at_least" placeholder="threshold, ex.: 2 or 30%"></td>
     </tr>
     [% END %]
 

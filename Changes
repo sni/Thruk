@@ -19,6 +19,7 @@ next:
             - fix unknown columns when using icinga2 without lmd
           - Business Process:
             - fix saving empty file in case of full filesystem
+            - add support for percent thresholds in at_least/not_more
           - Agents:
             - add support for extra custom checks
 
