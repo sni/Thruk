@@ -449,7 +449,7 @@
                   [% END %]
                 </td>
               </tr>
-                [% IF objects_save_format == "nagios" %]
+              [% IF objects_save_format == "nagios" %]
                 <tr>
                   <th class="align-top text-right">Contact Groups</th>
                   <td>
@@ -510,8 +510,8 @@
                     </form>
                   </td>
                 </tr>
-              </table>
-            [% END %]
+              [% END %]
+            </table>
           [% ELSE %]
             <div class="mt-5 w-fit mx-auto">
               <span class="textHINT font-bold">The export is currently disabled.</span><br>

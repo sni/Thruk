@@ -21,6 +21,7 @@ next:
             - fix saving empty file in case of full filesystem
             - add support for percent thresholds in at_least/not_more
             - only save if config reload succeeds
+            - fix editing BPs with icinga2 core
           - Agents:
             - add support for extra custom checks
 
