@@ -1790,6 +1790,7 @@ sub _task_hosts {
     my $json = {
         columns => [
             { 'header' => 'Hostname',               width => 120, dataIndex => 'name',                                 renderer => 'TP.render_clickable_host' },
+            { 'header' => 'Alias',                  width => 120, dataIndex => 'alias',                                renderer => 'TP.render_clickable_host' },
             { 'header' => 'Icons',                  width => 75,  dataIndex => 'icons',             align => 'right',  renderer => 'TP.render_host_icons' },
             { 'header' => 'Status',                 width => 80,  dataIndex => 'state',             align => 'center', renderer => 'TP.render_host_status' },
             { 'header' => 'Last Check',             width => 80,  dataIndex => 'last_check',        align => 'center', renderer => 'TP.render_last_check' },
@@ -1888,6 +1889,7 @@ sub _task_services {
     my $json = {
         columns => [
             { 'header' => 'Hostname',               width => 120, dataIndex => 'host_display_name',                    renderer => 'TP.render_service_host' },
+            { 'header' => 'Host Alias',                           dataIndex => 'host_alias',        hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Host',                                 dataIndex => 'host_name',         hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Host Icons',             width => 75,  dataIndex => 'icons',             align => 'right',  renderer => 'TP.render_host_service_icons' },
             { 'header' => 'Service',                width => 120, dataIndex => 'display_name',                         renderer => 'TP.render_clickable_service' },
