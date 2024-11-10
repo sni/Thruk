@@ -1790,7 +1790,6 @@ sub _task_hosts {
     my $json = {
         columns => [
             { 'header' => 'Hostname',               width => 120, dataIndex => 'name',                                 renderer => 'TP.render_clickable_host' },
-            { 'header' => 'Alias',                  width => 120, dataIndex => 'alias',                                renderer => 'TP.render_clickable_host' },
             { 'header' => 'Icons',                  width => 75,  dataIndex => 'icons',             align => 'right',  renderer => 'TP.render_host_icons' },
             { 'header' => 'Status',                 width => 80,  dataIndex => 'state',             align => 'center', renderer => 'TP.render_host_status' },
             { 'header' => 'Last Check',             width => 80,  dataIndex => 'last_check',        align => 'center', renderer => 'TP.render_last_check' },
@@ -1800,6 +1799,7 @@ sub _task_hosts {
             { 'header' => 'Status Information',     flex  => 1,   dataIndex => 'plugin_output',                        renderer => 'TP.render_plugin_output' },
             { 'header' => 'Performance',            width => 80,  dataIndex => 'perf_data',                            renderer => 'TP.render_perfbar' },
 
+            { 'header' => 'Alias',                    dataIndex => 'alias',                       hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Parents',                  dataIndex => 'parents',                     hidden => Cpanel::JSON::XS::true, renderer => 'TP.render_clickable_host_list' },
             { 'header' => 'Current Attempt',          dataIndex => 'current_attempt',             hidden => Cpanel::JSON::XS::true },
             { 'header' => 'Max Check Attempts',       dataIndex => 'max_check_attempts',          hidden => Cpanel::JSON::XS::true },
