@@ -122,8 +122,11 @@ sub cmd {
     }
 
     if($mode eq 'commit') {
-        # this function must be run on all cluster nodes
-        return if $c->cluster->run_cluster("all", "cmd: bp commit");
+        my $args = "";
+        $args .= " --no-reload-core" if $opt->{'no-reload-core'};
+        $args .= " --no-reload-cron" if $opt->{'no-reload-cron'};
+        # this function must be run on all cluster nodes, ex. so all nodes can update cronjobs
+        return if $c->cluster->run_cluster("all", "cmd: bp commit".$args);
 
         my $bps = Thruk::BP::Utils::load_bp_data($c);
         my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps, ($opt->{'no-reload-core'} ? 1 : 0));
