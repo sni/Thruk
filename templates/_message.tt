@@ -1,5 +1,8 @@
 ﻿[% SET message = get_message(c) %]
 [% IF message %]
+  [% IF message.2 == 2 %]
+    [% thruk_message_details = message.3 %]
+  [% END %]
 <div id="thruk_message">
   <div>
     <div class="w-5">
@@ -7,7 +10,7 @@
     </div>
     <div class="flex-grow text-center font-semibold whitespace-nowrap">
       <span class="[% message.0 | html %]">[% message.1 %]</span>
-      [% IF message.2 %]
+      [% IF message.2 && thruk_message_details.size > 1 %]
         <div class="mt-1"><a class="link" href="#" onclick="showElement('message_details'); hideElement(this.parentNode); window.clearInterval(thruk_message_fade_timer); return false;">show details...</a></div>
       [% END %]
     </div>
@@ -16,12 +19,9 @@
     </div>
   </div>
 
-  [% IF message.2 == 2 %]
-    [% thruk_message_details = message.3 %]
-  [% END %]
   [% IF message.2 %]
     <div class="w-full flex justify-center">
-      <pre class="[% message.0 | html %]" style="display:none;" id="message_details">
+      <pre class="[% message.0 | html %] overflow-scroll" style="[% IF thruk_message_details.size > 1 %]display:none;[% END %]" id="message_details">
 [%- FOREACH detail = thruk_message_details -%][%- detail.trim %]
 [% END -%]
       </pre>
