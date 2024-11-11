@@ -400,7 +400,14 @@ sub _plugin_sort {
 sub _restart_webserver {
     return unless $ENV{'OMD_ROOT'};
 
-    my($rc, $out) = Thruk::Utils::IO::cmd("omd status apache && omd reload apache");
+    my($rc, $out) = Thruk::Utils::IO::cmd("omd status apache");
+    if($rc != 0) {
+        _debug("apache not running, skipping reload");
+        _debug($out);
+        return 1;
+    }
+
+    ($rc, $out) = Thruk::Utils::IO::cmd("omd reload apache");
     if($rc != 0) {
         _warn("omd reload failed: %s", $out);
         return;
