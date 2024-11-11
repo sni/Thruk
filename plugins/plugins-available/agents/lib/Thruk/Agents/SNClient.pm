@@ -62,13 +62,13 @@ sub settings {
 
 =head2 get_config_objects
 
-    get_config_objects($c, $data, $checks_config)
+    get_config_objects($c, $data, $checks_config, $fres, $inventory_file)
 
 returns list of Monitoring::Objects for the host / services along with list of objects to remove
 
 =cut
 sub get_config_objects {
-    my($self, $c, $data, $checks_config, $fresh) = @_;
+    my($self, $c, $data, $checks_config, $fresh, $inventory_file) = @_;
 
     my $backend  = $data->{'backend'}  || die("missing backend");
     my $hostname = $data->{'hostname'} || die("missing hostname");
@@ -132,7 +132,7 @@ sub get_config_objects {
     }
 
     # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section, $mode, $settings->{'options'});
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section, $mode, $settings->{'options'}, $inventory_file);
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
     if(!$checks || scalar @{$checks} == 0) {
@@ -345,14 +345,18 @@ sub _add_templates {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options)
+    get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options, $inventory_file)
 
 returns list of Monitoring::Objects for the host / services
 
 =cut
 sub get_services_checks {
-    my($self, $c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options) = @_;
+    my($self, $c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options, $inventory_file) = @_;
     my $datafile = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
+    if($inventory_file) {
+        $datafile = $inventory_file;
+        _debug("using %s as inventory file", $inventory_file);
+    }
     if(!-r $datafile) {
         return([]);
     }

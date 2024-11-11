@@ -31,11 +31,11 @@ returns list of checks for this host grouped by type (new, exists, obsolete, dis
 
 =cut
 sub get_agent_checks_for_host {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $fresh, $section, $mode, $options) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $fresh, $section, $mode, $options, $inventory_file) = @_;
     $section = $section // $hostobj->{'conf'}->{'_AGENT_SECTION'};
 
     # extract checks and group by type
-    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $fresh, $section, $mode, $options);
+    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $fresh, $section, $mode, $options, $inventory_file);
     my $checks = Thruk::Base::array_group_by($flat, "exists");
     for my $key (qw/new exists obsolete disabled/) {
         $checks->{$key} = [] unless defined $checks->{$key};
@@ -103,13 +103,13 @@ sub update_inventory {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh, $section, $mode, $options)
+    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh, $section, $mode, $options, $inventory_file, $remove_obsolete)
 
 returns list of checks as flat list.
 
 =cut
 sub get_services_checks {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh, $section, $mode, $options) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $fresh, $section, $mode, $options, $inventory_file) = @_;
     my $checks   = [];
     return($checks) unless $hostname;
 
@@ -140,7 +140,7 @@ sub get_services_checks {
     $password = $password || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
 
     my $agent = build_agent($agenttype // $hostobj);
-    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options);
+    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options, $inventory_file);
     _set_checks_category($c, $hostname, $hostobj, $checks, $type, $fresh);
 
     return($checks);
@@ -653,6 +653,10 @@ returns undef or error message
 sub validate_params {
     my($hostname, $section) = @_;
     if(Thruk::Base::check_for_nasty_filename($hostname)) {
+        return("this hostname is not allowed");
+    }
+
+    if($hostname =~ m/^-/mx) {
         return("this hostname is not allowed");
     }
 

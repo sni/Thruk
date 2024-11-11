@@ -24,6 +24,9 @@ next:
             - fix editing BPs with icinga2 core
           - Agents:
             - add support for extra custom checks
+            - add support for alternative inventory file
+            - inventory saved to backup file in case new checks were found
+            - add dry run mode to cli tool
 
 3.18     Tue Sep 10 22:30:40 CEST 2024
           - add optional oauth 2.1 pkce workflow

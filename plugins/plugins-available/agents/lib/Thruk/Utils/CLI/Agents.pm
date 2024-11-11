@@ -35,7 +35,8 @@ Available commands are:
        --ip         set ip address        (available in add mode)
        --section    set section           (available in add mode)
   -k | --insecure   skip tls verification (available in add mode)
-       --cached     use cached host inventory
+       --cached[=file]  use cached host inventory, optionally specify location of cache file to use.
+  -n | --dryrun     only print changes    (available in add mode)
 
 
 =back
@@ -45,6 +46,7 @@ Available commands are:
 use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use File::Copy qw/copy/;
 use File::Temp ();
 use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval/;
@@ -94,6 +96,7 @@ sub cmd {
         'section'      => undef,
         'insecure'     => undef,
         'cached'       => undef,
+        'dryrun'       => undef,
     };
     $opt->{'fresh'}        = 1 if Thruk::Base::array_contains('-II',  $commandoptions);
     $opt->{'clear_manual'} = 1 if Thruk::Base::array_contains('-III', $commandoptions);
@@ -118,7 +121,8 @@ sub cmd {
        "ip=s"         => \$opt->{'address'},
        "section=s"    => \$opt->{'section'},
        "k|insecure"   => \$opt->{'insecure'},
-       "cached"       => \$opt->{'cached'},
+       "cached:s"     => \$opt->{'cached'},
+       "n|dryrun"     => \$opt->{'dryrun'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -358,6 +362,7 @@ sub _run_add {
         if($rc > 0) {
             return("", $rc);
         }
+        next if $opt->{'dryrun'};
 
         Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
         Thruk::Utils::Agents::sort_config_objects($c);
@@ -369,7 +374,9 @@ sub _run_add {
     }
 
     my $out = "";
-    if(!$opt->{'reload'}) {
+    if($opt->{'dryrun'}) {
+        $out .= "\n(dry run: no changes stored to disk)\n";
+    } elsif(!$opt->{'reload'}) {
         $out .= "\n(use -R to activate changes)\n";
     }
     return($out, 0);
@@ -393,7 +400,7 @@ sub _run_add_host {
     }
 
     my $orig_checks   = _build_checks_config($checks);
-    my $checks_config = _build_checks_config($checks);
+    my $checks_config = _build_checks_config($checks, $opt->{'clear_manual'});
     if($opt->{'interactive'}) {
         my @lines = (
             "# edit host: ".$hostname,
@@ -428,7 +435,7 @@ sub _run_add_host {
         # start default editor for this file
         my $editor = $ENV{'editor'} // "vim";
         system("$editor $filename");
-        $checks_config = _build_checks_config($checks);
+        $checks_config = _build_checks_config($checks, $opt->{'clear_manual'});
         for my $line (Thruk::Utils::IO::read_as_list($filename)) {
             next if $line =~ m/^\#/mx;
             $line =~ s/\#.*$//gmx;
@@ -460,7 +467,7 @@ sub _run_add_host {
 
     my $class   = Thruk::Utils::Agents::get_agent_class($data->{'type'});
     my $agent   = $class->new();
-    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, $opt->{'fresh'});
+    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, $opt->{'fresh'}, $opt->{'cached'});
     my @result;
     for my $obj (@{$objects}) {
         my $file = Thruk::Controller::conf::get_context_file($c, $obj, $obj->{'_filename'});
@@ -469,11 +476,13 @@ sub _run_add_host {
             _error("cannot write to %s, file is marked readonly\n", $file->{'display'});
             return("", 2);
         }
-        if(!$oldfile) {
-            $obj->set_file($file);
-            $obj->set_uniq_id($c->{'obj_db'});
-        } elsif($oldfile->{'path'} ne $file->{'path'}) {
-            $c->{'obj_db'}->move_object($obj, $file);
+        if(!$opt->{'dryrun'}) {
+            if(!$oldfile) {
+                $obj->set_file($file);
+                $obj->set_uniq_id($c->{'obj_db'});
+            } elsif($oldfile->{'path'} ne $file->{'path'}) {
+                $c->{'obj_db'}->move_object($obj, $file);
+            }
         }
         # build output
         if($obj->{'conf'}->{'service_description'}) {
@@ -506,14 +515,18 @@ sub _run_add_host {
                 };
             }
         }
-        if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
-            _error("%s: unable to save changes", $hostname);
-            return("", 2);
+        if(!$opt->{'dryrun'}) {
+            if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
+                _error("%s: unable to save changes", $hostname);
+                return("", 2);
+            }
         }
     }
 
     for my $obj (@{$remove}) {
-        $c->{'obj_db'}->delete_object($obj);
+        if(!$opt->{'dryrun'}) {
+            $c->{'obj_db'}->delete_object($obj);
+        }
         # build output
         if($obj->{'conf'}->{'service_description'}) {
             my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
@@ -550,6 +563,8 @@ sub _run_remove {
     if(!$hosts || scalar @{$hosts} == 0) {
         return($output, $rc);
     }
+
+    return("dry run not supported\n", 3) if $opt->{'dryrun'};
 
     for my $hostname (@{$hosts}) {
         my($checks, $checks_num, $hst, $hostobj) = _get_checks($c, $hostname, $opt, 0);
@@ -612,6 +627,11 @@ sub _check_inventory {
         scalar @{$checks->{'disabled'} // []},
         );
     if(scalar @{$checks->{'new'}} > 0) {
+        # save inventory backup
+        my $invfile = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
+        my $savfile = $invfile.'.chk';
+        copy($invfile, $savfile) && _debug("saved copy of inventory to %s", $savfile);
+
         my @details;
         for my $chk (@{$checks->{'new'}}) {
             push @details, " - ".$chk->{'name'};
@@ -698,7 +718,7 @@ sub _get_checks {
         $port = $1;
     }
 
-    $update = 0 if $opt->{'cached'};
+    $update = 0 if defined $opt->{'cached'};
 
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                             'custom_variables' => { '~' => 'AGENT .+' },
@@ -764,7 +784,7 @@ sub _get_checks {
         }
     }
 
-    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, $opt->{'fresh'}, $data->{'section'});
+    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, $opt->{'fresh'}, $data->{'section'}, undef, undef, $opt->{'cached'});
     return($checks, $checks_num, $hst->{'peer_key'} ? $hst : undef, $hostobj, $data);
 }
 
@@ -810,14 +830,16 @@ sub _user_confirm {
 
 ##############################################
 sub _build_checks_config {
-    my($checks) = @_;
+    my($checks, $remove_obsolete) = @_;
     my $checks_config = {};
 
     for my $t (qw/new exists obsolete disabled/) {
         for my $chk (@{$checks->{$t}}) {
             $chk->{'_type'} = $t;
             $chk->{'type'} = "new"  if $t eq 'new';
-            $chk->{'type'} = "keep" if $t eq 'obsolete';
+            if($t eq 'obsolete') {
+                $chk->{'type'} = $remove_obsolete ? "off" : "keep";
+            }
             $chk->{'type'} = "keep" if $t eq 'exists';
             $chk->{'type'} = "off"  if $t eq 'disabled';
             $checks_config->{"check.".$chk->{'id'}} = $chk->{'type'};
