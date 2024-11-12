@@ -1360,6 +1360,10 @@ sub PRINTF {
 sub PRINT {
     my($self, @data) = @_;
 
+    return unless $self;
+    my $fh = $self->{'fh'};
+    return unless $fh;
+
     my $time           = Thruk::Utils::Log::time_prefix(); chop($time);
     $time              = $time.$self->{'prefix'} if $self->{'prefix'};
     $time              = $time." ";
@@ -1367,7 +1371,6 @@ sub PRINT {
     my $line           = join("", @data);
     $self->{'newline'} = ($line =~ m/\n$/mx) ? 1 : 0;
 
-    my $fh = $self->{'fh'};
     if(!$last_newline && !$self->{'newline'}) {
         # continue printing, previous line did not end with a newline
         CORE::print($fh $line);
