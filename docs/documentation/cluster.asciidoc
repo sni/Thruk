@@ -53,7 +53,12 @@ Loadbalancing is not included automatically, but you can put any loadbalancer yo
 
     /thruk/cgi-bin/remote.cgi?lb_ping
 
-If supported, you can check for the string `OK`. You can put Thruk cluster nodes in maintenance mode. In this case they will show `MAINTENANCE` instead of `OK`.
+This page will respond either:
+
+- 200 OK
+- 503 MAINTENANCE
+
+You can put Thruk cluster nodes in maintenance mode with the `thruk cluster maint` command. Later reactivate the node with `thruk cluster unmaint`.
 
 ==== Maintenance
 

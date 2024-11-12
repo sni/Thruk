@@ -27,8 +27,10 @@ Show information about a Thruk cluster
     - status       displays status of the cluster
     - restart      restart thruk instance on each cluster node
     - ping         send heartbeat to cluster nodes
-    - maint        set current node into maintenance mode
+    - maintenance  set current node into maintenance mode
+    - maint        alias for maintenance
     - activate     removes maintenance mode from current node
+    - unmaint      alias for activate
 
 =back
 
