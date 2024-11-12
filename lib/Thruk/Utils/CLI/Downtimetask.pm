@@ -34,6 +34,7 @@ The downtimetask command executes recurring downtimes tasks.
 
 use warnings;
 use strict;
+use Cpanel::JSON::XS ();
 use Getopt::Long ();
 
 use Thruk::Action::AddDefaults ();
@@ -118,6 +119,7 @@ sub _handle_file {
 
     my $retries;
     my $total_retries = 5;
+    my $retry_delay   = 10;
 
     my $nr = $file;
     $file  = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
@@ -150,7 +152,7 @@ sub _handle_file {
     my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
     my $errors = 0;
     for($retries = 0; $retries < $total_retries; $retries++) {
-        sleep(10) if $retries > 0;
+        sleep($retry_delay * $retries) if $retries > 0;
         if($downtime->{'target'} eq 'host') {
             my $hosts = $downtime->{'host'};
             for my $hst (@{$hosts}) {
@@ -222,7 +224,7 @@ sub _handle_file {
         last unless $errors;
     }
 
-    return("recurring downtime ".$file." failed after $retries retries, find details in the thruk.log file.\n", 1) if $errors; # error is already printed
+    return("recurring downtime ".$file." failed after $retries retries.\n", 1) if $errors; # error is already printed
 
     my $output = '';
     $output = '['.$nr.'.tsk]';
@@ -284,9 +286,26 @@ sub set_downtime {
         service         => $downtime->{'service'},
         hostgroup       => $downtime->{'hostgroup'},
         servicegroup    => $downtime->{'servicegroup'},
+        json            => 1,
     });
-    return 0 if $res[0] != 200; # error is already printed
-    return 1;
+
+    if(scalar @res >= 2 && ref $res[1] eq 'HASH' && defined $res[1]->{'result'}) {
+        my $data;
+        my $jsonreader = Cpanel::JSON::XS->new->utf8;
+        $jsonreader->relaxed();
+        eval {
+            $data = $jsonreader->decode($res[1]->{'result'});
+        };
+        if($@) {
+            die("failed to parse json: ".$@);
+        }
+        return 1 if $data->{'success'};
+        _warn($data->{'error'});
+        return 0;
+    }
+    return 1 if $res[0] == 200;
+    # error is already printed?
+    return 0;
 }
 
 ##############################################

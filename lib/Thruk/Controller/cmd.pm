@@ -243,19 +243,19 @@ sub index {
         }
 
         # service quick commands
-        for my $servicedata ( split /,/mx, $c->req->parameters->{'selected_services'} ) {
+        for my $servicedata ( split(/,/mx, $c->req->parameters->{'selected_services'}) ) {
             if( defined $service_quick_commands->{$quick_command} ) {
                 $cmd_typ = $service_quick_commands->{$quick_command};
             }
             else {
                 return $c->detach('/error/index/7');
             }
-            my($host, $service, $backend)   = split /;/mx, $servicedata;
+            my($host, $service, $backend)   = split(/;/mx, $servicedata);
             if(!defined $service) {
                 $c->error("invalid data, no host or service received");
                 return $c->detach('/error/index/100');
             }
-            my @backends                    = split /\|/mx, $backend;
+            my @backends                    = split(/\|/mx, $backend);
             $c->stash->{'lasthost'}         = $host;
             $c->stash->{'lastservice'}      = $service;
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
@@ -298,9 +298,12 @@ sub index {
         _check_for_commands($c);
     }
 
-    if($c->req->parameters->{'json'} and $c->stash->{'form_errors'}) {
-        my $json = {'success' => ($c->stash->{'form_errors'} && scalar @{$c->stash->{'form_errors'}}) > 0 ? 0 : 1, errors => $c->stash->{'form_errors'} };
-        return $c->render(json => $json);
+    if($c->req->parameters->{'json'}) {
+        return 1 if $c->{'rendered'};
+        if(scalar @{$c->stash->{'form_errors'}} > 0) {
+            return $c->render(json => {'success' => 0, 'error' => $c->stash->{'form_errors'} });
+        }
+        return $c->render(json => {'success' => 1 });
     }
 
     return 1;
@@ -556,8 +559,8 @@ sub redirect_or_success {
 
         return if $just_return;
         if($c->req->parameters->{'json'}) {
-            my $json = {'success' => 1};
-            return $c->render(json => $json);
+            return $c->render(json => {'success' => 0, 'error' => $c->stash->{'last_command_error'} }) if $c->stash->{'last_command_error'};
+            return $c->render(json => {'success' => 1});
         }
         else {
             $c->redirect_to($referer);
@@ -566,8 +569,8 @@ sub redirect_or_success {
     else {
         return if $just_return;
         if($c->req->parameters->{'json'}) {
-            my $json = {'success' => 1};
-            return $c->render(json => $json);
+            return $c->render(json => {'success' => 0, 'error' => $c->stash->{'last_command_error'} }) if $c->stash->{'last_command_error'};
+            return $c->render(json => {'success' => 1});
         }
         $c->stash->{template} = 'cmd_success.tt';
     }
@@ -862,23 +865,24 @@ sub _bulk_send_backend {
         $c->stash->{'last_command_lines'} = [] unless $c->stash->{'last_command_lines'};
         push @{$c->stash->{'last_command_lines'}}, sprintf("%s%s", $cmd, ($c->stash->{'extra_log_comment'}->{$cmd} || ''));
     }
-    if(!$testmode) {
-        eval {
-            $c->db->send_command(%{$options});
-        };
-        my $err = $@;
-        if($err) {
-            $err =~ s/(\ at\ .*?\.pm\ line\ \d+).*$//gsmx;
-            $c->stash->{'last_command_error'} = $err;
-            Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
-            return;
-        }
-        my $cached_proc = $c->cache->get->{'global'} || {};
-        for my $key (split(/,/mx, $backends)) {
-            delete $cached_proc->{'processinfo'}->{$key};
-        }
-        $c->cache->set('global', $cached_proc);
+
+    return 1 if $testmode;
+
+    eval {
+        $c->db->send_command(%{$options});
+    };
+    my $err = $@;
+    if($err) {
+        $err =~ s/(\ at\ .*?\.pm\ line\ \d+).*$//gsmx;
+        $c->stash->{'last_command_error'} = $err;
+        Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
+        return;
     }
+    my $cached_proc = $c->cache->get->{'global'} || {};
+    for my $key (split(/,/mx, $backends)) {
+        delete $cached_proc->{'processinfo'}->{$key};
+    }
+    $c->cache->set('global', $cached_proc);
 
     return 1;
 }
