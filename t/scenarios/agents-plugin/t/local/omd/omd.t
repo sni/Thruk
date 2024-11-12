@@ -21,7 +21,7 @@ TestUtils::test_command({
 
 ###########################################################
 # initialize object configs
-TestUtils::test_command({ cmd => '/usr/bin/env thruk r -d "" /config/check', like => ['/Running\ configuration\ check/'] });
+TestUtils::test_command({ cmd => '/usr/bin/env thruk r -d "" /config/check', like => ['/Running\ (naemon\ |)configuration\ check/'] });
 
 ###########################################################
 # create example host

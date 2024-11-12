@@ -54,7 +54,7 @@ my $pages = [{
     }, {
         url     => 'POST /config/check',
         post    => {},
-        like    => ['"failed" : false,', 'Running configuration check'],
+        like    => ['"failed" : false,', 'Running (naemon |)configuration check'],
     }, {
         url     => 'POST /config/save',
         post    => {},

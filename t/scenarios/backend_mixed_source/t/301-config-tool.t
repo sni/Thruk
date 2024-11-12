@@ -65,7 +65,7 @@ _test_page({
 _test_page({
     url     => 'POST /config/check',
     post    => {},
-    like    => ['"failed" : false,', 'Running configuration check'],
+    like    => ['"failed" : false,', 'Running (naemon |)configuration check'],
 });
 _test_page({
     url     => 'POST /config/save',
