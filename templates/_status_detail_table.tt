@@ -64,6 +64,7 @@
         has_bp = has_business_process(s, "host_");
     %]
       <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'service')"[% END %] class="[% rowclasses %]">
+      [% loop_index = loop.index %]
       [% FOREACH col = table_columns.$paneprefix %]
         [% NEXT UNLESS col.checked %]
         [% IF col.field == "state" %]
@@ -93,7 +94,7 @@
                 <div class="flex-1">
                   <a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]" title="[% s.host_address | html %] - [% s.host_alias | html %]">[% _shost(s) | html %]</a>
                 </div>
-                [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count with_status=0 %]
+                [% PROCESS _status_host_attributes hostprefix="host_" host=s host_comment_count=host_comment_count loop_index=loop.index with_status=0 %]
               </div>
             </td>
           [% END %]

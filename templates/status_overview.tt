@@ -105,6 +105,7 @@
             <tbody>
               [% FOR hostname IN g.hosts.keys.sort %]
                 [% SET h = g.hosts.$hostname %]
+                [% loop_index = loop.index %]
                 <tr>
                 [% FOREACH col = table_columns.$paneprefix %]
                   [% NEXT UNLESS col.checked %]

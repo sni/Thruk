@@ -68,6 +68,7 @@
       END;
     %]
       <tr id="[% paneprefix %]r[% loop.index %]"[% UNLESS authorized_for_read_only %] onmouseover="addRowSelector(this.id, 'host')"[% END %] class="[% rowclasses %]">
+      [% loop_index = loop.index %]
       [% FOREACH col = table_columns.$paneprefix %]
         [% NEXT UNLESS col.checked %]
         [% IF col.field == "name" %]

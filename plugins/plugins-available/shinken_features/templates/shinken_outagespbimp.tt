@@ -48,7 +48,7 @@
             <td></td>
             <td class='[% status %]'>[% status %]</td>
             <td>
-              [% PROCESS _status_host_attributes hostprefix="" host=host host_comment_count=host.comment_count with_status=0 %]
+              [% PROCESS _status_host_attributes hostprefix="" host=host host_comment_count=host.comment_count loop_index=loop.index with_status=0 %]
             </td>
             <td>[% duration(date.now - host.last_state_change) %]</td>
             <td><a class="link flex" href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts+of+[% host.name | uri %]">[% host.affected_hosts %]</a></td>
@@ -99,7 +99,7 @@
             <td><a class="link flex" href="extinfo.cgi?type=2&amp;host=[% srv.host_name | uri %]&amp;service=[% srv.description | uri %]&amp;backend=[% srv.peer_key %]">[% srv.description | html %]</a></td>
             <td class='[% s_status_text %]'>[% s_status_text %]</td>
             <td>
-              [% PROCESS _status_service_attributes service=srv service_comment_count=srv.comment_count %]
+              [% PROCESS _status_service_attributes service=srv service_comment_count=srv.comment_count loop_index=loop.index %]
             </td>
             <td>[% duration(date.now - srv.last_state_change) %]</td>
             <td><a class="link flex" href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% srv.host_name | uri %]/[% srv.description | uri %]&amp;title=Impacts+of+[% srv.host_name | uri %]/[% srv.description | uri %]">[% srv.affected_hosts %]</a> </td>

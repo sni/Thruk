@@ -115,6 +115,7 @@
                 [% ELSIF h.state == 2 %]
                   [% hoststate = 'UNREACHABLE' %]
                 [% END %]
+                [% loop_index = loop.index %]
                 <tr class='[% IF loop.last %]border-b[% END %]'>
                 [% FOREACH col = table_columns.$paneprefix %]
                   [% NEXT UNLESS col.checked %]
