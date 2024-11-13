@@ -2363,15 +2363,12 @@ sub _file_editor {
         $c->stash->{'line'}          = $c->req->parameters->{'line'} || 1;
         $c->stash->{'back'}          = $c->req->parameters->{'back'} || '';
         $c->stash->{'file_link'}     = $file->{'display'};
-        $c->stash->{'file_name'}     = $file->{'display'};
-        $c->stash->{'file_name'}     =~ s/^$files_root//gmx;
         $c->stash->{'file_content'}  = decode_utf8($file->get_new_file_content());
     }
     elsif(_is_extra_file($filename, $c->config->{'Thruk::Plugin::ConfigTool'}->{'edit_files'})) {
         $file = Monitoring::Config::File->new($filename, [], $c->{'obj_db'}->{'coretype'}, 1);
         $c->stash->{'file'}          = $file;
         $c->stash->{'file_link'}     = $filename;
-        $c->stash->{'file_name'}     = $filename;
         $c->stash->{'line'}          = $c->req->parameters->{'line'} || 1;
         $c->stash->{'file_content'}  = '';
         if(-f $filename) {

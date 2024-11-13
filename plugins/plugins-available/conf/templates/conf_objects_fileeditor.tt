@@ -25,7 +25,7 @@
         <i class="uil uil-angle-double-left"></i>Back
       </a>
       <h3>
-        <span>[% IF file_name.substr(0,1) != '/' %]/[% END %][% file_name %]</span>
+        <span id="filename" class="js-copy-to-clipboard">[% file_link | html %]</span>
         [% IF file.readonly %]<span class="textHINT"> (read-only)</span>[% END %]
         [% IF file_locked %] <br><a href="[% uri_with(c, unlock => 1) %]"><span class="textHINT"> File is currently locked by [% file_locked.user %]. Edit Anyway? (Last changed: [% date_format(c, file_locked.time) %]) </span></a>[% END %]
       </h3>
