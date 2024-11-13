@@ -832,8 +832,9 @@ sub cmd {
     my $t1 = [gettimeofday];
 
     if($options->{'timeout'}) {
+        my $timeout = $options->{'timeout'};
         setpgrp();
-        alarm($options->{'timeout'});
+        alarm($timeout);
         delete $options->{'timeout'};
         local $SIG{'ALRM'} = sub { die("timeout"); };
         my @res;
@@ -845,7 +846,7 @@ sub cmd {
         if($err) {
             if($c) {
                 if($remain <= 0 || $err =~ m/timeout/mx) {
-                    _warn(longmess("command timed out after ".$options->{'timeout'}." seconds"));
+                    _warn(longmess("command timed out after ".$timeout." seconds"));
                 } else {
                     _warn(longmess("command errror: ".$err));
                 }
