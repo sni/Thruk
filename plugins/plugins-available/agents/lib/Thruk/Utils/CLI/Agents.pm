@@ -658,6 +658,11 @@ sub _check_inventory {
         }
     }
     if(scalar @need_update > 0) {
+        # save inventory backup
+        my $invfile = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
+        my $savfile = $invfile.'.chk';
+        copy($invfile, $savfile) && _debug("saved copy of inventory to %s", $savfile);
+
         return(sprintf("WARNING - %s check%s could re-apply defaults. |%s\n( run command: thruk agents -II '%s' )\nservices:\n%s\n",
             scalar @need_update,
             (scalar @need_update != 1 ? 's' : ''),
