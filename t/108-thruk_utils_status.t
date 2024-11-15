@@ -1,5 +1,6 @@
 use warnings;
 use strict;
+use Cpanel::JSON::XS ();
 use Test::More;
 use utf8;
 
