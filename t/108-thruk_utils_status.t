@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 57;
+plan tests => 59;
 
 BEGIN {
     use lib('t');
@@ -246,3 +246,82 @@ for my $b (@{$broken}) {
     like($err, $b->[1], "query failed to parse");
     is($f, undef, "no filter returned");
 }
+
+################################################################################
+# test query optimizer
+{
+    my $filter = {
+        '-or' => [
+            {
+                '-and' => [
+                    { 'host_groups' => { '>=' => 'hostgroup_01' } },
+                    {
+                        '-or' => [
+                                    'plugin_output', { '~~' => 'checked' },
+                                    'long_plugin_output', { '~~' => 'checked' }
+                                ]
+                    }
+                ]
+            }, {
+                '-and' => [
+                    {
+                        'host_groups' => { '>=' => 'hostgroup_01' }
+                    },
+                    {
+                        '-or' => [
+                                    'plugin_output', { '~~' => 'checked' },
+                                    'long_plugin_output', { '~~' => 'checked' }
+                                ]
+                    },
+                    {
+                        '-and' => [
+                                    'plugin_output', { '!~~' => 'random' },
+                                    'long_plugin_output', { '!~~' => 'random' }
+                                ]
+                    }
+                ]
+            }
+        ]
+    };
+    my $exp = {
+          '-and' => [
+                { '-and' => [ { 'host_groups' => { '>=' => 'hostgroup_01' } } ] },
+                {
+                '-or' => [
+                            {
+                                '-and' => [
+                                            {
+                                            '-or' => [
+                                                        'plugin_output', { '~~' => 'checked' },
+                                                        'long_plugin_output', { '~~' => 'checked' }
+                                                    ]
+                                            }
+                                        ]
+                            },
+                            {
+                                '-and' => [
+                                            {
+                                            '-or' => [
+                                                        'plugin_output', { '~~' => 'checked' },
+                                                        'long_plugin_output', { '~~' => 'checked' }
+                                                    ]
+                                            },
+                                            {
+                                            '-and' => [
+                                                        'plugin_output', { '!~~' => 'random' },
+                                                        'long_plugin_output', { '!~~' => 'random' }
+                                                        ]
+                                            }
+                                        ]
+                            }
+                            ]
+                }
+            ]
+        };
+    my $json = Cpanel::JSON::XS->new->utf8->canonical;
+    my $enc  = $json->encode($filter);
+    my $optimized = Thruk::Utils::Status::_improve_filter($filter);
+    my $enc2 = $json->encode($optimized);
+    ok($enc ne $enc2, "query can be optimized");
+    is_deeply($optimized, $exp, "optimized query is correct");
+};
