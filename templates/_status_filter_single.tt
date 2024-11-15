@@ -40,7 +40,7 @@
             </tr>
           </table>
         </div>
-        <button class="iconOnly p-2 hoverable" id="[% filterprefix %]_btn_del_search" onClick="deleteSearchPane(this.id); return false;" title="remove this filter"[% IF loop.index == 0 %] style="display: none;"[% END %]>
+        <button class="iconOnly p-2 hoverable absolute z-50 top-0 right-0" id="[% filterprefix %]_btn_del_search" onClick="deleteSearchPane(this.id); return false;" title="remove this filter"[% IF loop.index == 0 %] style="display: none;"[% END %]>
           <i class="uil uil-times"></i>
         </button>
       </td>
