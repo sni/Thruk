@@ -394,6 +394,7 @@ sub do_filter {
         return($servicefilter, $servicefilter, $servicefilter, $servicefilter, $c->stash->{'has_service_filter'});
     }
 
+    my $improved = 0;
     unless ( exists $params->{$prefix.'s0_hoststatustypes'}
           or exists $params->{$prefix.'s0_type'}
           or exists $params->{$prefix.'s0_hostprops'}
@@ -404,7 +405,6 @@ sub do_filter {
           or exists $params->{'s0_type'}
           or exists $params->{'complex'} )
     {
-
         # classic search
         my $search;
         ( $search, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = classic_filter($c, $params, $skip_totals);
@@ -413,7 +413,6 @@ sub do_filter {
         push @{$searches}, $search;
     }
     else {
-
         if(   exists $params->{'s0_hoststatustypes'}
            or exists $params->{'s0_type'} ) {
             $prefix = '';
@@ -426,6 +425,7 @@ sub do_filter {
             my $search = get_search_from_param( $c, $prefix.'s' . $x, undef, $params );
             push @{$searches}, $search if defined $search;
         }
+        $improved = 1;
         ( $searches, $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter ) = do_search( $c, $searches, $prefix );
     }
 
@@ -437,8 +437,10 @@ sub do_filter {
         $c->stash->{'filter_active'} = 1;
     }
 
-    $servicefilter = _improve_filter($servicefilter) if $servicefilter;
-    $hostfilter    = _improve_filter($hostfilter)    if $hostfilter;
+    unless($improved) {
+        $servicefilter = _improve_filter($servicefilter) if $servicefilter;
+        $hostfilter    = _improve_filter($hostfilter)    if $hostfilter;
+    }
 
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
 }
@@ -664,6 +666,11 @@ sub do_search {
     my $servicegroupfilter  = Thruk::Utils::combine_filter( '-or', \@servicegroupfilter );
     my $hosttotalsfilter    = Thruk::Utils::combine_filter( '-or', \@hosttotalsfilter );
     my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
+
+    $servicefilter       = _improve_filter($servicefilter)       if $servicefilter;
+    $hostfilter          = _improve_filter($hostfilter)          if $hostfilter;
+    $servicetotalsfilter = _improve_filter($servicetotalsfilter) if $servicetotalsfilter;
+    $hosttotalsfilter    = _improve_filter($hosttotalsfilter)    if $hosttotalsfilter;
 
     # fill the host/service totals box
     if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq 'ovr_' or $prefix eq 'grd_' or $prefix eq '')) {
@@ -3235,7 +3242,7 @@ sub _improve_filter {
     }
 
     # reduce useless intendion from lists
-    if(ref $filter eq 'ARRAY' && scalar @{$filter} == 1) {
+    while(ref $filter eq 'ARRAY' && scalar @{$filter} == 1) {
         $filter = $filter->[0];
     }
 
