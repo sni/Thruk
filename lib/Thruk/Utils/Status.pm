@@ -382,8 +382,7 @@ sub do_filter {
         my $err = $@;
         if($err) {
             _debug("lex filter failed: %s", $err);
-            $err =~ s/\ at\ [a-zA-Z\/\.]+?\ line\ \d+\.$//gmx;
-            Thruk::Utils::set_message($c, 'fail_message', $err);
+            Thruk::Utils::set_message($c, 'fail_message', _strip_line($err));
             $c->stash->{'has_error'} = 1;
         }
         if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq 'ovr_' or $prefix eq 'grd_' or $prefix eq '')) {

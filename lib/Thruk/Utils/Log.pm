@@ -24,7 +24,7 @@ use Thruk::Utils::Encode ();
 use base 'Exporter';
 our @EXPORT_OK = qw(_fatal _error _cronerror _warn _info _infos _infoc
                     _debug _debug2 _debugs _debugc _trace _audit_log
-                    _debug_http_response
+                    _debug_http_response _strip_line
                     );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
@@ -137,6 +137,14 @@ sub _debug_http_response {
     _debug("<<< end of response");
 
     return;
+}
+
+##############################################
+sub _strip_line {
+    my($error) = @_;
+    chomp($error);
+    $error =~ s/\ at\ [a-zA-Z\/\.]+?\ line\ \d+\.$//gmx;
+    return($error);
 }
 
 ##############################################

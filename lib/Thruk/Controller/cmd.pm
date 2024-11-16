@@ -873,7 +873,7 @@ sub _bulk_send_backend {
     };
     my $err = $@;
     if($err) {
-        $err =~ s/(\ at\ .*?\.pm\ line\ \d+).*$//gsmx;
+        $err = _strip_line($err);
         $c->stash->{'last_command_error'} = $err;
         Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
         return;

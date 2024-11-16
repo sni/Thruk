@@ -28,7 +28,7 @@ sub check_logger {
     return if $content =~ m/\Quse Thruk::Utils::Log\E/gmx;
     $content =~ s|::make_info\(||gmx;           # reduce false positive
     $content =~ s|::http_response_error\(||gmx; # reduce false positive
-    if($content =~ m/^(.*(_debug|_error|_warn|_info|_audit_log)\(.*)/gmx) {
+    if($content =~ m/^(.*(_debug|_error|_warn|_info|_audit_log|_strip_line|_cronerror)\(.*)/gmx) {
         my $line = $1;
         unless($content =~ m/\Quse Thruk::Utils::Log\E/gmx) {
             fail($file." uses logger but misses 'use Thruk::Utils::Log'");

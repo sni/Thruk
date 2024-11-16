@@ -187,7 +187,7 @@ sub _action_facts {
         }
         if(!$facts || $facts->{'last_error'}) {
             my $err = sprintf("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_error'}//'unknown error'));
-            _cronerror($err); # don't fill the log with errors from cronjobs
+            _cronerror(_strip_line($err)); # don't fill the log with errors from cronjobs
         } else {
             _info("%s updated %s sucessfully: OK\n", $peer->{'name'}, $mode);
         }

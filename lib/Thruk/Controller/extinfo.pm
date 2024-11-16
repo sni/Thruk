@@ -8,6 +8,7 @@ use Thruk::Backend::Manager ();
 use Thruk::UserAgent ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
+use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Status ();
 
 =head1 NAME
@@ -875,8 +876,7 @@ sub _process_perf_info_page {
             $c->stash->{'has_logcache'} = 1;
         };
         if($@) {
-            $c->stash->{'logcache_error'} = $@;
-            $c->stash->{'logcache_error'} =~ s/\ at\ .*?\ line\ \d+\.//gmx;
+            $c->stash->{'logcache_error'} = _strip_line($@);
         }
     }
 
