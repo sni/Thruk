@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+3.20     Sat Nov 16 12:38:39 CET 2024
           - change default first_day_of_week to monday
           - show host attributes on grid/overview pages
           - make status badges toggle buttons
@@ -8,7 +8,7 @@ next:
           - reworked status page column editor
           - improve performance when having custom column layout on status pages
           - reduce required queries when using lmd
-          - improve error out from downtime tasks
+          - improve error output from downtime tasks
           - Rest:
             - add support for host/service note commands
               ex.: /hosts/<name>/cmd/note
