@@ -309,7 +309,11 @@ sub cmd {
         my $res = 'successfully';
         if(scalar @{$errors} > 0) {
             $res = 'with '.scalar @{$errors}.' errors';
-            ($rc, $msg) = (1, 'ERROR');
+            if($num_sites == scalar @{$errors}) {
+                ($rc, $msg) = (1, 'ERROR');
+            } else {
+                ($rc, $msg) = (0, 'WARNING');
+            }
         }
 
         if($mode eq 'drop') {
