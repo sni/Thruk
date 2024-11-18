@@ -44,6 +44,9 @@ For example:
     # add extra options to check_nsc_web
     check_nsc_web_extra_options = "-k -t 35"
 
+    # change default port used to build the check command
+    default_port = 8443
+
     # override check interval
     check_interval = 1
     retry_interval = 0.5
