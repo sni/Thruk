@@ -452,9 +452,9 @@ sub statusfilter {
         my $data = $c->db->get_service_less_stats( filter => [ $servicefilter ]);
         $data    = _statusfilter_apply_filter("service", $data, $ack_filter, $downtime_filter, $unknown_filter);
         $total_services = $data->{'total'};
-        $good_services  = $data->{'ok'}   + $data->{'pending'} + $data->{'warning'};
-        $down_services  = $data->{'critical'} + $data->{'unknown'};
-        if(   $data->{'unknown'})  { ($best_service, $worst_service) = _set_best_worst(3, $best_service, $worst_service); }
+        $good_services  = $data->{'ok'} + $data->{'pending'} + $data->{'unknown'};
+        $down_services  = $data->{'critical'} + $data->{'warning'};
+        if($data->{'unknown'})  { ($best_service, $worst_service) = _set_best_worst(3, $best_service, $worst_service); }
         elsif($data->{'critical'}) { ($best_service, $worst_service) = _set_best_worst(2, $best_service, $worst_service); }
         elsif($data->{'warning'})  { ($best_service, $worst_service) = _set_best_worst(1, $best_service, $worst_service); }
         elsif($data->{'ok'})       { ($best_service, $worst_service) = _set_best_worst(0, $best_service, $worst_service); }
