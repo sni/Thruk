@@ -113,3 +113,7 @@ HTML.transparent BODY {
 HTML.transparent DIV.bp_zoom_container {
     background-color: transparent;
 }
+
+#bp_edit_node_form INPUT.active {
+    border: 1px solid var(--border-active);
+}
