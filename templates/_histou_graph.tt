@@ -148,6 +148,7 @@
                 title = title.replace('[% escape_js(svc) %] ', '');
                 title = title.replace(/^check_\S+ /, '');
                 if(panel.id==histou_source || title == histou_source) {
+                  histou_source = panel.id; // make refreses use the extracted id
                   set_histou_img(histou_start, histou_end, histou_id, panel.id);
                 }
               });
@@ -171,6 +172,7 @@
             if(data && data["dashboard"] && data["dashboard"]["panels"]) {
               jQuery(data.dashboard.panels).each(function(j, panel) {
                 if(panel.id==histou_source || panel.title.match(histou_source)) {
+                  histou_source = panel.id; // make refreses use the extracted id
                   set_histou_img(histou_start, histou_end, histou_id, panel.id);
                 }
               });

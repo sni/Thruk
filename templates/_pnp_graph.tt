@@ -96,6 +96,7 @@
             var sources = eval(data);
             jQuery(sources).each(function(x, s) {
                 if(x==pnp_source || s.ds_name == pnp_source) {
+                    pnp_source = x; // make refreses use the extracted id
                     set_png_img(pnp_start, pnp_end, pnp_id, x);
                     return false;
                 }
