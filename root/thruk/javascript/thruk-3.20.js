@@ -4099,6 +4099,7 @@ function fade(id, duration, remove) {
     if(!is_object(el)) {
         el = document.getElementById(el);
     }
+    if(el.style.display == "none") { return; }
     duration = duration || 500;
     jQuery(el).css({
         visibility: "hidden",
@@ -5566,7 +5567,7 @@ function codeComplete(el, token, idx, after, before, completionFn) {
     jQuery('<div>', {
         id: "code_completion",
         style: "top: 0px; left: 0px; min-width: 200px; min-height: 20px; max-height: 40%;",
-        class: "typeahead overflow-y-auto"
+        class: "typeahead overflow-y-auto hidden"
     }).appendTo("body");
     var container = jQuery("#code_completion")[0];
     container.dataset["lastToken"] = completeFor;
@@ -5602,6 +5603,7 @@ function codeComplete(el, token, idx, after, before, completionFn) {
         top  = Math.floor(pos.top) - h + (newlines*lineHeight);
     }
     container.style.top = top+"px";
+    jQuery("#code_completion").removeClass("hidden");
 }
 
 var queryCodeCompletionData = {
@@ -9493,7 +9495,7 @@ var ajax_search = {
 
         panel.innerHTML = resultHTML;
 
-        ajax_search.updateResultPosition(panel, input);
+        ajax_search.updateResultPosition(panel, input, true);
 
         jQuery(panel).appendTo("BODY");
 
@@ -9510,10 +9512,10 @@ var ajax_search = {
     updateResultPositionDelayed() {
         ajax_search.updateResultPosition();
         clearTimeout(ajax_search.scrollTimeout);
-        ajax_search.scrollTimeout = window.setTimeout(ajax_search.updateResultPositionDelayed, 500);
+        ajax_search.scrollTimeout = window.setTimeout(ajax_search.updateResultPosition, 500);
     },
 
-    updateResultPosition: function(panel, input) {
+    updateResultPosition: function(panel, input, force) {
         if(!panel) {
             panel = document.getElementById(ajax_search.result_pan);
         }
@@ -9524,7 +9526,7 @@ var ajax_search = {
         if(!panel || !input) { return; }
 
         var style     = panel.style;
-        if(!style || style.display == 'none') { return; }
+        if(!style || (style.display == 'none' && !force)) { return; }
 
         var coords    = jQuery(input).offset();
         style.left    = coords.left + "px";
