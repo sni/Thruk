@@ -249,7 +249,10 @@ sub worst {
     }
     return($state,
            'worst of',
-            Thruk::Utils::Filter::state2text($state).' - Worst state is '.Thruk::Utils::Filter::state2text($state).': '.Thruk::BP::Utils::join_labels($nodes, $state),
+            Thruk::Utils::Filter::state2text($state)
+                .' - Worst state is '.Thruk::Utils::Filter::state2text($state)
+                .': '.Thruk::BP::Utils::join_labels($nodes, $state)
+                .'| '._nodes_perfdata($depends),
            $extra,
     );
 }
@@ -272,7 +275,10 @@ sub best {
     }
     return($state,
            'best of',
-            Thruk::Utils::Filter::state2text($state).' - Best state is '.Thruk::Utils::Filter::state2text($state).': '.Thruk::BP::Utils::join_labels($nodes, $state),
+            Thruk::Utils::Filter::state2text($state)
+                .' - Best state is '.Thruk::Utils::Filter::state2text($state)
+                .': '.Thruk::BP::Utils::join_labels($nodes, $state)
+                .'| '._nodes_perfdata($depends),
            $extra,
     );
 }
@@ -526,6 +532,7 @@ sub statusfilter {
     }
     if($type eq 'services' || $type eq 'both') {
         push @{$thresholdoutput}, sprintf("%d/%d services up", $good_services, $total_services);
+        $perfdata .= ' ' if $perfdata;
         $perfdata .= 'services_up='.$good_services.' services_down='.$down_services;
     }
 
@@ -756,6 +763,30 @@ sub _get_nodes_extra {
         $extra->{'scheduled_downtime_depth'} = 1;
     }
     return($extra);
+}
+
+##########################################################
+sub _nodes_perfdata {
+    my($nodes) = @_;
+    my($ok, $warning, $unknown, $critical, $pending) = (0, 0, 0, 0, 0);
+
+    for my $n (@{$nodes}) {
+        if(   $n->{'status'} == 0) { $ok++; }
+        elsif($n->{'status'} == 1) { $warning++; }
+        elsif($n->{'status'} == 2) { $critical++; }
+        elsif($n->{'status'} == 3) { $unknown++; }
+        elsif($n->{'status'} == 4) { $pending++; }
+    }
+
+    my $res = sprintf(
+        "services_ok=%d services_warning=%d services_unknown=%d services_critical=%d services_pending=%d",
+        $ok,
+        $warning,
+        $unknown,
+        $critical,
+        $pending,
+    );
+    return($res);
 }
 
 ##########################################################

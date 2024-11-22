@@ -572,7 +572,7 @@ sub join_labels {
         for my $n (@{$nodes}) {
             my $firstline = "[".$n->{'label'}."] ".Thruk::Utils::Filter::state2text($state);
             $firstline   .= " - ".(split(/\n/mx, $n->{'status_text'}))[0] if $n->{'status_text'};
-            $long .= "\n- ".$firstline;
+            $long .= "\n- ".clean_status_text($firstline);
         }
     }
     if($num == 1) {
@@ -887,6 +887,23 @@ sub _update_index {
 
     $c->stats->profile(end => "_update_index");
     return;
+}
+
+##########################################################
+
+=head2 clean_status_text
+
+    clean_status_text($text)
+
+returns text and removes performance data
+
+=cut
+sub clean_status_text {
+    my($text, $keeplongoutput) = @_;
+    chomp($text);
+    $text =~ s/\|.*$//gmx;
+    return($text // "") if $keeplongoutput;
+    return((split(/\n|\\+n/mx, $text, 2))[0] // "");
 }
 
 ##########################################################

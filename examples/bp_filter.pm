@@ -116,13 +116,6 @@ sub add_recursive_output_filter {
     $args->{'extra'}->{'long_output'} = $text;
     return;
 }
-sub _add_recursive_output_filter_clean_status {
-    my($text, $keeplongoutput) = @_;
-    chomp($text);
-    $text =~ s/\|.*$//gmx;
-    return($text // "") if $keeplongoutput;
-    return((split(/\n|\\+n/mx, $text, 2))[0] // "");
-}
 sub _add_recursive_output_filter_indent {
     my($indent, $text) = @_;
     my $prefix = (chr(8194) x ($indent*3));
@@ -143,7 +136,7 @@ sub _add_recursive_output_filter_recurse {
     # add node itself
     my @lines;
     if($indent >= 0) {
-        @lines = split(/\n|\\+n/mx, '- ['.($node->{'label'} // '').'] '._add_recursive_output_filter_clean_status($node->{'status_text'} || $node->{'short_desc'}, 1));
+        @lines = split(/\n|\\+n/mx, '- ['.($node->{'label'} // '').'] '.Thruk::BP::Utils::clean_status_text($node->{'status_text'} || $node->{'short_desc'}, 1));
         my $firstline = shift @lines;
         $text .= _add_recursive_output_filter_indent($indent, $firstline)."\n";
         if($node->{'function'} eq 'statusfilter') {
@@ -173,7 +166,7 @@ sub _add_recursive_output_filter_recurse {
             $text = _add_recursive_output_filter_recurse($c, $text, $link_bp->[0], $first_node, $indent+1, $parents);
         } else {
             # remote bp
-            my @lines = split(/\n|\\+n/mx, _add_recursive_output_filter_clean_status($node->{'status_text'} || $node->{'short_desc'}, 1));
+            my @lines = split(/\n|\\+n/mx, Thruk::BP::Utils::clean_status_text($node->{'status_text'} || $node->{'short_desc'}, 1));
             shift @lines;
             for my $line (@lines) {
                 $text .= _add_recursive_output_filter_indent($indent+1, $line)."\n";
