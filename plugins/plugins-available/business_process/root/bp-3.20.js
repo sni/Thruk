@@ -120,6 +120,11 @@ function bp_context_menu_open(evt, node) {
     // clicking the wrench icon counts as right click too
     if(evt.target && jQuery(evt.target).hasClass('js-edit-icon')) { rightclick = true; }
     if(rightclick && node) {
+        // coordinates must be relative to parent "relative" element
+        var parent = jQuery("#bp_menu").parents('.relative').first();
+        var posX = evt.pageX - jQuery(parent).offset().left - 5;
+        var posY = evt.pageY - jQuery(parent).offset().top + 10;
+
         bp_unset_active_node();
         bp_context_menu = true;
         jQuery(node).addClass('bp_node_active');
@@ -127,8 +132,8 @@ function bp_context_menu_open(evt, node) {
         bp_update_status(evt, node);
         jQuery('.submenu').css('display', 'none'); // hide sub menu
         jQuery("#bp_menu")
-                          .css('top', evt.pageY+'px')
-                          .css('left', evt.pageX+'px')
+                          .css('top', posY+'px')
+                          .css('left', posX+'px')
                           .unbind('keydown');                 // use cursor keys in input field
         bp_menu_restore();
         element_check_visibility(jQuery("#bp_menu")[0]);
