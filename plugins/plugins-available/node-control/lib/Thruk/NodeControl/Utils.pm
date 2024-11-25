@@ -604,9 +604,11 @@ sub _omd_update_step2 {
         }
     }
 
+    my $omd_update_script = $config->{'omd_update_script'} // abs_path(Thruk::Base::dirname(__FILE__)."/../../../scripts/omd_update.sh")
+
     my($rc, $job);
     eval {
-        ($rc, $job) = _remote_script($c, $peer, $config->{'omd_update_script'}, { env => $env }, $env);
+        ($rc, $job) = _remote_script($c, $peer, $omd_update_script, { env => $env }, $env);
     };
     if($@) {
         return _set_job_errored($c, 'updating', $peer->{'key'}, $@);
@@ -1110,7 +1112,7 @@ sub config {
         'pkg_cleanup'             => 1,
         'skip_confirms'           => 0,
         'parallel_tasks'          => 3,
-        'omd_update_script'       => abs_path(Thruk::Base::dirname(__FILE__)."/../../../scripts/omd_update.sh"),
+        'omd_update_script'       => undef, # set fallback later to avoid race conditions if updated started on the host machine as well
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',
         'cmd_yum_pkg_install'     => 'sudo -n yum install -y %PKG',
         'cmd_dnf_pkg_install'     => 'sudo -n dnf install -y %PKG',
