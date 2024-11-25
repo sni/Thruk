@@ -604,7 +604,7 @@ sub _omd_update_step2 {
         }
     }
 
-    my $omd_update_script = $config->{'omd_update_script'} // abs_path(Thruk::Base::dirname(__FILE__)."/../../../scripts/omd_update.sh")
+    my $omd_update_script = $config->{'omd_update_script'} // abs_path(Thruk::Base::dirname(__FILE__)."/../../../scripts/omd_update.sh");
 
     my($rc, $job);
     eval {
