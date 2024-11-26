@@ -4099,6 +4099,7 @@ function fade(id, duration, remove) {
     if(!is_object(el)) {
         el = document.getElementById(el);
     }
+    if(!el) { return; }
     if(el.style.display == "none") { return; }
     duration = duration || 500;
     jQuery(el).css({
