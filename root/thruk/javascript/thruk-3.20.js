@@ -4186,7 +4186,7 @@ function thruk_message(rc, message, close_timeout) {
         html += ''
             + '    <div class="w-full flex justify-center">'
             + '      <pre class="'+cls+'" style="display:none;" id="message_details">'
-            + lines.join("<br>")
+            + lines.join("\n")
             + '      </pre>'
             + '    </div>';
     }
