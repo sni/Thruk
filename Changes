@@ -6,6 +6,8 @@ next:
             - pin inventory check to local worker
           - Business Process:
             - fix context menu position
+          - Reports:
+            - rename public tab and show own shared reports
 
 3.20     Sat Nov 16 12:38:39 CET 2024
           - change default first_day_of_week to monday
