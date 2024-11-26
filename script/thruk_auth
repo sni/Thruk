@@ -318,7 +318,7 @@ sub process {
             'login' => $user,
             'time'  => $now,
     };
-    _debug('basic auth ok for '.$user) if $verbose > 1;
+    _debug(((defined $basicauth && $basicauth ne 'none') ? 'basic ' : '').'auth ok for '.$user) if $verbose > 1;
     return "/loginok/".$user."/".$path;
 }
 
