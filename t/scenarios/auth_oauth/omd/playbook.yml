@@ -10,21 +10,23 @@
     vars:
       package:
         - gcc
-        - perl-Class-Load
-        - perl-URI
-        - perl-Plack-Test
-        - perl-Module-Metadata
-        - perl-Type-Tiny
-        - perl-Hash-Merge-Simple
-        - perl-Safe-Isa
-        - perl-Role-Tiny
-        - perl-Test-CPAN-Meta
-        - perl-Attribute-Handlers
-        - perl-Getopt-Long-Descriptive
-        - perl-Config-Any
-        - perl-Import-Into
-        - perl-Ref-Util
         - perl-App-cpanminus
+        - perl-Attribute-Handlers
+        - perl-Class-Load
+        - perl-Config-Any
+        - perl-Getopt-Long-Descriptive
+        - perl-Hash-Merge-Simple
+        - perl-Import-Into
+        - perl-LWP-Protocol-https
+        - perl-Module-Build-Tiny
+        - perl-Module-Metadata
+        - perl-Plack-Test
+        - perl-Ref-Util
+        - perl-Role-Tiny
+        - perl-Safe-Isa
+        - perl-Test-CPAN-Meta
+        - perl-Type-Tiny
+        - perl-URI
   - name: "omd config change"
     shell: "omd config demo change"
     args:
