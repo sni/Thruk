@@ -103,6 +103,12 @@ sub index {
         }
         elsif($keywords eq 'expired') {
             _invalidate_current_session($c, $cookie_path, "session expired");
+            # try again, kerberos sites would login automatically
+            if($has_query && $referer && $referer =~ m%/thruk/%mx) {
+                sleep(3); # delay a bit
+                $referer = '/'.$referer if $referer !~ m|^/|mx;
+                return $c->redirect_to($referer);
+            }
             Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
         }
         elsif($keywords eq 'invalid') {
