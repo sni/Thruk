@@ -1186,8 +1186,17 @@ sub _is_browser_request {
     # theme cookie is a good indicator for a user request
     my $cookies = $c->env->{'HTTP_COOKIE'};
     if($cookies) {
-        return 1 if($cookies =~ m/thruk_theme|thruk_screen/gmx);
+        return 1 if($cookies =~ m/thruk_theme=|thruk_screen=/gmx);
     }
+
+    # looks like a browser as well
+    my $user_agent = $c->env->{'HTTP_USER_AGENT'};
+    if($user_agent) {
+        return 1 if($user_agent =~ m/mozilla/gmxi);
+    }
+
+    # usually only set by a browser
+    return 1 if $c->env->{'HTTP_ACCEPT_LANGUAGE'};
 
     # everything else assumed to be not a browser
     return;
