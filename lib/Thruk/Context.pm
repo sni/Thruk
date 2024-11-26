@@ -940,6 +940,10 @@ sub finalize_request {
         if($res->[0] == 302 && $c->{'session'} && $c->{'session'}->{'file'}) {
             $save_for_later = 1;
         }
+        my $ctype = $h->get('Content-Type');
+        if($ctype && $ctype =~ m/application\/json/mx) {
+            $save_for_later = 1;
+        }
         if(!$save_for_later && ref $res->[2] eq 'ARRAY' && $res->[2]->[0] =~ m/<\/body>/mx) {
             $inject = 1;
         }
