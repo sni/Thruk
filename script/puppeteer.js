@@ -46,7 +46,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
           //,userDataDir: '/dev/null' // avoid leaking /tmp/puppeteer_dev_profile-xxxx folders https://github.com/puppeteer/puppeteer/issues/6414
   });
   const page = await browser.newPage();
-  page.setViewport({width: Number(width), height: Number(height)});
+  await page.setViewport({width: Number(width), height: Number(height)});
   if(url.match(/^https?:/)) {
     await page.setCookie({name: "thruk_auth", value: sessionid, url: url});
   }
