@@ -1289,7 +1289,7 @@ sub _convert_ansible_script_result {
     if(ref $data eq 'HASH') {
         if(defined $data->{'rc'} && defined $data->{'stdout'}) {
             $rc   = $data->{'rc'};
-            $data = $data->{'stdout'};
+            $data = $data->{'stdout'}.($data->{'stderr'}//'');
         }
     }
 
@@ -1311,7 +1311,7 @@ sub _convert_ansible_script_result {
         if($@) {
             die("ansible failed to parse json: ".$@);
         }
-        return($f->{'rc'}, $f->{'stdout'}) if defined $f->{'stdout'};
+        return($f->{'rc'}, $f->{'stdout'}.($f->{'stderr'}//'')) if defined $f->{'stdout'};
         die($f->{'msg'}) if(defined $f->{'msg'} && $state eq 'FAILED!');
         return($rc, $f);
     }
