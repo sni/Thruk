@@ -1,4 +1,4 @@
-﻿<div class="card shadow-float min-w-[500px]">
+﻿<div class="card shadow-float max-w-full lg:min-w-[500px]">
   <div class="head justify-between">
     <h3>
       <div class="js-nok hidden badge CRITICAL text-left"><i class="fa-solid fa-exclamation"></i>Failed</div>
@@ -9,7 +9,7 @@
     <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
   </div>
   <div class="body">
-    <div class='CONSOLE p-1 overflow-y-scroll min-w-[300px] max-w-[1000px] min-h-[150px] max-h-[500px] whitespace-pre' id='job_popup_[% job.id %]'>
+    <div class='CONSOLE p-1 overflow-y-scroll min-w-[300px] max-w-full lg:max-w-[1000px] min-h-[150px] max-h-[500px] whitespace-pre' id='job_popup_[% job.id %]'>
       [% IF job.defined("stdout"); job.stdout; END %]
       [% IF job.defined("stderr"); job.stderr; END %]
     </div>

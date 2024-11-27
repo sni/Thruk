@@ -352,7 +352,7 @@ header.header {
 }
 
 .modalFG {
-  @apply m-auto w-[600px] min-w-fit fixed z-50 top-0 left-0 right-0 bottom-0 h-max;
+  @apply m-auto w-full lg:w-[600px] min-w-full lg:min-w-fit fixed z-50 top-0 left-0 right-0 bottom-0 h-max;
 }
 
 TH {
