@@ -1655,6 +1655,9 @@ sub _do_on_peers {
         $c->stash->{'failed_backends'}->{$key} =~ s/^ERROR:\s*//mx;
         $c->stash->{'failed_backends'}->{$key} =~ s/,\s*<GEN1>\s*line\s*\d+\.$//mx;
     }
+    if(!$err && $num_selected_backends > 0 && $num_selected_backends == scalar keys %{$c->stash->{'failed_backends'}}) {
+        $err = "no response from selected backends";
+    }
 
     &timing_breakpoint('_get_result: '.$function);
     if(!defined $result || $err) {

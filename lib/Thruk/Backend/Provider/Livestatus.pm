@@ -353,14 +353,22 @@ sub get_can_submit_commands {
     my($self, $user, $data) = @_;
     confess("no user") unless defined $user;
     return $data if $data;
+
+    # optimized naemon with wrapped_json output
+    my $options = {AddPeer => 1};
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        $options->{wrapped_json} = 1;
+    }
+
     $data = $self->_optimize(
-            $self->{'live'}
+                $self->{'live'}
                     ->table('contacts')
                     ->columns(qw/can_submit_commands
                                  alias email/)
                     ->filter({ name => $user })
-                    ->options({AddPeer => 1}))
-                    ->hashref_array();
+                    ->options($options)
+            )
+            ->hashref_array();
     return($data);
 }
 
@@ -388,13 +396,20 @@ sub get_contactgroups_by_contact {
     confess("no user") unless defined $username;
     return $data if $data;
 
+    # optimized naemon with wrapped_json output
+    my $options = {AddPeer => 1};
+    if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
+        $options->{wrapped_json} = 1;
+    }
+
     $data = $self->_optimize(
-            $self->{'live'}
+                $self->{'live'}
                     ->table('contactgroups')
                     ->columns(qw/name/)
                     ->filter({ members => { '>=' => $username }})
-                    ->options({AddPeer => 1}))
-                    ->hashref_array();
+                    ->options($options)
+        )
+        ->hashref_array();
 
     return $data;
 }
