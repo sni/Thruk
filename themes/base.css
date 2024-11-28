@@ -82,6 +82,8 @@
 
   --peer-up-bg:               var(--color-green-500);
   --peer-up-fg:               var(--color-gray-700);
+  --peer-warn-bg:             var(--color-yellow-500);
+  --peer-warn-fg:             var(--color-gray-700);
   --peer-down-bg:             var(--color-red-500);
   --peer-down-fg:             var(--color-gray-700);
   --peer-dis-bg:              var(--color-truegray-300);
@@ -246,6 +248,9 @@
   }
   .button_peerDOWN {
     @apply !bg-[color:var(--peer-down-bg)] !text-[color:var(--peer-down-fg)];
+  }
+  .button_peerWARN {
+    @apply !bg-[color:var(--peer-warn-bg)] !text-[color:var(--peer-warn-fg)];
   }
   .button_peerDIS {
     @apply !bg-[color:var(--peer-dis-bg)] !text-[color:var(--peer-dis-fg)];

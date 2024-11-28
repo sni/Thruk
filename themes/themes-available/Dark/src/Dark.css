@@ -79,6 +79,8 @@
 
   --peer-up-bg:               var(--color-green-600);
   --peer-up-fg:               #f2f2f2;
+  --peer-warn-bg:             var(--color-yellow-500);
+  --peer-warn-fg:             #f2f2f2;
   --peer-down-bg:             var(--color-red-700);
   --peer-down-fg:             #f2f2f2;
   --peer-dis-bg:              #777;
