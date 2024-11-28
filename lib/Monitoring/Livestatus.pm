@@ -919,7 +919,7 @@ sub post_processing {
     my $orig_result;
     if($opt->{'wrapped_json'}) {
         $orig_result = $result;
-        $result = $result->{'data'};
+        $result = delete $orig_result->{'data'};
     }
 
     # add peer information?
@@ -949,10 +949,7 @@ sub post_processing {
         'result_count' => scalar @{$result},
     };
     if($opt->{'wrapped_json'}) {
-        for my $key (keys %{$orig_result}) {
-            next if $key eq 'data';
-            $self->{'meta_data'}->{$key} = $orig_result->{$key};
-        }
+        $self->{'meta_data'} = $orig_result;
     }
 
     return({ keys => $keys, result => $result });
