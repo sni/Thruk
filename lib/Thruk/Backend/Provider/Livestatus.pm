@@ -366,7 +366,7 @@ sub get_can_submit_commands {
                     ->columns(qw/can_submit_commands
                                  alias email/)
                     ->filter({ name => $user })
-                    ->options($options)
+                    ->options($options),
             )
             ->hashref_array();
     return($data);
@@ -407,7 +407,7 @@ sub get_contactgroups_by_contact {
                     ->table('contactgroups')
                     ->columns(qw/name/)
                     ->filter({ members => { '>=' => $username }})
-                    ->options($options)
+                    ->options($options),
         )
         ->hashref_array();
 
