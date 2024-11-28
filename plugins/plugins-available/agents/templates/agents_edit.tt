@@ -166,7 +166,7 @@
                     <option value="http"[% IF agent.mode == "http" %] selected[% END %]>plain http</option>
                   </select>
                   <span class="ml-2 text-right w-14 textTH font-semibold self-center">Port:</span>
-                  <input type="text" name="port" value="[% agent.port | html %]" class="w-36" placeholder="8443">
+                  <input type="text" name="port" value="[% agent.port | html %]" class="w-36" placeholder="[% default_port | html %]">
                 </div>
               </td>
             </tr>

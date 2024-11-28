@@ -292,6 +292,8 @@ sub _process_edit {
         }
     }
 
+    $c->stash->{'default_port'} = $c->config->{'Thruk::Agents'}->{$type}->{'default_port'} // 8443;
+
     # extract checks
     my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, undef, ($section // $agent->{'section'}));
 

@@ -4,6 +4,7 @@ next:
           - fix flickering on search suggestions
           - Agents:
             - pin inventory check to local worker
+            - show default port in edit mask
           - Business Process:
             - fix context menu position
           - Reports:
