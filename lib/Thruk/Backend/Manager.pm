@@ -951,6 +951,14 @@ sub expand_command {
     $expanded =~ s{\$\$}{\$}gmx;
     $orig     =~ s{\$\$}{\$}gmx;
 
+    # unescape semicolon
+    $expanded =~ s{\\\;}{;}gmx;
+    $orig     =~ s{\\\;}{;}gmx;
+
+    # unescape exclamation marks
+    $expanded =~ s{\\\!}{\!}gmx;
+    $orig     =~ s{\\\!}{\!}gmx;
+
     my $return = {
         'line'          => $command_name,
         'line_expanded' => $expanded,

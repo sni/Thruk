@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - unescape escaped characters in expanded command
           - fix flickering on search suggestions
           - Agents:
             - pin inventory check to local worker
