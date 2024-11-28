@@ -236,12 +236,13 @@
                 <div class="flexrow flex-nowrap gap-1">
                   [% IF s.logs.size > 0 %]
                     [% log_failed = 0 %]
+                    [% log_warn   = 0 %]
                     <script>
                       logs_menu['[% s.peer_key | html %]'] = [
                         [% available_logs = []; FOREACH l = ["install", "update", "cleanup"]; NEXT UNLESS s.logs.defined(l); available_logs.push(l); END %]
                         [% FOREACH l = available_logs %]
                           {
-                              'icon':  "fa-file-lines [% IF s.logs.$l.failed; log_failed = 1 %]textALERT[% END %]",
+                              'icon':  "fa-file-lines [% IF s.logs.$l.failed; IF s.logs.$l.failed == 2; log_warn = 1 %]textWARN[% ELSE; log_failed = 1 %]textALERT[% END; END %]",
                               'label': "<div class='flexrow flex-nowrap gap-x-1'><div class='w-20'>[% l | html %].log</div>[% IF s.logs.$l.time %]<div class='textHINTsoft text-right'>([% date_format(c, s.logs.$l.time) %])</div>[% END %]</div>",
                               'href':  "node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]",
                               'onclick': "openModalWindowUrl('node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]&modal=1'); return false;"
@@ -250,7 +251,7 @@
                       ];
                     </script>
                     <a href="#" class="" title="show logs of last tasks" onclick="show_action_menu(this, logs_menu['[% s.peer_key | html %]'],null, null, null, null, 'b-l'); return false;">
-                      <i class="fa-solid fa-file-lines [% IF log_failed == 1 %]textALERT[% END %]"></i>
+                      <i class="fa-solid fa-file-lines [% IF log_failed %]textALERT[% ELSIF log_warn %]textWARN[% END %]"></i>
                     </a>
                   [% ELSE %]
                     <a href="#" class="disabled not-clickable" title="no logs available" onclick="return false;">

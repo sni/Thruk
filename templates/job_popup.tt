@@ -1,9 +1,10 @@
 ﻿<div class="card shadow-float max-w-full lg:min-w-[500px]">
   <div class="head justify-between">
     <h3>
-      <div class="js-nok hidden badge CRITICAL text-left"><i class="fa-solid fa-exclamation"></i>Failed</div>
-      <div class="js-ok  hidden badge OK text-left"><i class="fa-solid fa-check"></i> Success</div>
-      <div class="js-run hidden badge text-left"><div class="spinner"></div>Running</div>
+      <div class="js-nok  hidden badge CRITICAL text-left"><i class="fa-solid fa-exclamation"></i>Failed</div>
+      <div class="js-ok   hidden badge OK text-left"><i class="fa-solid fa-check"></i> Success</div>
+      <div class="js-warn hidden badge WARNING text-left"><i class="fa-solid fa-exclamation"></i> Warning</div>
+      <div class="js-run  hidden badge text-left"><div class="spinner"></div>Running</div>
       [% IF job.defined("message"); job.message; ELSE; "Job: " _ job.id; END %]
     </h3>
     <button class="iconOnly medium hoverable" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>

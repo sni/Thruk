@@ -127,3 +127,6 @@ All hooks can make use of the following environment variables:
 - `SITE_NAME`:        site name which will be updated.
 - `FROM_OMD_VERSION`: current omd version that site is running.
 - `OMD_UPDATE`:       omd version that'll be used for the update.
+
+If a hook prints `[ERROR]` or `[WARNING]` messages, the logfile will be
+highlighted. This can be used to indicate non-fatal issues.

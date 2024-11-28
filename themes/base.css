@@ -36,6 +36,7 @@
   --text-active2:             var(--color-red-600);
   --text-success:             var(--color-green-600);
   --text-alert:               var(--color-red-600);
+  --text-warning:             var(--color-yellow-600);
   --text-unreachable:         var(--color-red-500);
   --text-mixed-gradient-from: var(--color-gray-200);
   --text-mixed-gradient-to:   var(--color-gray-300);
@@ -194,6 +195,10 @@
   .textALERT {
     @apply !text-[color:var(--text-alert)];
   }
+  .textYELLOW, .textWARN {
+    @apply !text-[color:var(--text-warning)];
+  }
+
   .textALERT-mixed {
     @apply bg-gradient-to-br from-[color:var(--text-mixed-gradient-from)] textALERT via-current to-[color:var(--text-mixed-gradient-from)] bg-clip-text fill-transparent;
     -webkit-text-fill-color: transparent;

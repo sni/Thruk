@@ -1250,6 +1250,20 @@ sub _set_job_done {
         'last_error' => '',
     };
     $data->{$type} = 0;
+
+    # check for errors and warning in the log file
+    my $logfile;
+    if($type eq 'installing') { $logfile = $c->config->{'var_path'}.'/node_control/'.$peerkey.'_install.log'; }
+    if($type eq 'updating')   { $logfile = $c->config->{'var_path'}.'/node_control/'.$peerkey.'_update.log'; }
+    if($type eq 'cleaning')   { $logfile = $c->config->{'var_path'}.'/node_control/'.$peerkey.'_cleanup.log'; }
+
+    if($logfile) {
+        my $log_text = Thruk::Utils::IO::saferead_decoded($logfile);
+        if($log_text =~ m/\[(ERROR|WARNING|WARN)\]/gmx) {
+            $data->{$type."_failed"} = "2";
+        }
+    }
+
     Thruk::Utils::IO::json_lock_patch($file, $data, { pretty => 1, allow_empty => 1 });
 
     return;

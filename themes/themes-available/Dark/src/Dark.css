@@ -33,6 +33,7 @@
   --text-active2:             var(--color-red-500);
   --text-success:             var(--color-green-500);
   --text-alert:               var(--color-red-500);
+  --text-warning:             var(--color-yellow-500);
   --text-unreachable:         var(--color-red-500);
   --text-mixed-gradient-from: var(--color-gray-400);
   --text-mixed-gradient-to:   var(--color-gray-500);

@@ -11,7 +11,11 @@
   <div class="head justify-between">
     <h3>
       [% IF log_meta.failed %]
-        <div class="badge CRITICAL text-left"><i class="fa-solid fa-exclamation" title="[% log_type | html %] task failed"></i>Failed</div>
+        [% IF log_meta.failed == 2 %]
+          <div class="badge WARNING text-left"><i class="fa-solid fa-exclamation" title="[% log_type | html %] task had warnings"></i>Warning</div>
+        [% ELSE %]
+          <div class="badge CRITICAL text-left"><i class="fa-solid fa-exclamation" title="[% log_type | html %] task failed"></i>Failed</div>
+        [% END %]
       [% ELSE %]
         <div class="badge OK text-left"><i class="fa-solid fa-check" title="[% log_type | html %] task finished successfully"></i> Success</div>
       [% END %]

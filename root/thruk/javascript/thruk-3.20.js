@@ -3951,8 +3951,10 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
     var head = jQuery('#'+divid).parents('.card').find("DIV.head");
     head.find(".js-ok").addClass("hidden");
     head.find(".js-nok").addClass("hidden");
+    head.find(".js-warn").addClass("hidden");
     head.find(".js-run").addClass("hidden");
-    jQuery('#'+divid).text(data.stdout+data.stderr);
+    var text = data.stdout+data.stderr;
+    jQuery('#'+divid).text(text);
 
     // check if text area should scroll
     var scroll = jQuery("#"+divid).data("scroll");
@@ -3977,11 +3979,17 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
 
     if(data['is_running']) {
         head.find(".js-run").removeClass("hidden");
+        if(text.match(/\[(ERROR|WARNING|WARN)\]/)) {
+            head.find(".js-run").addClass("WARNING");
+        }
         window.setTimeout(function() {
             showJobOutputPopupFetch(jobid, peerid, divid);
         }, 1000)
     } else {
-        if(data['rc'] == 0) {
+        if(text.match(/\[(ERROR|WARNING|WARN)\]/)) {
+            head.find(".js-warn").removeClass("hidden");
+        }
+        else if(data['rc'] == 0) {
             head.find(".js-ok").removeClass("hidden");
         } else {
             head.find(".js-nok").removeClass("hidden");
