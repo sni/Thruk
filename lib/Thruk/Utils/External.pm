@@ -1371,6 +1371,10 @@ sub PRINT {
     my $line           = join("", @data);
     $self->{'newline'} = ($line =~ m/\n$/mx) ? 1 : 0;
 
+    ## no critic
+    no warnings 'utf8'; # suppress Wide character in print... warning
+    ## use critic
+
     if(!$last_newline && !$self->{'newline'}) {
         # continue printing, previous line did not end with a newline
         CORE::print($fh $line);
