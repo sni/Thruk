@@ -79,7 +79,7 @@ add_link('name' => 'Home', 'href' => '/thruk/main.html');
 .Available parameters
 * name: This is how the link is called in the web front end.
 * href: This is the destination link optional you can add.
-* target: Target frame for this link. (`_parent` and `_blank` open as popup, `main` opens embedded. Empty target opens in the same window.)
+* target: Target frame for this link. (`_parent` and `_blank` open as popup, `embedded` opens embedded. Empty target opens in the same window.)
 * icon: Used for themes which support icons.
 * html: If set, all other attributes are ignored and the plain html data is inserted in the menu
 
@@ -88,13 +88,13 @@ Then the config looks like this:
 Open grafana in a new window:
 
 -----
-add_link('name' => 'Grafana, 'href' => '/grafana', 'target' => '_blank');
+add_link('name' => 'Grafana', 'href' => '/grafana', 'target' => '_blank');
 -----
 
 Open grafana embedded:
 
 -----
-add_link('name' => 'Grafana, 'href' => '/grafana', 'target' => 'main');
+add_link('name' => 'Grafana', 'href' => '/grafana', 'target' => 'embedded');
 -----
 
 
