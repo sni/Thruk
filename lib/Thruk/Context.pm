@@ -212,7 +212,7 @@ $data contains:
 =cut
 sub detach_error {
     my($c, $data) = @_;
-    $data->{'stacktrace'} .= Carp::longmess("detach_error()") if(!$data->{'stacktrace'} && $c->stash->{'thruk_author'});
+    $data->{'stacktrace'} .= Carp::longmess("detach_error()") if(!$data->{'stacktrace'} && $c->stash->{'thruk_author'} && (!$data->{'code'} || $data->{'code'} != 403));
     $c->stash->{'error_data'} = $data;
     my($package, $filename, $line) = caller;
     $c->stats->profile(comment => 'detach_eror from '.$package.':'.$line);

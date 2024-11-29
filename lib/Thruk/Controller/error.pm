@@ -283,6 +283,7 @@ sub index {
         $c->stash->{'raw_error_data'} = Thruk::Utils::IO::dclone($c->stash->{'error_data'});
         if(!$c->stash->{'error_data'}->{'skip_escape'}) {
             my $stack = delete $c->stash->{'error_data'}->{'stacktrace'};
+            $stack = Thruk::Base::clean_credentials_from_string($stack) if $stack;
             Thruk::Utils::Filter::html_escape_recursive($c->stash->{'error_data'});
             $c->stash->{'error_data'}->{'skip_escape'} = 1;
             $c->stash->{'error_data'}->{'stacktrace'}  = $stack if $stack;
@@ -302,7 +303,7 @@ sub index {
         $c->stash->{'stacktrace'} .= "\n".longmess("stacktrace from error controller") unless $c->stash->{'stacktrace'} =~ m/Thruk.pm/gmx;
     }
 
-    if(!$c->stash->{'stacktrace'} && $c->stash->{'thruk_author'}) {
+    if(!$c->stash->{'stacktrace'} && $c->stash->{'thruk_author'} && $code != 403) {
         $c->stash->{'stacktrace'} .= Carp::longmess("stacktrace from error controller");
     }
 
