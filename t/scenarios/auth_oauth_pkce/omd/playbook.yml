@@ -9,6 +9,7 @@
     args:
       stdin: |
         APACHE_MODE=own
+        LIVESTATUS_TCP=on
   - copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
