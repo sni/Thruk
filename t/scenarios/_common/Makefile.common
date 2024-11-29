@@ -119,14 +119,7 @@ ifdef INTERACTIVE
 non_interactive_only:
 	exit 1
 remove_interactive_only_reload_file:
-	@echo "### $@: $$(date "+%FT%T.%N")"
-	@for svc in $$(docker compose config --services | sort); do \
-		index=0; \
-		for container in $$(docker compose ps -q $$svc); do \
-			index=$$(( index + 1 )); \
-			docker exec -t --user root $$container rm -f /opt/omd/sites/demo/.THRUK_RESTARTER_DISABLED; \
-		done; \
-	done
+	$(MAKE) enable_watcher
 else
 non_interactive_only:
 	:
@@ -159,7 +152,7 @@ prepare: base_images
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	$(MAKE) remove_interactive_only_reload_file
+	$(MAKE) enable_watcher
 
 clean:
 	@echo "### $@: $$(date "+%FT%T.%N")"
@@ -188,14 +181,12 @@ update:
 
 enable_watcher:
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	for svc in $$(docker compose config --services | sort); do \
+	@for svc in $$(docker compose config --services | sort); do \
 		index=0; \
 		for container in $$(docker compose ps -q $$svc); do \
 			index=$$(( index + 1 )); \
 			echo "*** $${svc}_$${index}"; \
 			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
-				echo "***"; \
-				echo "*** $${svc}_$${index}"; \
 				docker exec -t --user root $$container rm -f /omd/sites/demo/.THRUK_RESTARTER_DISABLED; \
 				docker exec -t --user root $$container omd reload demo apache; \
 				echo "***"; \
