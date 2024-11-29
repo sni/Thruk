@@ -50,6 +50,7 @@ for my $site (qw/local/) {
         cmd  => '/usr/bin/env omd reload apache',
         like => ['/Reloading apache/'],
     });
+    sleep(3);
     TestUtils::test_command({
         cmd  => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: wrong" "http://omd.test.local/demo/thruk/cgi-bin/tac.cgi"',
         like => ['/wrong authentication key/'],
@@ -67,6 +68,7 @@ for my $site (qw/local/) {
         cmd  => '/usr/bin/env omd reload apache',
         like => ['/Reloading apache/'],
     });
+    sleep(3);
 };
 
 {

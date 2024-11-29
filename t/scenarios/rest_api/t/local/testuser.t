@@ -28,6 +28,7 @@ TestUtils::test_command({
         cmd    => '/usr/bin/env omd reload apache',
         like   => ['/Reloading apache/'],
     });
+    sleep(3);
     TestUtils::test_command({
         cmd    => '/usr/bin/env thruk cache dump',
         like   => ['/\{\}/'],

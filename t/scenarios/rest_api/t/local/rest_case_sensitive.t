@@ -78,6 +78,7 @@ sub _set_lmd {
         cmd  => '/usr/bin/env omd reload apache',
         like => ['/Reloading apache configuration.*OK/'],
     });
+    sleep(3);
     # wait till page is back online
     TestUtils::test_page(
         url     => 'http://localhost/demo/thruk/r/csv/sites/ALL/sites?columns=status&headers=0',
