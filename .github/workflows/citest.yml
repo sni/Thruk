@@ -3,8 +3,13 @@ name: citest
 on:
   push:
   pull_request:
-  schedule:
-    - cron: '30 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
 
 jobs:
   citest:
@@ -13,8 +18,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: perl -V
         run: perl -V
-      #- name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
-      #  uses: mxschmitt/action-tmate@v3
+      - name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
       - name: ./.ci/prepare_machine.sh
         run: timeout -v 15m sudo bash -x ./.ci/prepare_machine.sh
       - name: ./.ci/install_deps.sh
