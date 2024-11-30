@@ -188,8 +188,7 @@ enable_watcher:
 			echo "*** $${svc}_$${index}"; \
 			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
 				docker exec -t --user root $$container rm -f /omd/sites/demo/.THRUK_RESTARTER_DISABLED; \
-				docker exec -t --user root $$container /bin/sh -c "omd status demo -b >/dev/null apache && omd reload demo apache"; \
-				echo "***"; \
+				docker exec -t --user root $$container /bin/sh -c "omd status demo apache -b >/dev/null apache && omd reload demo apache"; \
 			fi; \
 		done; \
 	done
