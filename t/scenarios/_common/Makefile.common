@@ -71,6 +71,10 @@ test_verbose: wait_start
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) test_docker_logs_verbose
 
+testf:
+	TESTS=$$(ls -1 $(shell pwd)/t/*.t | grep "$(filter-out $@,$(MAKECMDGOALS))"); \
+	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $$TESTS
+
 test_docker_logs:
 	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/../_common/t/999*.t \
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
@@ -219,3 +223,12 @@ extra_prepare:
 extra_test:
 
 extra_test_verbose:
+
+# just skip unknown make targets
+.DEFAULT:
+	@if [[ "$(MAKECMDGOALS)" =~ ^testf ]]; then \
+		: ; \
+	else \
+		echo "unknown make target(s): $(MAKECMDGOALS)"; \
+		exit 1; \
+	fi
