@@ -193,7 +193,7 @@ enable_watcher:
 			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
 				docker exec -t --user root $$container rm -f /omd/sites/demo/.THRUK_RESTARTER_DISABLED; \
 				docker exec -t --user root $$container /bin/sh -c "omd status demo apache -b >/dev/null apache && omd reload demo apache"; \
-			fi; \
+			fi || : ; \
 		done; \
 	done
 
