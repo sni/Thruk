@@ -156,7 +156,7 @@ prepare: base_images
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	$(MAKE) enable_watcher
+	$(MAKE) remove_interactive_only_reload_file
 
 clean:
 	@echo "### $@: $$(date "+%FT%T.%N")"
