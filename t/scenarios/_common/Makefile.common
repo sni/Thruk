@@ -95,21 +95,16 @@ failed_test_info:
 		index=0; \
 		for container in $$(docker compose ps -q $$svc); do \
 			index=$$(( index + 1 )); \
-			echo "*** $${svc}_$${index}"; \
+			echo "*** $${svc}_$${index}:"; \
 			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
-				echo "***"; \
-				echo "*** $${svc}_$${index} - apache/error_log"; \
-				echo "***"; \
+				echo "**** $${svc}_$${index} - apache/error_log:"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/apache/error_log; \
-				echo "***"; \
-				echo "*** $${svc}_$${index} - thruk.log"; \
-				echo "***"; \
+				echo "**** $${svc}_$${index} - thruk.log:"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/thruk.log; \
-				echo "***"; \
-				echo "*** $${svc}_$${index} - naemon.log"; \
-				echo "***"; \
+				echo "**** $${svc}_$${index} - naemon.log:"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/naemon.log; \
 			fi; \
+			echo "***"; \
 		done; \
 	done
 	-test -e thruk.conf && $(THRUK) -vvv -l
