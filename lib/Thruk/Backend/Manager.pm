@@ -1585,7 +1585,7 @@ sub _set_service_macros {
     $macros->{'$SERVICECHECKCOMMAND$'}   = $service->{'check_command'};
     $macros->{'$SERVICEBACKENDID$'}      = $service->{'peer_key'};
     $macros->{'$SERVICENOTESURL$'}       = $service->{'notes_url_expanded'};
-    $macros->{'$SERVICEDURATION$'}       = time() - $service->{'last_state_change'};
+    $macros->{'$SERVICEDURATION$'}       = time() - ($service->{'last_state_change'}//0);
     $macros->{'$SERVICEDOWNTIME$'}       = $service->{'scheduled_downtime_depth'};
     my $peer = defined $service->{'peer_key'} ? $self->get_peer_by_key($service->{'peer_key'}) : undef;
     if($peer) {

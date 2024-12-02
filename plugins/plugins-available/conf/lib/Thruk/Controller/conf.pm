@@ -1181,6 +1181,21 @@ sub _process_objects_page {
         $c->stash->{'file_link'} = $obj->{'file'}->{'display'} if defined $obj->{'file'};
         _gather_references($c, $obj);
 
+        # expand command to use the obfuscated one later
+        $c->stash->{'_check_command'} = "";
+        if($c->stash->{'type'} eq 'host' && $obj->{'conf'}->{'host_name'}) {
+            my $hosts = $c->db->get_hosts(filter => [{ 'host_name' => $obj->{'conf'}->{'host_name'}}]);
+            if($hosts && scalar @{$hosts} > 0) {
+                $c->stash->{'_check_command'} = $c->db->expand_command('host' => $hosts->[0], 'source' => $c->config->{'show_full_commandline_source'} );
+            }
+        }
+        elsif($c->stash->{'type'} eq 'service' && $obj->{'conf'}->{'host_name'} && $obj->{'conf'}->{'service_description'}) {
+            my $services = $c->db->get_services(filter => [{ 'host_name' => $obj->{'conf'}->{'host_name'}}, { 'description' => $obj->{'conf'}->{'service_description'}}]);
+            if($services && scalar @{$services} > 0) {
+                $c->stash->{'_check_command'} = $c->db->expand_command('host' => $services->[0], 'service' => $services->[0], 'source' => $c->config->{'show_full_commandline_source'} );
+            }
+        }
+
         # add roles
         if($c->stash->{'conf_config'}->{'cgi.cfg'} && ($c->stash->{'type'} eq 'contactgroup' || $c->stash->{'type'} eq 'contact')) {
             my $file     = $c->config->{'Thruk::Plugin::ConfigTool'}->{'cgi.cfg'};
