@@ -3986,11 +3986,12 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
             showJobOutputPopupFetch(jobid, peerid, divid);
         }, 1000)
     } else {
-        if(text.match(/\[(ERROR|WARNING|WARN)\]/)) {
-            head.find(".js-warn").removeClass("hidden");
-        }
-        else if(data['rc'] == 0) {
-            head.find(".js-ok").removeClass("hidden");
+        if(data['rc'] == 0) {
+            if(text.match(/\[(ERROR|WARNING|WARN)\]/)) {
+                head.find(".js-warn").removeClass("hidden");
+            } else {
+                head.find(".js-ok").removeClass("hidden");
+            }
         } else {
             head.find(".js-nok").removeClass("hidden");
             jQuery('#'+divid).addClass("textALERT");
