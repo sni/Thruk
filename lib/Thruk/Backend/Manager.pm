@@ -1092,7 +1092,9 @@ update the logcache, returns 1 on success or undef otherwise
 =cut
 sub renew_logcache {
     my($self, $c, $noforks) = @_;
-    $noforks = 0 unless defined $noforks;
+    if(!defined $noforks) {
+        $noforks = $ENV{'THRUK_JOB_DIR'} ? 1 : 0;
+    }
     return 1 unless defined $c->config->{'logcache'};
     # set to import only to get faster initial results
     local $c->config->{'logcache_delta_updates'} = 1 if $c->req->parameters->{'logcache_update'};
@@ -1106,12 +1108,12 @@ sub renew_logcache {
     if($err) {
         # initial import redirects to job page
         if($err =~ m/\Qprevent further page processing\E/mx) {
+            return $rc if $noforks;
             die($err);
         }
         _error($err);
         $c->stash->{errorMessage}     = "Logfilecache Unavailable";
-        $c->stash->{errorDescription} = $@;
-        $c->stash->{errorDescription} =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
+        $c->stash->{errorDescription} = _strip_line($err);
         return $c->detach('/error/index/99');
     }
     return $rc;
@@ -1195,6 +1197,7 @@ sub _renew_logcache {
                                               nofork     => $noforks,
                                               background => 1,
                                             });
+            return $job if $noforks;
             return $c->redirect_to_detached($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$job);
         } else {
             return 1 if $c->config->{'logcache_delta_updates'} == 2; # return in import only mode
@@ -1217,6 +1220,7 @@ sub _renew_logcache {
                                                nofork     => $noforks,
                                                background => 1,
                                             });
+            return $job if $noforks;
             return $c->redirect_to_detached($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$job);
         }
 
