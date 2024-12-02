@@ -148,7 +148,14 @@
                 [% END %]
               </td>
               [% IF error_lines.size > 0 %]
-                <td colspan="[% IF show_os_updates %]7[% ELSE %]6[% END %]" class="align-top textALERT whitespace-pre truncate overflow-hidden [% IF error_lines.size > 1 %]clickable[% END %]" style="max-width: 60vw;" [% IF error_lines.size > 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); reapplyAllStripes(); return false;"[% END %]>[% error_lines.0 | html; error_started = 1 %]</td>
+                <td
+                  colspan="[% IF show_os_updates %]7[% ELSE %]6[% END %]"
+                  class="align-top textALERT whitespace-pre truncate overflow-hidden [% IF error_lines.size > 1 %]clickable[% END %]"
+                  style="max-width: 60vw;"
+                  [% IF error_lines.size > 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); reapplyAllStripes(); return false;"[% END %]
+                >
+                  [%- error_lines.0 | html; error_started = 1 -%]
+                </td>
               [% ELSE %]
                 [% IF s.omd_version && omd_default_version != s.omd_version %]
                   <td class="align-top WARNING" title="node uses an outdated omd release, available:&#013;[% s.omd_versions.join("&#013;").replace('-labs-edition', '') %]">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
