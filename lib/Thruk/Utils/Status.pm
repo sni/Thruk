@@ -3223,7 +3223,7 @@ sub _expand_duration_filter {
 }
 
 ##############################################
-# try to remove useless cruft and intendion
+# try to optimize and remove useless cruft and intendion
 sub _improve_filter {
     my($filter) = @_;
 
