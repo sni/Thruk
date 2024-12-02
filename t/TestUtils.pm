@@ -312,7 +312,7 @@ sub test_page {
                     bail_out_req('request failed', $request, 1);
                 }
                 if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
-                    fail('Request '.$location.' should not redirect to job page again. Original url: '.$opts->{'url'});
+                    fail(sprintf('Request %s should not redirect to job page again. (start: %s, now: %s, original url: %s', $location, (scalar localtime $start), (scalar localtime $now), $opts->{'url'}));
                     bail_out_req('request failed', $request, 1);
                 }
             } else {
