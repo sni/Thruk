@@ -1344,7 +1344,7 @@ function toggleElementRemote(id, part, bodyclose) {
     resetRefresh();
     var el = elements[0];
     /* fetched already, just toggle */
-    if(el.innerHTML) {
+    if(el.innerHTML && !el.innerHTML.match("red alert")) {
         toggleElement(id, undefined, bodyclose);
         return;
     }
@@ -1355,10 +1355,16 @@ function toggleElementRemote(id, part, bodyclose) {
     }
     el.innerHTML = "<div class='spinner w-8 h-8 mx-[50%] my-8'>";
     showElement(id, undefined, bodyclose);
-    jQuery('#'+id).load(url_prefix+'cgi-bin/parts.cgi?part='+part+append, {}, function(text, status, req) {
-        showElement(id, undefined, bodyclose);
-        resetRefresh();
-    });
+    jQuery('#'+id).load(url_prefix+'cgi-bin/parts.cgi?part='+part+append, {},
+        function(text, status, jqXHR) {
+            resetRefresh();
+            showElement(id, undefined, bodyclose);
+            if(status == "error") {
+                var msg = getXHRerrorMsg(text, status, jqXHR, false);
+                el.innerHTML = "<div class='card red alert w-full'>"+msg+"</div>";
+            }
+        }
+    )
 }
 
 /* toggle a element by id
@@ -4329,7 +4335,7 @@ function load_overcard_content(id, url, add_pre) {
 }
 
 function ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown) {
-    thruk_xhr_error('request failed: ', '', textStatus, jqXHR, errorThrown, true);
+    return(thruk_xhr_error('request failed: ', '', textStatus, jqXHR, errorThrown, true));
 }
 
 function thruk_xhr_error(prefix, responseText, textStatus, jqXHR, errorThrown, logOnly, closeTimeout) {
