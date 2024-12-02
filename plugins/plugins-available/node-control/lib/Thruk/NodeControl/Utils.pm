@@ -164,10 +164,13 @@ sub get_server {
         peer_type               => $peer->{'type'} // '',
         section                 => $peer->{'section'},
         gathering               => $facts->{'gathering'}       || 0, # job id of current gathering job or 0
-        cleaning                => $facts->{'cleaning'}        || 0, # cleaning job id
         run_all                 => $facts->{'run_all'}         || 0, # job id when install/update/clean runs in one job
         installing              => $facts->{'installing'}      || 0, # install job id
+        installing_failed       => $facts->{'installing_failed'} // 0,
         updating                => $facts->{'updating'}        || 0, # update job id
+        updating_failed         => $facts->{'updating_failed'}   // 0,
+        cleaning                => $facts->{'cleaning'}        || 0, # cleaning job id
+        cleaning_failed         => $facts->{'cleaning_failed'}   // 0,
         os_updating             => $facts->{'os_updating'}     || 0, # os update id
         os_sec_updating         => $facts->{'os_sec_updating'} || 0, # sec update job id
         host_name               => undef,

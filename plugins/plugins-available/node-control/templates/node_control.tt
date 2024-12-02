@@ -148,11 +148,16 @@
                 [% END %]
               </td>
               [% IF error_lines.size > 0 %]
+                [% clickable = "" %]
                 <td
                   colspan="[% IF show_os_updates %]7[% ELSE %]6[% END %]"
-                  class="align-top textALERT whitespace-pre truncate overflow-hidden [% IF error_lines.size > 1 %]clickable[% END %]"
                   style="max-width: 60vw;"
-                  [% IF error_lines.size > 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); reapplyAllStripes(); return false;"[% END %]
+                  [% IF error_lines.size > 1; clickable = 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); reapplyAllStripes(); return false;"
+                  [% ELSIF s.installing_failed && s.logs.defined("install"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&type=install&peer=[% s.peer_key | html %]&modal=1'); return false;"
+                  [% ELSIF s.updating_failed && s.logs.defined("update"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&type=update&peer=[% s.peer_key | html %]&modal=1'); return false;"
+                  [% ELSIF s.cleaning_failed && s.logs.defined("cleanup"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&type=cleanup&peer=[% s.peer_key | html %]&modal=1'); return false;"
+                  [% END %]
+                  class="align-top textALERT whitespace-pre truncate overflow-hidden[% IF clickable %] clickable[% END %]"
                 >
                   [%- error_lines.0 | html; error_started = 1 -%]
                 </td>
