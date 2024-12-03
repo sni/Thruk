@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - unescape escaped characters in expanded command
           - fix flickering on search suggestions
+          - fix host/service totals
           - Agents:
             - pin inventory check to local worker
             - show default port in edit mask

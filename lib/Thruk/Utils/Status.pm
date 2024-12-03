@@ -217,13 +217,11 @@ sub get_search_from_param {
         return;
     }
 
-    # use the type or prop without prefix as global overide
-    # ex.: hoststatustypes set from the totals link should override all filter
     my $search = {
-        'hoststatustypes'    => $c->stash->{'hoststatustypes'}    || $params->{ $prefix . '_hoststatustypes' },
-        'hostprops'          => $c->stash->{'hostprops'}          || $params->{ $prefix . '_hostprops' },
-        'servicestatustypes' => $c->stash->{'servicestatustypes'} || $params->{ $prefix . '_servicestatustypes' },
-        'serviceprops'       => $c->stash->{'serviceprops'}       || $params->{ $prefix . '_serviceprops' },
+        'hostprops'          => $params->{$prefix.'_hostprops'},
+        'hoststatustypes'    => $params->{$prefix.'_hoststatustypes'},
+        'servicestatustypes' => $params->{$prefix.'_servicestatustypes'},
+        'serviceprops'       => $params->{$prefix.'_serviceprops'},
     };
 
     # store global searches, these will be added to our search
@@ -441,6 +439,27 @@ sub do_filter {
         $hostfilter    = _improve_filter($hostfilter)    if $hostfilter;
     }
 
+    # add global filter from totals links
+    if($c->stash->{'servicestatustypes'}) {
+        my(undef, undef, $f) = get_service_statustype_filter($c->stash->{'servicestatustypes'});
+        $servicefilter = { '-and' => [ $servicefilter, $f ] };
+    }
+    if($c->stash->{'serviceprops'}) {
+        my(undef, undef, $f) = get_service_prop_filter($c->stash->{'serviceprops'});
+        $servicefilter = { '-and' => [ $servicefilter, $f ] };
+    }
+
+    if($c->stash->{'hoststatustypes'}) {
+        my(undef, undef, $hf, $sf) = get_host_statustype_filter($c->stash->{'hoststatustypes'});
+        $servicefilter = { '-and' => [ $servicefilter, $sf ] };
+        $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
+    }
+    if($c->stash->{'hostprops'}) {
+        my(undef, undef, $hf, $sf) = get_host_prop_filter($c->stash->{'hostprops'});
+        $servicefilter = { '-and' => [ $servicefilter, $sf ] };
+        $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
+    }
+
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
 }
 
@@ -646,7 +665,7 @@ returns combined filter. When using strict, alias or display_name are not used.
 sub do_search {
     my( $c, $searches, $prefix, $strict ) = @_;
 
-    my( @hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter, @hosttotalsfilter, @servicetotalsfilter );
+    my(@hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter);
 
     for my $search ( @{$searches} ) {
         my($tmp_hostfilter, $tmp_servicefilter, $tmp_hostgroupfilter, $tmp_servicegroupfilter, $tmp_hosttotalsfilter, $tmp_servicetotalsfilter) = single_search($c, $search, $strict);
@@ -654,8 +673,6 @@ sub do_search {
         push @servicefilter,       $tmp_servicefilter       if defined $tmp_servicefilter;
         push @hostgroupfilter,     $tmp_hostgroupfilter     if defined $tmp_hostgroupfilter;
         push @servicegroupfilter,  $tmp_servicegroupfilter  if defined $tmp_servicegroupfilter ;
-        push @servicetotalsfilter, $tmp_servicetotalsfilter if defined $tmp_servicetotalsfilter;
-        push @hosttotalsfilter,    $tmp_hosttotalsfilter    if defined $tmp_hosttotalsfilter;
     }
 
     # combine the array of filters by OR
@@ -663,17 +680,13 @@ sub do_search {
     my $servicefilter       = Thruk::Utils::combine_filter( '-or', \@servicefilter );
     my $hostgroupfilter     = Thruk::Utils::combine_filter( '-or', \@hostgroupfilter );
     my $servicegroupfilter  = Thruk::Utils::combine_filter( '-or', \@servicegroupfilter );
-    my $hosttotalsfilter    = Thruk::Utils::combine_filter( '-or', \@hosttotalsfilter );
-    my $servicetotalsfilter = Thruk::Utils::combine_filter( '-or', \@servicetotalsfilter );
 
     $servicefilter       = _improve_filter($servicefilter)       if $servicefilter;
     $hostfilter          = _improve_filter($hostfilter)          if $hostfilter;
-    $servicetotalsfilter = _improve_filter($servicetotalsfilter) if $servicetotalsfilter;
-    $hosttotalsfilter    = _improve_filter($hosttotalsfilter)    if $hosttotalsfilter;
 
     # fill the host/service totals box
     if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq 'ovr_' or $prefix eq 'grd_' or $prefix eq '')) {
-        fill_totals_box( $c, $hosttotalsfilter, $servicetotalsfilter );
+        fill_totals_box( $c, $hostfilter, $servicefilter );
     }
 
     # if there is only one search with a single text filter
@@ -873,7 +886,7 @@ sub single_search {
     my( $c, $search, $strict ) = @_;
 
     my $errors = 0;
-    my( @hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter, @hosttotalsfilter, @servicetotalsfilter );
+    my(@hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter);
 
     my( $tmp_hostfilter, $tmp_servicefilter, $host_statustype_filtername, $host_prop_filtername, $service_statustype_filtername, $service_prop_filtername, $host_statustype_filtervalue, $host_prop_filtervalue, $service_statustype_filtervalue, $service_prop_filtervalue )
         = extend_filter( $c, undef, undef, $search->{'hoststatustypes'}, $search->{'hostprops'}, $search->{'servicestatustypes'}, $search->{'serviceprops'} );
@@ -985,7 +998,6 @@ sub single_search {
                 push @{$host_search_filter}, { long_plugin_output => { $op     => $value } };
             }
             push @hostfilter,       { $joinop => $host_search_filter };
-            push @hosttotalsfilter, { $joinop => $host_search_filter };
 
             # and some for services
             my $service_search_filter = [ { description        => { $op     => $value } },
@@ -1003,7 +1015,6 @@ sub single_search {
                 push @{$service_search_filter}, { long_plugin_output => { $op     => $value } },;
             }
             push @servicefilter,       { $joinop => $service_search_filter };
-            push @servicetotalsfilter, { $joinop => $service_search_filter };
         }
         elsif ( $filter->{'type'} eq 'host' ) {
 
@@ -1013,31 +1024,23 @@ sub single_search {
                 my $searchhost = $value;
                 $searchhost = Thruk::Utils::convert_wildcards_to_regex($searchhost);
                 push @hostfilter,          { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost }, display_name      => { '~~' => $searchhost } ] };
-                push @hosttotalsfilter,    { -or => [ name      => { '~~' => $searchhost }, alias      => { '~~' => $searchhost }, address      => { '~~' => $searchhost }, display_name      => { '~~' => $searchhost } ] };
                 push @servicefilter,       { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost }, host_display_name => { '~~' => $searchhost } ] };
-                push @servicetotalsfilter, { -or => [ host_name => { '~~' => $searchhost }, host_alias => { '~~' => $searchhost }, host_address => { '~~' => $searchhost }, host_display_name => { '~~' => $searchhost } ] };
             }
             else {
                 if($strict || $op eq  '=') {
                     push @hostfilter,          { $joinop => [ name      => { $op => $value } ] };
-                    push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value } ] };
                     push @servicefilter,       { $joinop => [ host_name => { $op => $value } ] };
-                    push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value } ] };
                 } else {
                     push @hostfilter,          { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
-                    push @hosttotalsfilter,    { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
                     push @servicefilter,       { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
-                    push @servicetotalsfilter, { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
                 }
             }
         }
         elsif ( $filter->{'type'} eq 'service' ) {
             if($strict || $op eq  '=') {
                 push @servicefilter,       { $joinop => [ description => { $op => $value } ] };
-                push @servicetotalsfilter, { $joinop => [ description => { $op => $value } ] };
             } else {
                 push @servicefilter,       { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
-                push @servicetotalsfilter, { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
             }
             $c->stash->{'has_service_filter'} = 1;
         }
@@ -1045,14 +1048,10 @@ sub single_search {
             if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'hostgroup');
                 push @hostfilter,          $hfilter;
-                push @hosttotalsfilter,    $hfilter;
                 push @servicefilter,       $sfilter;
-                push @servicetotalsfilter, $sfilter;
             } else {
                 push @hostfilter,          { groups      => { $listop => $value } };
-                push @hosttotalsfilter,    { groups      => { $listop => $value } };
                 push @servicefilter,       { host_groups => { $listop => $value } };
-                push @servicetotalsfilter, { host_groups => { $listop => $value } };
             }
             push @hostgroupfilter,     { name        => { $op     => $value } };
         }
@@ -1060,10 +1059,8 @@ sub single_search {
             if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'servicegroup');
                 push @servicefilter,       $sfilter;
-                push @servicetotalsfilter, $sfilter;
             } else {
                 push @servicefilter,       { groups => { $listop => $value } };
-                push @servicetotalsfilter, { groups => { $listop => $value } };
             }
             push @servicegroupfilter,  { name   => { $op     => $value } };
             $c->stash->{'has_service_filter'} = 1;
@@ -1072,28 +1069,20 @@ sub single_search {
             if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'contacts');
                 push @hostfilter,          $hfilter;
-                push @hosttotalsfilter,    $hfilter;
                 push @servicefilter,       $sfilter;
-                push @servicetotalsfilter, $sfilter;
             } else {
                 push @hostfilter,          { contacts => { $listop => $value } };
-                push @hosttotalsfilter,    { contacts => { $listop => $value } };
                 push @servicefilter,       { contacts => { $listop => $value } };
-                push @servicetotalsfilter, { contacts => { $listop => $value } };
             }
         }
         elsif ( $filter->{'type'} eq 'contactgroup' ) {
             if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'contactgroup');
                 push @hostfilter,          $hfilter;
-                push @hosttotalsfilter,    $hfilter;
                 push @servicefilter,       $sfilter;
-                push @servicetotalsfilter, $sfilter;
             } else {
                 push @hostfilter,          { contact_groups => { $listop => $value } };
-                push @hosttotalsfilter,    { contact_groups => { $listop => $value } };
                 push @servicefilter,       { contact_groups => { $listop => $value } };
-                push @servicetotalsfilter, { contact_groups => { $listop => $value } };
             }
         }
         elsif ( $filter->{'type'} eq 'next check' ) {
@@ -1108,40 +1097,28 @@ sub single_search {
                 $date   = '-1';
             }
             push @hostfilter,          { next_check => { $dateop => $date } };
-            push @hosttotalsfilter,    { next_check => { $dateop => $date } };
             push @servicefilter,       { next_check => { $dateop => $date } };
-            push @servicetotalsfilter, { next_check => { $dateop => $date } };
         }
         elsif ( $filter->{'type'} eq 'number of services' ) {
             push @hostfilter,          { num_services => { $op => $value } };
-            push @hosttotalsfilter,    { num_services => { $op => $value } };
             push @servicefilter,       { host_num_services => { $op => $value } };
-            push @servicetotalsfilter, { host_num_services => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'latency' ) {
             push @hostfilter,          { latency => { $op => $value } };
-            push @hosttotalsfilter,    { latency => { $op => $value } };
             push @servicefilter,       { latency => { $op => $value } };
-            push @servicetotalsfilter, { latency => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'execution time' ) {
             $value = Thruk::Utils::expand_duration($value);
             push @hostfilter,          { execution_time => { $op => $value } };
-            push @hosttotalsfilter,    { execution_time => { $op => $value } };
             push @servicefilter,       { execution_time => { $op => $value } };
-            push @servicetotalsfilter, { execution_time => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq '% state change' ) {
             push @hostfilter,          { percent_state_change => { $op => $value } };
-            push @hosttotalsfilter,    { percent_state_change => { $op => $value } };
             push @servicefilter,       { percent_state_change => { $op => $value } };
-            push @servicetotalsfilter, { percent_state_change => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'current attempt' ) {
             push @hostfilter,          { current_attempt => { $op => $value } };
-            push @hosttotalsfilter,    { current_attempt => { $op => $value } };
             push @servicefilter,       { current_attempt => { $op => $value } };
-            push @servicetotalsfilter, { current_attempt => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'last check' ) {
             my $date;
@@ -1155,36 +1132,26 @@ sub single_search {
                 $date   = '-1';
             }
             push @hostfilter,          { last_check => { $dateop => $date } };
-            push @hosttotalsfilter,    { last_check => { $dateop => $date } };
             push @servicefilter,       { last_check => { $dateop => $date } };
-            push @servicetotalsfilter, { last_check => { $dateop => $date } };
         }
         elsif ( $filter->{'type'} eq 'parent' ) {
             push @hostfilter,          { parents      => { $listop => $value } };
-            push @hosttotalsfilter,    { parents      => { $listop => $value } };
             push @servicefilter,       { host_parents => { $listop => $value } };
-            push @servicetotalsfilter, { host_parents => { $listop => $value } };
         }
         elsif ( $filter->{'type'} eq 'dependency' ) {
             push @hostfilter,          { depends_exec => { $listop => $value } };
-            push @hosttotalsfilter,    { depends_exec => { $listop => $value } };
             push @servicefilter,       { depends_exec => { $listop => $value } };
-            push @servicetotalsfilter, { depends_exec => { $listop => $value } };
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'plugin output' ) {
             my $cop = '-or';
             if($op eq '!=' or $op eq '!~~') { $cop = '-and' }
             push @hostfilter,          { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
-            push @hosttotalsfilter,    { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
             push @servicefilter,       { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
-            push @servicetotalsfilter, { $cop => [ plugin_output => { $op => $value }, long_plugin_output => { $op => $value } ] };
         }
         elsif ( $filter->{'type'} eq 'event handler' ) {
             push @hostfilter,          { event_handler => { $op => $value } };
-            push @hosttotalsfilter,    { event_handler => { $op => $value } };
             push @servicefilter,       { event_handler => { $op => $value } };
-            push @servicetotalsfilter, { event_handler => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'command' ) {
             # convert equal filter to regex, because check_command looks like: check-host-alive!args...
@@ -1197,25 +1164,19 @@ sub single_search {
                 $value = '^'.$value.'\!';
             }
             push @hostfilter,          { check_command => { $op => $value } };
-            push @hosttotalsfilter,    { check_command => { $op => $value } };
             push @servicefilter,       { check_command => { $op => $value } };
-            push @servicetotalsfilter, { check_command => { $op => $value } };
         }
         # Root Problems are only available in Shinken
         elsif ( $filter->{'type'} eq 'rootproblem' && $c->stash->{'enable_shinken_features'}) {
             next unless $c->stash->{'enable_shinken_features'};
             push @hostfilter,          { source_problems      => { $listop => $value } };
-            push @hosttotalsfilter,    { source_problems      => { $listop => $value } };
             push @servicefilter,       { source_problems      => { $listop => $value } };
-            push @servicetotalsfilter, { source_problems      => { $listop => $value } };
         }
         # Impacts are only available in Shinken
         elsif ( $filter->{'type'} eq 'impact' && $c->stash->{'enable_shinken_features'}) {
             next unless $c->stash->{'enable_shinken_features'};
             push @hostfilter,          { impacts      => { $listop => $value } };
-            push @hosttotalsfilter,    { impacts      => { $listop => $value } };
             push @servicefilter,       { impacts      => { $listop => $value } };
-            push @servicetotalsfilter, { impacts      => { $listop => $value } };
         }
         # Business Impact (criticity) is only available in Shinken
         elsif ( $filter->{'type'} eq 'business impact' || $filter->{'type'} eq 'priority' ) {
@@ -1223,9 +1184,7 @@ sub single_search {
             # value has to be numeric, otherwise shinken breaks
             $value =~ s/[^\d]//gmx; $value = 0 unless $value;
             push @hostfilter,          { criticity => { $op => $value } };
-            push @hosttotalsfilter,    { criticity => { $op => $value } };
             push @servicefilter,       { criticity => { $op => $value } };
-            push @servicetotalsfilter, { criticity => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'comment' ) {
             my($hfilter, $sfilter, $num) = get_comments_filter($c, $op, $value);
@@ -1234,53 +1193,38 @@ sub single_search {
                 Thruk::Utils::set_message($c, 'fail_message', "filter found too many comments/downtimes, be more specific.");
             } else {
                 push @hostfilter,          $hfilter;
-                push @hosttotalsfilter,    $hfilter;
                 push @servicefilter,       $sfilter;
-                push @servicetotalsfilter, $sfilter;
             }
         }
         elsif ( $filter->{'type'} eq 'check period' ) {
             push @hostfilter,          { check_period => { $op => $value } };
-            push @hosttotalsfilter,    { check_period => { $op => $value } };
             push @servicefilter,       { check_period => { $op => $value } };
-            push @servicetotalsfilter, { check_period => { $op => $value } };
         }
         # Filter on the downtime duration
         elsif ( $filter->{'type'} eq 'downtime duration' ) {
             $value                 = Thruk::Utils::expand_duration($value);
             my($hfilter, $sfilter) = get_downtimes_filter($c, $op, $value);
             push @hostfilter,          $hfilter;
-            push @hosttotalsfilter,    $hfilter;
             push @servicefilter,       $sfilter;
-            push @servicetotalsfilter, $sfilter;
         }
         elsif ( $filter->{'type'} eq 'duration' ) {
             my($tmp_hostf, $tmp_svcf) = _expand_duration_filter($op, $value);
             push @hostfilter,          @{$tmp_hostf} if $tmp_hostf;
-            push @hosttotalsfilter,    @{$tmp_hostf} if $tmp_hostf;
             push @servicefilter,       @{$tmp_svcf}  if $tmp_svcf;
-            push @servicetotalsfilter, @{$tmp_svcf}  if $tmp_svcf;
         }
         elsif ( $filter->{'type'} eq 'notification period' ) {
             push @hostfilter,          { notification_period => { $op => $value } };
-            push @hosttotalsfilter,    { notification_period => { $op => $value } };
             push @servicefilter,       { notification_period => { $op => $value } };
-            push @servicetotalsfilter, { notification_period => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'custom variable' ) {
             my $pre = uc($filter->{'val_pre'});
             push @hostfilter,       { custom_variables => { $op => $pre." ".$value } };
-            push @hosttotalsfilter, { custom_variables => { $op => $pre." ".$value } };
             my $cop = '-or';
             if($op eq '!=')  { $cop = '-and' }
             if($op eq '!~~') { $cop = '-and' }
             if($op eq '='  && $value eq '') { $cop = '-and' }
             if($op eq '!=' && $value eq '') { $cop = '-or' }
             push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
-                                                  custom_variables => { $op => $pre." ".$value },
-                                          ],
-                                 };
-            push @servicetotalsfilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
                                                   custom_variables => { $op => $pre." ".$value },
                                           ],
                                  };
@@ -1303,14 +1247,12 @@ sub single_search {
     my $servicefilter       = Thruk::Utils::combine_filter( '-and', \@servicefilter );
     my $hostgroupfilter     = Thruk::Utils::combine_filter( '-or', \@hostgroupfilter );
     my $servicegroupfilter  = Thruk::Utils::combine_filter( '-or', \@servicegroupfilter );
-    my $hosttotalsfilter    = Thruk::Utils::combine_filter( '-and', \@hosttotalsfilter );
-    my $servicetotalsfilter = Thruk::Utils::combine_filter( '-and', \@servicetotalsfilter );
 
     if($errors) {
         $c->stash->{'has_error'} = 1;
     }
 
-    return ( $hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $hosttotalsfilter, $servicetotalsfilter );
+    return ($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter);
 }
 
 
@@ -1542,6 +1484,9 @@ sub get_service_statustype_filter {
     my @servicestatusfilter;
     my @servicestatusfiltername;
 
+    if($number eq '-1') {
+        return(-1, 'None', { state => -1 } );
+    }
     $number = 31 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 31;
     my $servicestatusfiltername = 'All';
     if( $number and $number != 31 ) {
@@ -3310,5 +3255,7 @@ sub _improve_filter {
 
     return $filter;
 }
+
+##############################################
 
 1;
