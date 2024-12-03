@@ -1484,7 +1484,7 @@ sub get_service_statustype_filter {
     my @servicestatusfilter;
     my @servicestatusfiltername;
 
-    if($number eq '-1') {
+    if($number && $number eq '-1') {
         return(-1, 'None', { state => -1 } );
     }
     $number = 31 if !defined $number || $number !~ m/^\d+$/mx || $number <= 0 || $number > 31;
