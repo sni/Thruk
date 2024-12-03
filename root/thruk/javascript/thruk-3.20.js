@@ -3960,7 +3960,16 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
     head.find(".js-warn").addClass("hidden");
     head.find(".js-run").addClass("hidden");
     var text = data.stdout+data.stderr;
-    jQuery('#'+divid).text(text);
+    var lines = text.split("\n");
+    jQuery(lines).each(function(i, l) {
+        var div = document.createElement("div");
+        div.className = "whitespace-pre w-full";
+        div.innerText = l;
+        if(l.match(/\[(ERROR|WARNING|WARN)\]/)) {
+            div.className += " textALERT";
+        }
+        jQuery('#'+divid).append(div);
+    });
 
     // check if text area should scroll
     var scroll = jQuery("#"+divid).data("scroll");

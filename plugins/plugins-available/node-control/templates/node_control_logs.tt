@@ -1,13 +1,11 @@
 ﻿[% IF ! modal %]
   [% PROCESS _header.tt %]
   [% PROCESS _message.tt %]
-
-  [% PROCESS _infobox.tt %]
 [% END %]
 
 <script src="[% url_prefix %]vendor/linedtextarea-e619e09/jquery-linedtextarea.js" type="text/javascript" charset="utf-8"></script>
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/linedtextarea-e619e09/jquery-linedtextarea.css' />
-<div class="card w-full min-w-full xl:min-w-[1200px] min-h-[500px] [% IF modal %]shadow-float[% ELSE %]mt-8[% END %] flexcol flex-nowrap gap-0">
+<div class="card w-full min-w-full xl:min-w-[1200px] min-h-[500px] [% IF modal %]shadow-float[% ELSE %]h-full[% END %] flexcol flex-nowrap gap-0">
   <div class="head justify-between">
     <h3>
       [% IF log_meta.failed %]
@@ -26,7 +24,7 @@
     [% END %]
   </div>
   <div class="w-full h-full flex grow overflow-hidden p-2">
-    <textarea class="w-full h-full whitespace-pre js-text-editor" wrap="off" readonly style="line-height: 15px; white-space: pre;">[% log_text | html %]</textarea>
+    <textarea class="w-full h-full whitespace-pre js-text-editor leading-[15px]" wrap="off" readonly>[% log_text | html %]</textarea>
   </div>
   [% IF modal %]
     <div class="footer justify-center">
@@ -36,9 +34,45 @@
 </div>
 <script>
   jQuery(document).ready(function() {
-    var editor = document.getElementById('texteditor');
-    jQuery(".js-text-editor").linedtextarea();
+    var textarea = jQuery(".js-text-editor");
+    textarea.linedtextarea();
+
+
+    // mark lines with errors or warnings
+    var markings = {};
+    textarea.val().split("\n").forEach(function(l, i) {
+      if(l.match(/\[(ERROR|WARNING|WARN)\]/)) {
+        markings[i+1] = true;
+      }
+    });
+
+    if(Object.keys(markings).length > 0) {
+      markLines(markings);
+      textarea.scroll(function() {
+        markLines(markings);
+      })
+    }
   });
+
+  var lastLines = 0;
+  function markLines(markings) {
+    var lines = jQuery(".codelines > DIV.lineno");
+    if(lines.length <= lastLines) {
+      return;
+    }
+    jQuery(".codelines > DIV.lineno").each(function(i, el) {
+      if(i < lastLines) {
+        return(true);
+      }
+      var nr = Number(el.innerHTML);
+      var row = jQuery(el);
+      row.addClass("lineno-"+nr)
+      if(markings[i+1]) {
+        row.addClass("bg-[color:var(--alert-red-bg)] text-[color:var(--alert-red-fg)] border borderError");
+      }
+    });
+    lastLines = lines.length;
+  }
 </script>
 
 [% IF ! modal %]
