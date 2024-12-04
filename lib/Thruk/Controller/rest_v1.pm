@@ -1348,6 +1348,11 @@ sub _livestatus_options {
         }
     }
 
+    # remove special columns from request
+    if($options->{'columns'} && !$ENV{'THRUK_USE_LMD'}) {
+        $options->{'columns'} = [grep(!/^(peer_key|peer_name)$/mx, @{$options->{'columns'}})];
+    }
+
     return $options;
 }
 

@@ -13,6 +13,8 @@ next:
             - rename public tab and show own shared reports
           - Config Tool:
             - obfuscate passwords in readonly files
+          - Rest:
+            - fix peer_name/peer_key in columns when not using LMD
 
 3.20     Sat Nov 16 12:38:39 CET 2024
           - change default first_day_of_week to monday
