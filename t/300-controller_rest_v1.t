@@ -8,7 +8,7 @@ use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 580;
+    plan tests => 588;
 }
 
 BEGIN {
@@ -334,6 +334,17 @@ TestUtils::test_page(
         'content_type' => 'application/x-msexcel',
         'method'       => 'GET',
         'like'         => ['Arial1'],
+        'unlike'       => ['ARRAY'],
+    );
+};
+
+################################################################################
+# peer_name / peer_key
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/hosts?columns=name,peer_name,peer_key&name='.$host,
+        'method'       => 'GET',
+        'like'         => [$host, 'peer_name', 'peer_key', 'name'],
         'unlike'       => ['ARRAY'],
     );
 };
