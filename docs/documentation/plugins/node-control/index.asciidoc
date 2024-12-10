@@ -49,6 +49,7 @@ Without sudo permissions you can only update to existing omd versions.
 
 ### Configuration
 
+thruk_local.conf:
 ...................................
 <Component Thruk::Plugin::NodeControl>
   # command will be run on the local node (the one starting the update) prior the update. Exit code != 0 will abort the update
@@ -130,3 +131,44 @@ All hooks can make use of the following environment variables:
 
 If a hook prints `[ERROR]` or `[WARNING]` messages, the logfile will be
 highlighted. This can be used to indicate non-fatal issues.
+
+### Additional Backends
+
+It is possible to add additional backends to node-control, even if they should
+not be used as normal backends on the status pages.
+
+Adding `tags  = node-control` to the backend configuration hides the backend
+on the normal status pages and only show them on the node control page.
+
+For example if the backend is available by ssh only:
+
+thruk_local.conf:
+...................................
+<Component Thruk::Backend>
+   <peer>
+      name  = ssh only
+      type  = configonly
+      tags  = node-control
+      <options>
+          host_name = some_ssh_hostname.local
+          site_name = omd_site_user
+      </options>
+    </peer>
+</Component>
+...................................
+
+And if it's a OMD site available by http:
+
+...................................
+<Component Thruk::Backend>
+    <peer>
+      name  = http backend
+      type  = http
+      tags  = node-control
+      <options>
+          peer = https://http_site.local/sitename/
+          auth = http auth key
+      </options>
+    </peer>
+</Component>
+...................................
