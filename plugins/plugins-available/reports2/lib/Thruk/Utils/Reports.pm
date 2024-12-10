@@ -1380,14 +1380,9 @@ sub read_report_file {
     $report->{'nr'} = $nr;
     $report = get_new_report($c, $report);
 
+    my $log        = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
     my $needs_save = 0;
     my $available_templates = $c->stash->{'available_templates'} || get_report_templates($c);
-    if($report->{'template'} && !defined $available_templates->{$report->{'template'}}) {
-        my($oldfile, $oldname) = _get_report_tt_name($report->{'template'});
-        $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_report.tt';
-        $needs_save = 1;
-        Thruk::Utils::set_message( $c, 'fail_message', 'Report Template \''.$oldname.'\' not available in \''.$report->{'name'}.'\', using default: \''.$available_templates->{$report->{'template'}}->{'name'}.'\'' );
-    }
     if(!$report->{'template'}) {
         $report->{'template'} = $c->req->parameters->{'template'} || $c->config->{'Thruk::Plugin::Reports2'}->{'default_template'} || 'sla_report.tt';
         $needs_save = 1;
@@ -1479,15 +1474,12 @@ sub read_report_file {
         $needs_save = 1;
     }
 
-    my $log = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
     if(!$report->{'var'}->{'is_running'} && $report->{'var'}->{'job'} && !Thruk::Utils::External::is_running($c, $report->{'var'}->{'job'}, 1)) {
         my $jobid = delete $report->{'var'}->{'job'};
         my($out,$err,$time, $dir,$stash,$rc,$profile) = Thruk::Utils::External::get_result($c, $jobid, 1);
         if($err && $err !~ m/\Qno such job:\E/mx) {
             # append job error to report logfile
-            open(my $fh, '>>', $log);
-            print $fh $err;
-            Thruk::Utils::IO::close($fh, $log);
+            Thruk::Utils::IO::write($log, $err, undef, 1);
         }
         $report->{'var'}->{'profile'} = $profile;
         $needs_save = 1;
@@ -1528,6 +1520,14 @@ sub read_report_file {
         $report->{'error'} =~ s/^\Qundef error - \E//mx;
         if(!$report->{'long_error'} && $report->{'error'} =~ m/\n/mx) {
             ($report->{'error'}, $report->{'long_error'}) = split(/\n/mx, $report->{'error'}, 2);
+        }
+    }
+
+    if($report->{'template'} && !defined $available_templates->{$report->{'template'}}) {
+        my $err = sprintf("report template '%s' not available\n", $report->{'template'});
+        if(!$report->{'error'} || $report->{'error'} ne $err) {
+            $report->{'failed'} = 1;
+            $report->{'error'}  = $err;
         }
     }
 
