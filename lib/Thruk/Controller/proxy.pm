@@ -113,7 +113,10 @@ sub proxy_request {
     my $content = $base_req->content();
     if($c->check_user_roles('admin')) {
         my $update = _update_federate_remote_req($c, $peer, $request_url, $content);
-        $content = $update if defined $update;
+        if(defined $update) {
+            $content = $update;
+            $req->header('Content-Length', length($content));
+        }
     }
     $req->content($content);
     # cleanup a few headers
@@ -285,7 +288,11 @@ sub _update_federate_remote_req {
 
     $data->{'credential'} = $peer->{'class'}->{'auth'} if $data->{'credential'};
     if($data->{'options'} && $data->{'options'}->{'remote_name'}) {
-        $data->{'options'}->{'remote_name'} = $peer->{'class'}->{'remote_name'} if $peer->{'class'}->{'remote_name'};
+        if($peer->{'class'}->{'remote_name'}) {
+            $data->{'options'}->{'remote_name'} = $peer->{'class'}->{'remote_name'};
+        } else {
+            delete $data->{'options'}->{'remote_name'};
+        }
     }
 
     return($json->encode({ data => $json->encode($data) }));
