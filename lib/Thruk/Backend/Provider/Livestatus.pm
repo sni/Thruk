@@ -844,7 +844,7 @@ sub get_downtimes {
     # try to reduce the amount of transfered data
     my($size, $limit);
     if(!$self->{'optimized'} && defined $options{'pager'} && !defined $options{'options'}->{'limit'}) {
-        ($size, $limit) = $self->_get_query_size('downtimes', \%options, 'service_description', 'host_name', 'service_description');
+        ($size, $limit) = $self->_get_query_size('downtimes', \%options, 'host_name', 'host_name', 'service_description');
         if(defined $size) {
             # then set the limit for the real query
             $options{'options'}->{'limit'} = $limit;
