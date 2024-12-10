@@ -105,16 +105,16 @@ sub cmd {
         return(_action_list($c, $config));
     }
     elsif($mode eq 'facts' || $mode eq 'runtime') {
-        return(_action_facts($c, $mode, $opt, $commandoptions));
+        return(_action_facts($c, $mode, $opt, $commandoptions, $global_options));
     }
     elsif($mode eq 'cleanup') {
-        return(_action_cleanup($c, $opt, $commandoptions));
+        return(_action_cleanup($c, $opt, $commandoptions, $global_options));
     }
     elsif($mode eq 'install') {
-        return(_action_install($c, $opt, $commandoptions, $config));
+        return(_action_install($c, $opt, $commandoptions, $config, $global_options));
     }
     elsif($mode eq 'update') {
-        return(_action_update($c, $opt, $commandoptions, $config));
+        return(_action_update($c, $opt, $commandoptions, $config, $global_options));
     }
 
     $c->stats->profile(end => "_cmd_nc()");
@@ -168,9 +168,9 @@ sub _action_list {
 
 ##############################################
 sub _action_facts {
-    my($c, $mode, $opt, $commandoptions) = @_;
+    my($c, $mode, $opt, $commandoptions, $global_options) = @_;
 
-    my $peers = _get_selected_peers($c, $commandoptions);
+    my $peers = _get_selected_peers($c, $commandoptions, $global_options);
     _scale_peers($c, $opt->{'worker'}, $peers, sub {
         my($peer_key) = @_;
         my $peer = $c->db->get_peer_by_key($peer_key);
@@ -198,11 +198,11 @@ sub _action_facts {
 
 ##############################################
 sub _action_install {
-    my($c, $opt, $commandoptions, $config) = @_;
+    my($c, $opt, $commandoptions, $config, $global_options) = @_;
 
     my $version = $opt->{'version'} || $config->{'omd_default_version'};
     my $errors = 0;
-    my $peers = _get_selected_peers($c, $commandoptions);
+    my $peers = _get_selected_peers($c, $commandoptions, $global_options);
     for my $peer_key (@{$peers}) {
         my $peer = $c->db->get_peer_by_key($peer_key);
         local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
@@ -236,11 +236,11 @@ sub _action_install {
 
 ##############################################
 sub _action_update {
-    my($c, $opt, $commandoptions, $config) = @_;
+    my($c, $opt, $commandoptions, $config, $global_options) = @_;
 
     my $version = $opt->{'version'} || $config->{'omd_default_version'};
     my $errors = 0;
-    my $peers = _get_selected_peers($c, $commandoptions);
+    my $peers = _get_selected_peers($c, $commandoptions, $global_options);
     for my $peer_key (@{$peers}) {
         my $peer = $c->db->get_peer_by_key($peer_key);
         local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
@@ -274,10 +274,10 @@ sub _action_update {
 
 ##############################################
 sub _action_cleanup {
-    my($c, $opt, $commandoptions) = @_;
+    my($c, $opt, $commandoptions, $global_options) = @_;
 
     my $errors = 0;
-    my $peers = _get_selected_peers($c, $commandoptions);
+    my $peers = _get_selected_peers($c, $commandoptions, $global_options);
     for my $peer_key (@{$peers}) {
         my $peer = $c->db->get_peer_by_key($peer_key);
         local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
@@ -311,7 +311,7 @@ sub _action_cleanup {
 
 ##############################################
 sub _get_selected_peers {
-    my($c, $commandoptions) = @_;
+    my($c, $commandoptions, $global_options) = @_;
     my $peers = [];
     my $backend = shift @{$commandoptions};
     if($backend && $backend ne 'all') {
@@ -320,6 +320,15 @@ sub _get_selected_peers {
             _fatal("no such peer: ".$backend);
         }
         push @{$peers}, $backend;
+    }
+    elsif($global_options->{'backends'} && scalar @{$global_options->{'backends'}} > 0) {
+        for my $backend (@{$global_options->{'backends'}}) {
+            my $peer = $c->db->get_peer_by_key($backend);
+            if(!$peer) {
+                _fatal("no such peer: ".$backend);
+            }
+            push @{$peers}, $backend;
+        }
     } else {
         for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
             push @{$peers}, $peer->{'key'};
