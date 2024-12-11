@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 71;
+    plan tests => 74;
 
     use lib('t');
     require TestUtils;
@@ -79,4 +79,9 @@ my $omd_version = `omd version -b`; chomp($omd_version);
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk nc update tier2c --version='.$omd_version,
     errlike => ['/updating demo on tier2c/', '/tier2c update sucessfully/', '/OMD_SITE=demo/', '/OMD_UPDATE=/'],
+});
+
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk nc runtime tier3a',
+    errlike => ['/tier3a updated runtime sucessfully: OK/'],
 });
