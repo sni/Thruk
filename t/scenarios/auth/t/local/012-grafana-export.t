@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 53;
+plan tests => 73;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -80,4 +80,38 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => '/usr/bin/env file tmp/grafana.png',
     like => ['/tmp/grafana.png: PNG image data, 200 x 200, 8-bit\/color RGB, non-interlaced/'],
+});
+
+# extract text from image and check for a valid graph
+TestUtils::test_command({
+    cmd     => '/usr/bin/env tesseract tmp/grafana.png -',
+    like    => ['/check_ping/', '/pl-warn/'],
+    errlike => undef,
+});
+
+use lib 'share/thruk/lib/';
+
+my $c = TestUtils->get_c();
+$c->authenticate('username' => 'omdadmin', 'auth_src' => 'test');
+require Thruk::Utils;
+my($sessionid) = Thruk::Utils::get_fake_session($c, undef, "omdadmin");
+ok($sessionid, "got session id: ".($sessionid // 'none'));
+
+# export complete dashboard
+TestUtils::test_command({
+    cmd     => '/usr/bin/env /thruk/script/grafana_export.sh "1400" "900" "1733838250" "1733924650" "http://127.0.0.1:5000/demo/grafana/dashboard/script/histou.js?host=test&service=Ping" tmp/test.png',
+    like    => ['/chart panel found/'],
+    env     => { 'THRUK_SESSION_ID' => $sessionid },
+});
+
+TestUtils::test_command({
+    cmd  => '/usr/bin/env file tmp/test.png',
+    like => ['/tmp/test.png: PNG image data, 1400 x 900, 8-bit\/color RGB, non-interlaced/'],
+});
+
+# extract text from image and check for a valid graph
+TestUtils::test_command({
+    cmd     => '/usr/bin/env tesseract tmp/test.png -',
+    like    => ['/Home/', '/Dashboards/', '/Ping/', '/check_ping/', '/pl-warn/'],
+    errlike => undef,
 });
