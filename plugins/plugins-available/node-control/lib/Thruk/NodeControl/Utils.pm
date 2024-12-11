@@ -213,6 +213,13 @@ sub get_server {
         $server->{'omd_site'}  = $site if $site;
     }
 
+    if(!$server->{'last_error'} && !$c->stash->{'pi_detail'}->{$peer->{'key'}}->{'program_start'}) {
+        $c->stash->{'pi_detail'}->{$peer->{'key'}}->{'program_start'} = time();
+    }
+    if($server->{'last_error'} && !$peer->{'last_error'}) {
+        $peer->{'last_error'} = [split(/\n/mx, $server->{'last_error'})]->[0];
+    }
+
     # remove current default from cleanable
     if($server->{'omd_cleanable'}) {
         my $def = $config->{'omd_default_version'};

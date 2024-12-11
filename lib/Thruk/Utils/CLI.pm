@@ -1029,13 +1029,12 @@ sub _cmd_raw {
     my $key;
     # do we have a hint about remote peer?
     if($opt->{'remote_name'}) {
-        if(ref $opt->{'remote_name'} eq 'ARRAY') {
-            if(scalar @{$opt->{'remote_name'}} != 1) {
-                die('multiple remote_name not supported');
-            }
-            $opt->{'remote_name'} = $opt->{'remote_name'}->[0];
+        $opt->{'remote_name'} = Thruk::Base::list($opt->{'remote_name'});
+        if(scalar @{$opt->{'remote_name'}} != 1) {
+            die('multiple remote_name not supported');
         }
-        my $peer = $c->db->get_peer_by_name($opt->{'remote_name'});
+        $opt->{'remote_name'} = $opt->{'remote_name'}->[0];
+        my $peer = $c->db->get_peer_by_key($opt->{'remote_name'});
         die('no such backend: '.$opt->{'remote_name'}) unless defined $peer;
         $key = $peer->peer_key();
     }

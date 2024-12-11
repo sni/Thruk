@@ -55,7 +55,7 @@ sub index {
     for my $peer (@{$peers}) {
         push @{$servers}, Thruk::NodeControl::Utils::get_server($c, $peer, $config);
     }
-    Thruk::Action::AddDefaults::set_possible_backends($c, undef, $peers);
+    Thruk::Action::AddDefaults::set_possible_backends($c, $c->stash->{'disabled_backends'}, $peers);
 
     my $action = $c->req->parameters->{'action'} || 'list';
 

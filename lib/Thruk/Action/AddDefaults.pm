@@ -778,7 +778,7 @@ sub set_possible_backends {
             'name'        => $peer->{'name'},
             'addr'        => $peer->{'addr'},
             'type'        => $peer->{'type'},
-            'disabled'    => $disabled_backends->{$back} || REACHABLE,
+            'disabled'    => $disabled_backends->{$back} // REACHABLE,
             'running'     => 0,
             'last_error'  => defined $peer->{'last_error'} ? $peer->{'last_error'} : '',
             'section'     => $peer->{'section'} || 'Default',
@@ -795,8 +795,9 @@ sub set_possible_backends {
         push @new_possible_backends, $back;
     }
 
-    $c->stash->{'backends'}         = \@new_possible_backends;
-    $c->stash->{'backend_detail'}   = \%backend_detail;
+    $c->stash->{'disabled_backends'} = $disabled_backends;
+    $c->stash->{'backends'}          = \@new_possible_backends;
+    $c->stash->{'backend_detail'}    = \%backend_detail;
 
     return;
 }

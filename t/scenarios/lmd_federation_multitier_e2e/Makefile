@@ -15,7 +15,7 @@ extra_clean:
 	-killall lmd
 
 extra_test:
-	docker compose exec $(DOCKER_COMPOSE_TTY) --user root tier1a sudo -iu demo /usr/local/bin/local_test.sh 0
+	docker compose exec $(DOCKER_COMPOSE_TTY) --user root tier1a sudo -iu demo /usr/local/bin/local_test.sh 0 $(filter-out $@,$(MAKECMDGOALS))
 
 extra_test_verbose:
-	docker compose exec $(DOCKER_COMPOSE_TTY) --user root tier1a sudo -iu demo /usr/local/bin/local_test.sh 1
+	docker compose exec $(DOCKER_COMPOSE_TTY) --user root tier1a sudo -iu demo /usr/local/bin/local_test.sh 1 $(filter-out $@,$(MAKECMDGOALS))

@@ -5,6 +5,12 @@
     - role: local_tests
     - role: thruk_developer
   tasks:
+  - name: "install nagios4 / livestatus build dependencies"
+    include_role:
+      name: yum_apt_retry
+    vars:
+      package:
+        - tesseract
   - name: "omd config change"
     shell: "omd config demo change"
     args:

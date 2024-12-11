@@ -113,7 +113,13 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
     }
   };
 
-  await page.goto(url);
+  const response = await page.goto(url);
+  if(!response.ok()) {
+    console.log("fetching url failed: "+response.status()+" "+response.statusText())
+    //console.log(response.text())
+    await browser.close();
+    process.exit(2);
+  }
   if(url.match(/histou\.js\?/) || url.match(/\/grafana\//)) {
     var errorMsg;
     await Promise.race([
@@ -137,6 +143,8 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
       }, async () => {
         if(!errorMsg) {
           errorMsg = "timeout while waiting for chart, export failed";
+          //const pageSourceHTML = await page.content();
+          //console.log(pageSourceHTML);
         }
       })
     ]);

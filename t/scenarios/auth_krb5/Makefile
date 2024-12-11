@@ -14,10 +14,10 @@ wait_start_failed_extra:
 	-curl -kv http://127.0.0.3:60080/demo/thruk/cgi-bin/remote.cgi
 
 extra_test:
-	docker compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /usr/local/bin/local_test.sh 0
+	docker compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /usr/local/bin/local_test.sh 0 $(filter-out $@,$(MAKECMDGOALS))
 
 extra_test_verbose:
-	docker compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /usr/local/bin/local_test.sh 1
+	docker compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /usr/local/bin/local_test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
 
 webvnc:
 	@python3 -m webbrowser http://127.0.0.3:6901/?password=vncpassword
