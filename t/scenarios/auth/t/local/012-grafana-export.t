@@ -99,7 +99,7 @@ ok($sessionid, "got session id: ".($sessionid // 'none'));
 
 # export complete dashboard
 TestUtils::test_command({
-    cmd     => '/usr/bin/env /thruk/script/grafana_export.sh "1400" "900" "1733838250" "1733924650" "http://127.0.0.1:5000/demo/grafana/dashboard/script/histou.js?host=test&service=Ping" tmp/test.png',
+    cmd     => '/usr/bin/env /thruk/script/grafana_export.sh "1400" "900" "'.(time()-600).'" "'.(time()).'" "http://127.0.0.1:5000/demo/grafana/dashboard/script/histou.js?host=test&service=Ping" tmp/test.png',
     like    => ['/chart panel found/'],
     env     => { 'THRUK_SESSION_ID' => $sessionid },
 });
