@@ -8,6 +8,10 @@ echo "<<<OMD VERSION>>>"
 omd version -b
 echo "<<<>>>"
 
+echo "<<<OMD ADDONS>>>"
+ls -1 version/addon 2>/dev/null
+echo "<<<>>>"
+
 echo "<<<OMD VERSIONS>>>"
 omd versions
 echo "<<<>>>"

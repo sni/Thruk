@@ -334,6 +334,9 @@ sub _runtime_data {
     my %blocks = $out =~ m/<<<([^>]+)>>>\s*(.*?)\s*<<<>>>/sgmx;
 
     $runtime->{'omd_version'} = $blocks{'OMD VERSION'};
+    my $omd_addons = $blocks{'OMD ADDONS'}//'';
+    $omd_addons    =~ s=/$==gmx;
+    $runtime->{'omd_addons'}  = [split/\n/mx, $omd_addons];
 
     my %services = ($blocks{'OMD STATUS'} =~ m/^(\S+?)\s+(\d+)/gmx);
     $runtime->{'omd_status'} = \%services;
