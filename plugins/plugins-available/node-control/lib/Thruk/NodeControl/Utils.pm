@@ -706,6 +706,7 @@ sub _omd_install_update_cleanup_step2 {
     _set_job_started($c, 'run_all', $peer->{'key'});
 
     # install omd pkg
+    my @steps_done;
     if($config->{'pkg_install'} && !grep(/$version/mx, @{$facts->{'omd_versions'} // []})) {
         my $job = omd_install($c, $peer, $version, 1);
         return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to start install") unless $job;
@@ -713,17 +714,21 @@ sub _omd_install_update_cleanup_step2 {
         if(!$jobdata || $jobdata->{'rc'} ne '0') {
             return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to install");
         }
+        push @steps_done, "install";
     }
 
     # update
-    my $f = _ansible_get_facts($c, $peer, 0);
-    if($f->{'omd_version'} ne $version) {
-        my $job = omd_update($c, $peer, $version, 1);
-        return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to start update") unless $job;
-        my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, 180, 1);
-        if(!$jobdata || $jobdata->{'rc'} ne '0') {
-            return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to update");
+    if($config->{'pkg_update'}) {
+        my $f = _ansible_get_facts($c, $peer, 0);
+        if($f->{'omd_version'} ne $version) {
+            my $job = omd_update($c, $peer, $version, 1);
+            return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to start update") unless $job;
+            my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, 180, 1);
+            if(!$jobdata || $jobdata->{'rc'} ne '0') {
+                return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to update");
+            }
         }
+        push @steps_done, "update";
     }
 
     # cleanup
@@ -734,9 +739,10 @@ sub _omd_install_update_cleanup_step2 {
         if(!$jobdata || $jobdata->{'rc'} ne '0') {
             return _set_job_errored($c, 'run_all', $peer->{'key'}, "failed to cleanup");
         }
+        push @steps_done, "cleanup";
     }
 
-    printf(Thruk::Utils::Log::time_prefix()."*** install / update / cleanup finished.\n");
+    printf(Thruk::Utils::Log::time_prefix()."*** ".join(@steps_done, " / ")." finished.\n");
 
     _set_job_done($c, 'run_all', $peer->{'key'});
 
@@ -1121,6 +1127,7 @@ sub config {
         'ssh_fallback'            => 1,
         'os_updates'              => 1,
         'pkg_install'             => 1,
+        'pkg_update'              => 1,
         'pkg_cleanup'             => 1,
         'skip_confirms'           => 0,
         'parallel_tasks'          => 3,

@@ -80,8 +80,8 @@
             <div class="flexrow flex-nowrap gap-x-1 justify-between">
               <span>OS</span>
               <div class="flexrow flex-nowrap gap-x-1">
-                <a href="#" onclick="return nc_run_all(this, '.js-os-update-btn', {action: 'os_update'})"><i class="fa-solid fa-shield text-sm" title="install OS updates for all visible servers"></i></a>
-                <a href="#" onclick="return nc_run_all(this, '.js-os-sec-update-btn', {action: 'os_sec_update'})"><i class="fa-solid fa-shield-halved text-sm" title="install security OS updates for all visible servers"></i></a>
+                [% IF show_os_updates == 1 %]<a href="#" onclick="return nc_run_all(this, '.js-os-update-btn', {action: 'os_update'})">[% END %]<i class="fa-solid fa-shield text-sm" title="install OS updates for all visible servers"></i>[% IF show_os_updates == 1 %]</a>[% END %]
+                [% IF show_os_updates == 1 %]<a href="#" onclick="return nc_run_all(this, '.js-os-sec-update-btn', {action: 'os_sec_update'})">[% END %]<i class="fa-solid fa-shield-halved text-sm" title="install security OS updates for all visible servers"></i>[% IF show_os_updates == 1 %]</a>[% END %]
               </div>
             </div>
           </th>
@@ -92,11 +92,14 @@
           <th class="w-24">Disk</th>
           <th class="w-8 not-hoverable">
             <div class="flexrow flex-nowrap gap-x-1">
-              <a class="ml-6" href="#" onclick="nc_run_all(this, '.js-update-btn', {action: 'update'}); return false;"><i class="fa-solid fa-arrows-rotate text-sm" title="update facts for all visible servers"></i></a>
+              [% IF show_pkg_install || show_pkg_update || show_pkg_cleanup %]
+              <div class="w-5"></div>
+              [% END %]
+              <a href="#" onclick="nc_run_all(this, '.js-update-btn', {action: 'update'}); return false;"><i class="fa-solid fa-arrows-rotate text-sm" title="update facts for all visible servers"></i></a>
               [% IF show_pkg_install && show_all_button %]
                 <a href="#" onclick="[% skip_confirm %]confirm('really install omd v[% omd_default_version_label | html %] pkg on all visible servers?') && nc_run_all(this, '.js-install-btn', {action: 'omd_install'}); return false;"><i class="fa-solid fa-truck-arrow-right text-sm" title="install omd v[% omd_default_version_label | html %] for all visible servers"></i></a>
               [% END %]
-              [% IF show_all_button %]
+              [% IF show_pkg_update && show_all_button %]
                 <a href="#" onclick="[% skip_confirm %]confirm('really update to omd v[% omd_default_version_label | html %] on all visible servers?') && nc_run_all(this, '.js-omd-update-btn', {action: 'omd_update'}); return false;"><i class="fa-solid fa-square-up-right text-sm" title="update omd v[% omd_default_version_label | html %] for all visible servers"></i></a>
               [% END %]
               [% IF show_pkg_cleanup && show_all_button %]
@@ -200,14 +203,14 @@
                         [% IF s.os_updating %]
                           <div class="spinner clickable" onclick="showJobOutputPopup('[% s.os_updating | html %]','[% s.peer_key | html %]'); return false;"></div>
                         [% ELSE %]
-                          <button class="round p-0 h-5 w-5 gray text-xs text-center [% IF s.os_updates.size == 0 || s.os_sec_updating %]invisible[% END %] js-os-update-btn" title="There are [% s.os_updates.size %] updates available: [% s.os_updates.join(", ").substr(0, 250) %]" onclick="return nc_action_with_popup(this, {action: 'os_update'}, '[% s.peer_key | html %]')">
+                          <button class="round p-0 h-5 w-5 gray text-xs text-center [% IF show_os_updates == 2 %]cursor-default[% END %] [% IF s.os_updates.size == 0 || s.os_sec_updating %]invisible[% END %] js-os-update-btn" title="There are [% s.os_updates.size %] updates available: [% s.os_updates.join(", ").substr(0, 250) %]" [% IF show_os_updates == 1 %]onclick="return nc_action_with_popup(this, {action: 'os_update'}, '[% s.peer_key | html %]')"[% ELSIF show_os_updates == 2 %]onclick="return false;"[% END %]>
                             <i style="font-style: normal;">[% s.os_updates.size %]</i>
                           </button>
                         [% END %]
                         [% IF s.os_sec_updating %]
                           <div class="spinner clickable" style="margin-left: 3px;" onclick="showJobOutputPopup('[% s.os_sec_updating | html %]','[% s.peer_key | html %]'); return false;"></div>
                         [% ELSE %]
-                          <button class="round p-0 h-5 w-5 red text-xs text-center [% IF s.os_security.size == 0 || s.os_updating %]invisible[% END %] js-os-sec-update-btn" title="There are [% s.os_security.size %] security updates available: [% s.os_security.join(", ").substr(0, 250) %]" onclick="return nc_action_with_popup(this, {action: 'os_sec_update'}, '[% s.peer_key | html %]')">
+                          <button class="round p-0 h-5 w-5 red text-xs text-center [% IF show_os_updates == 2 %]cursor-default[% END %] [% IF s.os_security.size == 0 || s.os_updating %]invisible[% END %] js-os-sec-update-btn" title="There are [% s.os_security.size %] security updates available: [% s.os_security.join(", ").substr(0, 250) %]" [% IF show_os_updates == 1 %]onclick="return nc_action_with_popup(this, {action: 'os_sec_update'}, '[% s.peer_key | html %]')"[% ELSIF show_os_updates == 2 %]onclick="return false;"[% END %]>
                             <i style="font-style: normal;">[% s.os_security.size %]</i>
                           </button>
                         [% END %]
@@ -248,29 +251,31 @@
                 <input type="hidden" name="peer" value="[% s.peer_key | html %]">
                 <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                 <div class="flexrow flex-nowrap gap-1">
-                  [% IF s.logs.size > 0 %]
-                    [% log_failed = 0 %]
-                    [% log_warn   = 0 %]
-                    <script>
-                      logs_menu['[% s.peer_key | html %]'] = [
-                        [% available_logs = []; FOREACH l = ["install", "update", "cleanup"]; NEXT UNLESS s.logs.defined(l); available_logs.push(l); END %]
-                        [% FOREACH l = available_logs %]
-                          {
-                              'icon':  "fa-file-lines [% IF s.logs.$l.failed; IF s.logs.$l.failed == 2; log_warn = 1 %]textWARN[% ELSE; log_failed = 1 %]textALERT[% END; END %]",
-                              'label': "<div class='flexrow flex-nowrap gap-x-1'><div class='w-20'>[% l | html %].log</div>[% IF s.logs.$l.time %]<div class='textHINTsoft text-right'>([% date_format(c, s.logs.$l.time) %])</div>[% END %]</div>",
-                              'href':  "node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]",
-                              'onclick': "openModalWindowUrl('node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]&modal=1'); return false;"
-                          }[% UNLESS loop.last %],[% END %]
-                        [% END %]
-                      ];
-                    </script>
-                    <a href="#" class="" title="show logs of last tasks" onclick="show_action_menu(this, logs_menu['[% s.peer_key | html %]'],null, null, null, null, 'b-l'); return false;">
-                      <i class="fa-solid fa-file-lines [% IF log_failed %]textALERT[% ELSIF log_warn %]textWARN[% END %]"></i>
-                    </a>
-                  [% ELSE %]
-                    <a href="#" class="disabled not-clickable" title="no logs available" onclick="return false;">
-                      <i class="fa-solid fa-file-lines"></i>
-                    </a>
+                  [% IF show_pkg_install || show_pkg_update || show_pkg_cleanup %]
+                    [% IF s.logs.size > 0 %]
+                      [% log_failed = 0 %]
+                      [% log_warn   = 0 %]
+                      <script>
+                        logs_menu['[% s.peer_key | html %]'] = [
+                          [% available_logs = []; FOREACH l = ["install", "update", "cleanup"]; NEXT UNLESS s.logs.defined(l); available_logs.push(l); END %]
+                          [% FOREACH l = available_logs %]
+                            {
+                                'icon':  "fa-file-lines [% IF s.logs.$l.failed; IF s.logs.$l.failed == 2; log_warn = 1 %]textWARN[% ELSE; log_failed = 1 %]textALERT[% END; END %]",
+                                'label': "<div class='flexrow flex-nowrap gap-x-1'><div class='w-20'>[% l | html %].log</div>[% IF s.logs.$l.time %]<div class='textHINTsoft text-right'>([% date_format(c, s.logs.$l.time) %])</div>[% END %]</div>",
+                                'href':  "node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]",
+                                'onclick': "openModalWindowUrl('node_control.cgi?action=log&type=[% l | html %]&peer=[% s.peer_key | html %]&modal=1'); return false;"
+                            }[% UNLESS loop.last %],[% END %]
+                          [% END %]
+                        ];
+                      </script>
+                      <a href="#" class="" title="show logs of last tasks" onclick="show_action_menu(this, logs_menu['[% s.peer_key | html %]'],null, null, null, null, 'b-l'); return false;">
+                        <i class="fa-solid fa-file-lines [% IF log_failed %]textALERT[% ELSIF log_warn %]textWARN[% END %]"></i>
+                      </a>
+                    [% ELSE %]
+                      <a href="#" class="disabled not-clickable" title="no logs available" onclick="return false;">
+                        <i class="fa-solid fa-file-lines"></i>
+                      </a>
+                    [% END %]
                   [% END %]
 
                   [% IF s.gathering %]
@@ -300,13 +305,15 @@
                     [% END %]
                   [% END %]
 
-                  [% IF s.updating %]
-                    <div class="spinner clickable" style="margin-right: 3px;" title="site is updating omd right now" onclick="showJobOutputPopup('[% s.updating | html %]','[% s.peer_key | html %]')"></div>
-                  [% ELSE %]
-                    [% IF !has_installed && !show_pkg_install %]
-                      <a href="#" class="js-omd-update-btn disabled not-clickable" onclick="return false;" title="omd v[% omd_default_version_label | html %] is not available on [% s.host_name | html %]"><i class="fa-solid fa-square-up-right text-sm"></i></a>
+                  [% IF show_pkg_update %]
+                    [% IF s.updating %]
+                      <div class="spinner clickable" style="margin-right: 3px;" title="site is updating omd right now" onclick="showJobOutputPopup('[% s.updating | html %]','[% s.peer_key | html %]')"></div>
                     [% ELSE %]
-                      <a href="#" class="js-omd-update-btn [% IF s.omd_version == omd_default_version || !has_installed %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="[% skip_confirm %]confirm('update to omd v[% omd_default_version_label | html %] on [% s.host_name | html %]?') && nc_action_with_popup(this, {action: 'omd_update'}, '[% s.peer_key | html %]'); return false;"><i class="fa-solid fa-square-up-right text-sm" title="update to omd v[% omd_default_version_label | html %]"></i></a>
+                      [% IF !has_installed && !show_pkg_install %]
+                        <a href="#" class="js-omd-update-btn disabled not-clickable" onclick="return false;" title="omd v[% omd_default_version_label | html %] is not available on [% s.host_name | html %]"><i class="fa-solid fa-square-up-right text-sm"></i></a>
+                      [% ELSE %]
+                        <a href="#" class="js-omd-update-btn [% IF s.omd_version == omd_default_version || !has_installed %]invisible[% ELSE; show_all_btn = 1; END %]" onclick="[% skip_confirm %]confirm('update to omd v[% omd_default_version_label | html %] on [% s.host_name | html %]?') && nc_action_with_popup(this, {action: 'omd_update'}, '[% s.peer_key | html %]'); return false;"><i class="fa-solid fa-square-up-right text-sm" title="update to omd v[% omd_default_version_label | html %]"></i></a>
+                      [% END %]
                     [% END %]
                   [% END %]
 

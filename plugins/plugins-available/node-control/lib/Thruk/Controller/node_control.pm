@@ -46,6 +46,7 @@ sub index {
 
     $c->stash->{'show_os_updates'}  = $config->{'os_updates'}  // 1;
     $c->stash->{'show_pkg_install'} = $config->{'pkg_install'} // 1;
+    $c->stash->{'show_pkg_update'}  = $config->{'pkg_update'}  // 1;
     $c->stash->{'show_pkg_cleanup'} = $config->{'pkg_cleanup'} // 1;
     $c->stash->{'show_all_button'}  = $config->{'all_button'}  // 1;
     $c->stash->{'skip_confirm'}     = $config->{'skip_confirms'} ? 'noop_' : '';
@@ -197,6 +198,7 @@ sub _node_action {
 
     if($action eq 'omd_update') {
         return unless Thruk::Utils::check_csrf($c);
+        return($c->render(json => {'success' => 0, 'error' => "pkg update is disabled by config"})) unless $config->{'pkg_update'};
         my $job = Thruk::NodeControl::Utils::omd_update($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job"}));
@@ -211,7 +213,7 @@ sub _node_action {
 
     if($action eq 'os_update') {
         return unless Thruk::Utils::check_csrf($c);
-        return($c->render(json => {'success' => 0, 'error' => "os updates are disabled by config"})) unless $config->{'os_updates'};
+        return($c->render(json => {'success' => 0, 'error' => "os updates are disabled by config"})) if (($config->{'os_updates'}//0) != 1);
         my $job = Thruk::NodeControl::Utils::os_update($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job"}));
@@ -219,7 +221,7 @@ sub _node_action {
 
     if($action eq 'os_sec_update') {
         return unless Thruk::Utils::check_csrf($c);
-        return($c->render(json => {'success' => 0, 'error' => "os updates are disabled by config"})) unless $config->{'os_updates'};
+        return($c->render(json => {'success' => 0, 'error' => "os updates are disabled by config"})) if (($config->{'os_updates'}//0) != 1);
         my $job = Thruk::NodeControl::Utils::os_sec_update($c, $peer, $config->{'omd_default_version'});
         return($c->render(json => {'success' => 1, job => $job})) if $job;
         return($c->render(json => {'success' => 0, 'error' => "failed to start job" }));

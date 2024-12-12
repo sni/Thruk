@@ -68,11 +68,14 @@ thruk_local.conf:
   # set to 0 to disable ssh fallback in case http connection fails
   #ssh_fallback = 1
 
-  # set to 0 to disable os updates
+  # set to 0 to disable os updates, set it to 2 to show updates but dont offer updating them
   #os_updates = 1
 
   # set to 0 to disable pkg installation
   #pkg_install = 1
+
+  # set to 0 to disable pkg update
+  #pkg_update = 1
 
   # set to 0 to disable pkg cleanup
   #pkg_cleanup = 1
