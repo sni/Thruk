@@ -5395,6 +5395,15 @@ function matchOrIndex(obj, pattern, reOpts) {
     return(found);
 }
 
+function setTableSearchFilter(filter, inputId) {
+    if(!inputId) {
+        inputId = '#table_search_input';
+    }
+    jQuery(inputId).val(filter);
+    jQuery(inputId).change();
+  }
+
+
 /*******************************************************************************
  *   ,ad8888ba,   ,ad8888ba,   88b           d88 88888888ba  88          88888888888 888888888888 88   ,ad8888ba,   888b      88
  *  d8"'    `"8b d8"'    `"8b  888b         d888 88      "8b 88          88               88      88  d8"'    `"8b  8888b     88

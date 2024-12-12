@@ -79,7 +79,7 @@ sub update_inventory {
     my $port      = $opt->{'port'}     || $hostobj->{'conf'}->{'_AGENT_PORT'}     // default_port($type);
     my $mode      = $opt->{'mode'}     || $hostobj->{'conf'}->{'_AGENT_MODE'}     // 'https';
 
-    my $class = Thruk::Utils::Agents::get_agent_class($type);
+    my $class = get_agent_class($type);
     my $agent = $class->new({});
     my $data;
     eval {

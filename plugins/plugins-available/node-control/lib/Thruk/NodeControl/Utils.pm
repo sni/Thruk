@@ -5,6 +5,7 @@ use strict;
 use Carp;
 use Cpanel::JSON::XS ();
 use Cwd qw/abs_path/;
+use File::Temp qw/tempfile/;
 
 use Thruk::Constants qw/:peer_states/;
 use Thruk::Utils ();
@@ -195,6 +196,7 @@ sub get_server {
         last_error              => $facts->{'last_error'} // '',
         last_error_ts           => $facts->{'last_error_ts'} // '',
         last_job                => $facts->{'last_job'} // '',
+        last_gather_runtime     => $facts->{'last_gather_runtime'} // '',
         logs                    => $logs,
         facts                   => $facts || {},
     };
@@ -224,6 +226,15 @@ sub get_server {
     if($server->{'omd_cleanable'}) {
         my $def = $config->{'omd_default_version'};
         @{$server->{'omd_cleanable'}} = grep(!/$def/mx, @{$server->{'omd_cleanable'}}) if $def;
+    }
+
+    # allow addons to change and extend server
+    my $modules = Thruk::NodeControl::Utils::get_addon_modules();
+    for my $mod (@{$modules}) {
+        if($mod->can("extend_server")) {
+            my($s) = $mod->extend_server($server);
+            $server = $s if $s;
+        }
     }
 
     return($server);
@@ -326,7 +337,19 @@ sub _runtime_data {
     if($skip_cpu) {
         $script .= " 1";
     }
-    my($rc, $out) = _remote_script($c, $peer, $script);
+    my $script_append_data;
+
+    # allow addons to gather extra things
+    my $modules = get_addon_modules();
+    for my $mod (@{$modules}) {
+        my $mod_data;
+        if($mod->can("extra_runtime_script")) {
+            $mod_data = $mod->extra_runtime_script();
+        }
+        $script_append_data .= "\n".$mod_data if $mod_data;
+    }
+
+    my($rc, $out) = _remote_script($c, $peer, $script, undef, undef, $script_append_data);
     if($rc != 0) {
         die("failed to gather runtime data: rc ".$rc." ".$out);
     }
@@ -389,6 +412,14 @@ sub _runtime_data {
         $runtime->{'omd_cpu_perc'}  = (100-$val[7])/100;
     }
 
+    # run addons parser
+    for my $mod (@{$modules}) {
+        if($mod->can("extra_runtime_parse")) {
+            $mod->extra_runtime_parse($runtime, \%blocks);
+        }
+    }
+
+    $runtime->{'last_gather_runtime'}  = time();
 
     return($runtime);
 }
@@ -942,7 +973,7 @@ sub _remote_cmd {
 ##########################################################
 # upload and run a local script
 sub _remote_script {
-    my($c, $peer, $script, $background_options, $env) = @_;
+    my($c, $peer, $script, $background_options, $env, $script_append_data) = @_;
     my($rc, $out, $err);
 
     my $args;
@@ -951,7 +982,7 @@ sub _remote_script {
     if($args ne "") { $args = " ".$args; }
 
     if(!$peer->{'ssh_ok'} && ($peer->is_local() || $peer->is_peer_machine_reachable_by_http())) {
-        my $script_data = Thruk::Utils::IO::read($script);
+        my $script_data = Thruk::Utils::IO::read($script).($script_append_data// '');
         my $remote_path = sprintf('var/tmp/%s', Thruk::Base::basename($script));
         my $cmd = 'bash '.$remote_path.$args;
         if($env) {
@@ -984,10 +1015,21 @@ sub _remote_script {
 
     _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
 
-    if($env) {
+    if($env || $script_append_data) {
         # upload script and use the shell module, the scripts module cannot set env variables
         my $tmpscript = "var/tmp/".Thruk::Base::basename($script);
-        my($rc, $out) = _ansible_cmd($c, $peer, "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m copy -a \"src=".$script." dest=".$tmpscript." mode=0700\"", undef, $err);
+        my $localscript = $script;
+        if($script_append_data) {
+            my $script_data = Thruk::Utils::IO::read($script).($script_append_data// '');
+            my($fh, $file) = tempfile(TEMPLATE => 'scriptXXXXX', UNLINK => 1);
+            print $fh $script_data;
+            CORE::close($fh);
+            $localscript = $file;
+        }
+        my($rc, $out) = _ansible_cmd($c, $peer, "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m copy -a \"src=".$localscript." dest=".$tmpscript." mode=0700\"", undef, $err);
+        if($script_append_data) {
+            unlink($localscript);
+        }
         if($rc != 0) {
             die($out);
         }
@@ -1387,6 +1429,29 @@ sub _get_hook_env {
         'OMD_UPDATE'       => $version                 // '',
     };
     return($env);
+}
+
+##########################################################
+
+=head2 get_addon_modules
+
+  get_addon_modules()
+
+returns addon modules
+
+=cut
+sub get_addon_modules {
+    our $addon_modules;
+    return $addon_modules if defined $addon_modules;
+
+    $addon_modules = Thruk::Utils::find_modules('/Thruk/NodeControl/Addon/*.pm');
+    for my $mod (@{$addon_modules}) {
+        require $mod;
+        $mod =~ s/\//::/gmx;
+        $mod =~ s/\.pm$//gmx;
+        $mod->import;
+    }
+    return $addon_modules;
 }
 
 ##########################################################

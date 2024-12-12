@@ -100,6 +100,24 @@ sub index {
     map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};
     $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'peer_name', 'host_name', 'omd_site']);
 
+    $c->stash->{'columns'} = [qw/section backend hostname site omd status os virt cpu memory disk actions/];
+
+    # allow addons to change and extend visible columns
+    my $modules = Thruk::NodeControl::Utils::get_addon_modules();
+    for my $mod (@{$modules}) {
+        if($mod->can("set_columns")) {
+            my($cols) = $mod->set_columns($c->stash->{'columns'});
+            $c->stash->{'columns'} = $cols if $cols;
+        }
+    }
+
+    # allow addons to change server list
+    for my $mod (@{$modules}) {
+        if($mod->can("adjust_server_list")) {
+            my($s) = $mod->adjust_server_list($servers);
+            $servers = $s if $s;
+        }
+    }
     $c->stash->{data} = $servers;
 
     return 1;

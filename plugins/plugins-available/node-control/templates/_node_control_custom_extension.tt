@@ -1,0 +1,7 @@
+﻿[% BLOCK server_table_header %]
+  <th class="w-24">[% col %]</th>
+[% END %]
+
+[% BLOCK server_table_row %]
+  <td></td>
+[% END %]
