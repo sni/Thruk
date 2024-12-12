@@ -320,6 +320,35 @@ sub array2hash {
     return \%hash;
 }
 
+
+########################################
+
+=head2 array_insert_after
+
+  array_insert_after($list, $search, $insert)
+
+return list and insert $insert after element $search
+
+=cut
+sub array_insert_after {
+    my($list, $search, $insert) = @_;
+
+    my $found;
+    my @result;
+    for my $el (@{$list}) {
+        push @result, $el;
+        if($el eq $search) {
+            push @result, $insert;
+            $found = 1;
+        }
+    }
+    if(!$found) {
+        push @result, $insert;
+    }
+
+    return \@result;
+}
+
 ########################################
 
 =head2 hash_invert
