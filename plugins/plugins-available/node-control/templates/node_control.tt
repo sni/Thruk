@@ -59,7 +59,9 @@
       [% PROCESS _table_search_field.tt ids=["msTable"] %]
     </div>
     <div class="grow"></div>
-    <span class="tabs active">Nodes</span>
+    <span class="tabs min-w-[140px] w-40 text-center js-tabs clickable" id="view_all"      onclick="omd_view('all')     ; return false;">All</span>
+    <span class="tabs min-w-[140px] w-40 text-center js-tabs clickable" id="view_outdated" onclick="omd_view('outdated'); return false;">Outdated</span>
+    <span class="tabs min-w-[140px] w-40 text-center js-tabs clickable" id="view_current"  onclick="omd_view('current') ; return false;">Up To Date</a></span>
     <div class="grow"></div>
     <div class="w-48"></div>
   </div>
@@ -115,7 +117,7 @@
           IF s.last_error;
             error_lines = s.last_error.split("\n");
           END %]
-          <tr class="js-tabs" id="node_row_[% s.peer_key | html %]">
+          <tr class="js-node[% IF s.omd_version %][% IF omd_default_version != s.omd_version %] outdated[% ELSE %] current[% END; END %]" id="node_row_[% s.peer_key | html %]">
             <td class="align-top js-node-row">[% IF s.section != "Default" && s.section != "" && s.section != last_section; s.section | html; END; last_section = s.section; %]</td>
             <td class="align-top clickable pr-px" onclick="openModalWindowUrl('node_control.cgi?action=peer_status&modal=1&peer=[% s.peer_key | html %]');" title="[% s.peer_key | html %]">
               <div class="flex min-w-max">
@@ -358,5 +360,32 @@
 </script>
 [% END %]
 
+<script type="text/javascript">
+  var last_view_typ;
+  function omd_view(typ) {
+      if(typ == undefined) {
+          typ = last_view_typ;
+      }
+      last_view_typ = typ;
+
+      if(typ == 'all') {
+        jQuery('#msTable TR.js-node').removeClass("hidden");
+        set_hash("", 1);
+      } else {
+        jQuery('#msTable TR.js-node').addClass("hidden");
+        jQuery('#msTable TR.'+typ).removeClass("hidden");
+        set_hash(typ, 1);
+      }
+      jQuery("SPAN.tabs").removeClass("active");
+      jQuery("#view_"+typ).addClass("active");
+
+      return true;
+  }
+
+  var typ = get_hash(1);
+  if(typ == undefined) { typ = 'all' }
+  if(typ == "")        { typ = 'all' }
+  omd_view(typ);
+</script>
 
 [% PROCESS _footer.tt %]
