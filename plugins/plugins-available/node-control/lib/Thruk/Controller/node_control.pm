@@ -114,7 +114,7 @@ sub index {
     # allow addons to change server list
     for my $mod (@{$modules}) {
         if($mod->can("adjust_server_list")) {
-            my($s) = $mod->adjust_server_list($servers);
+            my($s) = $mod->adjust_server_list($c, $servers);
             $servers = $s if $s;
         }
     }
