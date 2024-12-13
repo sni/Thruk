@@ -982,7 +982,7 @@ sub _remote_cmd {
     _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
 
     $cmd =~ s/"/\\"/gmx;
-    my $fullcmd = "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m shell -a \"".$cmd."\"";
+    my $fullcmd = "ansible all -i "._sitename($server->{'omd_site'})."\@$host_name, -m shell -a \"".$cmd."\"";
     return(_ansible_cmd($c, $peer, $fullcmd, $background_options, $err));
 }
 
@@ -1042,7 +1042,7 @@ sub _remote_script {
             CORE::close($fh);
             $localscript = $file;
         }
-        my($rc, $out) = _ansible_cmd($c, $peer, "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m copy -a \"src=".$localscript." dest=".$tmpscript." mode=0700\"", undef, $err);
+        my($rc, $out) = _ansible_cmd($c, $peer, "ansible all -i "._sitename($server->{'omd_site'})."\@$host_name, -m copy -a \"src=".$localscript." dest=".$tmpscript." mode=0700\"", undef, $err);
         if($script_append_data) {
             unlink($localscript);
         }
@@ -1052,7 +1052,7 @@ sub _remote_script {
         return(_remote_cmd($c, $peer, 'bash '.$tmpscript.$args, $background_options, $env));
     }
 
-    my $fullcmd = "ansible all -i ".$server->{'omd_site'}."\@$host_name, -m script -a \"".$script.$args."\"";
+    my $fullcmd = "ansible all -i "._sitename($server->{'omd_site'})."\@$host_name, -m script -a \"".$script.$args."\"";
     return(_ansible_cmd($c, $peer, $fullcmd, $background_options, $err));
 }
 
@@ -1468,6 +1468,12 @@ sub get_addon_modules {
         $mod->import;
     }
     return $addon_modules;
+}
+
+##########################################################
+sub _sitename {
+    my($site) = @_;
+    return($site || $ENV{'OMD_SITE'} || $ENV{'USER'} || 'nobody');
 }
 
 ##########################################################
