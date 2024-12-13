@@ -334,7 +334,7 @@ function init_deletable_inputs() {
                     }
                     var This = this;
                     jQuery(This).hide();
-                    jQuery(This).prev("INPUT").val("").trigger("change").trigger("keyup");
+                    jQuery(This).prev("INPUT").val("").trigger("change").trigger("keyup").focus();
                     if(jQuery(This).hasClass("autosubmit")) {
                         window.setTimeout(function() {
                             jQuery(This).parents("FORM").submit();
@@ -5421,7 +5421,7 @@ function setTableSearchFilter(filter, inputId) {
         inputId = '#table_search_input';
     }
     jQuery(inputId).val(filter);
-    jQuery(inputId).change();
+    jQuery(inputId).focus();
   }
 
 
