@@ -1036,8 +1036,11 @@ sub _remote_script {
         my $tmpscript = "var/tmp/".Thruk::Base::basename($script);
         my $localscript = $script;
         if($script_append_data) {
-            my $script_data = Thruk::Utils::IO::read($script).($script_append_data// '');
-            my($fh, $file) = tempfile(TEMPLATE => 'scriptXXXXX', UNLINK => 1);
+            my $scriptfolder = $c->config->{'tmp_path'}.'/scripts';
+            Thruk::Utils::IO::mkdir($scriptfolder) unless -d $scriptfolder;
+            Thruk::Utils::clean_old_folder_files($scriptfolder, 'thruk-nc-', 600);
+            my $script_data = Thruk::Utils::IO::read($script)."\n\n".$script_append_data;
+            my($fh, $file) = tempfile(TEMPLATE => 'thruk-nc-scriptXXXXX', UNLINK => 1, DIR => $scriptfolder);
             print $fh $script_data;
             CORE::close($fh);
             $localscript = $file;

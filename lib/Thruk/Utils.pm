@@ -4112,6 +4112,38 @@ sub http_response_error {
     }
 }
 
+##########################################################
+
+=head2 clean_old_folder_files
+
+  clean_old_folder_files($folder, $filter, $max_age)
+
+removes all files from folder which are older than $max_age and match given $filter
+
+=cut
+sub clean_old_folder_files {
+    my($folder, $filter, $max_age) = @_;
+
+    return unless -d $folder;
+
+    my $timeout = time() - $max_age;
+    _debug2("checking for old files in ".$folder." older than: ".(scalar localtime($timeout)));
+    opendir( my $dh, $folder) || die "can't opendir '$folder': $!";
+    for my $entry (readdir($dh)) {
+        next if $entry eq '.' or $entry eq '..';
+        next if $entry !~ m/$filter/mx;
+
+        my $file = $folder.'/'.$entry;
+        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
+        if($mtime && $mtime < $timeout) {
+            _debug2("removing old file: ".$file);
+            unlink($file);
+        }
+    }
+
+    return;
+}
+
 ##############################################
 
 1;
