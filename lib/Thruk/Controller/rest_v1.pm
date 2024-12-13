@@ -3066,7 +3066,9 @@ sub guess_field_type {
 
     # ex.: last_update
     if($name =~ m/^(last_|next_|start_|end_)/mx) {
-        return('time', '');
+        if($name !~ /(last_job|last_error)/mx) {
+            return('time', '');
+        }
     }
 
     # ex.: expire_ts

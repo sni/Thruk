@@ -511,6 +511,8 @@ sub _fetch_keys {
     return if $url eq '/thruk/cluster/heartbeat';
     return if $url eq '/thruk/config';
     return if $url =~ '/thruk/editor';
+    return if $url =~ '/thruk/nc';
+    return if $url =~ '/thruk/node-control';
     return if $url eq '/config/objects';
     return if $url eq '/config/fullobjects';
     return if($url eq '/lmd/sites' && !$ENV{'THRUK_USE_LMD'});

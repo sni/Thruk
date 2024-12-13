@@ -3464,6 +3464,246 @@ __DATA__
    ]
   }
  },
+ "/thruk/node-control/nodes": {
+  "GET": {
+   "columns": [
+    {
+     "description": "full qualified domain from ansible facts",
+     "name": "ansible_fqdn",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 1/0 if the nodes is running cleanup right now",
+     "name": "cleaning",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 1/0 wether last cleanup job failed",
+     "name": "cleaning_failed",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of cpu cores",
+     "name": "cpu_cores",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "current cpu usage in percent",
+     "name": "cpu_perc",
+     "type": "number",
+     "unit": "%"
+    },
+    {
+     "description": "ansible facts as nested data structure",
+     "name": "facts",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 1/0 if node is gathering facts right now",
+     "name": "gathering",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "nodes host name",
+     "name": "host_name",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 1/0 if node is installing omd right now",
+     "name": "installing",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 1/0 if last install failed",
+     "name": "installing_failed",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "text of last job error",
+     "name": "last_error",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "timestamp of last error",
+     "name": "last_error_ts",
+     "type": "time",
+     "unit": ""
+    },
+    {
+     "description": "duration of last facts gathering job",
+     "name": "last_gather_runtime",
+     "type": "time",
+     "unit": ""
+    },
+    {
+     "description": "last job id",
+     "name": "last_job",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "nested list of available log files",
+     "name": "logs",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "machine type from ansible",
+     "name": "machine_type",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "free memory in MB",
+     "name": "memfree",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "total memory in MB",
+     "name": "memtotal",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "list of available omd versions",
+     "name": "omd_available_versions",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "list of unused omd versions",
+     "name": "omd_cleanable",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "free disk space in bytes",
+     "name": "omd_disk_free",
+     "type": "",
+     "unit": "bytes"
+    },
+    {
+     "description": "total disk space in bytes",
+     "name": "omd_disk_total",
+     "type": "",
+     "unit": "bytes"
+    },
+    {
+     "description": "omd site name",
+     "name": "omd_site",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "nested structure of omd services with their states",
+     "name": "omd_status",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "current used omd version",
+     "name": "omd_version",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "available omd versions",
+     "name": "omd_versions",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "operating systems name",
+     "name": "os_name",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 1/0 if security updates are beeing installed right now",
+     "name": "os_sec_updating",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "list of available security updates",
+     "name": "os_security",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "list of available os updates",
+     "name": "os_updates",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 1/0 if os updates are beeing installed right now",
+     "name": "os_updating",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "version number of operating system",
+     "name": "os_version",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "backend id when having multiple sites connected",
+     "name": "peer_key",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "name of this backend",
+     "name": "peer_name",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "peer connection type",
+     "name": "peer_type",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 0/1 if install/update/cleanup is running right now",
+     "name": "run_all",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "peer backend section",
+     "name": "section",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 0/1 if update is running right now",
+     "name": "updating",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "flag 0/1 if last update failed",
+     "name": "updating_failed",
+     "type": "",
+     "unit": ""
+    }
+   ]
+  }
+ },
  "/thruk/panorama": {
   "GET": {
    "columns": [

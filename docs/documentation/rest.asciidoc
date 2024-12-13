@@ -2306,6 +2306,59 @@ runs the logcache delta update.
 
 alias for /thruk/stats
 
+=== GET /thruk/nc/nodes
+
+alias for /thruk/node-control/nodes
+
+=== GET /thruk/node-control/nodes
+
+lists node control nodes.
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|ansible_fqdn                      |            |          | full qualified domain from ansible facts
+|cleaning                          |            |          | flag 1/0 if the nodes is running cleanup right now
+|cleaning_failed                   |            |          | flag 1/0 wether last cleanup job failed
+|cpu_cores                         |            |          | number of cpu cores
+|cpu_perc                          | number     | %        | current cpu usage in percent
+|facts                             |            |          | ansible facts as nested data structure
+|gathering                         |            |          | flag 1/0 if node is gathering facts right now
+|host_name                         |            |          | nodes host name
+|installing                        |            |          | flag 1/0 if node is installing omd right now
+|installing_failed                 |            |          | flag 1/0 if last install failed
+|last_error                        |            |          | text of last job error
+|last_error_ts                     | time       |          | timestamp of last error
+|last_gather_runtime               | time       |          | duration of last facts gathering job
+|last_job                          |            |          | last job id
+|logs                              |            |          | nested list of available log files
+|machine_type                      |            |          | machine type from ansible
+|memfree                           |            |          | free memory in MB
+|memtotal                          |            |          | total memory in MB
+|omd_available_versions            |            |          | list of available omd versions
+|omd_cleanable                     |            |          | list of unused omd versions
+|omd_disk_free                     |            | bytes    | free disk space in bytes
+|omd_disk_total                    |            | bytes    | total disk space in bytes
+|omd_site                          |            |          | omd site name
+|omd_status                        |            |          | nested structure of omd services with their states
+|omd_version                       |            |          | current used omd version
+|omd_versions                      |            |          | available omd versions
+|os_name                           |            |          | operating systems name
+|os_sec_updating                   |            |          | flag 1/0 if security updates are beeing installed right now
+|os_security                       |            |          | list of available security updates
+|os_updates                        |            |          | list of available os updates
+|os_updating                       |            |          | flag 1/0 if os updates are beeing installed right now
+|os_version                        |            |          | version number of operating system
+|peer_key                          |            |          | backend id when having multiple sites connected
+|peer_name                         |            |          | name of this backend
+|peer_type                         |            |          | peer connection type
+|run_all                           |            |          | flag 0/1 if install/update/cleanup is running right now
+|section                           |            |          | peer backend section
+|updating                          |            |          | flag 0/1 if update is running right now
+|updating_failed                   |            |          | flag 0/1 if last update failed
+|===========================================
+
+
 === GET /thruk/panorama
 
 lists all panorama dashboards.
