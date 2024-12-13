@@ -3745,6 +3745,15 @@ function do_table_search_table(id, table, value) {
 }
 
 function matchTableCellContent(el, value) {
+    // search data fields
+    if(el.dataset) {
+        for(var key in el.dataset) {
+            if(matchOrIndex(el.dataset[key], value)) {
+                return true;
+            }
+        }
+    }
+
     var src = el.innerHTML.toLowerCase();
     // remove html tags
     src = src.replace(/<[^>]*?>/g, '');
