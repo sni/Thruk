@@ -156,7 +156,7 @@ sub _action_list {
             Site    => $s->{'omd_site'},
             Version => $v,
             OS      => sprintf("%s %s", $s->{'os_name'}, $s->{'os_version'}),
-            Status  => _omd_status($s->{'omd_status'}),
+            Status  => _status($s),
         };
     }
     my $output = Thruk::Utils::text_table(
@@ -350,8 +350,15 @@ sub _scale_peers {
 }
 
 ##############################################
-sub _omd_status {
-    my($status) = @_;
+sub _status {
+    my($s) = @_;
+
+    if($s->{'last_error'}) {
+        my $err = ([split(/\n/mx, $s->{'last_error'})])->[0];
+        return("failed: ".$err);
+    }
+
+    my $status = $s->{'omd_status'};
 
     return "" unless defined $status->{'OVERALL'};
     return "OK" if $status->{'OVERALL'} == 0;
