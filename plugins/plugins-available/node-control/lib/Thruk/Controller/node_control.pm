@@ -124,6 +124,42 @@ sub index {
 }
 
 ##########################################################
+
+=head2 TO_JSON
+
+=cut
+sub TO_JSON {
+    my ($c) = @_;
+
+    my $config  = Thruk::NodeControl::Utils::config($c);
+    my $peers   = Thruk::NodeControl::Utils::get_peers($c);
+    my $servers = [];
+    for my $peer (@{$peers}) {
+        push @{$servers}, Thruk::NodeControl::Utils::get_server($c, $peer, $config);
+    }
+    Thruk::Action::AddDefaults::set_possible_backends($c, $c->stash->{'disabled_backends'}, $peers);
+
+    # allow addons to change and extend visible columns
+    my $modules = Thruk::NodeControl::Utils::get_addon_modules();
+    for my $mod (@{$modules}) {
+        if($mod->can("set_columns")) {
+            my($cols) = $mod->set_columns($c->stash->{'columns'});
+            $c->stash->{'columns'} = $cols if $cols;
+        }
+    }
+
+    # allow addons to change server list
+    for my $mod (@{$modules}) {
+        if($mod->can("adjust_server_list")) {
+            my($s) = $mod->adjust_server_list($c, $servers);
+            $servers = $s if $s;
+        }
+    }
+
+    return $servers;
+}
+
+##########################################################
 sub _node_action {
     my($c, $action) = @_;
 

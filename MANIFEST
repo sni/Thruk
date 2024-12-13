@@ -407,6 +407,7 @@ plugins/plugins-available/minemap/templates/minemap.tt
 plugins/plugins-available/node-control/cron
 plugins/plugins-available/node-control/description.txt
 plugins/plugins-available/node-control/lib/Thruk/Controller/node_control.pm
+plugins/plugins-available/node-control/lib/Thruk/Controller/Rest/V1/nc.pm
 plugins/plugins-available/node-control/lib/Thruk/NodeControl/Utils.pm
 plugins/plugins-available/node-control/lib/Thruk/Utils/CLI/Nc.pm
 plugins/plugins-available/node-control/lib/Thruk/Utils/CLI/Nodecontrol.pm
