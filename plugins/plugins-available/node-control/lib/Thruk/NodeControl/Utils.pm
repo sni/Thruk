@@ -58,6 +58,22 @@ sub get_peers {
         $dups->{$peer->{'key'}} = 1;
         push @peers, $peer;
     }
+
+    # allow addons to add more peers
+    my $modules = get_addon_modules();
+    for my $mod (@{$modules}) {
+        if($mod->can("get_peers")) {
+            my $peers = $mod->get_peers($c, \@peers);
+            next unless defined $peers;
+            for my $peer (@{$peers}) {
+                next if (defined $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
+                next if $dups->{$peer->{'key'}}; # backend can be in both lists
+                $dups->{$peer->{'key'}} = 1;
+                push @peers, $peer;
+            }
+        }
+    }
+
     return \@peers;
 }
 
@@ -228,11 +244,11 @@ sub get_server {
         @{$server->{'omd_cleanable'}} = grep(!/$def/mx, @{$server->{'omd_cleanable'}}) if $def;
     }
 
-    # allow addons to change and extend server
+    # allow addons to finally change and reorder the server list
     my $modules = Thruk::NodeControl::Utils::get_addon_modules();
     for my $mod (@{$modules}) {
         if($mod->can("extend_server")) {
-            my($s) = $mod->extend_server($server);
+            my($s) = $mod->extend_server($c, $server);
             $server = $s if $s;
         }
     }
