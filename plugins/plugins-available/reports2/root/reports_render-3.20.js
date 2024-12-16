@@ -107,11 +107,12 @@ function render_total_sla_graph(nr, title, data, sla, graph_min_sla, type, label
     // split on multiple pages?
     if(data.length > max_entries_per_page) {
         render_total_sla_graph_chunked(nr, title, data, sla, graph_min_sla, type, label, max_entries_per_page);
+        render_total_sla_graph_apply_hst_label_visibility();
         return;
     }
 
-    var height = data.length * 20;
-    if(height < 300) { height = 300; }
+    var height = 40 + (data.length * 20);
+    if(height < 80)  { height = 80; }
     if(height > 800) { height = 800; }
     jQuery("#flotgraph"+nr).css('height', height+"px");
 
@@ -163,6 +164,7 @@ function render_total_sla_graph(nr, title, data, sla, graph_min_sla, type, label
             ]
         }
     });
+    render_total_sla_graph_apply_hst_label_visibility();
     return;
 }
 
@@ -202,6 +204,19 @@ function render_total_sla_graph_chunked(nr, title, data, sla, graph_min_sla, typ
         render_total_sla_graph(nr+'_'+x, title, new_data, sla, graph_min_sla, type, label_chunk, max_entries_per_page);
     }
     return;
+}
+
+function render_total_sla_graph_apply_hst_label_visibility() {
+    jQuery("DIV.page").each(function(i, page) {
+        var alreadyShown = {};
+        jQuery(page).find("SPAN.js-hst-label").get().reverse().forEach(function(label, k) {
+            if(alreadyShown[label.innerHTML]) {
+                jQuery(label).addClass("hidden");
+            } else {
+                alreadyShown[label.innerHTML] = true;
+            }
+        })
+    });
 }
 
 function render_apply_overview_threshold(threshold, data, label) {

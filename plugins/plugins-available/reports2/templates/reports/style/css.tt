@@ -324,4 +324,8 @@ I.fa-solid {
   margin-top: -4px;
 }
 
+.hidden {
+  display: none;
+}
+
 </style>
