@@ -4,6 +4,7 @@ next:
           - unescape escaped characters in expanded command
           - fix flickering on search suggestions
           - fix host/service totals
+          - fix action menus read from action_menu_items_folder
           - Agents:
             - pin inventory check to local worker
             - show default port in edit mask
