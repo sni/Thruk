@@ -134,9 +134,13 @@
               <th>Type</th>
               <td colspan=2>
                 <select name="template" class="w-56" onchange="update_reports_type('[% r.nr %]', this.value)">
+                  [% found=0 %]
                   [% FOREACH file = templates.keys.sort %]
                   [% IF templates.$file.deprecated && file != r.template; NEXT; END %]
-                  <option value="[% file | html %]"[% IF file == r.template %] selected[% END %]>[% templates.$file.name %]</option>
+                    <option value="[% file | html %]"[% IF file == r.template; found=1 %] selected[% END %]>[% templates.$file.name %]</option>
+                  [% END %]
+                  [% IF !found %]
+                    <option value="[% r.template | html %]" selected>[% r.template | html %]</option>
                   [% END %]
                 </select>
               </td>
@@ -144,7 +148,17 @@
             <tr id="new_reports_options">
               <td colspan=3 class="pt-5"><h3 class="text-center">Report Options</h3></td>
             </tr>
-            [% PROCESS reports_edit_step2.tt %]
+            [% IF template_exists %]
+              [% PROCESS reports_edit_step2.tt %]
+            [% ELSE %]
+              <tr class="js-report-options">
+                <td colspan=3 class="pt-5 text-center">
+                  <span class="textALERT">
+                    <b>Error:</b> The report template '[% r.template | html %]' does not exist!
+                  </span>
+                </td>
+              </tr>
+            [% END %]
           </tbody>
         </table>
       </div>

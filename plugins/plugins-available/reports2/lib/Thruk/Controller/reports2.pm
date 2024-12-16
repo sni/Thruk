@@ -225,6 +225,8 @@ sub report_edit {
     $c->stash->{report_themes} = Thruk::Utils::Reports::get_report_themes($c);
     _set_report_data($c, $r);
 
+    $c->stash->{template_exists} = defined $c->stash->{templates}->{$r->{'template'}};
+
     Thruk::Utils::ssi_include($c);
     $c->stash->{template} = 'reports_edit.tt';
     return;
