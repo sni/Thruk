@@ -578,7 +578,7 @@
       </div>
       <div class="body">
         <textarea class="CONSOLE w-[300px] h-[80px]">#> whoami
-          root</textarea>
+root</textarea>
       </div>
     </div>
 
