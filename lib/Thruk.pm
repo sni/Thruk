@@ -242,13 +242,9 @@ sub _build_app {
         }
 
         # enable cron files, this only works for OMD right now.
-        if($ENV{'OMD_ROOT'}) {
-            $self->_check_plugin_cron_file($plugin_dir);
-        }
+        $self->_check_plugin_cron_file($plugin_dir);
     }
-    if($ENV{'OMD_ROOT'}) {
-        $self->_cleanup_plugin_cron_files();
-    }
+    $self->_cleanup_plugin_cron_files();
     &timing_breakpoint('startup() plugins loaded');
 
     ###################################################
@@ -813,6 +809,10 @@ sub _setup_development_signals {
 ###################################################
 sub _check_plugin_cron_file {
     my($self, $plugin_dir) = @_;
+
+    # OMD only feature
+    return unless $ENV{'OMD_ROOT'};
+
     my $cron_file = $plugin_dir;
     $cron_file =~ s|/lib/Thruk/Controller/.*\.pm$|/cron|gmx;
     if(-e $cron_file && $cron_file =~ m/\/plugins\-enabled\/([^\/]+)\/cron/mx) {
@@ -828,6 +828,11 @@ sub _check_plugin_cron_file {
                     last;
                 }
             }
+            elsif(-f $file) {
+                # if it's a regular file, keep it and don't replace it with a symlink
+                # so you can disable or replace the upstream cron with your own
+                $found = 1;
+            }
         }
         if(!$found) {
             symlink('../thruk/plugins-enabled/'.$plugin_name.'/cron', 'etc/cron.d/thruk-plugin-'.$plugin_name);
@@ -841,6 +846,10 @@ sub _check_plugin_cron_file {
 ###################################################
 sub _cleanup_plugin_cron_files {
     my($self) = @_;
+
+    # OMD only feature
+    return unless $ENV{'OMD_ROOT'};
+
     my @existing_cron_files = glob($ENV{'OMD_ROOT'}.'/etc/cron.d/*');
     for my $file (@existing_cron_files) {
         if($file =~ m/\/thruk\-plugin\-/mx && -l $file && !-e $file) {
