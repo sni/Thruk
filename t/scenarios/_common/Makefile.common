@@ -29,7 +29,7 @@ wait_start:
 
 start_info:
 	@echo "***********************************************************"
-	@echo "Thruk is available at: http://$$(docker compose exec $$(docker compose config --services | sort | head -n1) ip a | grep 'inet ' | grep -v 127.0 | awk '{ print $$2 }' | sed -e 's/\/.*$$//')/demo/thruk/"
+	@echo "Thruk is available at: http://$$(docker compose exec $$(docker compose config --services | sort | head -n1) ip a | grep 'inet ' | grep -v 127.0 | awk '{ print $$2 }' | head -n1 | sed -e 's/\/.*$$//')/demo/thruk/"
 	@echo "***********************************************************"
 
 wait_start_failed: wait_start_short_errors non_interactive_only
