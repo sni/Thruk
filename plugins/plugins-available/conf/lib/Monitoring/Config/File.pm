@@ -317,7 +317,7 @@ sub update_objects_from_text {
     # return object for given line
     if(defined $lastline) {
         for my $obj (@{$self->{'objects'}}) {
-            if($obj->{'line'} >= $lastline) {
+            if($obj->{'line'} && $obj->{'line'} >= $lastline) {
                 return($obj);
             }
         }
