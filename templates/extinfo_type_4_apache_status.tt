@@ -3,16 +3,20 @@
 <div class="flexrow">
   <div class="flexcol">
     [% PROCESS _infobox.tt %]
-    <div class="card overflow-hidden">
-      <div class="actionbox less-padding">
-        <div><a href='extinfo.cgi?type=4'>Back to Performance Info</a></div>
-      </div>
-    </div>
   </div>
 </div>
 
 <div class="card w-full mt-5 overflow-auto min-w-[420px]">
-  <div>
+  <div class="head p-0 justify-between border-0">
+    <div class="w-32 grow">
+      <a href="extinfo.cgi?type=4" class="button header-button rounded w-[70px] ml-1.5" title="Back to performance info page"><i class="uil uil-angle-double-left"></i>Back</a>
+    </div>
+    [% FOREACH s = apache_status %]
+      <span class="tabs min-w-[140px] w-40 text-center[% IF apache_name == s %] active[% END %]"><a href="?type=4&apache=[% s | uri %]" class="block">[% s | html %] Apache</a></span>
+    [% END %]
+    <div class="w-32 grow"></div>
+  </div>
+  <div class="body mainTable">
     [% content %]
   </div>
 </div>

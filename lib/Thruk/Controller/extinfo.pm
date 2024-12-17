@@ -836,14 +836,12 @@ sub _process_perf_info_page {
        and $c->check_user_roles("authorized_for_system_information")) {
         my $apache = $c->req->parameters->{'apache'};
 
-        for my $name (keys %{$c->config->{'apache_status'}}) {
+        for my $name (sort keys %{$c->config->{'apache_status'}}) {
             push @{$c->stash->{'apache_status'}}, $name;
         }
 
         if($apache and $c->config->{'apache_status'}->{$apache}) {
-            _apache_status($c, $apache, $c->config->{'apache_status'}->{$apache});
-            $c->stash->{template} = 'extinfo_type_4_apache_status.tt';
-            return 1;
+            return _apache_status($c, $apache, $c->config->{'apache_status'}->{$apache});
         }
     }
 
@@ -1135,6 +1133,10 @@ sub _set_backend_selector {
 # get apache status
 sub _apache_status {
     my($c, $name, $url) = @_;
+
+    $c->stash->{template} = 'extinfo_type_4_apache_status.tt';
+    $c->stash->{'apache_name'} = $name;
+
     local $ENV{'HTTPS_PROXY'} = undef if exists $ENV{'HTTPS_PROXY'};
     local $ENV{'HTTP_PROXY'}  = undef if exists $ENV{'HTTP_PROXY'};
     my $ua = Thruk::UserAgent->new({}, $c->config);
@@ -1153,7 +1155,7 @@ sub _apache_status {
         $content =~ s|<body>||gmx;
         $content =~ s|<\/body>||gmx;
         $content =~ s|<\/html>||gmx;
-        $content =~ s|<h1>Apache\s+Server\s+Status\s+for\s+.*?</h1>|<h1>$name Apache Server Status</h1>|gmx;
+        $content =~ s|<h1>Apache\s+Server\s+Status\s+for\s+.*?</h1>|<h2>$name Apache Server Status</h2>|gmx;
         $c->stash->{content} = $content;
     } else {
         $c->stash->{content}  = 'not available: '.$res->code;
