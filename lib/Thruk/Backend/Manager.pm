@@ -2889,7 +2889,7 @@ sub _set_result_group_stats {
 
     my $res = {};
     for my $row (@{$data}) {
-        $res->{$row->{$group_key}} = $row;
+        $res->{($row->{$group_key} // '')} = $row;
     }
 
     return($res);
