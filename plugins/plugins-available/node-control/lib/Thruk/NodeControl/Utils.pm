@@ -948,6 +948,12 @@ sub _omd_cleanup_step2 {
 sub _remote_cmd {
     my($c, $peer, $cmd, $background_options, $env) = @_;
     my($rc, $out, $err);
+    my $config = config($c);
+
+    _debug("_remote_cmd: %s", $cmd);
+    _debug2(" - is_local: %s", $peer->is_local() ? "true" : "false");
+    _debug2(" - is_http:  %s", $peer->is_peer_machine_reachable_by_http() ? "true" : "false");
+    _debug2(" - use_ssh:  %s", $config->{'ssh_fallback'} ? "true" : "false");
 
     if($env) {
         for my $key (sort keys %{$env}) {
@@ -967,8 +973,7 @@ sub _remote_cmd {
     }
 
     # fallback to ssh if possible
-    my $facts     = ansible_get_facts($c, $peer, 0);
-    my $config    = config($c);
+    my $facts = ansible_get_facts($c, $peer, 0);
     if(!$config->{'ssh_fallback'}) {
         _die_connection_error($peer, $err);
     }
@@ -1045,7 +1050,8 @@ sub _remote_script {
             CORE::close($fh);
             $localscript = $file;
         }
-        my($rc, $out) = _ansible_cmd($c, $peer, "ansible all -i "._sitename($server->{'omd_site'})."\@$host_name, -m copy -a \"src=".$localscript." dest=".$tmpscript." mode=0700\"", undef, $err);
+        my $cmd = "ansible all -i "._sitename($server->{'omd_site'})."\@$host_name, -m copy -a \"src=".$localscript." dest=".$tmpscript." mode=0700\"";
+        my($rc, $out) = _ansible_cmd($c, $peer, $cmd, undef, $err);
         if($script_append_data) {
             unlink($localscript);
         }
@@ -1062,6 +1068,7 @@ sub _remote_script {
 ##########################################################
 sub _ansible_cmd {
     my($c, $peer, $fullcmd, $background_options, $http_err) = @_;
+    _debug2("_ansible_cmd: %s", $fullcmd);
     if($background_options) {
         $background_options->{"background"} = 1;
         $background_options->{"cmd"}        = $fullcmd;
