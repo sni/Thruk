@@ -366,7 +366,7 @@
                   <td
                     colspan="[% loop.size - loop.index - 2 %]"
                     style="max-width: 40vw;"
-                    [% IF error_lines.size > 1; clickable = 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); reapplyAllStripes(); return false;"
+                    [% IF error_lines.size > 1; clickable = 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); jQuery('#errors_[% s.peer_key | html %]').removeClass('filter_hidden'); reapplyAllStripes(); return false;"
                     [% ELSIF s.installing_failed && s.logs.defined("install"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&type=install&peer=[% s.peer_key | html %]&modal=1'); return false;"
                     [% ELSIF s.updating_failed && s.logs.defined("update"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&type=update&peer=[% s.peer_key | html %]&modal=1'); return false;"
                     [% ELSIF s.cleaning_failed && s.logs.defined("cleanup"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&type=cleanup&peer=[% s.peer_key | html %]&modal=1'); return false;"
