@@ -70,6 +70,22 @@
 
     <div class="basis-1/3"></div>
 
+    [% IF clean_cookies %]
+    [%# try to remove https cookies as well, as they prevent storing http cookies #%]
+    <script>
+    <!--
+      if(window.location.protocol && window.location.protocol == "http:") {
+        jQuery('BODY').append(jQuery("<iframe>", {
+          src: window.location.toString().replace(/^http:/, "https:"),
+          width: "1px",
+          height: "1px",
+          style: "position: absolute; top: 1px; left: 1px; width: 1px; height: 1px;"
+        }));
+      }
+    -->
+    </script>
+    [% END %]
+
     <script>
     <!--
       if(window.location.hash) {
@@ -92,22 +108,6 @@
 
       -->
     </script>
-
-    [% IF clean_cookies %]
-      [%# try to remove https cookies as well, as they prevent storing http cookies #%]
-      <script>
-      <!--
-        if(window.location.protocol && window.location.protocol == "http:") {
-          jQuery('BODY').append(jQuery("<img>", {
-            src: window.location.toString().replace(/^http:/, "https:"),
-            width: "1px",
-            height: "1px",
-            style: "position: absolute; top: -1px; left: 1px; width: 1px; height: 1px;"
-          }));
-        }
-    -->
-    </script>
-    [% END %]
 
     [% IF ssi_footer; ssi_footer | evaltt; END %]
   </body>
