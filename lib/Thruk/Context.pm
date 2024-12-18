@@ -1002,8 +1002,10 @@ sub finalize_request {
     {
         $h->push('Content-Length' => $content_length);
     }
-    $h->push('Cache-Control', 'no-store');
-    $h->push('Expires', '0');
+    if(!$c->stash->{'no_change_res_header'}) {
+        $h->push('Cache-Control', 'no-store');
+        $h->push('Expires', '0');
+    }
 
     # last possible time to report/save profile
     if($ENV{'THRUK_JOB_DIR'}) {

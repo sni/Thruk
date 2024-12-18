@@ -57,6 +57,7 @@ sub index {
     $c->res->body($res->content);
     $c->{'rendered'} = 1;
     $c->stash->{'inject_stats'} = 0;
+    $c->stash->{'no_change_res_header'} = 1;
     return;
 
 }
@@ -139,6 +140,7 @@ sub proxy_request {
     $req->header('X-Thruk-Proxy', 1);
     _add_cookie($req, 'thruk_auth', $session_id);
     $c->stats->profile(begin => "req: ".$request_url);
+
     my $res = $ua->request($req);
     $c->stats->profile(end => "req: ".$request_url);
     $c->stats->profile(comment => sprintf('code: %s%s', $res->code, $res->header('location') ? "redirect: ".$res->header('location') : ''));
