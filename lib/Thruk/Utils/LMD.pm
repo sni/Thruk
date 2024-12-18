@@ -93,7 +93,7 @@ sub check_proc {
             }
         }
         if($config->{'lmd_options'}) {
-            $cmd .= ' '.$config->{'lmd_options'}.' ';
+            $cmd .= ' '.join(" ", @{Thruk::Base::list($config->{'lmd_options'})}).' ';
         }
         my $startlog = $lmd_dir.'/startup.log';
         $cmd .= ' >'.$startlog.' 2>&1 &';
