@@ -115,6 +115,37 @@ sub _is_valid_hostname {
     return;
 }
 
+sub as_string {
+    my($self) = @_;
+
+    # Get request method and path
+    my $method = $self->method;
+    my $path   = $self->path_info || '/';
+
+    # Build the query string if it exists
+    my $query_string = $self->query_string;
+    $path .= "?$query_string" if $query_string;
+
+    # Get headers
+    my $headers = $self->headers; # This is an HTTP::Headers object
+    my @header_lines;
+    $headers->scan(sub {
+        my ($key, $value) = @_;
+        push @header_lines, "$key: $value";
+    });
+
+    # Get the request body
+    my $body = $self->raw_body || '';
+
+    # Assemble the full request as a string
+    return join("\n",
+        "$method $path HTTP/1.1",
+        @header_lines,
+        '',
+        $body,
+    );
+}
+
 1;
 __END__
 
@@ -162,6 +193,10 @@ Returns L<Uri> object, but applies HTTP_X_FORWARDED_* environment if set.
 =head2 unescape
 
 Returns B<uri_unescape> for given value.
+
+=head2 as_string
+
+Returns request as string for debugging purposes.
 
 =head1 SEE ALSO
 
