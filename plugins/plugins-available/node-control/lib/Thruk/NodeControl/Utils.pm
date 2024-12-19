@@ -128,7 +128,7 @@ sub get_server {
         }
         if($data && !$data->{'is_running'}) {
             $facts->{$key} = 0;
-            if($data->{'rc'} != 0) {
+            if($data->{'rc'} ne "0") {
                 $facts->{'last_error'} = $data->{'stdout'}.$data->{'stderr'};
                 $facts->{'last_error_ts'} = time();
             }
