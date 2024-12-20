@@ -71,6 +71,10 @@ test_verbose: wait_start
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) test_docker_logs_verbose
 
+# run thruk commands, ex.: make thruk -- r /services or make thruk ARGS="-l -vv"
+thruk:
+	$(THRUK) $(ARGS) $(filter-out $@,$(MAKECMDGOALS))
+
 testf:
 	TESTS=$$(ls -1 $(shell pwd)/t/*.t | grep "$(filter-out $@,$(MAKECMDGOALS))"); \
 	if [ "$$TESTS" != "" ]; then \
@@ -230,7 +234,7 @@ extra_test_verbose:
 
 # just skip unknown make targets
 .DEFAULT:
-	@if [[ "$(MAKECMDGOALS)" =~ ^testf ]]; then \
+	@if [[ "$(MAKECMDGOALS)" =~ ^(thruk|testf) ]]; then \
 		: ; \
 	else \
 		echo "unknown make target(s): $(MAKECMDGOALS)"; \
