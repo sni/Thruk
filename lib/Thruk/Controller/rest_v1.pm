@@ -105,7 +105,7 @@ sub index {
         elsif($prefix eq 'sites' || $prefix eq 'backend') {
             if($path_info =~ m%^/([^/]+)(/.*)$%mx) {
                 $path_info = $2;
-                my @sites = split(/\s*,\s*/mx, $1);
+                my @sites = split(/\s*,\s*/mx, uri_unescape($1));
                 push @{$backends}, @sites;
             }
         }
@@ -1308,7 +1308,7 @@ sub _livestatus_options {
                         $found = 0;
                         last;
                     }
-                    if($col eq 'peer_name' || $col eq 'peer_key') {
+                    if($col eq 'peer_name' || $col eq 'peer_key' || $col eq 'peer_section') {
                         next;
                     }
                     if(!$ref_columns->{$col} && $ref_columns->{'perf_data'}) {
@@ -1351,6 +1351,9 @@ sub _livestatus_options {
     # remove special columns from request
     if($options->{'columns'} && !$ENV{'THRUK_USE_LMD'}) {
         $options->{'columns'} = [grep(!/^(peer_key|peer_name)$/mx, @{$options->{'columns'}})];
+    }
+    if($options->{'columns'} && !$ENV{'THRUK_USE_LMD'}) {
+        $options->{'columns'} = [grep(!/^(peer_section)$/mx, @{$options->{'columns'}})];
     }
 
     return $options;
@@ -1527,6 +1530,9 @@ sub _expand_perfdata_and_custom_vars {
         }
         if($row->{'peer_key'} && !$row->{'peer_name'}) {
             $row->{'peer_name'} = Thruk::Utils::Filter::peer_name($row);
+        }
+        if($row->{'peer_key'} && !$row->{'peer_section'}) {
+            $row->{'peer_section'} = Thruk::Utils::Filter::peer_section($row);
         }
     }
     return($data);
@@ -2208,6 +2214,7 @@ sub _rest_get_livestatus_hosts_commandline {
             'host_name'     => $hst->{'name'},
             'peer_key'      => $hst->{'peer_key'},
             'peer_name'     => Thruk::Utils::Filter::peer_name($hst),
+            'peer_section'  => Thruk::Utils::Filter::peer_section($hst),
         };
     }
     return($data);
@@ -2303,6 +2310,7 @@ sub _rest_get_livestatus_services_commandline {
             'service_description' => $svc->{'description'},
             'peer_key'            => $svc->{'peer_key'},
             'peer_name'           => Thruk::Utils::Filter::peer_name($svc),
+            'peer_section'        => Thruk::Utils::Filter::peer_section($svc),
         };
     }
     return($data);
@@ -2378,6 +2386,7 @@ register_rest_path_v1('GET', qr%^/contacts?/([^/]+)$%mx, \&_rest_get_livestatus_
 sub _rest_get_livestatus_contacts_by_name {
     my($c, undef, $contact) = @_;
     my $data = $c->db->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contacts'), { "name" => $contact }, _livestatus_filter($c) ], %{_livestatus_options($c)});
+    _expand_perfdata_and_custom_vars($c, $data, "contacts");
     return($data);
 }
 
@@ -2555,6 +2564,11 @@ sub _rest_get_livestatus_processinfos {
     my($c) = @_;
     my $data = $c->db->get_processinfo(filter => [ _livestatus_filter($c) ], %{_livestatus_options($c)});
     $data = [values(%{$data})] if ref $data eq 'HASH';
+    for my $row (@{$data}) {
+        if($row->{'peer_key'} && !$row->{'peer_section'}) {
+            $row->{'peer_section'} = Thruk::Utils::Filter::peer_section($row);
+        }
+    }
     return($data);
 }
 

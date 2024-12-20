@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Rest:
+            - add peer_section attribute
+
 3.20.2   Wed Dec 18 17:43:10 CET 2024
           - unescape escaped characters in expanded command
           - fix flickering on search suggestions

@@ -1349,6 +1349,49 @@ sub peer_name {
 
 ##############################################
 
+=head2 peer_section
+
+  get peer_section from dataset
+
+returns peer_section
+
+=cut
+sub peer_section {
+    my($row) = @_;
+
+    my $c = $Thruk::Globals::c;
+
+    if(ref $row ne "HASH") {
+        my $peer = $c->db->get_peer_by_key($row);
+        if($peer && $peer->{'section'}) {
+            return($peer->{'section'});
+        }
+        return($row);
+    }
+
+    return($row->{'peer_section'}) if $row->{'peer_section'};
+
+    if($row->{'peer_key'}) {
+        if(ref $row->{'peer_key'} eq 'ARRAY') {
+            my $names = [];
+            for my $key (@{$row->{'peer_key'}}) {
+                if($c->stash->{'backend_detail'}->{$key}) {
+                    push @{$names}, $c->stash->{'backend_detail'}->{$key}->{'section'};
+                }
+            }
+            return($names);
+        } else {
+            my $key = $row->{'peer_key'};
+            if($c->stash->{'backend_detail'}->{$key}) {
+                return($c->stash->{'backend_detail'}->{$key}->{'section'});
+            }
+        }
+    }
+    return("");
+}
+
+##############################################
+
 =head2 servicestatetext
 
     servicestatetext($svc)

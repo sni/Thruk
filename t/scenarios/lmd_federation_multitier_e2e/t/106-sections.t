@@ -6,7 +6,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 64;
+    plan tests => 74;
 }
 
 
@@ -78,6 +78,12 @@ ok(defined $ids->{'tier1a'}, 'got backend ids II');
     $test = TestUtils::test_page(
         'url'    => '/thruk/r/csv/processinfo?columns=peer_name&backends=tier1a/tier2a',
         'like'   => [ 'tier2a', 'tier3a' ],
+    );
+    is(scalar(split/\n/, $test->{'content'}), 5, "output number of lines ok");
+
+    $test = TestUtils::test_page(
+        'url'    => '/thruk/r/csv/sites/tier1a%2Ftier2a/processinfo?columns=peer_name,peer_section',
+        'like'   => [ 'tier2a', 'tier3a', 'tier1a/tier2a' ],
     );
     is(scalar(split/\n/, $test->{'content'}), 5, "output number of lines ok");
 };
