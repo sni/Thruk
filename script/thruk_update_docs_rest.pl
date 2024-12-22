@@ -427,9 +427,9 @@ sub _update_docs {
                         die("unknown typ in $url ($name): $typ");
                     }
 
-                    if(!$desc && $name eq 'peer_key') {
-                        $desc = "backend id when having multiple sites connected";
-                    }
+                    if($name eq 'peer_key')     { $desc = "id as defined in Thruk::Backend component configuration"; }
+                    if($name eq 'peer_name')    { $desc = "name as defined in Thruk::Backend component configuration"; }
+                    if($name eq 'peer_section') { $desc = "section as defined in Thruk::Backend component configuration"; }
                     if($url eq '/thruk/stats') {
                         my $help = Thruk::Utils::IO::json_lock_retrieve($c->{'config'}->{'var_path'}.'/thruk.stats.help');
                         $desc = $help->{$name};

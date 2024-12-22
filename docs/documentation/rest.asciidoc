@@ -835,7 +835,7 @@ Returns differences between filesystem and stashed config changes.
 |Attribute                         | Type       | Unit     | Description
 |file                              |            |          | file name of changed file
 |output                            |            |          | diff output
-|peer_key                          |            |          | backend id when having multiple sites connected
+|peer_key                          |            |          | id as defined in Thruk::Backend component configuration
 |===========================================
 
 
@@ -855,7 +855,7 @@ returns all config files
 |hex                               |            |          | hex sum for this file
 |mtime                             | time       |          | unix timestamp of last modification
 |path                              |            |          | filesystem path
-|peer_key                          |            |          | backend id when having multiple sites connected
+|peer_key                          |            |          | id as defined in Thruk::Backend component configuration
 |readonly                          |            |          | readonly flag
 |===========================================
 
@@ -939,7 +939,7 @@ Returns result from Thruks config precheck. The precheck does not require change
 |Attribute                         | Type       | Unit     | Description
 |errors                            |            |          | list of errors encountered
 |failed                            |            |          | boolean flag wether configuration check has failed or not
-|peer_key                          |            |          | backend id when having multiple sites connected
+|peer_key                          |            |          | id as defined in Thruk::Backend component configuration
 |===========================================
 
 
@@ -1280,8 +1280,9 @@ displays commandline for check command of given hosts.
 |command_line                      |            |          | full expanded command line (if possible)
 |error                             |            |          | contains the error if expanding failed for some reason
 |host_name                         |            |          | host name
-|peer_key                          |            |          | backend id when having multiple sites connected
-|peer_name                         |            |          | name of remote site
+|peer_key                          |            |          | id as defined in Thruk::Backend component configuration
+|peer_name                         |            |          | name as defined in Thruk::Backend component configuration
+|peer_section                      |            |          | section as defined in Thruk::Backend component configuration
 |===========================================
 
 
@@ -1507,8 +1508,8 @@ lists connected sites. Only available if LMD (`use_lmd`) is enabled.
 |lmd_last_cache_update             | time       |          | same as last_update
 |name                              |            |          | name of the site
 |parent                            |            |          | parent id for lmd federation setups
-|peer_key                          |            |          | same as `key`
-|peer_name                         |            |          | same as `name`
+|peer_key                          |            |          | id as defined in Thruk::Backend component configuration
+|peer_name                         |            |          | name as defined in Thruk::Backend component configuration
 |queries                           |            |          | number of queries received
 |response_time                     | number     | s        | response time in seconds
 |section                           |            |          | thruks section
@@ -1767,8 +1768,9 @@ displays commandline for check command of given services.
 |command_line                      |            |          | full expanded command line (if possible)
 |error                             |            |          | contains the error if expanding failed for some reason
 |host_name                         |            |          | host name
-|peer_key                          |            |          | backend id when having multiple sites connected
-|peer_name                         |            |          | name of remote site
+|peer_key                          |            |          | id as defined in Thruk::Backend component configuration
+|peer_name                         |            |          | name as defined in Thruk::Backend component configuration
+|peer_section                      |            |          | section as defined in Thruk::Backend component configuration
 |service_description               |            |          | service name
 |===========================================
 
@@ -2349,8 +2351,8 @@ lists node control nodes.
 |os_updates                        |            |          | list of available os updates
 |os_updating                       |            |          | flag 1/0 if os updates are beeing installed right now
 |os_version                        |            |          | version number of operating system
-|peer_key                          |            |          | backend id when having multiple sites connected
-|peer_name                         |            |          | name of this backend
+|peer_key                          |            |          | id as defined in Thruk::Backend component configuration
+|peer_name                         |            |          | name as defined in Thruk::Backend component configuration
 |peer_type                         |            |          | peer connection type
 |run_all                           |            |          | flag 0/1 if install/update/cleanup is running right now
 |section                           |            |          | peer backend section

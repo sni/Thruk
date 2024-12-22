@@ -522,7 +522,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "backend id when having multiple sites connected",
+     "description": "id as defined in Thruk::Backend component configuration",
      "name": "peer_key",
      "type": "",
      "unit": ""
@@ -558,7 +558,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "backend id when having multiple sites connected",
+     "description": "id as defined in Thruk::Backend component configuration",
      "name": "peer_key",
      "type": "",
      "unit": ""
@@ -690,7 +690,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "backend id when having multiple sites connected",
+     "description": "id as defined in Thruk::Backend component configuration",
      "name": "peer_key",
      "type": "",
      "unit": ""
@@ -1044,14 +1044,20 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "backend id when having multiple sites connected",
+     "description": "id as defined in Thruk::Backend component configuration",
      "name": "peer_key",
      "type": "",
      "unit": ""
     },
     {
-     "description": "name of remote site",
+     "description": "name as defined in Thruk::Backend component configuration",
      "name": "peer_name",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "section as defined in Thruk::Backend component configuration",
+     "name": "peer_section",
      "type": "",
      "unit": ""
     }
@@ -1680,13 +1686,13 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "same as `key`",
+     "description": "id as defined in Thruk::Backend component configuration",
      "name": "peer_key",
      "type": "",
      "unit": ""
     },
     {
-     "description": "same as `name`",
+     "description": "name as defined in Thruk::Backend component configuration",
      "name": "peer_name",
      "type": "",
      "unit": ""
@@ -2118,14 +2124,20 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "backend id when having multiple sites connected",
+     "description": "id as defined in Thruk::Backend component configuration",
      "name": "peer_key",
      "type": "",
      "unit": ""
     },
     {
-     "description": "name of remote site",
+     "description": "name as defined in Thruk::Backend component configuration",
      "name": "peer_name",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "section as defined in Thruk::Backend component configuration",
+     "name": "peer_section",
      "type": "",
      "unit": ""
     },
@@ -3660,13 +3672,13 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "backend id when having multiple sites connected",
+     "description": "id as defined in Thruk::Backend component configuration",
      "name": "peer_key",
      "type": "",
      "unit": ""
     },
     {
-     "description": "name of this backend",
+     "description": "name as defined in Thruk::Backend component configuration",
      "name": "peer_name",
      "type": "",
      "unit": ""
