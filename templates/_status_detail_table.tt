@@ -154,7 +154,7 @@
                   onclick="return(show_plugin_output_popup(this, '[% escape_js(s.host_name) %]', '[% escape_js(s.description) %]', '[% escape_js(s.peer_key) %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], { 'width': 600 }));"
                 [% ELSE %]
                   onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(_shost(s))) %] - [% escape_html(escape_js(_service(s))) %]', 'width': 600 }));"
-                  abbr="[% escape_html(plugin_output) %]&lt;br&gt;[% escape_html(nl2br(long_plugin_output)) %]"
+                  abbr="[% plugin_output | replace_links | replace_copy_paste | escape_html %]&lt;br&gt;[% long_plugin_output | nl2br | replace_links | replace_copy_paste | escape_html %]"
                 [% END %]
               [% END %]
               >

@@ -4512,7 +4512,6 @@ function show_plugin_output_popup(target, host, service, backend, escape_html, o
         "backend":       backend
     };
     jQuery.post(url, data, function(data, status, req) {
-        console.log(data);
         jQuery('#overcard .plugin_output').html("");
         if(!data) {
             jQuery('#overcard .plugin_output').html("failed to fetch details: "+status);
@@ -5265,6 +5264,7 @@ function copyCode(evt, id) {
             text = code.innerText;
         }
     }
+    text = decodeEntities(text);
     var result      = "Copied!";
     var removeDelay = 1500;
     if(navigator.clipboard) {
@@ -5301,6 +5301,12 @@ function copyCode(evt, id) {
     window.setTimeout(function () {
         jQuery(tooltip).remove();
     }, removeDelay);
+}
+
+function decodeEntities(input) {
+  var y = document.createElement('textarea');
+  y.innerHTML = input;
+  return y.value;
 }
 
 // returns true if query ui is available

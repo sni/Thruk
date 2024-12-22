@@ -1713,7 +1713,6 @@ sub replace_copy_paste {
     return($txt);
 }
 
-
 ########################################
 sub _replace_link {
     my($name, $url) = @_;
