@@ -129,7 +129,7 @@ sub check_templates {
                 if($key =~ m/^(href|src)$/mx) {
                     if($var =~ m/
                                      \|\s*uri
-                                #   |\|\s*html # must not use html in urls, does not escpace plus properly
+                                #   |\|\s*html # must not use html in urls, does not escape plus properly
                                     |escape_html\(
                                     |full_uri\(
                                     |short_uri\(
@@ -156,6 +156,7 @@ sub check_templates {
                     if($var =~ m/
                                     \|\s*html
                                     |escape_html\(
+                                    |\|\s*escape_html\s*$
                                     |full_uri\(
                                     |short_uri\(
                                     |uri_with\(
