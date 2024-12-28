@@ -850,8 +850,6 @@ sub _send {
     # return a empty result set if nothing found
     return({ keys => [], result => []}) if !defined $body;
 
-    my $limit_start = 0;
-    if(defined $opt->{'limit_start'}) { $limit_start = $opt->{'limit_start'}; }
     # body is already parsed
     my $result;
     if($status == 200) {

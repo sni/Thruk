@@ -3088,7 +3088,7 @@ sub caching_query {
         }
     } else {
         $cache  = Thruk::Utils::Cache->new($cache_file);
-        my $cached = $cache->get() || {};
+        $cached = $cache->get() || {};
     }
     for my $peer_key (@{$selected_backends}) {
         if(!defined $cached->{$peer_key} || !defined $c->stash->{'pi_detail'}->{$peer_key} || !defined $cached->{$peer_key}->{'program_start'} || !defined $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'} || $cached->{$peer_key}->{'program_start'} < $c->stash->{'pi_detail'}->{$peer_key}->{'program_start'}) {

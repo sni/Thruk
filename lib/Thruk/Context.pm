@@ -374,7 +374,7 @@ sub authenticate {
     # save current roles in session file so it can be used from external tools
     if(!$internal && $sessiondata && !$sessiondata->{'current_roles'}) {
         $sessiondata->{'current_roles'} = $c->{'user'}->{'roles'} || [];
-        my $data = Thruk::Utils::IO::json_lock_patch($sessiondata->{'file'}, { current_roles => $sessiondata->{'current_roles'} });
+        Thruk::Utils::IO::json_lock_patch($sessiondata->{'file'}, { current_roles => $sessiondata->{'current_roles'} });
     }
     return($user);
 }

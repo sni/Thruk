@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
-use POSIX ();
 
 use Monitoring::Livestatus::Class::Lite ();
 use Thruk::Base ();
@@ -1890,11 +1889,7 @@ sub _get_query_size {
     my $size = $rows->[0]->{'total'};
     return unless defined $size;
 
-    my $pages = 0;
     my $page  = $options->{'pager'}->{'page'};
-    if( $entries > 0 ) {
-        $pages = POSIX::ceil( $size / $entries );
-    }
     if( $page < 0 ) { $page = 1; }
     unless(wantarray) {
         confess("_get_query_size() should not be called in scalar context");

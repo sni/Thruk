@@ -1056,12 +1056,9 @@ sub _process_log_line {
         elsif($data->{'type'} eq 'HOST DOWNTIME ALERT') {
             return unless $self->{'report_options'}->{'showscheduleddowntime'};
 
-            my $last_state_time = $host_hist->{'last_state_time'};
-
             $self->_log('_process_log_line() hostdowntime, inserting fake event for all hosts/services') if $verbose;
             # set an event for all services
             for my $service_description (keys %{$self->{'service_data'}->{$data->{'host_name'}}}) {
-                $last_state_time = $self->{'service_data'}->{$data->{'host_name'}}->{$service_description}->{'last_state_time'};
                 &_set_service_event($self, $data->{'host_name'}, $service_description, $result, { 'start' => $data->{'start'}, 'end' => $data->{'end'}, 'time' => $data->{'time'} });
             }
 
