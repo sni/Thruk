@@ -58,11 +58,11 @@ sub _fetch_source {
     if(-e $cache && (stat(_))[10] > time() - 3600) {
         return(scalar Thruk::Utils::IO::read($cache));
     }
-    my $req = TestUtils::_external_request($src);
-    die("fetching source failed: ".Dumper($req)) unless $req->is_success;
-    open(my $fh, '>', $cache);
-    print $fh $req->content;
-    close($fh);
+    my($rc, $out) = Thruk::Utils::IO::cmd("curl -s '".$src."' > '".$cache.".new'");
+    if($rc == 0) {
+        unlink($cache);
+        rename($cache.".new", $cache);
+    }
     return(scalar Thruk::Utils::IO::read($cache));
 }
 
