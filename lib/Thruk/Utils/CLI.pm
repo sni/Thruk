@@ -1375,10 +1375,9 @@ sub _authorize_command {
     my($c, $cmd_name, $cmd_args) = @_;
     require Thruk::Controller::Rest::V1::cmd;
     my $available_commands = Thruk::Controller::Rest::V1::cmd::get_rest_external_command_data();
-    my($cmd, $cat);
+    my($cat);
     for my $cat_name (sort keys %{$available_commands}) {
         if($available_commands->{$cat_name}->{$cmd_name}) {
-            $cmd = $available_commands->{$cat_name}->{$cmd_name};
             $cat = $cat_name;
             last;
         }

@@ -59,9 +59,8 @@ sub _complete_rest_path {
     # split leaves an leading empty element, remove it
     if(defined $path[0] && $path[0] eq '') { shift @path; }
     # trim trailing text which is not yet terminated by trailing /
-    my $match;
     if(scalar @path > 0 && $path[scalar @path - 2] eq '/') {
-        $match = pop @path;
+        pop @path;
     }
 
     # strip known prefixes

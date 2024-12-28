@@ -1033,7 +1033,7 @@ sub logline_icon {
     elsif($type =~ m/Bailing\ out/mx)                  { $pic = "fa-solid fa-power-off";    $desc = "Program End"; }
     else                                               { $pic = "fa-solid fa-info";         $desc = "Informational Message"; }
 
-    return $pic;
+    return($pic, $desc);
 }
 
 ########################################
