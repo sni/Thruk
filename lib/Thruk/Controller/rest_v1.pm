@@ -1850,6 +1850,7 @@ sub _rest_get_thruk_jobs {
     require Thruk::Utils::External;
 
     my $data = [];
+# TODO: ...
     for my $dir (glob($c->config->{'var_path'}."/jobs/*/.")) {
         if($dir =~ m%/([^/]+)/\.$%mx) {
             my $id = $1;
@@ -1890,7 +1891,7 @@ sub _rest_get_thruk_sessions {
     my $min5 = time() - (5*60);
     my $uniq = {};
     my $uniq5min = {};
-    for my $file (sort glob($c->config->{'var_path'}."/sessions/*")) {
+    for my $file (sort @{Thruk::Utils::IO::find_files($c->config->{'var_path'}."/sessions/")}) {
         $total_number++;
         my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, file => $file);
         next unless $session_data;

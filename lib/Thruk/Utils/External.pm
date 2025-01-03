@@ -274,9 +274,9 @@ sub is_running {
     my($c, $id, $nouser) = @_;
     confess("got no id") unless $id;
 
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
-    if(!$nouser && -f $dir."/user" ) {
-        my $user = Thruk::Utils::IO::read($dir."/user");
+    my $dir  = $c->config->{'var_path'}."/jobs/".$id;
+    my $user = Thruk::Utils::IO::saferead($dir."/user");
+    if(!$nouser && defined $user) {
         chomp($user);
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
@@ -299,9 +299,9 @@ sub cancel {
     my($c, $id, $nouser) = @_;
     confess("got no id") unless $id;
 
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
-    if(!$nouser && -f $dir."/user" ) {
-        my $user = Thruk::Utils::IO::read($dir."/user");
+    my $dir  = $c->config->{'var_path'}."/jobs/".$id;
+    my $user = Thruk::Utils::IO::saferead($dir."/user");
+    if(!$nouser && defined $user) {
         chomp($user);
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
@@ -313,8 +313,9 @@ sub cancel {
         chomp($pid);
 
         # is it running on this node?
-        if(-s $dir."/hostname") {
-            my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
+        my $hosts = Thruk::Utils::IO::saferead($dir."/hostname");
+        if(defined $hosts) {
+            my @hosts = split(/\n/mx, $hosts);
             if($hosts[0] ne $Thruk::Globals::NODE_ID) {
                 $c->cluster->run_cluster($hosts[0], 'Thruk::Utils::External::cancel', [$c, $id, $nouser]);
                 return _is_running($c, $dir);
@@ -440,8 +441,7 @@ sub get_status {
         my @end  = Time::HiRes::stat($dir."/stdout");
         $end[9]  = time() unless defined $end[9];
         $time    = $end[9] - $start[9];
-    } elsif(-f $dir."/status") {
-        $percent = Thruk::Utils::IO::read($dir."/status");
+    } elsif($percent = Thruk::Utils::IO::read($dir."/status")) {
         chomp($percent);
     }
 
@@ -452,7 +452,7 @@ sub get_status {
     chomp($forward) if defined $forward;
 
     my $show_output;
-    if(-f $dir."/show_output") {
+    if(defined Thruk::Utils::IO::saferead($dir."/show_output")) {
         $show_output = 1;
     }
 
@@ -509,9 +509,9 @@ sub get_result {
     my($c, $id, $nouser) = @_;
     confess("got no id") unless $id;
 
-    my $dir = $c->config->{'var_path'}."/jobs/".$id;
-    if(!$nouser && -f $dir."/user") {
-        my $user = Thruk::Utils::IO::read($dir."/user");
+    my $dir  = $c->config->{'var_path'}."/jobs/".$id;
+    my $user = Thruk::Utils::IO::saferead($dir."/user");
+    if(!$nouser && defined $user) {
         chomp($user);
         confess('no remote_user') unless defined $c->stash->{'remote_user'};
         return unless $user eq $c->stash->{'remote_user'};
@@ -532,19 +532,19 @@ sub get_result {
     $err =~ s|^\s*\n||gmx;
 
     # dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-    my @start = Time::HiRes::stat($dir.'/start');
+    my @start = Thruk::Utils::IO::stat($dir.'/start');
     my @end;
     my $retries = 10;
     while($retries > 0) {
-        if(-f $dir."/killed") {
-            @end = Time::HiRes::stat($dir."/killed");
+        if(Thruk::Utils::IO::file_exists($dir."/killed")) {
+            @end = Thruk::Utils::IO::stat($dir."/killed");
             $killed = "job has been killed";
-        } elsif(-f $dir."/stdout") {
-            @end = Time::HiRes::stat($dir."/stdout");
-        } elsif(-f $dir."/stderr") {
-            @end = Time::HiRes::stat($dir."/stderr");
-        } elsif(-f $dir."/rc") {
-            @end = Time::HiRes::stat($dir."/rc");
+        } elsif(Thruk::Utils::IO::file_exists($dir."/stdout")) {
+            @end = Thruk::Utils::IO::stat($dir."/stdout");
+        } elsif(Thruk::Utils::IO::file_exists($dir."/stderr")) {
+            @end = Thruk::Utils::IO::stat($dir."/stderr");
+        } elsif(Thruk::Utils::IO::file_exists($dir."/rc")) {
+            @end = Thruk::Utils::IO::stat($dir."/rc");
         }
         if(!defined $end[9]) {
             sleep(1);
@@ -563,6 +563,7 @@ sub get_result {
 
     my $time = $end[9] - $start[9];
 
+# TODO: ...
     my $stash = -f $dir."/stash" ? Storable::retrieve($dir."/stash") : undef;
 
     my $rc = Thruk::Utils::IO::saferead($dir."/rc") // -1;
@@ -572,6 +573,7 @@ sub get_result {
     chomp($perl_res) if defined $perl_res;
 
     my $profiles = [];
+# TODO: ...
     for my $p (glob($dir."/profile.log*")) {
         my $text = Thruk::Utils::IO::read($p);
         chomp($text);
@@ -579,22 +581,18 @@ sub get_result {
         $htmlfile =~ s/\.log\./.html./gmx;
         my $jsonfile = $p;
         $jsonfile =~ s/\.log\./.json./gmx;
-        my $totals;
-        if(-f $jsonfile) {
-            $totals = Thruk::Utils::IO::json_lock_retrieve($jsonfile);
-        }
+        my $totals = Thruk::Utils::IO::json_lock_retrieve($jsonfile);
         push @{$profiles}, {
             name   => "Job ".$id,
             time   => $end[9] // $start[9],
-            html   => -e $htmlfile ? Thruk::Utils::IO::read($htmlfile) : undef,
+            html   => Thruk::Utils::IO::saferead($htmlfile),
             text   => $text,
             totals => $totals ? $totals->{'totals'} : undef,
         };
         my $dbfile = $p;
         $dbfile =~ s/\.log\./.db./gmx;
-        if(-f $dbfile) {
-            push @{$profiles}, Thruk::Utils::IO::json_lock_retrieve($dbfile);
-        }
+        my $dbprofile = Thruk::Utils::IO::json_lock_retrieve($dbfile);
+        push @{$profiles}, $dbprofile if $dbprofile;
     }
 
     return($out,$err,$time,$dir,$stash,$rc,$profiles,$start[9],$end[9],$perl_res,$killed);
@@ -1036,6 +1034,7 @@ sub cleanup_job_folders {
 
     $c->stats->profile(begin => "cleanup_job_folders");
 
+# TODO: ...
     my($total, $removed) = (0, 0);
     my $max_age      = time() - 3600;      # keep them for one hour
     my $max_age_dead = time() - (86400*3); # clean broken jobs after 3 days
@@ -1088,8 +1087,11 @@ remove job folder and all files
 =cut
 sub remove_job_dir {
     my($dir) = @_;
-    unlink(glob($dir."/*"));
-    rmdir($dir);
+    my @files = Thruk::Utils::IO::find_files($dir);
+    for my $f (@files) {
+        Thruk::Utils::IO::unlink($f);
+    }
+    Thruk::Utils::IO::rmdir($dir);
     return;
 }
 
@@ -1112,8 +1114,9 @@ sub _is_running {
     $pid = Thruk::Utils::IO::untaint($pid);
 
     # fetch status from remote node
-    if(-s $dir."/hostname") {
-        my @hosts = Thruk::Utils::IO::read_as_list($dir."/hostname");
+    my $hosts = Thruk::Utils::IO::saferead($dir."/hostname");
+    if(defined $hosts) {
+        my @hosts = split(/\n/mx, $hosts);
         if($hosts[0] ne $Thruk::Globals::NODE_ID) {
             confess('clustered _is_running requires $c') unless $c;
             my $cluster = $c->cluster;
@@ -1233,11 +1236,18 @@ sub _clean_unstorable_refs {
 ##############################################
 sub _reconnect {
     my($c) = @_;
-    return unless $c->db();
-    $c->db->reconnect() or do {
-        _error("reconnect failed: %s", $@);
-        kill($$);
-    };
+
+    my $hdl = $Thruk::Utils::IO::var_db;
+    if($hdl && $hdl ne "-1") {
+        $hdl->reconnect();
+    }
+
+    if($c->db()) {
+        $c->db->reconnect() or do {
+            _error("reconnect failed: %s", $@);
+            kill($$);
+        };
+    }
     return;
 }
 

@@ -1,0 +1,28 @@
+{
+   "backends" : [],
+   "childoptions" : 0,
+   "comment" : "automatic downtime",
+   "duration" : "1",
+   "fixed" : "1",
+   "flex_range" : "1",
+   "host" : [
+      "localhost"
+   ],
+   "hostgroup" : [],
+   "schedule" : [
+      {
+         "cust" : "* * * * *",
+         "day" : "1",
+         "hour" : "0",
+         "minute" : "0",
+         "month_day" : "1st_Monday",
+         "type" : "cust",
+         "week_day" : ""
+      }
+   ],
+   "service" : [
+      "Https Cert"
+   ],
+   "servicegroup" : [],
+   "target" : "service"
+}

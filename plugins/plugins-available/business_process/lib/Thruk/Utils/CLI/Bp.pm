@@ -255,13 +255,13 @@ sub cmd {
 
     # merge spool files into one file
     if($spoolfile) {
-        my @files = glob($spoolfile.".*");
+        my @files = @{Thruk::Utils::IO::find_files($spoolfile)};
         if(scalar @files > 0) {
             for my $file (@files) {
                 my $cont = Thruk::Utils::IO::read($file);
                 Thruk::Utils::IO::write($spoolfile, $cont, undef, 1);
+                Thruk::Utils::IO::unlink($file);
             }
-            unlink(@files);
         }
         my $file = $spoolfile.'.ok';
         sysopen(my $t,$file,O_WRONLY|O_CREAT|O_NONBLOCK|O_NOCTTY) || die("cannot create $file: $!");

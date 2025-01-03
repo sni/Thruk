@@ -35,11 +35,7 @@ sub register {
 sub get_all {
     my($self) = @_;
     $self->store();
-    if(!-s $self->{'file'}) {
-        return({});
-    }
-    my $data = Thruk::Utils::IO::json_lock_retrieve($self->{'file'});
-    return($data);
+    return(Thruk::Utils::IO::json_lock_retrieve($self->{'file'}) // {});
 }
 
 ##############################################
@@ -72,12 +68,6 @@ sub store {
     $self->_save_help() if $self->{'save_help'};
     return if scalar @{$self->{'store'}} == 0;
     my $data = {};
-    if(!-s $self->{'file'}) {
-        $self->_apply_data($data);
-        Thruk::Utils::IO::json_store($self->{'file'}, $data, { pretty => 1 });
-        $self->{'store'} = [];
-        return;
-    }
     my($fh, $lock_fh);
     eval {
         ($fh, $lock_fh) = Thruk::Utils::IO::file_lock($self->{'file'});
@@ -87,7 +77,7 @@ sub store {
         $self->{'store'} = [];
     };
     my $err = $@;
-    Thruk::Utils::IO::file_unlock($self->{'file'}, $fh, $lock_fh) if($fh || $lock_fh);
+    Thruk::Utils::IO::file_unlock($self->{'file'}, $fh, $lock_fh);
     confess($err) if $err;
     return;
 }
@@ -95,10 +85,7 @@ sub store {
 ##############################################
 sub _save_help {
     my($self) = @_;
-    if(!-s $self->{'help_file'}) {
-        Thruk::Utils::IO::json_store($self->{'help_file'}, {}, { pretty => 1 });
-    }
-    my $help = Thruk::Utils::IO::json_lock_retrieve($self->{'help_file'});
+    my $help = Thruk::Utils::IO::json_lock_retrieve($self->{'help_file'}) // {};
     for my $key (keys %{$self->{'help'}}) {
         $help->{$key} = $self->{'help'}->{$key};
     }

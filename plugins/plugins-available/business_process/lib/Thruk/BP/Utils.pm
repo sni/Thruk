@@ -863,9 +863,13 @@ runs index update if necessary.
 =cut
 sub check_update_index {
     my($c, $bps) = @_;
-    if($ENV{'THRUK_CRON'} || !-s $c->config->{'var_path'}.'/bp/.index' || (stat(_))[9] < time()-300) {
+    return unless $ENV{'THRUK_CRON'};
+
+    my @stat = Thruk::Utils::IO::stat($c->config->{'var_path'}.'/bp/.index');
+    if(!$stat[9] || $stat[9] < time()-300) {
         _update_index($c, $bps);
     }
+
     return;
 }
 

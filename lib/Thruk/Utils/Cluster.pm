@@ -189,7 +189,6 @@ removes ourself from the cluster statefile
 sub unregister {
     my($self) = @_;
     return unless $Thruk::Globals::NODE_ID;
-    return unless -s $self->{'localstate'};
     Thruk::Utils::IO::json_lock_patch($self->{'localstate'}, {
         $Thruk::Globals::NODE_ID => {
             pids => { $$ => undef },
@@ -231,9 +230,7 @@ return 1 if a cluster is configured
 =cut
 sub is_clustered {
     my($self) = @_;
-    return 0 if !$self->{'config'}->{'cluster_enabled'};
-    return 1 if scalar keys %{$self->{nodes_by_url}} > 1;
-    return 1 if scalar @{$self->{'config'}->{'cluster_nodes'}} > 1;
+    return 1 if $self->{'config'}->{'cluster_enabled'};
     return 0;
 }
 
@@ -565,14 +562,9 @@ sub _replace_url_macros {
 ##########################################################
 sub _cleanup_jobs_folder {
     my($self) = @_;
-    my $keep = time() - 600;
-    my $jobs_path = $self->{'config'}->{'var_path'}.'/cluster/jobs';
-    for my $file (glob($jobs_path.'/*')) {
-        my @stat = stat($file);
-        if($stat[9] && $stat[9] < $keep) {
-            unlink($file);
-        }
-    }
+
+    Thruk::Utils::clean_old_folder_files($self->{'config'}->{'var_path'}.'/cluster/jobs', undef, 600);
+
     return;
 }
 

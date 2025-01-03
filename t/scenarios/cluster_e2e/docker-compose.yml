@@ -1,6 +1,6 @@
 services:
   lb:
-    image: 'traefik:latest'
+    image: 'traefik:v3.2'
     command:
         - "--api=true"
         - "--api.dashboard=true"

@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
-use File::Copy qw/move/;
 
 use Monitoring::Config::Object ();
 use Thruk::Controller::conf ();
@@ -765,10 +764,12 @@ sub migrate_hostname {
     # rename data file
     my $df1 = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
     my $df2 = $c->config->{'var_path'}.'/agents/hosts/'.$old_host.'.json';
-    if(-f $df2 && !-f $df1) {
-        move($df2, $df1);
+    my $d1 = Thruk::Utils::IO::saferead($df1);
+    my $d2 = Thruk::Utils::IO::saferead($df2);
+    if(defined $d2 && !defined $d1) {
+        Thruk::Utils::IO::write($df1, $d2);
     }
-    unlink($df2);
+    Thruk::Utils::IO::unlink($df2);
 
     return;
 }

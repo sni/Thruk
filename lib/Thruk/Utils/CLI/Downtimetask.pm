@@ -123,7 +123,8 @@ sub _handle_file {
 
     my $nr = $file;
     $file  = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
-    if(!-s $file) {
+    my $data = Thruk::Utils::IO::saferead($file);
+    if(!defined $data) {
         _error("cannot read %s: %s", $file, $!);
         return("", 1);
     }
@@ -318,9 +319,8 @@ sub _auto_fix_downtimes {
     require Thruk::Utils::RecurringDowntimes;
 
     my $fixed = 0;
-    my @files = glob($c->config->{'var_path'}.'/downtimes/*.tsk');
-    for my $dfile (@files) {
-        next unless -f $dfile;
+	my $files = Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/downtimes/', '\.tsk$');
+    for my $dfile (@{$files}) {
         my $d = Thruk::Utils::RecurringDowntimes::read_downtime($c, $dfile);
         next unless $d;
         next unless $d->{'fixable'};

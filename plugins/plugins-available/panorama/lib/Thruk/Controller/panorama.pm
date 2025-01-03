@@ -1692,8 +1692,9 @@ sub _task_show_logs {
         data    => [],
     };
     for my $row (@{$data}) {
+        my($icon, $desc) = Thruk::Utils::Filter::logline_icon($row);
         push @{$json->{'data'}}, {
-            icon    => Thruk::Utils::Filter::logline_icon($row),
+            icon    => $icon,
             time    => $row->{'time'},
             message => substr($row->{'message'},13),
         };
@@ -3053,8 +3054,8 @@ sub _task_dashboard_list {
     # add last_used data
     for my $d (@{$dashboards}) {
         $d->{'last_used'} = 0;
-        for my $file (glob($c->config->{'var_path'}.'/panorama/'.$d->{'nr'}.'.tab.*runtime')) {
-            my @stat = stat($file);
+        for my $file (@{Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/panorama/', $d->{'nr'}.'\.tab\..*runtime$')}) {
+            my @stat = Thruk::Utils::IO::stat($file);
             $d->{'last_used'} = $stat[9] if $d->{'last_used'} < $stat[9];
         }
     }
@@ -3636,6 +3637,7 @@ sub _add_json_dashboard_timestamps {
         my $nr = $tab;
            $nr =~ s/^pantab_//gmx;
         $json->{'dashboard_ts'} = {};
+# TODO: move to var
         my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
         if($nr eq "0" && !-s $file) {
             $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';

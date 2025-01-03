@@ -1089,11 +1089,8 @@ sub get_user_data {
     }
     confess("username not allowed") if Thruk::Base::check_for_nasty_filename($username);
 
-    my $user_data = {};
-    my $file = $c->config->{'var_path'}."/users/".$username;
-    if(-s $file) {
-        $user_data = read_data_file($file);
-    }
+    my $file      = $c->config->{'var_path'}."/users/".$username;
+    my $user_data = Thruk::Utils::IO::json_retrieve($file) // {};
 
     # remove null entries from site_panel_bookmarks
     if($user_data->{'site_panel_bookmarks'}) {
@@ -1170,8 +1167,7 @@ sub get_global_user_data {
     my($c) = @_;
 
     my $file = $c->config->{'var_path'}."/global_user_data";
-    return {} unless -s $file;
-    return read_data_file($file);
+    return(Thruk::Utils::IO::json_retrieve($file) // {});
 }
 
 
@@ -1847,13 +1843,9 @@ sub absolute_url {
         $host        =~ s/\/$//mx;      # remove last /
         $fullpath    =~ s/\?.*$//mx;
         $fullpath    =~ s/^\///mx;
-        my($path,$file) = ('', '');
+        my $path     = '';
         if($fullpath =~ m/^(.+)\/(.*)$/mx) {
             $path = $1;
-            $file = $2;
-        }
-        else {
-            $file = $fullpath;
         }
         $path =~ s/^\///mx; # remove first /
 
@@ -4124,20 +4116,13 @@ removes all files from folder which are older than $max_age and match given $fil
 sub clean_old_folder_files {
     my($folder, $filter, $max_age) = @_;
 
-    return unless -d $folder;
-
     my $timeout = time() - $max_age;
-    _debug2("checking for old files in ".$folder." older than: ".(scalar localtime($timeout)));
-    opendir( my $dh, $folder) || die "can't opendir '$folder': $!";
-    for my $entry (readdir($dh)) {
-        next if $entry eq '.' or $entry eq '..';
-        next if $entry !~ m/$filter/mx;
-
-        my $file = $folder.'/'.$entry;
-        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
+    _debug2("checking for old files in ".$folder." older than: ".(scalar localtime($timeout)).($filter ? " matching: ".$filter : ""));
+    for my $file (@{Thruk::Utils::IO::find_files($folder, $filter)}) {
+        my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = Thruk::Utils::IO::stat($file);
         if($mtime && $mtime < $timeout) {
             _debug2("removing old file: ".$file);
-            unlink($file);
+            Thruk::Utils::IO::unlink($file);
         }
     }
 

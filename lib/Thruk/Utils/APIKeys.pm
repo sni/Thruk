@@ -44,7 +44,7 @@ sub get_keys {
 
     my $keys   = [];
     my $folder = $c->config->{'var_path'}.'/api_keys';
-    for my $file (glob($folder.'/*')) {
+    for my $file (@{Thruk::Utils::IO::find_files($folder)}) {
         my $basename = Thruk::Base::basename($file);
         next unless $basename =~ $hashed_key_file_regex;
         next if $basename =~ /\.stats$/mx;
@@ -259,8 +259,8 @@ return key for given file
 sub read_key {
     my($config, $file) = @_;
     confess("no file") unless $file;
-    return unless -r $file;
-    my $data       = Thruk::Utils::IO::json_lock_retrieve($file);
+    my $data       = Thruk::Utils::IO::json_retrieve($file);
+    return unless $data;
     my $hashed_key = Thruk::Base::basename($file);
     my $type;
     if($hashed_key =~ m%\.([^\.]+)$%gmx) {
@@ -272,14 +272,9 @@ sub read_key {
     $data->{'digest'}     = $type;
     $data->{'superuser'}  = 1 if delete $data->{'system'}; # migrate system keys
     delete $data->{'force_user'} unless $data->{'superuser'};
-    if(-s $file.'.stats') {
-        my $stats = {};
-        eval {
-            $stats = Thruk::Utils::IO::json_lock_retrieve($file.'.stats');
-        };
-        _debug("failed to read stats file: ".$@) if $@;
-        $data = { %{$stats}, %{$data} } if $stats;
-    }
+    my $stats = Thruk::Utils::IO::json_retrieve($file.'.stats');
+    _debug("failed to read stats file: ".$@) if $@;
+    $data = { %{$stats}, %{$data} } if $stats;
 
     return($data);
 }

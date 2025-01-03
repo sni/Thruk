@@ -77,7 +77,8 @@ sub new {
     $self->set_file($c, $file);
 
     if($editmode && -e $self->{'editfile'}) { $file = $self->{'editfile'}; }
-    if(-s $file) {
+    my $test = Thruk::Utils::IO::saferead($file);
+    if(defined $test) {
         $bpdata = Thruk::Utils::IO::json_lock_retrieve($file);
         return unless $bpdata;
         return unless $bpdata->{'name'};
@@ -168,11 +169,13 @@ sub load_runtime_data {
     my($self) = @_;
 
     my $file = $self->{'datafile'};
-    if($self->{'editmode'} and -s $self->{'datafile'}.'.edit') {
+    my $test = Thruk::Utils::IO::saferead($self->{'datafile'}.'.edit');
+    if($self->{'editmode'} && defined $test) {
         $file = $self->{'datafile'}.'.edit';
     }
 
-    return unless -s $file;
+    $test = Thruk::Utils::IO::saferead($file);
+    return unless defined $test;
 
     my $data = Thruk::Utils::IO::json_lock_retrieve($file);
     for my $key (@stateful_keys) {

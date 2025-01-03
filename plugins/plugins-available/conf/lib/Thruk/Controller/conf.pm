@@ -1379,7 +1379,7 @@ sub _process_tools_page {
     my $tools                = _get_tools($c);
     $c->stash->{'tools'}     = $tools;
     my $ignore_file          = $c->config->{'var_path'}.'/conf_tools_ignore';
-    my $ignores              = -s $ignore_file ? Thruk::Utils::IO::json_lock_retrieve($ignore_file) : {};
+    my $ignores              = Thruk::Utils::IO::json_lock_retrieve($ignore_file) // {};
     $c->stash->{'tool'}      = $tool;
 
     $c->stats->profile(begin => "tool: ".$tool);

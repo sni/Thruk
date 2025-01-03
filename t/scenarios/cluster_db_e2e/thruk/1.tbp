@@ -1,0 +1,82 @@
+{
+   "filter" : [],
+   "name" : "Test Business Process",
+   "nodes" : [
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "create_obj" : 1,
+         "depends" : [
+            "node2",
+            "node5"
+         ],
+         "filter" : [],
+         "function" : "worst()",
+         "id" : "node1",
+         "label" : "Test Business Process"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [
+            "node3",
+            "node4"
+         ],
+         "filter" : [],
+         "function" : "worst()",
+         "id" : "node2",
+         "label" : "Web"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [],
+         "filter" : [],
+         "function" : "status('localhost', 'Http', '=')",
+         "id" : "node3",
+         "label" : "none"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [],
+         "filter" : [],
+         "function" : "status('localhost', 'Https', '=')",
+         "id" : "node4",
+         "label" : "none"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [
+            "node6",
+            "node7"
+         ],
+         "filter" : [],
+         "function" : "worst()",
+         "id" : "node5",
+         "label" : "App"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [],
+         "filter" : [],
+         "function" : "status('localhost', 'Users', '=')",
+         "id" : "node6",
+         "label" : "none"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [],
+         "filter" : [],
+         "function" : "status('localhost', 'Disk /', '=')",
+         "id" : "node7",
+         "label" : "none"
+      }
+   ],
+   "rankDir" : "TB",
+   "state_type" : "both",
+   "template" : ""
+}

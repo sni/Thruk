@@ -487,6 +487,7 @@ sub set_default_config {
     # set var dir
     $config->{'var_path'} = $config->{'home'}.'/var' unless defined $config->{'var_path'};
     $config->{'var_path'} =~ s|/$||mx;
+    $Thruk::Utils::IO::var_path = $config->{'var_path'};
 
     if(!defined $config->{'etc_path'}) {
         if($ENV{'THRUK_CONFIG'}) {
@@ -995,9 +996,8 @@ return secret_key
 sub secret_key {
     my $config      = &get_config();
     my $secret_file = $config->{'var_path'}.'/secret.key';
-    return unless -s $secret_file;
-    my $secret_key  = Thruk::Utils::IO::read($secret_file);
-    chomp($secret_key);
+    my $secret_key  = Thruk::Utils::IO::saferead($secret_file);
+    chomp($secret_key) if defined $secret_key;
     return($secret_key);
 }
 

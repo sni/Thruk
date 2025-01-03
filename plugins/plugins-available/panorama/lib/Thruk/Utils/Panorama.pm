@@ -282,11 +282,8 @@ sub load_dashboard {
     $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
 
     # merge runtime data
-    my $runtime      = {};
     my $runtimefile  = get_runtime_file($c, $nr);
-    if(-s $runtimefile) {
-        $runtime = Thruk::Utils::read_data_file($runtimefile, $c);
-    }
+    my $runtime = Thruk::Utils::read_data_file($runtimefile, $c) // {};
     for my $tab (keys %{$runtime}) {
         next if !defined $dashboard->{$tab};
         for my $key (keys %{$runtime->{$tab}}) {

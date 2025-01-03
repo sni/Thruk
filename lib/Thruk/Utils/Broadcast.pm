@@ -32,7 +32,7 @@ sub get_broadcasts {
     my $list = [];
 
     my $now    = time();
-    my @files  = glob($c->config->{'var_path'}.'/broadcast/*.json');
+    my @files  = @{Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/broadcast/', '\.json$')};
     return([]) unless scalar @files > 0;
 
     my $user_data = Thruk::Utils::get_user_data($c);
