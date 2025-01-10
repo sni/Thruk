@@ -75,7 +75,7 @@ sub decrypt {
 
 ##############################################
 
-=head2 get_random_bytes
+=head2 get_insecure_random_bytes
 
   get_insecure_random_bytes($number_of_bytes)
 
@@ -113,10 +113,10 @@ sub get_random_bytes {
     my $num = sysread($f, $bytes, $length);
 
     if($!) {
-        confess("Cannot get randomness from $randomfile: $!")
+        confess("Cannot get randomness from $randomfile: $!");
     }
     if(!$num) {
-        confess("Cannot get randomness from $randomfile: eof")
+        confess("Cannot get randomness from $randomfile: eof");
     }
 
     return $bytes;

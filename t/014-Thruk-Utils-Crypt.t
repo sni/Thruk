@@ -36,4 +36,3 @@ my $b1 = Thruk::Utils::Crypt::get_random_bytes(16);
 my $b2 = Thruk::Utils::Crypt::get_random_bytes(16);
 is(length($b1), 16, 'random length is ok');
 ok($b1 ne $b2, "randomness differs");
-
