@@ -35,17 +35,41 @@
     </td>
   </tr>
   [% IF show_sounds %]
-  <tr>
-    <th class="align-middle">[% IF play_sounds %]<i class="uil uil-volume"></i>[% ELSE %]<i class="uil uil-volume-mute"></i>[% END %]</th>
-    <th class="align-middle">Sounds</th>
-    <td>
-      [% IF has_cgi_sounds %]
-      <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')" class="w-40">
-      [% ELSE %]
-      <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled class="w-40">
-      [% END %]
-    </td>
-  </tr>
+    <tr>
+      <th class="align-middle">[% IF play_sounds %]<i class="uil uil-volume"></i>[% ELSE %]<i class="uil uil-volume-mute"></i>[% END %]</th>
+      <th class="align-middle">Sounds</th>
+      <td>
+        <div class="flexrow">
+          [% IF has_cgi_sounds %]
+            <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')" class="w-40">
+            [% IF play_sounds %]
+              <button class="ml-5" onClick="toggleElement('testsound_panel')">play test sound<i class="uil uil-angle-down ml-1 mr-0"></i></button>
+            [% END %]
+          [% ELSE %]
+            <input type="button" name="submit" value="no sound files configured in cgi.cfg" disabled class="w-40">
+          [% END %]
+        </div>
+      </td>
+    </tr>
+
+    [% IF has_cgi_sounds && play_sounds %]
+      <tr>
+        <th class="align-middle"></th>
+        <th class="align-middle"></th>
+        <td>
+          <div id="audiomsg"></div>
+          <table class="hidden w-fit mb-2" id="testsound_panel">
+            [% FOREACH s = ['normal', 'host_down', 'host_unreachable', 'service_warning', 'service_critical', 'service_unknown' ] %]
+              <tr>
+                <td><button class="w-fit [% IF !c.config.defined(s _ "_sound") %]disabled[% END %]" [% IF !c.config.defined(s _ "_sound") %]disabled[% END %] onClick="play_test_audio(this, '[% s %]')"><i class="uil uil-play m-0"></i></button></td>
+                <td>[% s.replace("_", " ") %][% IF !c.config.defined(s _ "_sound") %] <span class="textHINT">(cgi.cfg: no audio file configured)</span>[% END %]</td>
+              </tr>
+            [% END %]
+          </table>
+          <div id="testsound"></div>
+        </td>
+      </tr>
+    [% END %]
   [% END %]
   <tr>
     <th class="align-middle"><i class="uil uil-star"></i></th>

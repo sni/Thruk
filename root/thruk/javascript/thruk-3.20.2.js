@@ -690,6 +690,14 @@ function setBtnNoSpinner(btn) {
     setBtnClearTimer(btn);
 }
 
+function setBtnReset(btn) {
+    setBtnClearTimer(btn);
+    jQuery(btn).find('div.spinner').remove();
+    jQuery(btn).find('I.fa-exclamation').remove();
+    jQuery(btn).find('I.fa-check').remove();
+    jQuery(btn).find("I").css("display", "");
+}
+
 function setBtnError(btn, title) {
     setBtnClearTimer(btn);
     jQuery(btn).find('div.spinner').remove();
@@ -5430,8 +5438,23 @@ function setTableSearchFilter(filter, inputId) {
     }
     jQuery(inputId).val(filter);
     jQuery(inputId).focus();
-  }
+}
 
+function play_test_audio(btn, audio) {
+    resetRefresh();
+    setBtnSpinner(btn);
+    jQuery('#testsound').load(url_prefix+'cgi-bin/parts.cgi?part=_sounds&audio='+audio, {},
+        function(text, status, jqXHR) {
+            resetRefresh();
+            if(status == "error") {
+                var msg = getXHRerrorMsg(text, status, jqXHR, false);
+                setBtnError(btn, msg);
+            } else {
+                setBtnReset(btn);
+            }
+        }
+    )
+}
 
 /*******************************************************************************
  *   ,ad8888ba,   ,ad8888ba,   88b           d88 88888888ba  88          88888888888 888888888888 88   ,ad8888ba,   888b      88

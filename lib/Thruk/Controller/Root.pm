@@ -291,7 +291,14 @@ sub parts_cgi {
     }
 
     if($part eq '_summary_prompt') {
-        $c->stash->{'template'}  = '_parts_summary_prompt.tt';
+        $c->stash->{'template'} = '_parts_summary_prompt.tt';
+        return;
+    }
+
+    if($part eq '_sounds') {
+        my $audio = $c->req->parameters->{'audio'} // 'normal';
+        $c->stash->{'audiofile'} = $c->config->{$audio.'_sound'} // $c->config->{'normal_sound'} // 'nosound';
+        $c->stash->{'template'}  = '_sounds.tt';
         return;
     }
 

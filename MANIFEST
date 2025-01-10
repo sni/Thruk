@@ -691,10 +691,10 @@ root/thruk/cache/thruk-panorama-3.20.2.js
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
 root/thruk/javascript/thruk-3.20.2.js
-root/thruk/media/critical.wav
-root/thruk/media/ok.wav
-root/thruk/media/unknown.wav
-root/thruk/media/warning.wav
+root/thruk/media/critical.webm
+root/thruk/media/ok.webm
+root/thruk/media/unknown.webm
+root/thruk/media/warning.webm
 root/thruk/themes
 root/thruk/usercontent/backgrounds/europa.png
 root/thruk/usercontent/backgrounds/europa.svg

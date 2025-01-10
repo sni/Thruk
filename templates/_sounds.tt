@@ -1,7 +1,31 @@
 ﻿[% IF audiofile %]
-<object type="audio/x-wav" height="0" width="0" data="[% audiofile | html %]">
-  <param name="filename" value="[% audiofile | html %]">
-  <param name="autostart" value="true">
-  <param name="playcount" value="1">
-</object>
+<audio id="audiofileid">
+  <source src="[% audiofile | html %]" [% IF audiofile.match("\.wav$") %]type="audio/wav"[% ELSIF audiofile.match("\.mp3$") %]type="audio/mpeg"[% ELSIF audiofile.match("\.ogg$") %]type="audio/ogg"[% END %]>
+</audio>
+<script>
+  var el = document.getElementById("audiofileid");
+  if(el) {
+    try {
+      el.play();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  var error = "";
+  try {
+    if(navigator.getAutoplayPolicy("mediaelement") !== "allowed") {
+      error = "cannot play audio file, auto play is disabled by your browser";
+    }
+  } catch (error) {
+    console.log(error);
+  }
+console.log(error);
+  if(error != "") {
+    if(jQuery("#audiomsg").length > 0) {
+      jQuery("#audiomsg").text(error);
+    } else {
+      thruk_message(1, error);
+    }
+  }
+</script>
 [% END %]

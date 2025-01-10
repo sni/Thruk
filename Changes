@@ -1,6 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - migrate sound files to webm
+          - add test page for sound file in user preferences
           - Rest:
             - add peer_section attribute
 
