@@ -7,7 +7,7 @@ use utf8;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 73;
+    plan tests => 75;
 
     use lib('t');
     require TestUtils;
@@ -31,3 +31,9 @@ use_ok('Thruk::Utils::Crypt');
         }
     }
 };
+
+my $b1 = Thruk::Utils::Crypt::get_random_bytes(16);
+my $b2 = Thruk::Utils::Crypt::get_random_bytes(16);
+is(length($b1), 16, 'random length is ok');
+ok($b1 ne $b2, "randomness differs");
+
