@@ -1,0 +1,89 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: local_tests
+    - role: thruk_developer
+  tasks:
+#  - shell: "crond"
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+  - shell: rm /omd/sites/demo/etc/naemon/conf.d/*.cfg
+  - name: "create secret.key"
+    shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - name: "set permissions on secret.key"
+    file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - shell: ln -sfn /thruk/support/thruk_templates.cfg /omd/sites/demo/etc/naemon/conf.d/thruk_templates.cfg
+  - copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/thruk_cluster.conf
+      dest: /omd/sites/demo/etc/thruk/thruk_local.d/cluster.conf
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/dot_thruk
+      dest: /omd/sites/demo/.thruk
+      owner: demo
+      group: demo
+  - name: add example business process
+    copy:
+      src: /root/1.tbp
+      dest: /omd/sites/demo/etc/thruk/bp/1.tbp
+      owner: demo
+      group: demo
+  - name: create reports folder
+    file:
+      path: /omd/sites/demo/var/thruk/reports
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - name: add example report
+    copy:
+      src: /root/1.rpt
+      dest: /omd/sites/demo/var/thruk/reports/1.rpt
+      owner: demo
+      group: demo
+  - name: create downtimes folder
+    file:
+      path: /omd/sites/demo/var/thruk/downtimes
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - name: add example recurring downtime
+    copy:
+      src: /root/1.tsk
+      dest: /omd/sites/demo/var/thruk/downtimes/1.tsk
+      owner: demo
+      group: demo
+  - name: wait for omd livestatus to become available
+    wait_for:
+      host: omd
+      port: 6557
+  - name: "wait for http://omd/demo/ to come up"
+    uri:
+      url: "http://omd/demo/thruk/cgi-bin/remote.cgi"
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 180
+    delay: 1
+  - name: "thruk filesystem import"
+    shell: sudo su - demo -c "thruk filesystem import"
+  - name: "thruk cron install"
+    shell: sudo su - demo -c "thruk cron install"
+# TODO: fix
+#  - name: "thruk bp commit"
+#    shell: sudo su - demo -c "thruk bp commit"

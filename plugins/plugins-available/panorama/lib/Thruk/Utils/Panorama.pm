@@ -215,13 +215,13 @@ sub load_dashboard {
     return if $nr !~ m/^\-?[a-zA-Z_\-\d]+$/gmx;
 
     # startpage can be overridden, only load original file if there is none in etc/
-    if($nr eq "0" && !-s $file) {
+    if($nr eq "0" && !Thruk::Utils::IO::file_not_empty($file)) {
         $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
     }
 
     set_is_admin($c);
 
-    return unless -s $file;
+    return unless Thruk::Utils::IO::file_not_empty($file);
     my $dashboard;
     my $scripted = 0;
     if(-x $file) {
@@ -282,11 +282,8 @@ sub load_dashboard {
     $dashboard->{'file_version'} = DASHBOARD_FILE_VERSION;
 
     # merge runtime data
-    my $runtime      = {};
     my $runtimefile  = get_runtime_file($c, $nr);
-    if(-s $runtimefile) {
-        $runtime = Thruk::Utils::read_data_file($runtimefile, $c);
-    }
+    my $runtime = Thruk::Utils::read_data_file($runtimefile, $c) // {};
     for my $tab (keys %{$runtime}) {
         next if !defined $dashboard->{$tab};
         for my $key (keys %{$runtime->{$tab}}) {
@@ -311,7 +308,7 @@ sub load_dashboard {
 
     # check for maintenance mode
     my $maintfile  = get_maint_file($c, $nr);
-    if(-e $maintfile) {
+    if(Thruk::Utils::IO::file_exists($maintfile)) {
         my $maintenance = Thruk::Utils::IO::json_lock_retrieve($maintfile);
         $dashboard->{'maintenance'} = $maintenance->{'maintenance'};
     }
@@ -350,7 +347,7 @@ sub save_dashboard {
         # find next free number
         $nr = $c->config->{'Thruk::Plugin::Panorama'}->{'new_files_start_at'} || 1;
         $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
-        while(-e $file) {
+        while(Thruk::Utils::IO::file_exists($file)) {
             $nr++;
             $file = $c->config->{'etc_path'}.'/panorama/'.$nr.'.tab';
         }
@@ -460,7 +457,7 @@ sub is_authorized_for_dashboard {
     return ACCESS_OWNER if $c->stash->{'is_admin'};
 
     # does that dashboard already exist?
-    if(-s $file) {
+    if(Thruk::Utils::IO::file_not_empty($file)) {
         $dashboard = load_dashboard($c, $nr, 1) unless $dashboard;
         if($dashboard->{'user'} eq $c->stash->{'remote_user'}) {
             return ACCESS_READONLY if $c->stash->{'readonly'};
@@ -542,7 +539,7 @@ sub move_dashboard {
     my $oldnr = $dashboard->{'id'};
        $oldnr =~ s/^pantab_//gmx;
 
-    if(-e $c->config->{'etc_path'}.'/panorama/'.$newfile) {
+    if(Thruk::Utils::IO::file_exists($c->config->{'etc_path'}.'/panorama/'.$newfile)) {
         Thruk::Utils::set_message($c, 'fail_message', 'Renaming dashboard failed, '.$newfile.' does already exist.');
         return($dashboard);
     }

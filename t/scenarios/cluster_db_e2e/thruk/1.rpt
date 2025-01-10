@@ -1,0 +1,47 @@
+{
+   "backends" : [],
+   "cc" : "",
+   "desc" : "Example Description",
+   "failed_backends" : "cancel",
+   "is_public" : 0,
+   "name" : "Test Report",
+   "params" : {
+      "assumeinitialstates" : "yes",
+      "breakdown" : "days",
+      "decimals" : "2",
+      "details_max_level" : "-1",
+      "graph_min_sla" : "90",
+      "host" : "localhost",
+      "includesoftstates" : "no",
+      "initialassumedhoststate" : "0",
+      "language" : "en",
+      "mail_max_level" : "-1",
+      "max_outages_pages" : "1",
+      "max_pnp_sources" : "1",
+      "max_worst_pages" : "1",
+      "rpttimeperiod" : "",
+      "sla" : "98",
+      "t1" : 1526456460,
+      "t2" : 1526542860,
+      "timeperiod" : "last24hours",
+      "unavailable" : [
+         "down",
+         "unreachable"
+      ]
+   },
+   "send_types" : [
+      {
+         "cust" : "* * * * *",
+         "day" : "1",
+         "hour" : "0",
+         "minute" : "0",
+         "month_day" : "1st_Monday",
+         "type" : "cust",
+         "week_day" : ""
+      }
+   ],
+   "template" : "sla_host.tt",
+   "to" : "",
+   "user" : "omdadmin",
+   "var" : {}
+}

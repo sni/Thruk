@@ -251,14 +251,14 @@ the shipping installer:
 
   #> /usr/share/thruk/script/install_puppeteer.sh
 
-This will install puppeteer into /var/lib/thruk/puppeteer
+This will install puppeteer into /var/lib/thruk/local/puppeteer
 
 It requires node and npm to be installed.
 
 Thruk will use the system chromium if it is installed befor running
 the puppet installer.
 If no chromium is installed, puppeteer will download chromium
-into /var/lib/thruk/puppeteer/chromium.
+into /var/lib/thruk/local/puppeteer/chromium.
 
 You can disable downloading chromium by setting this into the
 environment before running the installer.

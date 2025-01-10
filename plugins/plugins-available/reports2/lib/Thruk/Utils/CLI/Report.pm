@@ -170,7 +170,7 @@ sub _cmd_report {
     _debug("finished creating report");
     if(defined $report_file and $report_file eq '-2') {
         return($Thruk::Utils::Reports::error // "[".$nr.".rpt] report is running on another node already\n", 0);
-    } elsif(defined $report_file and -f $report_file) {
+    } elsif(defined $report_file && Thruk::Utils::IO::file_exists($report_file)) {
         ## no critic
         return(sprintf("[%s.rpt] report calculated successfully in %.1fs\n", $nr, $options->{'var'}->{'end_time'}-$options->{'var'}->{'start_time'}), 0) if(-t 0 || $ENV{'THRUK_CRON'}); # avoid pdf being printed to logfile
         ## use critic

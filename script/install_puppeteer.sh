@@ -2,7 +2,7 @@
 #
 # usage: ./install_puppeteer.sh
 #
-# installs puppeteer into /var/lib/thruk/puppeteer so it can be used to render PDFs
+# installs puppeteer into /var/lib/thruk/local/puppeteer so it can be used to render PDFs
 #
 
 ###########################################################
@@ -13,7 +13,7 @@ PUPPETEER_VERSION=21.11.0 # the last one with node 16 support
 # target folder
 DEST=$1
 if [ -z "$DEST" ]; then
-    DEST=/var/lib/thruk/puppeteer
+    DEST=/var/lib/thruk/local/puppeteer
 fi
 
 NPM="npm"

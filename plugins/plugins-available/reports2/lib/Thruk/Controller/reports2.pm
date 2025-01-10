@@ -159,7 +159,7 @@ sub index {
         }
     }
 
-    if(!$ENV{'OMD_ROOT'} && !-d $c->config->{'var_path'}."/puppeteer" && !Thruk::Utils::has_node_module($c, 'puppeteer')) {
+    if(!$ENV{'OMD_ROOT'} && !-d $c->config->{'var_path'}."/local/puppeteer" && !Thruk::Utils::has_node_module($c, 'puppeteer')) {
         $c->stash->{'puppeteer'} = 0;
     }
 
@@ -506,7 +506,8 @@ sub report_email {
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => '\'to\' address missing' });
     }
 
-    $c->stash->{size} = -s $c->config->{'var_path'}.'/reports/'.$r->{'nr'}.'.dat';
+    my $test = Thruk::Utils::IO::saferead($c->config->{'var_path'}.'/reports/'.$r->{'nr'}.'.dat');
+    $c->stash->{size} = $test ? length($test) : 0;
     if($r->{'var'}->{'attachment'} && (!$r->{'var'}->{'ctype'} || $r->{'var'}->{'ctype'} ne 'html2pdf')) {
         $c->stash->{attach}  = $r->{'var'}->{'attachment'};
     } else {
@@ -514,9 +515,8 @@ sub report_email {
     }
     if(defined $r->{'params'}->{'pdf'} && $r->{'params'}->{'pdf'} eq 'no') {
         my $attachment = $c->config->{'var_path'}.'/reports/'.$r->{'nr'}.'.html';
-        if(-s $attachment) {
-            $c->stash->{size} = -s $attachment;
-        }
+        my $test = Thruk::Utils::IO::saferead($attachment);
+        $c->stash->{size} = $test ? length($test) : 0;
     }
     $c->stash->{subject} = $r->{'subject'} || 'Report: '.$r->{'name'};
     $c->stash->{r}       = $r;

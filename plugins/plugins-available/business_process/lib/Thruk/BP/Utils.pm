@@ -191,7 +191,7 @@ sub next_free_bp_file {
     my $base_folder = bp_base_folder($c);
     Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/bp');
     Thruk::Utils::IO::mkdir_r($base_folder);
-    while(-e $base_folder.'/'.$num.'.tbp' || -e $c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit') {
+    while(Thruk::Utils::IO::file_exists($base_folder.'/'.$num.'.tbp') || Thruk::Utils::IO::file_exists($c->config->{'var_path'}.'/bp/'.$num.'.tbp.edit')) {
         $num++;
     }
     return($base_folder.'/'.$num.'.tbp', $num);
@@ -285,7 +285,7 @@ sub save_bp_objects {
     Thruk::Utils::IO::write($filename, Encode::encode_utf8($text));
 
     my $new_hex = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($filename));
-    my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
+    my $old_hex = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::saferead($file) || '');
 
     # check if something changed
     if($new_hex eq $old_hex) {
@@ -398,13 +398,13 @@ sub clean_orphaned_edit_files {
     $threshold = 86400 unless defined $threshold;
     my $base_folder = bp_base_folder($c);
     for my $pattern (qw/edit runtime/) {
-    my @files = glob($c->config->{'var_path'}.'/bp/*.tbp.'.$pattern);
-        for my $file (@files) {
+    my $files = Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/bp/', '\.tbp\.'.$pattern);
+        for my $file (@{$files}) {
             $file =~ m/\/(\d+)\.tbp\.$pattern/mx;
-            if($1 && !-e $base_folder.'/'.$1.'.tbp') {
-                my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
+            if($1 && !Thruk::Utils::IO::file_exists($base_folder.'/'.$1.'.tbp')) {
+                my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = Thruk::Utils::IO::stat($file);
                 next if $mtime > (time() - $threshold);
-                unlink($file);
+                Thruk::Utils::IO::unlink($file);
             }
         }
     }
@@ -469,7 +469,7 @@ sub get_custom_functions {
     my $functions = [];
     my @files = glob(bp_base_folder($c).'/*.pm');
     for my $filename (@files) {
-        next unless -s $filename;
+        next unless Thruk::Utils::IO::file_not_empty($filename);
         my $f = _parse_custom_functions($filename, 'function$');
         push @{$functions}, @{$f};
     }
@@ -492,7 +492,7 @@ sub get_custom_filter {
     my $functions = [];
     my @files = glob(bp_base_folder($c).'/*.pm');
     for my $filename (@files) {
-        next unless -s $filename;
+        next unless Thruk::Utils::IO::file_not_empty($filename);
         my $f = _parse_custom_functions($filename, 'filter$');
         push @{$functions}, @{$f};
     }
@@ -863,9 +863,13 @@ runs index update if necessary.
 =cut
 sub check_update_index {
     my($c, $bps) = @_;
-    if($ENV{'THRUK_CRON'} || !-s $c->config->{'var_path'}.'/bp/.index' || (stat(_))[9] < time()-300) {
+    return unless $ENV{'THRUK_CRON'};
+
+    my @stat = Thruk::Utils::IO::stat($c->config->{'var_path'}.'/bp/.index');
+    if(!$stat[9] || $stat[9] < time()-300) {
         _update_index($c, $bps);
     }
+
     return;
 }
 

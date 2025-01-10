@@ -104,7 +104,7 @@ sub index {
             if($id eq 'new') {
                 $id = POSIX::strftime('%Y-%m-%d-'.$c->stash->{'remote_user'}.'.json', localtime);
                 my $x  = 1;
-                while(-e $c->config->{'var_path'}.'/broadcast/'.$id) {
+                while(Thruk::Utils::IO::file_exists($c->config->{'var_path'}.'/broadcast/'.$id)) {
                     $id = POSIX::strftime('%Y-%m-%d-'.$c->stash->{'remote_user'}.'_'.$x.'.json', localtime);
                     $x++;
                 }

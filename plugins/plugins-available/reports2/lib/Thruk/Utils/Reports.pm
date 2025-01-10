@@ -46,7 +46,7 @@ sub get_report_list {
     $c->stats->profile(begin => "Utils::Reports::get_report_list(".($number_filter//'all').")");
 
     my $reports = [];
-    for my $rfile (glob($c->config->{'var_path'}.'/reports/*.rpt')) {
+    for my $rfile (@{Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/reports/', '\.rpt$')}) {
         if($rfile =~ m/\/(\d+)\.rpt/mx) {
             my $nr = $1;
             next if $number_filter && $nr ne $number_filter;
@@ -109,15 +109,15 @@ sub report_show {
     }
 
     my $report_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
-    if($refresh || ! -f $report_file) {
+    if($refresh || !Thruk::Utils::IO::file_exists($report_file)) {
         generate_report($c, $nr);
     }
 
-    if(defined $report_file and -f $report_file) {
+    if(defined $report_file && Thruk::Utils::IO::file_exists($report_file)) {
         $c->stash->{'template'} = 'passthrough.tt';
         if($c->req->parameters->{'html'}) {
             my $html_file   = $c->config->{'var_path'}.'/reports/'.$nr.'.html';
-            if(!-e $html_file) {
+            if(!Thruk::Utils::IO::file_exists($html_file)) {
                 $html_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
             }
             my $report_text = decode_utf8(Thruk::Utils::IO::read($html_file));
@@ -138,6 +138,7 @@ sub report_show {
                 }
             }
             my $fh;
+# TODO: ...
             if($report->{'var'}->{'ctype'} eq 'text/html') {
                 open($fh, '<', $c->config->{'var_path'}.'/reports/'.$nr.'.html');
             } else {
@@ -207,7 +208,8 @@ sub report_send {
     my $attachment;
     if($skip_generate) {
         $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.dat';
-        if(!-s $attachment) {
+        my $test = Thruk::Utils::IO::saferead($attachment);
+        if(! defined $test) {
             Thruk::Utils::set_message( $c, 'fail_message', 'report not yet generated' );
             return $c->redirect_to('reports2.cgi');
         }
@@ -307,7 +309,8 @@ sub report_send {
     # url reports as html
     if(defined $report->{'params'}->{'pdf'} && $report->{'params'}->{'pdf'} eq 'no') {
         $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.html';
-        if(!-s $attachment) {
+        my $test = Thruk::Utils::IO::saferead($attachment);
+        if(! defined $test) {
             $attachment = $c->config->{'var_path'}.'/reports/'.$report->{'nr'}.'.dat';
         }
         my $ctype = 'text/html';
@@ -335,7 +338,8 @@ sub report_send {
         );
     }
 
-    if($report->{'var'}->{'json_file'} && -e $report->{'var'}->{'json_file'}) {
+    if($report->{'var'}->{'json_file'} && Thruk::Utils::IO::file_exists($report->{'var'}->{'json_file'})) {
+# TODO: wont't work with DB
         $msg->attach(Type    => 'text/json',
                  Path        => $report->{'var'}->{'json_file'},
                  Filename    => encode_utf8(Thruk::Base::basename($report->{'var'}->{'json_file'})),
@@ -403,7 +407,7 @@ sub report_save {
     Thruk::Utils::IO::mkdir($c->config->{'var_path'}.'/reports/');
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
     my $old_report;
-    if($nr ne 'new' && -f $file) {
+    if($nr ne 'new' && Thruk::Utils::IO::file_exists($file)) {
         $old_report = read_report_file($c, $nr);
         return unless defined $old_report;
         return if $old_report->{'readonly'};
@@ -508,10 +512,10 @@ sub generate_report {
         # just wait till its finished and return
         while($options->{'var'}->{'is_running'}) {
             sleep 1;
-            return unless -f $report_file; # report may have been deleted meanwhile
+            return unless Thruk::Utils::IO::file_exists($report_file); # report may have been deleted meanwhile
             $options = read_report_file($c, $nr);
         }
-        if(-e $attachment) {
+        if(Thruk::Utils::IO::file_exists($attachment)) {
             return $attachment;
         }
     }
@@ -551,8 +555,7 @@ sub generate_report {
 
     # empty logfile
     my $logfile = $c->config->{'var_path'}.'/reports/'.$nr.'.log';
-    open(my $fh, '>', $logfile);
-    Thruk::Utils::IO::close($fh, $logfile);
+    Thruk::Utils::IO::unlink($logfile);
 
     # check for exposed custom variables
     my $allowed = Thruk::Utils::get_exposed_custom_vars($c->config);
@@ -678,7 +681,7 @@ sub generate_report {
     }
 
     # set error if not already set
-    if(!-f $attachment && !$Thruk::Utils::Reports::error) {
+    if(!Thruk::Utils::IO::file_exists($attachment) && !$Thruk::Utils::Reports::error) {
         $Thruk::Utils::Reports::error = Thruk::Utils::IO::read($logfile);
     }
     _error($Thruk::Utils::Reports::error);
@@ -715,18 +718,20 @@ sub generate_report {
     }
 
     if($c->stash->{'debug_info'}) {
-        my $debug_file = Thruk::Action::AddDefaults::save_debug_information_to_tmp_file($c);
-        if($debug_file) {
+        my $debug_tmp_file = Thruk::Action::AddDefaults::save_debug_information_to_tmp_file($c);
+        if($debug_tmp_file) {
             my $rpt_debug_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dbg';
-            if(-s $debug_file > 1000000) {
-                Thruk::Utils::IO::cmd("gzip $debug_file >/dev/null 2>&1");
-                if(!-s $debug_file && -s $debug_file.'.gz') {
+            if(Thruk::Utils::IO::file_not_empty($debug_tmp_file) > 1000000) {
+                Thruk::Utils::IO::cmd("gzip $debug_tmp_file >/dev/null 2>&1");
+                if(!Thruk::Utils::IO::file_not_empty($debug_tmp_file) && Thruk::Utils::IO::file_not_empty($debug_tmp_file.'.gz')) {
                     $rpt_debug_file = $c->config->{'var_path'}.'/reports/'.$nr.'.dbg.gz';
-                    move($debug_file.'.gz', $rpt_debug_file);
+                    $debug_tmp_file = $debug_tmp_file.'.gz';
                 }
-            } else {
-                move($debug_file, $rpt_debug_file);
             }
+            my $dbg = Thruk::Utils::IO::saferead($debug_tmp_file);
+            Thruk::Utils::IO::write($rpt_debug_file, $dbg);
+            Thruk::Utils::IO::unlink($debug_tmp_file);
+
             my $patch = {};
             Thruk::Utils::IO::json_lock_patch($report_file, { var => { debug_file => $rpt_debug_file } }, { pretty => 1 });
         }
@@ -1113,10 +1118,10 @@ remove any tmp files from this report
 =cut
 sub clean_report_tmp_files {
     my($c, $nr) = @_;
-    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
-    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.log';
-    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.html';
-    unlink $c->config->{'var_path'}.'/reports/'.$nr.'.dbg';
+    Thruk::Utils::IO::unlink($c->config->{'var_path'}.'/reports/'.$nr.'.dat');
+    Thruk::Utils::IO::unlink($c->config->{'var_path'}.'/reports/'.$nr.'.log');
+    Thruk::Utils::IO::unlink($c->config->{'var_path'}.'/reports/'.$nr.'.html');
+    Thruk::Utils::IO::unlink($c->config->{'var_path'}.'/reports/'.$nr.'.dbg');
     return;
 }
 
@@ -1236,8 +1241,8 @@ returns list ($running, $waiting)
 sub get_running_reports_number {
     my($c) = @_;
     my $index_file = $c->config->{'var_path'}.'/reports/.index';
-    return(0,0) unless -s $index_file;
     my $index   = Thruk::Utils::IO::json_lock_retrieve($index_file);
+    return(0,0) unless defined $index;
     my $running = 0;
     my $waiting = 0;
     for my $nr (keys %{$index}) {
@@ -1308,7 +1313,7 @@ sub store_report_data {
         # find next free number
         $nr = 1;
         $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
-        while(-e $file) {
+        while(Thruk::Utils::IO::file_exists($file)) {
             $nr++;
             $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
         }
@@ -1368,7 +1373,7 @@ sub read_report_file {
         return $c->detach('/error/index/99');
     }
     my $file = $c->config->{'var_path'}.'/reports/'.$nr.'.rpt';
-    unless(-f $file) {
+    unless(Thruk::Utils::IO::file_exists($file)) {
         _error("report does not exist: $!\n");
         $c->stash->{errorMessage}       = "report does not exist";
         $c->stash->{errorDescription}   = "please make sure this report exists.";
@@ -1411,8 +1416,7 @@ sub read_report_file {
 
     # add some runtime information
     my $rfile = $c->config->{'var_path'}.'/reports/'.$nr.'.dat';
-    $report->{'var'}->{'file_exists'} = 0;
-    $report->{'var'}->{'file_exists'} = 1  if -f $rfile;
+    $report->{'var'}->{'file_exists'} = Thruk::Utils::IO::file_exists($rfile) ? 1 : 0;
     $report->{'var'}->{'is_running'}  = 0  unless defined $report->{'var'}->{'is_running'};
     $report->{'var'}->{'start_time'}  = 0  unless defined $report->{'var'}->{'start_time'};
     $report->{'var'}->{'end_time'}    = 0  unless defined $report->{'var'}->{'end_time'};
@@ -1484,19 +1488,20 @@ sub read_report_file {
         $report->{'var'}->{'profile'} = $profile;
         $needs_save = 1;
     }
-    if($report->{'var'}->{'debug_file'} && !-e $report->{'var'}->{'debug_file'}) {
+    if($report->{'var'}->{'debug_file'} && !Thruk::Utils::IO::file_exists($report->{'var'}->{'debug_file'})) {
         delete $report->{'var'}->{'debug_file'};
         $needs_save = 1;
     }
-    if($report->{'var'}->{'json_file'} && !-e $report->{'var'}->{'json_file'}) {
+    if($report->{'var'}->{'json_file'} && !Thruk::Utils::IO::file_exists($report->{'var'}->{'json_file'})) {
         delete $report->{'var'}->{'json_file'};
         $needs_save = 1;
     }
 
     # failed?
     $report->{'failed'} = 0;
-    if(-s $log) {
-        $report->{'error'} = Thruk::Utils::IO::read($log);
+    my $logdata = Thruk::Utils::IO::saferead($log);
+    if(defined $logdata) {
+        $report->{'error'} = $logdata;
 
         # strip performance debug output
         $report->{'error'}  =~ s%^\[.*INFO.*Req:.*$%%gmx;
@@ -1616,6 +1621,7 @@ sub _get_report_cmd {
         $thruk_bin = $nice.' -n '.$niceval.' '.$thruk_bin;
     }
     $numbers = Thruk::Base::list($numbers);
+# TODO: fix
     my $cmd = sprintf("cd %s && %s '%s report \"%s\"' >/dev/null 2>%s/reports/%d.log",
                             $c->config->{'project_root'},
                             $c->config->{'thruk_shell'},
@@ -1755,10 +1761,7 @@ sub _convert_to_pdf {
     }
 
     # write out result
-    open(my $fh, '>', $htmlfile);
-    binmode $fh;
-    print $fh $reportdata;
-    Thruk::Utils::IO::close($fh, $htmlfile);
+    Thruk::Utils::IO::write($htmlfile, $reportdata);
 
     if($htmlonly) {
         Thruk::Utils::IO::touch($attachment);
@@ -1766,22 +1769,24 @@ sub _convert_to_pdf {
         return;
     }
 
+# TODO:
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "file://'.abs_path($htmlfile).'" "'.$attachment.'.pdf" "'.$logfile.'" "'.($is_report//0).'"';
     _debug("converting to pdf: ".$cmd);
     my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 
-    if(!-e $attachment.'.pdf') {
-        my $error = Thruk::Utils::IO::read($logfile);
+    if(!Thruk::Utils::IO::file_exists($attachment.'.pdf')) {
+        my $error = Thruk::Utils::IO::saferead($logfile);
         if($error eq "") { $error = $out; }
         if($error =~ m/internal\/modules\/cjs\/loader\.js/mx) {
             $error =~ s/^.*?internal\/modules\/cjs\/loader(\.js:\d+|:\d*)\s*throw\s*err;\s*\^\s*Error:/Node Error:/sgmx; # remove useless info from node errors
             Thruk::Utils::IO::write($logfile, $error);
         } else {
-            Thruk::Utils::IO::write($logfile, $error, undef, 1) unless -s $logfile;
+            Thruk::Utils::IO::write($logfile, $error, undef, 1) unless Thruk::Utils::IO::file_not_empty($logfile);
         }
         die('report failed: '.$error);
     }
 
+# TODO:
     move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
     Thruk::Utils::IO::ensure_permissions('file', $attachment);
 
@@ -1856,9 +1861,8 @@ returns nothing
 =cut
 sub check_for_waiting_reports {
     my($c) = @_;
-    my $index_file = $c->config->{'var_path'}.'/reports/.index';
-    return unless -s $index_file;
-    my $index   = Thruk::Utils::IO::json_lock_retrieve($index_file);
+    my $index = Thruk::Utils::IO::json_lock_retrieve($c->config->{'var_path'}.'/reports/.index');
+    return unless $index;
     for my $nr (keys %{$index}) {
         if($index->{$nr}->{'is_waiting'}) {
             generate_report_background($c, $nr, undef, undef, 1);

@@ -708,6 +708,15 @@ ex.:
   var_path = ./var
 
 
+=== var_path_db
+
+Use database for storing files in var_path. See link:cluster.html[Clustering].
+
+ex.:
+
+ var_path_db = mysql://user:password@hostname/databasename
+
+
 === tmp_path
 
 Path to a temporary directory. Defaults to /tmp if not set and usually

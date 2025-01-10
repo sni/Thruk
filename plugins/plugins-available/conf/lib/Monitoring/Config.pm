@@ -286,7 +286,7 @@ sub commit {
     my @new_files;
     my %new_index;
     for my $f (@{$self->{'files'}}) {
-        if(!$f->{'deleted'} || -f $f->{'path'}) {
+        if(!$f->{'deleted'} || Thruk::Utils::IO::file_exists($f->{'path'})) {
             push @new_files, $f;
             $new_index{$f->{'display'}} = $f;
             $new_index{$f->{'path'}}    = $f;
@@ -1572,7 +1572,7 @@ sub _set_config {
         my $core_conf = $self->{'config'}->{'core_conf'};
         if(defined $ENV{'OMD_ROOT'}
            && -d $ENV{'OMD_ROOT'}."/version/."
-           && ! -s $core_conf
+           && ! Thruk::Utils::IO::file_not_empty($core_conf)
            && scalar(@{Thruk::Base::list($self->{'config'}->{'obj_dir'})})  == 0
            && scalar(@{Thruk::Base::list($self->{'config'}->{'obj_file'})}) == 0) {
             my $newest = $self->_newest_file(
@@ -2531,7 +2531,7 @@ sub remote_file_sync {
     }
 
     for my $f (@{$self->{'files'}}) {
-        next unless -f $f->{'path'};
+        next unless Thruk::Utils::IO::file_exists($f->{'path'});
         $files->{$f->{'display'}} = {
             'mtime'        => $f->{'mtime'},
             'hex'          => $f->{'hex'},

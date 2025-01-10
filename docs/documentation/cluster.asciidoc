@@ -6,9 +6,8 @@ title: Cluster Setup
 == Thruk Clustering
 {% include new_since.ad version="2.24" %}
 Clustered setups provide high-availability and performance improvements at the
-price of higher complexity. All Thruk nodes in a cluster must use shared
-storage for their `etc_path` and `var_path` while the `tmp_path` should remain
-local.
+price of higher complexity. All Thruk nodes in a cluster must use some kind of
+shared storage or database for `var_path`.
 
 
 === Setup
@@ -18,6 +17,23 @@ local.
     - Double check the node url in `cluster_nodes`
     - Enable cluster with `cluster_enabled=1`
 
+
+==== Shared Filesystem
+All Thruk nodes in a cluster must use shared storage for their `etc_path`
+and `var_path` while the `tmp_path` remains local.
+
+This can be either implemented by mounting for example a NFS share or by using
+a shared database.
+
+==== Shared Database
+{% include new_since.ad version="3.22" %}
+Instead of a shared filesystem, you can use a shared database for the `var_path`.
+This is especially useful when you have a database cluster already in place.
+
+In order to use a mysql/mariadb database, you have to fill in a connection
+string in the `var_path_db`.
+
+    var_path_db = mysql://user:password@hostname/databasename
 
 ==== Static Cluster
 Having a fixed number of cluster nodes will be set if you configure multiple

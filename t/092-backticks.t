@@ -20,12 +20,14 @@ for my $cmd (@{$cmds}) {
   while(my $line = <$ph>) {
     chomp($line);
     $line =~ s/'.*?'//gmx;
+    $line =~ s=/+=/=gmx;
     next if $line =~ m/nasty\ chars/mx;
     next if $line =~ m/\Qcontains invalid characters\E/mx;
     next if $line =~ m/NO\ CRITIC\ BACKTICKS/mx;
     $line =~ s/\#.*$//gmx;
     next if($filter && $line !~ m%$filter%mx);
     next if $line =~ m%\QThruk/Utils/IO.pm:\E%mx;
+    next if $line =~ m%\QThruk/Utils/IO/LocalFS.pm:\E%mx;
     next if $line =~ m/(CREATE|ALTER|TRUNCATE|OPTIMIZE|DROP|LOCK)\ TABLE/mx;
     next if $line =~ m/LEFT\ JOIN/mx;
     next if $line =~ m/INSERT\ INTO/mx;

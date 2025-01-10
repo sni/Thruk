@@ -156,7 +156,7 @@ sub process {
 
     # direct login by secret/api key
     if($extra->[2] && $extra->[2] =~ m/[a-zA-Z0-9_]+/mx) {
-        my $secret_key  = Thruk::Utils::IO::read($secret_file) if -s $secret_file;
+        my $secret_key  = Thruk::Utils::IO::saferead($secret_file);
         chomp($secret_key) if $secret_key;
         if($secret_key && $extra->[2] eq $secret_key) {
             if(!$extra->[3]) {

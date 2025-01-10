@@ -1,0 +1,51 @@
+---
+- hosts: all
+  roles:
+    - role: common
+  tasks:
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        PNP4NAGIOS=off
+        LIVESTATUS_TCP=on
+        MYSQL=on
+  - name: copy naemon example.cfg
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - name: copy naemon test.cfg
+    copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - name: enable mysql networking
+    lineinfile:
+      dest: /opt/omd/sites/demo/.my.cnf
+      line: "#skip-networking"
+      regexp: '^\#?skip-networking'
+  - name: change mysql bind address
+    lineinfile:
+      dest: /opt/omd/sites/demo/.my.cnf
+      line: "bind-address = 0.0.0.0"
+      regexp: 'bind-address.*='
+  - name: start mysql
+    shell: omd start demo mysql
+  - name: create mysql table
+    shell: sudo su - demo -c 'echo "CREATE DATABASE IF NOT EXISTS thruk_var_fs" | mysql'
+  - name: create mysql user
+    shell: sudo su - demo -c 'echo "CREATE USER IF NOT EXISTS \"thruk\"@\"%\" IDENTIFIED BY \"thruk\"" | mysql'
+  - name: grant mysql privileges
+    shell: sudo su - demo -c 'echo "GRANT ALL PRIVILEGES ON \`thruk_var_fs\`.* TO \"thruk\"@\"%\"" | mysql'
+  - name: stop mysql
+    shell: omd stop demo mysql

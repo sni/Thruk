@@ -90,8 +90,35 @@ sub new {
     if(!defined $options->{'peer_key'}) {
         confess('please provide peer_key');
     }
+    my($dbhost, $dbport, $dbuser, $dbpass, $dbname, $dbsock) = _parse_connection_string($options->{'peer'});
+    my $self = {
+        'dbhost'      => $dbhost,
+        'dbport'      => $dbport,
+        'dbname'      => $dbname,
+        'dbuser'      => $dbuser,
+        'dbpass'      => $dbpass,
+        'dbsock'      => $dbsock,
+        'peer_config' => $options,
+        'verbose'     => 0,
+    };
+    bless $self, $class;
+
+    return $self;
+}
+
+##########################################################
+
+=head2 _parse_connection_string
+
+    _parse_connection_string($str)
+
+parse and return connection string
+
+=cut
+sub _parse_connection_string {
+    my($connection_string) = @_;
     my($dbhost, $dbport, $dbuser, $dbpass, $dbname, $dbsock);
-    if($options->{'peer'} =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
+    if($connection_string =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
         $dbuser = $1;
         $dbpass = $2;
         $dbhost = $3;
@@ -106,20 +133,7 @@ sub new {
     } else {
         die('Mysql connection must match this form: mysql://user:password@host:port/dbname');
     }
-
-    my $self = {
-        'dbhost'      => $dbhost,
-        'dbport'      => $dbport,
-        'dbname'      => $dbname,
-        'dbuser'      => $dbuser,
-        'dbpass'      => $dbpass,
-        'dbsock'      => $dbsock,
-        'peer_config' => $options,
-        'verbose'     => 0,
-    };
-    bless $self, $class;
-
-    return $self;
+    return($dbhost, $dbport, $dbuser, $dbpass, $dbname, $dbsock);
 }
 
 ##########################################################
@@ -1514,7 +1528,6 @@ sub _check_lock {
 
     # check if there is already a update / import running
     my $skip          = 0;
-    my $cache_version = 1;
     eval {
         $dbh->do('LOCK TABLES `'.$prefix.'_status` READ') unless $c->config->{'logcache_pxc_strict_mode'};
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
@@ -1523,10 +1536,6 @@ sub _check_lock {
                 _info("WARNING: logcache update already running with pid ".$pids[0]);
                 $skip = 1;
             }
-        }
-        my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
-        if(scalar @versions > 0 and $versions[0]) {
-            $cache_version = $versions[0];
         }
     };
     $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};

@@ -3123,10 +3123,10 @@ sub caching_query {
             }
             # simply remove all files older than 24h
             my $yesterday = time() - 86400;
-            for my $file (glob($cache_file."/*.cache")) {
-                my @stat = stat($file);
+            for my $file (@{Thruk::Utils::IO::find_files($cache_file, '\.cache$')}) {
+                my @stat = Thruk::Utils::IO::stat($file);
                 if($stat[9] < $yesterday) {
-                    unlink($file);
+                    Thruk::Utils::IO::unlink($file);
                 }
             }
         } else {

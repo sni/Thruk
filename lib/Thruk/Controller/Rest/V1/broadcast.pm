@@ -27,8 +27,8 @@ Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/broadcasts?$
 sub _rest_get_thruk_broadcast {
     my($c, undef, $file) = @_;
     require Thruk::Utils::Broadcast;
-    $file = '*' unless $file;
-    my @files  = glob($c->config->{'var_path'}.'/broadcast/'.$file.'.json');
+    $file = '.*' unless $file;
+    my @files  = @{Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/broadcast/', $file.'\.json$')};
     my $broadcasts = Thruk::Controller::rest_v1::load_json_files($c, {
             files                  => \@files,
             authorization_callback => $c->user->check_user_roles('authorized_for_broadcasts') ? undef : \&Thruk::Utils::Broadcast::is_authorized_for_broadcast,
@@ -41,7 +41,7 @@ sub _rest_get_thruk_broadcast {
         $b->{'text'} = Thruk::Utils::Filter::replace_macros($b->{'text'}, $b->{'frontmatter'});
     }
 
-    if($file eq '*') {
+    if($file eq '.*') {
         return($broadcasts);
     }
 
@@ -80,7 +80,7 @@ sub _rest_get_thruk_broadcast {
         });
     }
 
-    if($file ne '*') {
+    if($file ne '.*') {
         return($broadcasts->[0]);
     }
 }
@@ -115,7 +115,7 @@ sub _rest_get_thruk_broadcast_new {
     if(!$file) {
         $file = POSIX::strftime('%Y-%m-%d-'.$c->stash->{'remote_user'}.'.json', localtime);
         my $x  = 1;
-        while(-e $c->config->{'var_path'}.'/broadcast/'.$file) {
+        while(Thruk::Utils::IO::file_exists($c->config->{'var_path'}.'/broadcast/'.$file)) {
             $file = POSIX::strftime('%Y-%m-%d-'.$c->stash->{'remote_user'}.'_'.$x.'.json', localtime);
             $x++;
         }

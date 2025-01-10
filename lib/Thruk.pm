@@ -702,7 +702,7 @@ sub _create_secret_file {
     return unless (Thruk::Base->mode() eq 'FASTCGI' || Thruk::Base->mode() eq 'DEVSERVER');
     my $var_path   = $config->{'var_path'} || die("no var path!");
     my $secretfile = $var_path.'/secret.key';
-    return if -s $secretfile;
+    return if Thruk::Utils::IO::file_not_empty($secretfile);
     require Thruk::Utils::Crypt;
     my $digest = Thruk::Utils::Crypt::random_uuid([time()]);
     Thruk::Utils::IO::write($secretfile, $digest);

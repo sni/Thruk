@@ -104,7 +104,7 @@ sub index {
             my $host_templates    = [];
             my $service_templates = [];
             # simple / fast template grep
-            if($c->stash->{'objects_templates_file'} and -e $c->stash->{'objects_templates_file'}) {
+            if($c->stash->{'objects_templates_file'} && Thruk::Utils::IO::file_exists($c->stash->{'objects_templates_file'})) {
                 my $lasttype;
                 open(my $fh, '<', $c->stash->{'objects_templates_file'}) or die("failed to open ".$c->stash->{'objects_templates_file'}.": ".$!);
                 while(my $line = <$fh>) {
@@ -196,7 +196,7 @@ sub index {
             unlink($bp->{'editfile'});
             unlink($bp->{'datafile'}.'.edit');
             Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'changes canceled' });
-            if(-e $bp->{'file'}) {
+            if(Thruk::Utils::IO::file_exists($bp->{'file'})) {
                 return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&bp=".$id);
             } else {
                 return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");

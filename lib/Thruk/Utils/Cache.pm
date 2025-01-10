@@ -172,17 +172,16 @@ update cache from file
 =cut
 sub _update {
     my($self) = @_;
-    if(-s $self->{'_cachefile'}) {
-        my @stat = stat(_);
-        if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
-            $self->{'_data'} = $self->_retrieve();
-            $self->{'_stat'} = \@stat;
-            return;
-        }
-    } else {
-        # did not exist before, so create an empty cache
-        $self->_store();
+
+    my @stat = Thruk::Utils::IO::stat($self->{'_cachefile'});
+    if(!$self->{'_stat'}->[9] || $stat[9] != $self->{'_stat'}->[9]) {
+        $self->{'_data'} = $self->_retrieve();
+        $self->{'_stat'} = \@stat;
+        return;
     }
+
+    # did not exist before, so create an empty cache
+    $self->_store();
     return;
 }
 
@@ -197,7 +196,7 @@ store cache to disk
 =cut
 sub _store {
     my($self) = @_;
-    Thruk::Utils::IO::json_lock_store($self->{'_cachefile'}, $self->{'_data'});
+    Thruk::Utils::IO::json_lock_store($self->{'_cachefile'}, $self->{'_data'} // {});
     my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
     $self->{'_stat'} = \@stat;
     return;

@@ -623,7 +623,7 @@ sub _process_users_page {
         ($name, $alias) = split(/\ \-\ /mx,$user, 2);
         $profile_file = $c->config->{'var_path'}."/users/".$name;
         $c->stash->{'profile_file'} = $profile_file;
-        $c->stash->{'profile_file_exists'} = -e $profile_file ? 1 : 0;
+        $c->stash->{'profile_file_exists'} = Thruk::Utils::IO::file_exists($profile_file) ? 1 : 0;
     }
 
     # save changes to user
@@ -1379,7 +1379,7 @@ sub _process_tools_page {
     my $tools                = _get_tools($c);
     $c->stash->{'tools'}     = $tools;
     my $ignore_file          = $c->config->{'var_path'}.'/conf_tools_ignore';
-    my $ignores              = -s $ignore_file ? Thruk::Utils::IO::json_lock_retrieve($ignore_file) : {};
+    my $ignores              = Thruk::Utils::IO::json_lock_retrieve($ignore_file) // {};
     $c->stash->{'tool'}      = $tool;
 
     $c->stats->profile(begin => "tool: ".$tool);
@@ -1604,7 +1604,7 @@ sub _htpasswd_password {
     # check old password first?
     if($has_minus_v && $oldpassword) {
         my $cmd = [$htpasswd];
-        push @{$cmd}, '-c' unless -s $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+        push @{$cmd}, '-c' unless Thruk::Utils::IO::file_not_empty($c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'});
         push @{$cmd}, '-i' if  $has_minus_i;
         push @{$cmd}, '-b' if !$has_minus_i;
         push @{$cmd}, '-v';
@@ -1617,7 +1617,7 @@ sub _htpasswd_password {
     }
 
     my $cmd = [$htpasswd];
-    push @{$cmd}, '-c' unless -s $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
+    push @{$cmd}, '-c' unless Thruk::Utils::IO::file_not_empty($c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'});
     push @{$cmd}, '-i' if $has_minus_i;
     push @{$cmd}, '-b' if !$has_minus_i;
     push @{$cmd}, $c->config->{'Thruk::Plugin::ConfigTool'}->{'htpasswd'};
@@ -1945,7 +1945,7 @@ sub _object_revert {
     my($c, $obj) = @_;
 
     my $id = $obj->get_id();
-    if(-e $obj->{'file'}->{'path'}) {
+    if(Thruk::Utils::IO::file_exists($obj->{'file'}->{'path'})) {
         my $oldobj;
         my $tmpfile = Monitoring::Config::File->new($obj->{'file'}->{'path'}, undef, $c->{'obj_db'}->{'coretype'});
         $tmpfile->update_objects();
@@ -2386,7 +2386,7 @@ sub _file_editor {
         $c->stash->{'file_link'}     = $filename;
         $c->stash->{'line'}          = $c->req->parameters->{'line'} || 1;
         $c->stash->{'file_content'}  = '';
-        if(-f $filename) {
+        if(Thruk::Utils::IO::file_exists($filename)) {
             my $content                  = Thruk::Utils::IO::read($filename);
             $c->stash->{'file_content'}  = decode_utf8($content);
         }

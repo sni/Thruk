@@ -37,16 +37,16 @@ else
     export XDG_CONFIG_HOME=/tmp/puppeteer.cache.$(id -u)
     export XDG_CACHE_HOME=$XDG_CACHE_HOME
 fi
-if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/puppeteer/node_modules" ]; then
-    export NODE_PATH="/var/lib/thruk/puppeteer/node_modules"
+if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/local/puppeteer/node_modules" ]; then
+    export NODE_PATH="/var/lib/thruk/local/puppeteer/node_modules"
     if [ -z "$PUPPETEER_EXECUTABLE_PATH" ]; then
-        export PUPPETEER_EXECUTABLE_PATH=$(ls -1 /var/lib/thruk/puppeteer/chromium/chrome/*/chrome*/chrome 2>/dev/null | head -n 1)
+        export PUPPETEER_EXECUTABLE_PATH=$(ls -1 /var/lib/thruk/local/puppeteer/chromium/chrome/*/chrome*/chrome 2>/dev/null | head -n 1)
     fi
     if [ -z "$PUPPETEER_EXECUTABLE_PATH" -a -x /usr/bin/chromium ]; then
         export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     fi
-    if [ -d "/var/lib/thruk/puppeteer/node" ]; then
-        NODE="/var/lib/thruk/puppeteer/node/bin/node"
+    if [ -d "/var/lib/thruk/local/puppeteer/node" ]; then
+        NODE="/var/lib/thruk/local/puppeteer/node/bin/node"
     fi
 fi
 

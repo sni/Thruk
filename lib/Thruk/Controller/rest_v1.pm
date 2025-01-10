@@ -1749,8 +1749,8 @@ sub load_json_files {
     my($c, $options) = @_;
     my $list = [];
     for my $file (@{$options->{'files'}}) {
-        next unless -e $file;
         my $data = Thruk::Utils::IO::json_lock_retrieve($file);
+        next unless $data;
         $data->{'file'} = $file;
         $data->{'file'} =~ s%.*?([^/]+)\.\w+$%$1%mx;
         if($options->{'pre_process_callback'}) {
@@ -1849,8 +1849,15 @@ sub _rest_get_thruk_jobs {
     my($c, undef, $job) = @_;
     require Thruk::Utils::External;
 
+    my $files = Thruk::Utils::IO::find_files($c->config->{'var_path'}."/jobs");
+    my %dirs;
+    for my $f (@{$files}) {
+        my $d = Thruk::Base::dirname($f);
+        $dirs{$d} = 1;
+    }
+
     my $data = [];
-    for my $dir (glob($c->config->{'var_path'}."/jobs/*/.")) {
+    for my $dir (sort keys %dirs) {
         if($dir =~ m%/([^/]+)/\.$%mx) {
             my $id = $1;
             next if $job && $job ne $id;
@@ -1890,7 +1897,7 @@ sub _rest_get_thruk_sessions {
     my $min5 = time() - (5*60);
     my $uniq = {};
     my $uniq5min = {};
-    for my $file (sort glob($c->config->{'var_path'}."/sessions/*")) {
+    for my $file (sort @{Thruk::Utils::IO::find_files($c->config->{'var_path'}."/sessions/")}) {
         $total_number++;
         my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, file => $file);
         next unless $session_data;

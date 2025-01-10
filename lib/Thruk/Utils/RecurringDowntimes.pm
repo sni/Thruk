@@ -144,9 +144,8 @@ sub get_downtimes_list {
     my $default_rd         = get_default_recurring_downtime($c, $host, $service);
     my $downtimes          = [];
     my $reinstall_required = 0;
-    my @files = glob($c->config->{'var_path'}.'/downtimes/*.tsk');
-    for my $dfile (@files) {
-        next unless -f $dfile;
+    my $files = Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/downtimes/', '\.tsk$');
+    for my $dfile (@{$files}) {
         $reinstall_required++ if $dfile !~ m/\/\d+\.tsk$/mx;
         my $d = read_downtime($c, $dfile, $default_rd, $authhosts, $authservices, $authhostgroups, $authservicegroups, $host, $service, $auth, $backendfilter, $hosts, $services, $hostgroups, $servicegroups);
         push @{$downtimes}, $d if $d;
@@ -257,6 +256,7 @@ sub read_downtime {
     }
 
     my $d = Thruk::Utils::read_data_file($dfile);
+    return unless $d;
     $d->{'file'} = $dfile;
     $d->{'file'} =~ s|^.*/||gmx;
     $d->{'file'} =~ s|\.tsk$||gmx;
@@ -553,7 +553,9 @@ sub get_data_file_name {
         $nr = 1;
     }
 
-    while(-f $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk') {
+	my $files = Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/downtimes/', '\.tsk$');
+    $files = Thruk::Base::array2hash($files);
+    while(defined $files->{$c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk'}) {
         $nr++;
     }
 

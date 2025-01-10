@@ -343,8 +343,8 @@ sub _process_recurring_downtimes_page {
         my $old_file;
         if($nr && !$failed) {
             $old_file  = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
-            if(-s $old_file) {
-                my $old_rd = Thruk::Utils::read_data_file($old_file);
+            my $old_rd = Thruk::Utils::read_data_file($old_file);
+            if($old_rd) {
                 if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $old_rd) != 2) {
                     $failed = 1;
                 } else {
@@ -381,8 +381,8 @@ sub _process_recurring_downtimes_page {
         }
         for my $nr (@{$numbers}) {
             my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
-            if(-s $file) {
-                my $old_rd = Thruk::Utils::read_data_file($file);
+            my $old_rd = Thruk::Utils::read_data_file($file);
+            if($old_rd) {
                 if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $old_rd) != 2) {
                     Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'no such downtime!' });
                 } else {
@@ -420,7 +420,8 @@ sub _process_recurring_downtimes_page_edit {
     $c->stash->{can_edit}     = 1;
     if($nr) {
         my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
-        if(-s $file) {
+        my $exists = Thruk::Utils::IO::saferead($file);
+        if(defined $exists) {
             $c->stash->{rd} = Thruk::Utils::RecurringDowntimes::read_downtime($c, $file, undef, undef, undef, undef, undef, undef, undef, 0);
             my $perms = Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $c->stash->{rd});
             # check cmd permission for this downtime

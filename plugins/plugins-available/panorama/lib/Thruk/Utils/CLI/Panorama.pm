@@ -39,6 +39,7 @@ use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Getopt::Long ();
 
 use Thruk::Utils::CLI ();
+use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -91,7 +92,7 @@ sub cmd {
         my $nr = shift @{$commandoptions};
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) unless defined $nr;
         my $file;
-        if(-e $nr) {
+        if(Thruk::Utils::IO::file_exists($nr)) {
             $file = $nr;
             $nr   = -1;
         }
@@ -108,7 +109,7 @@ sub cmd {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) if scalar @{$commandoptions} == 0;
         for my $nr (@{$commandoptions}) {
             my $file;
-            if(-e $nr) {
+            if(Thruk::Utils::IO::file_exists($nr)) {
                 $file = $nr;
                 $nr   = -1;
             }

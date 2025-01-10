@@ -19,24 +19,26 @@ my $c = TestUtils::get_c();
 
 use_ok("Thruk::Utils::IO");
 
+my $srcfolders = "lib/ plugins/plugins-available/*/lib";
 my $cmds = [
-  "grep -nr  'close\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::close",
-  "grep -nr  'mkdir\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::mkdir",
-  "grep -nr  'chown\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::ensure_permissions",
-  "grep -nr  'chmod\(' lib/ plugins/plugins-available/*/lib",          "better use Thruk::Utils::IO::ensure_permissions",
-  "grep -Pnr 'sleep\\(\\d+\\.' lib/ plugins/plugins-available/*/lib",  "better use Time::HiRes::sleep directly",
-  "grep -nr  'File::Slurp' t/ lib/ plugins/plugins-available/*/lib",   "better use Thruk::Utils::IO::read",
+  "grep -nr  'close\(' $srcfolders",            "better use Thruk::Utils::IO::close",
+  "grep -nr  'mkdir\(' $srcfolders",            "better use Thruk::Utils::IO::mkdir",
+  "grep -nr  'chown\(' $srcfolders",            "better use Thruk::Utils::IO::ensure_permissions",
+  "grep -nr  'chmod\(' $srcfolders",            "better use Thruk::Utils::IO::ensure_permissions",
+  "grep -Enr 'sleep\\([0-9]+\\.' $srcfolders",  "better use Time::HiRes::sleep directly",
+  "grep -nr  'File::Slurp' t/ $srcfolders",     "better use Thruk::Utils::IO::read",
 ];
+my $iocmd = "grep -Enr -- '(\\-s|\\-f|\\-d|unlink\\(|stat\\(|opendir\\(|open\\(|move\\(|glob\\() ' $srcfolders";
 
 # find all close / mkdirs not ensuring permissions
 my @fails;
 while(scalar @{$cmds} > 0) {
   my $cmd  = shift @{$cmds};
   my $desc = shift @{$cmds};
-  open(my $ph, '-|', $cmd.' 2>&1') or die('cmd '.$cmd.' failed: '.$!);
-  ok($ph, 'cmd '.$cmd.' started');
-  while(<$ph>) {
-    my $line = $_;
+  ok(1, $cmd);
+  my($rc, $out) = Thruk::Utils::IO::cmd($cmd);
+  ok($rc == 0, "rc: $rc");
+  for my $line (split m/\n/mx, $out) {
     chomp($line);
     $line =~ s|//|/|gmx;
 
@@ -46,6 +48,7 @@ while(scalar @{$cmds} > 0) {
     next if $line =~ m|STDOUT|mx;
     next if $line =~ m|POSIX::close|mx;
     next if $line =~ m|Thruk/Utils/IO\.pm:|mx;
+    next if $line =~ m|Thruk/Utils/IO/LocalFS\.pm:|mx;
     next if $line =~ m|Thruk::Utils::IO::close|mx;
     next if $line =~ m|Thruk::Utils::IO::mkdir|mx;
     next if $line =~ m|CORE::|mx;
@@ -57,14 +60,44 @@ while(scalar @{$cmds} > 0) {
     next if $line =~ m|\->close|mx;
     next if $line =~ m|Time::HiRes|mx;
 
-    push @fails, $desc." in\n".$line;
+    fail($desc." in\n".$line);
   }
-  close($ph);
-  ok($? == 0, "exit code is: ".$?." (cmd: ".$cmd.")");
 }
 
-for my $fail (sort @fails) {
-    fail($fail);
+{
+    ok(1, $iocmd);
+    my($rc, $out) = Thruk::Utils::IO::cmd($iocmd);
+    ok($rc == 0, "rc: $rc");
+    for my $line (split m/\n/mx, $out) {
+        chomp($line);
+        $line =~ s|//|/|gmx;
+        next if $line =~ m|:\s*\#|mx;
+        next if $line =~ m|/tmp/|mx;
+        next if $line =~ m|tmp_path|mx;
+        next if $line =~ m|/local/|mx;
+        next if $line =~ m|pidfile|mx;
+        next if $line =~ m|logcache|mx;
+        next if $line =~ m|thruk_local.conf|mx;
+        next if $line =~ m|thruk.conf|mx;
+        next if $line =~ m|thruk_local.d|mx;
+        next if $line =~ m|\$addon|mx;
+        next if $line =~ m|/version|mx;
+        next if $line =~ m|usercontent|mx;
+        next if $line =~ m|/root/|mx;
+        next if $line =~ m|project_root|mx;
+        next if $line =~ m|script/|mx;
+        next if $line =~ m|scriptfolder|mx;
+        next if $line =~ m|plugin_enabled_dir|mx;
+        next if $line =~ m|/plugins-available/|mx;
+        next if $line =~ m|spool folder|mx;
+        next if $line =~ m|route_file|mx;
+        next if $line =~ m|_info|mx;
+        next if $line =~ m|\Qlib/Monitoring/Config\E|mx;
+        next if $line =~ m|\Qlib/Thruk/Utils/LMD\E|mx;
+        next if $line =~ m|\Qlib/Thruk/Utils/IO/LocalFS.pm\E|mx;
+
+        fail("direct file access in\n".$line);
+    }
 }
 
 my($rc, $output) = Thruk::Utils::IO::cmd('ls -la');

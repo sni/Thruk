@@ -129,7 +129,7 @@ sub _print_key {
     if($hashed_key) {
         $file = sprintf("%s/api_keys/%s.%s", $c->config->{'var_path'}, $hashed_key, $digest_name);
     }
-    if((!$file || !-e $file) && -e $key) {
+    if((!$file || !Thruk::Utils::IO::file_exists($file)) && Thruk::Utils::IO::file_exists($key)) {
         $file   = $key;
     }
 
@@ -142,7 +142,7 @@ sub _print_key {
     if(!$file) {
         push @{$res}, { 'name' => 'info',  'value' => "wrong key format" };
     }
-    elsif(!-e $file) {
+    elsif(!Thruk::Utils::IO::file_exists($file)) {
         push @{$res}, { 'name' => 'info',  'value' => "unable to read key: ".$! };
     }
     elsif(!$data) {

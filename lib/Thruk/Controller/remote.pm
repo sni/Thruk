@@ -100,12 +100,10 @@ sub index {
         if($body) {
             if(ref $body eq 'File::Temp') {
                 my $file = $body->filename();
-                if($file and -e $file) {
-                    my $msg = Thruk::Utils::IO::read($file);
-                    unlink($file);
-                    _error($msg);
-                    return $c->render("text" => 'OK');
-                }
+                my $msg = Thruk::Utils::IO::saferead($file);
+                unlink($file);
+                _error($msg) if $msg;
+                return $c->render("text" => 'OK');
             }
             if(ref $body eq 'FileHandle') {
                 while(<$body>) {

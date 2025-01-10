@@ -359,6 +359,7 @@ sub _clean_failed_logins {
     }
     my $timeout = time() - (30 * 86400);
     Thruk::Utils::IO::mkdir($dir);
+# TODO: ...
     opendir( my $dh, $dir) or die "can't opendir '$dir': $!";
     for my $entry (readdir($dh)) {
         next if $entry eq '.' or $entry eq '..';

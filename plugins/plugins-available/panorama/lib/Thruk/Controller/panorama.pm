@@ -765,7 +765,7 @@ sub _task_upload {
     }
 
     my $newlocation = $folder.'/'.$filename;
-    if(-s $newlocation && !_check_media_permissions($c, $newlocation)) {
+    if(Thruk::Utils::IO::file_not_empty($newlocation) && !_check_media_permissions($c, $newlocation)) {
         # must be text/html result, otherwise extjs form result handler dies
         $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Only administrator/panorama_view_media_manager roles may overwrite existing files.', success => Cpanel::JSON::XS::false });
         return;
@@ -938,7 +938,7 @@ sub _task_load_dashboard {
         require MIME::Base64;
         my $usercontent_folder = $c->stash->{'usercontent_folder'}.'/';
         for my $file (sort keys %{$data->{'usercontent'}}) {
-            my $size = -s $usercontent_folder.$file;
+            my $size = Thruk::Utils::IO::file_not_empty($usercontent_folder.$file);
             next if $c->config->{'demo_mode'};
             next if $size && !_check_media_permissions($c, $usercontent_folder.$file); # overwrite only if user is allowed to
             my $content = MIME::Base64::decode_base64($data->{'usercontent'}->{$file});
@@ -3055,8 +3055,8 @@ sub _task_dashboard_list {
     # add last_used data
     for my $d (@{$dashboards}) {
         $d->{'last_used'} = 0;
-        for my $file (glob($c->config->{'var_path'}.'/panorama/'.$d->{'nr'}.'.tab.*runtime')) {
-            my @stat = stat($file);
+        for my $file (@{Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/panorama/', $d->{'nr'}.'\.tab\..*runtime$')}) {
+            my @stat = Thruk::Utils::IO::stat($file);
             $d->{'last_used'} = $stat[9] if $d->{'last_used'} < $stat[9];
         }
     }
@@ -3175,9 +3175,10 @@ sub _task_dashboard_restore {
     my $dashboard  = Thruk::Utils::Panorama::load_dashboard($c, $nr, 1);
     my $permission = Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $nr, $dashboard);
     if($permission >= ACCESS_READWRITE && !$dashboard->{'scripted'}) {
-        die("no such dashboard") unless -e $c->{'panorama_etc'}.'/'.$nr.'.tab';
-        die("no such restore point") unless -e $c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode;
-        unlink($c->{'panorama_etc'}.'/'.$nr.'.tab');
+        die("no such dashboard")     unless Thruk::Utils::IO::file_exists($c->{'panorama_etc'}.'/'.$nr.'.tab');
+        die("no such restore point") unless Thruk::Utils::IO::file_exists($c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode);
+        Thruk::Utils::IO::unlink($c->{'panorama_etc'}.'/'.$nr.'.tab');
+# TODO: ...
         copy($c->{'panorama_var'}.'/'.$nr.'.tab.'.$timestamp.".".$mode, $c->{'panorama_etc'}.'/'.$nr.'.tab');
     }
     my $json = {};
@@ -3638,8 +3639,9 @@ sub _add_json_dashboard_timestamps {
         my $nr = $tab;
            $nr =~ s/^pantab_//gmx;
         $json->{'dashboard_ts'} = {};
+# TODO: move to var
         my $file  = $c->{'panorama_etc'}.'/'.$nr.'.tab';
-        if($nr eq "0" && !-s $file) {
+        if($nr eq "0" && !Thruk::Utils::IO::file_not_empty($file)) {
             $file = $c->config->{'plugin_path'}.'/plugins-enabled/panorama/0.tab';
         }
         my @stat = stat($file);
@@ -3654,7 +3656,7 @@ sub _add_json_dashboard_timestamps {
             $json->{'dashboard_ts'}->{$tab} = $stat[9] if defined $stat[9];
         }
         my $maintfile  = Thruk::Utils::Panorama::get_maint_file($c, $nr);
-        if(-e $maintfile) {
+        if(Thruk::Utils::IO::file_exists($maintfile)) {
             my $maintenance = Thruk::Utils::IO::json_lock_retrieve($maintfile);
             $json->{'maintenance'}->{$tab} = $maintenance->{'maintenance'};
         } else {

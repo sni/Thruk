@@ -161,7 +161,7 @@ sub get_server {
     $facts->{'last_error'} =~ s/\s+at\s+.*(Utils|HTTP)\.pm\s+line\s+\d+\.//gmx if $facts->{'last_error'};
 
     # gather available logs
-    my @logs = glob($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_*.log');
+    my @logs = @{Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}, '_.*\.log$')};
     @logs = map { my $l = $_; $l =~ s/^.*\///gmx; $l =~ s/\.log$//gmx; $l =~ s/^$peer->{'key'}_//gmx; $l; } @logs;
     my $logs = Thruk::Base::array2hash(\@logs);
     for my $l (sort keys %{$logs}) {
@@ -318,7 +318,7 @@ sub update_runtime_data {
 sub _ansible_get_facts {
     my($c, $peer, $refresh) = @_;
     my $file = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
-    if(!$refresh && -e $file) {
+    if(!$refresh && Thruk::Utils::IO::file_exists($file)) {
         return(Thruk::Utils::IO::json_lock_retrieve($file));
     }
     if(defined $refresh && !$refresh) {
@@ -1189,7 +1189,7 @@ sub config {
 
     my $file = $c->config->{'var_path'}.'/node_control/_conf.json';
     my $var;
-    if(-e $file) {
+    if(Thruk::Utils::IO::file_exists($file)) {
         $var = Thruk::Utils::IO::json_lock_retrieve($file);
     }
 

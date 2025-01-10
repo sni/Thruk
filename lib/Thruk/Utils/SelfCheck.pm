@@ -151,6 +151,7 @@ sub _filesystem_checks  {
     for my $fs (['var path', $c->config->{'var_path'}],
                 ['tmp path', $c->config->{'tmp_path'}],
                 ) {
+# TODO: check...
         if(!-e $fs->[1]) {
             $details .= sprintf("  - %s %s does not exist: %s\n", $fs->[0], $fs->[1], $!);
             $rc = 2;
@@ -185,8 +186,9 @@ sub _logfile_checks  {
                  $c->config->{'log4perl_logfile_in_use'},
                 ) {
         next unless $log;    # may not be set
-        next unless -e $log; # may not exist either
+        next unless Thruk::Utils::IO::file_exists($log); # may not exist either
         # count errors
+# TODO: won't work with DB
         my @out = split(/\n/mx, Thruk::Utils::IO::cmd("grep 'ERROR' $log"));
         $details .= sprintf("  - %s: ", $log);
         if(scalar @out == 0) {
@@ -475,8 +477,9 @@ sub _lmd_checks  {
     }
 
     for my $log ($c->config->{'tmp_path'}.'/lmd/lmd.log') {
-        next unless -e $log; # may not exist either
+        next unless Thruk::Utils::IO::file_exists($log); # may not exist either
         # count errors
+# TODO: won't work with DB
         my @out = split(/\n/mx, Thruk::Utils::IO::cmd("grep 'Panic:' $log"));
         $details .= sprintf("  - %s: ", $log);
         if(scalar @out == 0) {

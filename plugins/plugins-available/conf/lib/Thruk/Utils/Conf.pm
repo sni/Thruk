@@ -463,10 +463,7 @@ replace block in config file
 sub replace_block {
     my($file, $string, $start, $end) = @_;
 
-    my $content = "";
-    if(-f $file) {
-        $content = Thruk::Utils::IO::read($file);
-    }
+    my $content = Thruk::Utils::IO::saferead($file) // "";
 
     ## no critic
     unless($content =~ s/$start.*?$end/$string/sxi) {
@@ -557,7 +554,7 @@ sub get_cgi_user_list {
     }
 
     # add users from profiles
-    my @profiles = glob($c->config->{'var_path'}."/users/*");
+    my @profiles = @{Thruk::Utils::IO::find_files($c->config->{'var_path'}."/users/")};
     for my $profile (@profiles) {
         $profile =~ s/^.*\///gmx;
         $all_contacts->{$profile} = { name => $profile } unless defined $all_contacts->{$profile};
@@ -621,8 +618,7 @@ read htpasswd file
 sub read_htpasswd {
     my ( $file ) = @_;
     my $htpasswd = {};
-    return $htpasswd unless -f $file;
-    my $content  = Thruk::Utils::IO::read($file);
+    my $content  = Thruk::Utils::IO::saferead($file) // '';
     for my $line (split/\n/mx, $content) {
         my($user,$hash) = split/:/mx, $line;
         next unless defined $hash;
@@ -708,11 +704,11 @@ sub get_model_retention {
     my $var_path = $c->config->{'var_path'};
 
     my $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".".$user_id.".dat";
-    if(! -f $file) {
+    if(!Thruk::Utils::IO::file_exists($file)) {
         $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
     }
 
-    if(! -f $file) {
+    if(!Thruk::Utils::IO::file_exists($file)) {
         $c->stats->profile(end => "get_model_retention($backend)");
         return 1 if $model->cache_exists($backend);
         return;

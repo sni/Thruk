@@ -213,40 +213,37 @@ sub clean_session_files {
     my $fake_session_timeout = time() - 600;
     Thruk::Utils::IO::mkdir($sdir);
     my $sessions_by_user = {};
-    opendir( my $dh, $sdir) or die "can't opendir '$sdir': $!";
-    for my $entry (readdir($dh)) {
-        next if $entry eq '.' or $entry eq '..';
-        $total++;
-        my $file = $sdir.'/'.$entry;
+    for my $file (@{Thruk::Utils::IO::find_files($sdir)}) {
         my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-           $atime,$mtime,$ctime,$blksize,$blocks) = stat($file);
-        if($mtime) {
-            if($mtime < $timeout) {
+           $atime,$mtime,$ctime,$blksize,$blocks) = Thruk::Utils::IO::stat($file);
+        next unless $mtime;
+        $total++;
+
+        if($mtime < $timeout) {
+            my $data;
+            eval {
+                $data = Thruk::Utils::IO::json_lock_retrieve($file);
+            };
+            _warn($@) if $@;
+            _audit_log("session", "session timeout hit, removing session file", $data->{'username'}//'?', $file, 0);
+            Thruk::Utils::IO::unlink($file);
+            $cleaned++;
+        }
+        elsif($mtime < $fake_session_timeout) {
+            eval {
                 my $data;
                 eval {
                     $data = Thruk::Utils::IO::json_lock_retrieve($file);
                 };
                 _warn($@) if $@;
-                _audit_log("session", "session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
-                unlink($file);
-                $cleaned++;
-            }
-            elsif($mtime < $fake_session_timeout) {
-                eval {
-                    my $data;
-                    eval {
-                        $data = Thruk::Utils::IO::json_lock_retrieve($file);
-                    };
-                    _warn($@) if $@;
-                    if($data && $data->{'fake'}) {
-                        _audit_log("session", "short session timeout hit, removing session file", $data->{'username'}//'?', $entry, 0);
-                        unlink($file);
-                        $cleaned++;
-                    } elsif(defined $data->{'username'}) {
-                        $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
-                    }
-                };
-            }
+                if($data && $data->{'fake'}) {
+                    _audit_log("session", "short session timeout hit, removing session file", $data->{'username'}//'?', $file, 0);
+                    Thruk::Utils::IO::unlink($file);
+                    $cleaned++;
+                } elsif(defined $data->{'username'}) {
+                    $sessions_by_user->{$data->{'username'}}->{$file} = $mtime;
+                }
+            };
         }
     }
 
@@ -262,7 +259,7 @@ sub clean_session_files {
                     my $entry = $file;
                     $entry =~ s|^.*/||gmx;
                     _audit_log("session", "max session reached, cleaning old session", $user, $entry, 0);
-                    unlink($file);
+                    Thruk::Utils::IO::unlink($file);
                     $cleaned++;
                     $num--;
                 } else {
@@ -417,9 +414,10 @@ sub retrieve_session {
     my $sdir = $config->{'var_path'}.'/sessions';
     $sessionfile = $sdir.'/'.$hashed_key.'.'.$digest_name;
 
+    my @stat = Thruk::Utils::IO::stat($sessionfile);
+    return unless $stat[9];
+
     my $data;
-    return unless -e $sessionfile;
-    my @stat = stat(_);
     eval {
         $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
     };

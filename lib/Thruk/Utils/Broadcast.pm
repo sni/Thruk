@@ -32,7 +32,7 @@ sub get_broadcasts {
     my $list = [];
 
     my $now    = time();
-    my @files  = glob($c->config->{'var_path'}.'/broadcast/*.json');
+    my @files  = @{Thruk::Utils::IO::find_files($c->config->{'var_path'}.'/broadcast/', '\.json$')};
     return([]) unless scalar @files > 0;
 
     my $user_data = Thruk::Utils::get_user_data($c);
@@ -240,7 +240,7 @@ sub update_dismiss {
     my $clean_delay = $now - (86400 * 10);
     for my $file (keys %{$data->{'broadcast'}->{'read'}}) {
         my $ts = $data->{'broadcast'}->{'read'}->{$file};
-        if(!-e $c->config->{'var_path'}.'/broadcast/'.$file && $ts < $clean_delay) {
+        if(!Thruk::Utils::IO::file_exists($c->config->{'var_path'}.'/broadcast/'.$file) && $ts < $clean_delay) {
             delete $data->{'broadcast'}->{'read'}->{$file};
         }
     }
