@@ -1692,8 +1692,9 @@ sub _task_show_logs {
         data    => [],
     };
     for my $row (@{$data}) {
+        my($icon) = Thruk::Utils::Filter::logline_icon($row);
         push @{$json->{'data'}}, {
-            icon    => Thruk::Utils::Filter::logline_icon($row),
+            icon    => $icon,
             time    => $row->{'time'},
             message => substr($row->{'message'},13),
         };
