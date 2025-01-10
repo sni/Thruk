@@ -75,6 +75,56 @@ sub decrypt {
 
 ##############################################
 
+=head2 get_random_bytes
+
+  get_insecure_random_bytes($number_of_bytes)
+
+returns $number_of_bytes pseudo random bytes
+
+=cut
+
+sub get_insecure_random_bytes {
+    my $length = shift;
+    return join "", map { chr(int(rand(256))) } (1..$length);
+}
+
+##############################################
+
+=head2 get_random_bytes
+
+  get_random_bytes($number_of_bytes)
+
+returns $number_of_bytes random bytes
+
+=cut
+
+sub get_random_bytes {
+    my $length = shift;
+
+    # if we want to run on weird platforms for testing purposes
+    # let's see if we ever need that
+    if($ENV{THRUK_USE_INSECURE_RANDOMNESS}) {
+        return get_insecure_random_bytes($length);
+    }
+
+    my $randomfile = $ENV{THRUK_RANDOM_SOURCE} || "/dev/urandom";
+    my $bytes;
+    open(my $f, "<:raw", $randomfile) or die("Cannot open $randomfile: $!");
+    my $num = sysread($f, $bytes, $length);
+
+    if($!) {
+        confess("Cannot get randomness from $randomfile: $!")
+    }
+    if(!$num) {
+        confess("Cannot get randomness from $randomfile: eof")
+    }
+
+    return $bytes;
+}
+
+##############################################
+
+
 =head2 random_uuid
 
   random_uuid([$salt])
@@ -87,7 +137,7 @@ sub random_uuid {
     my $type = $supported_digests->{$default_digest};
     my $digest = Digest->new($type);
     $digest->add(time());
-    $digest->add(rand(10000000));
+    $digest->add(get_random_bytes(64));
     if($salt) {
         for my $s (@{$salt}) {
             $digest->add($s);
