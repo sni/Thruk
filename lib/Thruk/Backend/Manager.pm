@@ -1661,8 +1661,23 @@ sub _do_on_peers {
     }
 
     # all backends failed, set a error message
-    if(!$err && $num_selected_backends > 0 && $num_selected_backends == scalar keys %{$c->stash->{'failed_backends'}}) {
-        $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
+    if(!$err && scalar keys %{$c->stash->{'failed_backends'}} > 0) {
+        # check if all requested backends fail (recalculate requested backends because already failed ones would not be counted otherwise)
+        my $failed = $c->stash->{'failed_backends'};
+        $c->stash->{'failed_backends'} = {};
+        my($get_results_for) = $self->select_backends($function, $arg);
+        $get_results_for = $backends if $backends;
+        my $num_failed = 0;
+        for my $peer_key (@{$get_results_for}) {
+            if($failed->{$peer_key}) {
+                $num_failed++;
+            }
+        }
+        $c->stash->{'failed_backends'} = $failed;
+        my $num_selected_backends = scalar @{$get_results_for};
+        if($num_selected_backends == $num_failed) {
+            $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
+        }
     }
 
     &timing_breakpoint('_get_result: '.$function);
