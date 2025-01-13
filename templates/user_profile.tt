@@ -1,4 +1,5 @@
-﻿[% PROCESS _header.tt %]
+﻿[% USE date %]
+[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
 [% PROCESS _infobox.tt %]
@@ -40,7 +41,7 @@
         <td>
           <div class="flexrow flex-nowrap gap-1 justify-between">
             <span>[% IF profile_user.groups.size > 0; profile_user.groups.sort.join(', '); ELSE %]&lt;none&gt;[% END %]</span>
-            [% cache_age = date.now() - profile_user.timestamp; IF cache_age > 5 %]
+            [% cache_age = date.now - profile_user.timestamp; IF cache_age > 5 %]
               <a class="link" href="user.cgi?clear_auth_cache=1"><span class="textHINTsoft" title="auth cache last updated: [% date_format(c, profile_user.timestamp, datetime_format) %]">(auth cache updated [% duration(cache_age, 6) %] ago)</span></a>
             [% END %]
           </div>

@@ -1,4 +1,5 @@
-﻿[% PROCESS _blocks.tt %]
+﻿[% USE date %]
+[% PROCESS _blocks.tt %]
 [% PROCESS custom_perf_bar_adjustments.tt %]
 
 <table class="[% paneprefix %]_table mainTable striped" onmouseout='reset_all_hosts_and_services();'>

@@ -1,4 +1,5 @@
-﻿[% PROCESS _header.tt %]
+﻿[% USE date %]
+[% PROCESS _header.tt %]
 [% PROCESS _message.tt %]
 
 <div class="flexrow">
