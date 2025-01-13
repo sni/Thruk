@@ -33,20 +33,21 @@ for my $a (reverse sort @available) {
 
 my $filter = $ARGV[0];
 my $extra_tests = [
+  't/070-template_errors.t',
+  't/071-template_encoding.t',
   't/081-modules.t',
   't/083-xss.t',
   't/085-json_xs.t',
   't/087-trailing_whitespace.t',
+  't/088-remove_after.t',
   't/090-io.t',
   't/092-backticks.t',
-  't/088-remove_after.t',
   't/092-clean_debug.t',
   't/092-private_subs.t',
   't/092-stash-config.t',
   't/092-thruk-view-json.t',
   't/092-todo.t',
   't/094-plugin-root-path.t',
-  't/094-template_encoding.t',
   't/099-Perl-Critic.t',
   't/900-javascript_syntax.t',
   glob('t/data/800-plugins/*.t'),
