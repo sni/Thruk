@@ -158,7 +158,11 @@ sub user_page {
 
     if($c->req->parameters->{'clear_auth_cache'}) {
         $c->stash->{'profile_user'} = Thruk::Authentication::User->new($c, $c->stash->{'remote_user'})->set_dynamic_attributes($c);
-        Thruk::Utils::set_message( $c, 'success_message', 'Auth cache cleared successfully.' );
+        if($c->stash->{'profile_user'} && $c->stash->{'profile_user'}->{'timestamp'} && time() - $c->stash->{'profile_user'}->{'timestamp'} < 5) {
+            Thruk::Utils::set_message( $c, 'success_message', 'Auth cache cleared successfully.' );
+        } else {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to clear auth cache. Authoritive backends down?' );
+        }
         return $c->redirect_to('user.cgi');
     }
 
