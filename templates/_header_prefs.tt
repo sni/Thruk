@@ -41,7 +41,7 @@
       <td>
         <div class="flexrow">
           [% IF has_cgi_sounds %]
-            <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]')" class="w-40">
+            <input type="button" name="submit" value="[% IF play_sounds %]sound is on[% ELSE %]sound is off[% END %]" onClick="prefSubmitSound(full_uri, '[% IF play_sounds %]off[% ELSE %]on[% END %]'); return false;" class="w-40">
             [% IF play_sounds %]
               <button class="ml-5" onClick="toggleElement('testsound_panel')">play test sound<i class="uil uil-angle-down ml-1 mr-0"></i></button>
             [% END %]
@@ -75,7 +75,7 @@
     <th class="align-middle"><i class="uil uil-star"></i></th>
     <th class="align-middle">Favicon</th>
     <td>
-      <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]')" class="w-40">
+      <input type="button" name="submit" value="[% IF fav_counter %]counter is on[% ELSE %]counter is off[% END %]" onClick="prefSubmitCounter(full_uri, '[% IF fav_counter %]off[% ELSE %]on[% END %]'); return false;" class="w-40">
     </td>
   </tr>
   <tr>

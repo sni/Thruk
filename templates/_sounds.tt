@@ -19,7 +19,7 @@
   } catch (error) {
     console.log(error);
   }
-console.log(error);
+
   if(error != "") {
     if(jQuery("#audiomsg").length > 0) {
       jQuery("#audiomsg").text(error);

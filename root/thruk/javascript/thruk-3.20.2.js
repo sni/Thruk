@@ -1345,7 +1345,7 @@ function toggleFilterPopup(id) {
 }
 
 /* toggle a element by id and load content from remote */
-function toggleElementRemote(id, part, bodyclose) {
+function toggleElementRemote(id, part, bodyclose, forceRefresh) {
     var elements = jQuery('#'+id);
     if(!elements[0]) {
         if(thruk_debug_js) { alert("ERROR: got no panel for id in toggleElementRemote(): " + id); }
@@ -1354,7 +1354,7 @@ function toggleElementRemote(id, part, bodyclose) {
     resetRefresh();
     var el = elements[0];
     /* fetched already, just toggle */
-    if(el.innerHTML && !el.innerHTML.match("red alert")) {
+    if(el.innerHTML && !el.innerHTML.match("red alert") && !forceRefresh) {
         toggleElement(id, undefined, bodyclose);
         return;
     }
@@ -1498,8 +1498,10 @@ function checkMainTableMaxHeight() {
 
 /* save settings in a cookie */
 function prefSubmitSound(url, value) {
+  resetRefresh();
   cookieSave('thruk_sounds', value);
-  reloadPage(50, true);
+  toggleElementRemote('pref_pane', '_header_prefs', true, true);
+  return false;
 }
 
 /* save something in a cookie */
@@ -10169,17 +10171,15 @@ function updateFaviconCounter(value, color, fill, font, fontColor) {
 
 /* save settings in a cookie */
 function prefSubmitCounter(url, value) {
+  resetRefresh();
   if(value == false) {
       updateFaviconCounter(null);
   }
 
   cookieSave('thruk_favicon', value);
-  // favicon is created from the parent page, so reload that one if we use frames
-  try {
-    window.parent.location.reload();
-  } catch(e) {
-    reloadPage();
-  }
+
+  toggleElementRemote('pref_pane', '_header_prefs', true, true);
+  return false;
 }
 
 
