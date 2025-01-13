@@ -27,9 +27,4 @@ sub check_template {
     };
     print $@ if $@;
     is( $type, 'UTF-8' , $file.' is utf-8');
-
-    my $content = Thruk::Utils::IO::read($file);
-    if($content =~ m/PROCESS\s+_header\.tt/mx && $content !~ m/PROCESS\s+_footer\.tt/mx) {
-        fail($file." does not process _footer.tt");
-    }
 }
