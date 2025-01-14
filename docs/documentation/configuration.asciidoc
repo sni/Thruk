@@ -359,7 +359,7 @@ Replace this with where you want your home location to be.
 
 ex.:
 
-  home_link = http://www.thruk.org
+  home_link = https://www.thruk.org
 
 
 === documentation_link
