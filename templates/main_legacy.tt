@@ -69,7 +69,7 @@
 </script>
 
 <div class="mb-10 mx-auto w-fit">
-  <a href="[% c.config.home_link %]" target="_blank"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
+  <a href="[% c.config.home_link %]" target="[% c.config.home_link_target %]"><img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk.png" alt="Thruk" title="Thruk"></a>
 </div>
 
 <div class="card min-w-[420px] max-w-[500px] w-full mt-5 mx-auto">

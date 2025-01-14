@@ -48,6 +48,7 @@ my $base_defaults = {
     'cgi.cfg'                               => 'cgi.cfg',
     'bug_email_rcpt'                        => 'bugs@thruk.org',
     'home_link'                             => 'https://www.thruk.org',
+    'home_link_target'                      => '_blank',
     'plugin_registry_url'                   => ['https://api.thruk.org/v1/plugin/list'],
     'cluster_nodes'                         => ['$proto$://$hostname$/$url_prefix$/'],
     'cluster_heartbeat_interval'            => 15,
