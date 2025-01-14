@@ -362,6 +362,16 @@ ex.:
   home_link = https://www.thruk.org
 
 
+=== home_link_target
+
+This sets how the home link is opened.
+By default this is set up open in a new tab (_blank).
+
+ex.:
+
+  home_link_target = _blank
+
+
 === documentation_link
 
 This link is used in the side navigation menu as link to the documentation.

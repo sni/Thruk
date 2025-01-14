@@ -29,7 +29,7 @@ my $whitelist_vars = Thruk::Base::array2hash([qw/
     a.t1 a.t2 nr id first_remaining tblID start_with backlink type typename
     s_status f d i j x s key size head_height image_width state hoststate status image_height
     div_id graph_url index loop_index filterprefix center extra_classes
-    c.config.jquery_ui c.config.start_page c.config.home_link
+    c.config.jquery_ui c.config.start_page c.config.home_link c.config.home_link_target
     host_health_cls service_health_cls host_perc opt_class ok_pct w_pct u_pct c_pct p_pct
     s.cpu_perc perc plugin_name plugin_editor_path shinken_features_path l.0 l.1
     prev_host_empty color add_request_backend soff son hon hoff on off skip_confirm
