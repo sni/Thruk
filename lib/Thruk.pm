@@ -564,16 +564,21 @@ sub _check_exit_reason {
         return;
     }
 
+    local $| = 1;
+    my $c = $Thruk::Globals::c;
+    my $url = $c->req->url;
+
+    my $params = ($c->req->parameters and scalar keys %{$c->req->parameters} > 0) ? Thruk::Utils::dump_params($c->req->parameters) : undef;
+    if($params =~ m|Thruk::Utils::Cluster::pong|mx) {
+        return;
+    }
+
     if(!defined $Thruk::Globals::c) {
         # not processing any request right now -> simply exit
         return;
     }
 
     my $request_runtime = tv_interval($Thruk::Globals::c->stash->{'time_begin'});
-
-    local $| = 1;
-    my $c = $Thruk::Globals::c;
-    my $url = $c->req->url;
 
     # print stacktrace
     my $log = \&_error;
@@ -587,7 +592,7 @@ sub _check_exit_reason {
     &{$log}("Runtime:    %.2fs\n", $request_runtime);
     &{$log}("Timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
     &{$log}("Address:    %s\n", $c->req->address) if $c->req->address;
-    &{$log}("Parameters: %s\n", Thruk::Utils::dump_params($c->req->parameters)) if($c->req->parameters and scalar keys %{$c->req->parameters} > 0);
+    &{$log}("Parameters: %s\n", $params // '<none>');
     if($c->stash->{errorDetails}) {
         for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
             &{$log}("%s\n", $row);
