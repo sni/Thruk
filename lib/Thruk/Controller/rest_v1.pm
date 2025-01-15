@@ -2632,7 +2632,7 @@ sub _match_complex_filter {
                 for my $op (%{$val}) {
                     my $localkey = $key;
                     if(!defined $data->{$localkey}) {
-                        # translate some keys back
+                        # translate some keys back (set from Utils::Status::parse_lexical_filter)
                         if($localkey eq 'host_name' && defined $data->{'host'}) {
                             $localkey = 'host';
                         } elsif($localkey eq 'description' && defined $data->{'service'}) {

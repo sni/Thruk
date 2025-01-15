@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 370;
+    plan tests => 378;
 
     use lib('t');
     require TestUtils;
@@ -66,6 +66,9 @@ my $pages = [{
     }, {
         url          => '/logs?q=***type = "EXTERNAL COMMAND" and time > '.(time() - 600).'***',
         like         => ['EXTERNAL COMMAND'],
+    }, {
+        url          => '/services/outages?q=***host = "localhost" and service = "Ping" and timeperiod = "today"***',
+        like         => ['\[\]'],
     }, {
         url          => '/services/localhost/Ping/config',
         method       => 'PATCH',

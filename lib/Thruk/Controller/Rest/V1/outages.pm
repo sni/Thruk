@@ -426,6 +426,10 @@ sub _rest_query_time_filter {
         }
     }
 
+    if($c->req->parameters->{'start'} && !$c->req->parameters->{'end'}) {
+        $c->req->parameters->{'end'} = time();
+    }
+
     # combine remaining filter again
     $c->req->parameters->{'q'} = Thruk::Utils::Status::filter2text($c, undef, $filter);
 
@@ -487,7 +491,11 @@ sub _rest_replace_logs_time_filter {
 
     if($start) {
         $c->req->parameters->{'start'} = $start;
-        $c->req->parameters->{'end'}   = $end // time();
+    }
+    if($end) {
+        $c->req->parameters->{'end'}   = $end;
+    }
+    if($start || $end) {
         return 1;
     }
 }
