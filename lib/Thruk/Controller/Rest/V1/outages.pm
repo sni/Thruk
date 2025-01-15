@@ -407,6 +407,9 @@ sub _rest_query_time_filter {
     return unless $c->req->parameters->{'q'};
 
     my($filter) = Thruk::Utils::Status::parse_lexical_filter($c->req->parameters->{'q'}, 1);
+    if(scalar @{$filter} == 1 && ref $filter->[0] eq 'HASH' && defined $filter->[0]->{'-and'}) {
+        $filter = $filter->[0]->{'-and'};
+    }
     for my $param (@{$filter}) {
         if(ref $param eq 'ARRAY' && scalar @{$param} == 1) {
             $param = $param->[0];
@@ -422,6 +425,7 @@ sub _rest_query_time_filter {
             next;
         }
     }
+
     # combine remaining filter again
     $c->req->parameters->{'q'} = Thruk::Utils::Status::filter2text($c, undef, $filter);
 
