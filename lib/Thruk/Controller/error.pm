@@ -284,9 +284,13 @@ sub index {
         if(!$c->stash->{'error_data'}->{'skip_escape'}) {
             my $stack = delete $c->stash->{'error_data'}->{'stacktrace'};
             $stack = Thruk::Base::clean_credentials_from_string($stack) if $stack;
+            my $raw_msg   = "".($c->stash->{'error_data'}->{'msg'} // '');
+            my $raw_descr = "".($c->stash->{'error_data'}->{'descr'} // '');
             Thruk::Utils::Filter::html_escape_recursive($c->stash->{'error_data'});
             $c->stash->{'error_data'}->{'skip_escape'} = 1;
             $c->stash->{'error_data'}->{'stacktrace'}  = $stack if $stack;
+            $c->stash->{'error_data'}->{'msg_raw'} = $raw_msg;
+            $c->stash->{'error_data'}->{'descr_raw'} = $raw_descr;
         }
         $c->stash->{errorMessage}       = $c->stash->{'error_data'}->{'msg'};
         $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";
@@ -374,6 +378,8 @@ sub index {
         };
         $json->{'details'}     = $c->stash->{errorDetails}     if $c->stash->{errorDetails};
         $json->{'description'} = $c->stash->{errorDescription} if $c->stash->{errorDescription};
+        $json->{'message'}     = $c->stash->{'error_data'}->{'msg_raw'}   if($c->stash->{'error_data'} && $c->stash->{'error_data'}->{'msg_raw'});
+        $json->{'description'} = $c->stash->{'error_data'}->{'descr_raw'} if($c->stash->{'error_data'} && $c->stash->{'error_data'}->{'descr_raw'});
         return $c->render(json => $json);
     }
 
