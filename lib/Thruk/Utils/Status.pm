@@ -2787,6 +2787,7 @@ sub parse_lexical_filter {
                 }
 
                 # some keys require special handling
+                # need to adjust _match_complex_filter in rest_v1.pm when adding more
                 $key = "host_name"   if $key eq 'host';
                 $key = "description" if $key eq 'service';
                 if(!$keep_custom_fields) {

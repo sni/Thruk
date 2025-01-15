@@ -2630,8 +2630,18 @@ sub _match_complex_filter {
             my $val = $filter->{$key};
             if(ref $val eq 'HASH') {
                 for my $op (%{$val}) {
-                    $missed->{$key}->{$nr} = 1 if !defined $data->{$key};
-                    return(_compare($op, $data->{$key}, $val->{$op}));
+                    my $localkey = $key;
+                    if(!defined $data->{$localkey}) {
+                        # translate some keys back
+                        if($localkey eq 'host_name' && defined $data->{'host'}) {
+                            $localkey = 'host';
+                        } elsif($localkey eq 'description' && defined $data->{'service'}) {
+                            $localkey = 'service';
+                        } else {
+                            $missed->{$localkey}->{$nr} = 1;
+                        }
+                    }
+                    return(_compare($op, $data->{$localkey}, $val->{$op}));
                 }
                 return;
             }
