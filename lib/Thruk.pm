@@ -564,17 +564,17 @@ sub _check_exit_reason {
         return;
     }
 
-    local $| = 1;
-    my $c = $Thruk::Globals::c;
-    my $url = $c->req->url;
-
-    my $params = ($c->req->parameters and scalar keys %{$c->req->parameters} > 0) ? Thruk::Utils::dump_params($c->req->parameters) : undef;
-    if($params =~ m|Thruk::Utils::Cluster::pong|mx) {
+    if(!defined $Thruk::Globals::c) {
+        # not processing any request right now -> simply exit
         return;
     }
 
-    if(!defined $Thruk::Globals::c) {
-        # not processing any request right now -> simply exit
+    local $| = 1;
+    my $c   = $Thruk::Globals::c;
+    my $url = $c->req ? $c->req->url : '<no url>';
+
+    my $params = ($c->req && $c->req->parameters && scalar keys %{$c->req->parameters} > 0) ? Thruk::Utils::dump_params($c->req->parameters) : undef;
+    if($params =~ m|Thruk::Utils::Cluster::pong|mx) {
         return;
     }
 
