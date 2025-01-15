@@ -219,7 +219,7 @@ sub index {
         '19'  => {
             'mess' => 'not a valid date',
             'dscr' => 'this is not a valid date',
-            'code' => 500, # internal server error
+            'code' => 400, # bad request
         },
         '21'  => {
             'mess' => 'This plugin is not available or enabled',

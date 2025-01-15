@@ -362,12 +362,20 @@ sub get_start_end_for_timeperiod {
         if(defined $t1) {
             $start = _parse_date($t1);
         } else {
+            if(!defined $syear || !defined $smon || !defined $sday || !defined $shour || !defined $smin || !defined $ssec) {
+                _warn("unknown timeperiod: ".$timeperiod) if $timeperiod;
+                return(undef, undef);
+            }
             $start = Thruk::Utils::DateTime::normal_mktime($syear,$smon,$sday, $shour,$smin,$ssec);
         }
 
         if(defined $t2) {
             $end = _parse_date($t2);
         } else {
+            if(!defined $eyear || !defined $emon || !defined $eday || !defined $ehour || !defined $emin || !defined $esec) {
+                _warn("unknown timeperiod: ".$timeperiod) if $timeperiod;
+                return(undef, undef);
+            }
             $end   = Thruk::Utils::DateTime::normal_mktime($eyear,$emon,$eday, $ehour,$emin,$esec);
         }
     }
