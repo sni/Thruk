@@ -50,7 +50,9 @@ if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/puppeteer/node_modules" ]; then
     fi
 fi
 
-$NODE $DIR/puppeteer.js "$INPUT" "${OUTPUT}.pdf" "1600" "1200" "" $IS_REPORT 2>&1
-mv "${OUTPUT}.pdf" "${OUTPUT}"
+$NODE $DIR/puppeteer.js "$INPUT" "${OUTPUT}.pdf" "1600" "1200" "$THRUK_SESSION_ID" $IS_REPORT 2>&1
 rc=$?
+if [ -e "${OUTPUT}.pdf" ]; then
+    mv "${OUTPUT}.pdf" "${OUTPUT}"
+fi
 exit $rc

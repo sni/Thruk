@@ -643,8 +643,9 @@ sub generate_report {
         my $discard;
         Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'}, undef, \$discard);
     };
-    if($@) {
-        return(_report_die($c, $nr, $@, $logfile));
+    my $err = $@;
+    if($err) {
+        return(_report_die($c, $nr, $err, $logfile));
     }
 
     # render report
@@ -655,8 +656,9 @@ sub generate_report {
         $c->stash->{'block'} = 'render';
         Thruk::Views::ToolkitRenderer::render($c, 'reports/'.$options->{'template'}, undef, \$reportdata);
     };
-    if($@) {
-        return(_report_die($c, $nr, $@, $logfile));
+    $err = $@;
+    if($err) {
+        return(_report_die($c, $nr, $err, $logfile));
     }
     POSIX::setlocale(POSIX::LC_TIME, $default_time_locale);
 
@@ -1768,7 +1770,7 @@ sub _convert_to_pdf {
 
     my $cmd = $c->config->{home}.'/script/html2pdf.sh "file://'.abs_path($htmlfile).'" "'.$attachment.'.pdf" "'.$logfile.'" "'.($is_report//0).'"';
     _debug("converting to pdf: ".$cmd);
-    my $out = Thruk::Utils::IO::cmd($cmd.' 2>&1');
+    my($rc, $out) = Thruk::Utils::IO::cmd($cmd.' 2>&1');
 
     if(!-e $attachment.'.pdf') {
         my $error = Thruk::Utils::IO::read($logfile);
@@ -1878,6 +1880,8 @@ sub _report_die {
         $err .= ($c->stash->{'raw_error_data'}->{'descr'} // $c->stash->{'error_data'}->{'descr'})."\n" if $c->stash->{'error_data'}->{'descr'};
     }
 
+    _debug("stack:");
+    _debug(Carp::longmess("report failed"));
     _error($err);
     Thruk::Utils::IO::write($logfile, $err, undef, 1);
     $Thruk::Utils::Reports::error = $err;

@@ -389,11 +389,21 @@ sub get_url {
     my($sessionid) = Thruk::Utils::get_fake_session($c);
     push @{$c->stash->{'report_tmp_files_to_delete'}}, $c->stash->{'fake_session_file'};
 
+    my $site = $ENV{'OMD_SITE'};
+    # lokal urls but not thruk itself
+    if($site && $url =~ m=^/$site/=gmx && $url !~ m=^/$site/thruk=gmx) {
+        $url =~ s=^/$site/=/=gmx;
+        $url = $c->config->{'omd_local_site_url'}.$url;
+    }
+
     # directly convert external urls
     if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'} && $c->stash->{'param'}->{'pdf'} eq 'yes') {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
         local $ENV{THRUK_SESSION_ID} = $sessionid;
-        Thruk::Utils::IO::cmd([$c->config->{home}.'/script/html2pdf.sh', $url, $c->stash->{'attachment'}.'.pdf']);
+        my($rc, $out) = Thruk::Utils::IO::cmd([$c->config->{home}.'/script/html2pdf.sh', $url, $c->stash->{'attachment'}.'.pdf']);
+        if(!-e $c->stash->{'attachment'}.'.pdf') {
+            die("error: ".$out);
+        }
         move($c->stash->{'attachment'}.'.pdf', $c->stash->{'attachment'}) or die('move '.$c->stash->{'attachment'}.'.pdf to '.$c->stash->{'attachment'}.' failed: '.$!);
         $Thruk::Utils::PDF::ctype      = 'application/pdf';
         $Thruk::Utils::PDF::attachment = 'report.pdf';
