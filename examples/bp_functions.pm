@@ -14,8 +14,8 @@ use utf8;
 sub echo_function {
     my($c, $bp, $n, $args, $livedata) = @_;
     my($text, $reverse, $upper) = @{$args};
-    $text = scalar reverse $text if $reverse eq 'yes';
-    $text =             uc $text if $upper   eq 'yes';
+    $text = scalar reverse $text if ($reverse//'') eq 'yes';
+    $text =             uc $text if ($upper//'')   eq 'yes';
     return(0, $text, $text, {});
 }
 
