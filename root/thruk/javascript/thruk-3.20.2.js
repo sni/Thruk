@@ -5420,6 +5420,19 @@ function matchOrIndex(obj, pattern, reOpts) {
     if(pattern === "") {
         return true;
     }
+    if(reOpts === undefined) {
+        reOpts = "i";
+    }
+
+    // try index match first
+    if(reOpts == "i") {
+        obj = obj.toLowerCase()
+        pattern = pattern.toLowerCase()
+    }
+    if(obj.indexOf(pattern) != -1) {
+        return(true);
+    }
+
     var found = false;
     try {
         var re = new RegExp(pattern, reOpts);
@@ -5427,9 +5440,7 @@ function matchOrIndex(obj, pattern, reOpts) {
             found = true;
         }
     } catch(err) {
-        if(obj.indexOf(pattern) != -1) {
-            found = true;
-        }
+        console.log(err);
     }
     return(found);
 }
