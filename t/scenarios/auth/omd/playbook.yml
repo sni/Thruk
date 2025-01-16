@@ -49,3 +49,16 @@
       mode: 0600
       owner: demo
       group: demo
+  - name: create reports folder
+    file:
+      path: /omd/sites/demo/var/thruk/reports
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+  - name: add example report
+    copy:
+      src: /root/1.rpt
+      dest: /omd/sites/demo/var/thruk/reports/1.rpt
+      owner: demo
+      group: demo

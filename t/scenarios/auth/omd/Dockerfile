@@ -5,3 +5,4 @@ COPY thruk_local.conf /root/
 COPY cgi.cfg /root/
 COPY objects.cfg /root/
 COPY menu_local.conf /root/
+COPY 1.rpt /root/

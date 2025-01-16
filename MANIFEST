@@ -2629,6 +2629,7 @@ t/scenarios/agents-plugin/t/local/livestatus-backend/03-check_nsc_web.t
 t/scenarios/agents-plugin/t/local/omd/omd.t
 t/scenarios/auth/docker-compose.yml
 t/scenarios/auth/Makefile
+t/scenarios/auth/omd/1.rpt
 t/scenarios/auth/omd/cgi.cfg
 t/scenarios/auth/omd/Dockerfile
 t/scenarios/auth/omd/menu_local.conf
@@ -2641,6 +2642,7 @@ t/scenarios/auth/t/local/011-api_keys.t
 t/scenarios/auth/t/local/012-grafana-export.t
 t/scenarios/auth/t/local/013-basic-auth.t
 t/scenarios/auth/t/local/014-x-forwarded-header.t
+t/scenarios/auth/t/local/015-report.t
 t/scenarios/auth_krb5/docker-compose.yml
 t/scenarios/auth_krb5/krb5/Dockerfile
 t/scenarios/auth_krb5/krb5/playbook.yml

@@ -1,0 +1,26 @@
+{
+   "backends" : {
+      "backends" : []
+   },
+   "cc" : "",
+   "desc" : "Grafana Dashboard Report",
+   "failed_backends" : "cancel",
+   "is_public" : 0,
+   "name" : "New Report",
+   "params" : {
+      "delay" : "60",
+      "js" : "yes",
+      "language" : "en",
+      "minimal" : "yes",
+      "nav" : "no",
+      "pdf" : "yes",
+      "retries" : "0",
+      "theme" : "Light",
+      "url" : "/demo/grafana/explore?schemaVersion=1&panes={\"srh\":{\"datasource\":\"grafana\",\"queries\":[{\"queryType\":\"randomWalk\",\"refId\":\"A\",\"datasource\":{\"type\":\"datasource\",\"uid\":\"grafana\"}}],\"range\":{\"from\":\"now-1h\",\"to\":\"now\"}}}&orgId=1"
+   },
+   "permissions" : [],
+   "send_types" : [],
+   "template" : "report_from_url.tt",
+   "to" : "",
+   "user" : "omdadmin",
+}
