@@ -888,7 +888,7 @@ sub get_cookie_domain {
 
 =head2 finalize_request
 
-    register_cron_entries($c, $res)
+    finalize_request($c, $res)
 
 finalize request data by adding profile and headers
 

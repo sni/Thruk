@@ -248,6 +248,8 @@ sub enable_plugin {
             or die("cannot create ".$plugin_enabled_dir.'/'.$dir." : ".$!);
     }
 
+    $c->app->check_plugins_cron_file();
+
     return;
 }
 

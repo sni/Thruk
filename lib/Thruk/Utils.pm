@@ -2236,7 +2236,7 @@ sub update_cron_file {
     }
     Thruk::Utils::IO::close($fh, $c->config->{'cron_file'});
 
-    if($c->config->{'cron_post_edit_cmd'}) {
+    if($c->config->{'cron_post_edit_cmd'} && !$ENV{'THRUK_SKIP_CRON_RELOAD'}) {
         local $< = $> if $< == 0; # set real and effective uid to user, crontab will still be run as root on some systems otherwise
         my $cmd = $c->config->{'cron_post_edit_cmd'}." 2>>".$errorlog;
         my($rc, $output) = Thruk::Utils::IO::cmd($cmd);

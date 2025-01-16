@@ -237,14 +237,11 @@ sub _build_app {
             };
             $err = $@ if $@;
             _error("disabled broken plugin $plugin_class: ".$err) if $err;
+            next;
         } else {
             die("unknown plugin folder format: $plugin_dir");
         }
-
-        # enable cron files, this only works for OMD right now.
-        $self->_check_plugin_cron_file($plugin_dir);
     }
-    $self->_cleanup_plugin_cron_files();
     &timing_breakpoint('startup() plugins loaded');
 
     ###################################################
@@ -756,13 +753,104 @@ sub _set_ssi {
 
     register_cron_entries($function_name)
 
-register callback to update cron jobs
+register callback to update cron jobs (usually called from plugins routes files)
 
 =cut
 sub register_cron_entries {
     my($self, $function) = @_;
     $self->{'_cron_callbacks'} = {} unless defined $self->{'_cron_callbacks'};
     $self->{'_cron_callbacks'}->{$function} = 1;
+    return;
+}
+
+###################################################
+
+=head2 check_plugins_cron_file
+
+    check_plugins_cron_file()
+
+check for cron files from enabled plugins
+
+=cut
+sub check_plugins_cron_file {
+    my($self) = @_;
+
+    my $config = Thruk->config;
+    for my $plugin_dir (glob($config->{'plugin_path'}.'/plugins-enabled/*/lib/Thruk/Controller/*.pm')) {
+        # enable cron files, this only works for OMD right now.
+        $self->_check_plugin_cron_file($plugin_dir);
+    }
+
+    $self->_cleanup_plugin_cron_files();
+
+    return;
+}
+
+###################################################
+sub _check_plugin_cron_file {
+    my($self, $plugin_dir) = @_;
+
+    # OMD only feature
+    return unless $ENV{'OMD_ROOT'};
+
+    my $plugin_name = '<unknown>';
+    if($plugin_dir =~ m/\/plugins\-enabled\/([^\/]+)\//mx) {
+        $plugin_name = $1;
+    }
+    _debug("checking for cron file for '%s' plugin", $plugin_name);
+
+    my $target_cron_file_name = 'thruk-plugin-'.$plugin_name;
+
+    my $cron_file = $plugin_dir;
+    $cron_file =~ s|/lib/Thruk/Controller/.*\.pm$|/cron|gmx;
+    if(-e $cron_file && $cron_file =~ m/\/plugins\-enabled\/([^\/]+)\/cron/mx) {
+        # check existing cron files, to see if its already enabled
+        my $found = 0;
+        my @existing_cron_files = glob($ENV{'OMD_ROOT'}.'/etc/cron.d/*');
+        for my $file (@existing_cron_files) {
+            my $basefile = Thruk::Base::basename("".$file);
+            next if $basefile ne $target_cron_file_name;
+            if(-l $file) {
+                my $target = readlink($file);
+                if($target =~ m/\/\Q$plugin_name\E\/cron$/mx) {
+                    _debug("plugin '%s': cron file %s already exists and is a symbolic link, skipping", $plugin_name, $file);
+                    $found = 1;
+                    last;
+                }
+            }
+            elsif(-f $file) {
+                # if it's a regular file, keep it and don't replace it with a symlink
+                # so you can disable or replace the upstream cron with your own
+                _debug("plugin '%s': cron file %s already exists, skipping", $plugin_name, $file);
+                $found = 1;
+            }
+        }
+        if(!$found) {
+            symlink('../thruk/plugins-enabled/'.$plugin_name.'/cron', 'etc/cron.d/'.$target_cron_file_name);
+            Thruk::Utils::IO::cmd("omd status crontab >/dev/null 2>&1 && omd reload crontab > /dev/null");
+            _info("enabled cron file for plugin: ".$plugin_name);
+        }
+    } else {
+        _debug("no cron file for '%s' plugin", $plugin_name);
+    }
+
+    return;
+}
+
+###################################################
+sub _cleanup_plugin_cron_files {
+    my($self) = @_;
+
+    # OMD only feature
+    return unless $ENV{'OMD_ROOT'};
+
+    my @existing_cron_files = glob($ENV{'OMD_ROOT'}.'/etc/cron.d/*');
+    for my $file (@existing_cron_files) {
+        if($file =~ m/\/thruk\-plugin\-/mx && -l $file && !-e $file) {
+            _info("removed old plugin cronfile: ".$file);
+            unlink($file);
+        }
+    }
     return;
 }
 
@@ -807,60 +895,6 @@ sub _setup_development_signals {
             print STDERR $@ if $@;
         };
         ## use critic
-    }
-    return;
-}
-
-###################################################
-sub _check_plugin_cron_file {
-    my($self, $plugin_dir) = @_;
-
-    # OMD only feature
-    return unless $ENV{'OMD_ROOT'};
-
-    my $cron_file = $plugin_dir;
-    $cron_file =~ s|/lib/Thruk/Controller/.*\.pm$|/cron|gmx;
-    if(-e $cron_file && $cron_file =~ m/\/plugins\-enabled\/([^\/]+)\/cron/mx) {
-        my $plugin_name = $1;
-        # check existing cron files, to see if its already enabled
-        my $found = 0;
-        my @existing_cron_files = glob($ENV{'OMD_ROOT'}.'/etc/cron.d/*');
-        for my $file (@existing_cron_files) {
-            if(-l $file) {
-                my $target = readlink($file);
-                if($target =~ m/\/\Q$plugin_name\E\/cron$/mx) {
-                    $found = 1;
-                    last;
-                }
-            }
-            elsif(-f $file) {
-                # if it's a regular file, keep it and don't replace it with a symlink
-                # so you can disable or replace the upstream cron with your own
-                $found = 1;
-            }
-        }
-        if(!$found) {
-            symlink('../thruk/plugins-enabled/'.$plugin_name.'/cron', 'etc/cron.d/thruk-plugin-'.$plugin_name);
-            Thruk::Utils::IO::cmd("omd status crontab >/dev/null 2>&1 && omd reload crontab > /dev/null");
-            _info("enabled cronfile for plugin: ".$plugin_name);
-        }
-    }
-    return;
-}
-
-###################################################
-sub _cleanup_plugin_cron_files {
-    my($self) = @_;
-
-    # OMD only feature
-    return unless $ENV{'OMD_ROOT'};
-
-    my @existing_cron_files = glob($ENV{'OMD_ROOT'}.'/etc/cron.d/*');
-    for my $file (@existing_cron_files) {
-        if($file =~ m/\/thruk\-plugin\-/mx && -l $file && !-e $file) {
-            _info("removed old plugin cronfile: ".$file);
-            unlink($file);
-        }
     }
     return;
 }

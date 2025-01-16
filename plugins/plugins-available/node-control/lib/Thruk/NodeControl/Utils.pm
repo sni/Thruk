@@ -36,6 +36,8 @@ update controlled nodes cronjobs
 sub update_cron_file {
     my($c) = @_;
 
+    # plugin has a generic cron file which simply will be linked into the cron.d folder
+
     return 1;
 }
 

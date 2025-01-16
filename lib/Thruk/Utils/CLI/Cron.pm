@@ -84,6 +84,8 @@ sub _install {
     $c->cluster->run_cluster("others", "cmd: cron install");
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1; # skip further subsequent cluster calls
 
+    local $ENV{'THRUK_SKIP_CRON_RELOAD'} = 1; # skip reloading crontab multiple times
+
     Thruk::Utils::update_cron_file_maintenance($c);
     _debug("maintenance cron installed");
 
@@ -105,6 +107,12 @@ sub _install {
             _debug($pkg_name." cron installed");
         }
     }
+
+    $c->app->check_plugins_cron_file();
+
+    # finally reload crontab
+    delete local $ENV{'THRUK_SKIP_CRON_RELOAD'};
+    Thruk::Utils::update_cron_file($c);
 
     $c->stats->profile(end => "_cmd_installcron()");
     return "updated cron entries\n";
