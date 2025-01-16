@@ -174,11 +174,12 @@
                   [% END %]
                 </td>
               [% ELSIF col == "omd" %]
-                [% IF s.omd_version && omd_default_version != s.omd_version %]
-                  <td class="align-top WARNING" title="node uses an outdated omd release, available:&#013;[% s.omd_versions.join("&#013;").replace('-labs-edition', '') %]">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
-                [% ELSE %]
-                  <td class="align-top">[% s.omd_version.replace('-labs-edition', '') | html %]</td>
-                [% END %]
+                <td
+                  class="align-top[% IF s.omd_version && omd_default_version != s.omd_version %] WARNING[% END %] clickable"
+                  data-version="v:[% s.omd_version.replace('-labs-edition', '') | html %]:"
+                  onclick="setTableSearchFilter('v:[% s.omd_version.replace('-labs-edition', '') | html %]:')"
+                  title="filter by omd version: [% s.omd_version.replace('-labs-edition', '') | html %][% IF s.omd_version && omd_default_version != s.omd_version %]&#013;node uses an outdated omd release, available:&#013;[% s.omd_versions.join("&#013;").replace('-labs-edition', '') %][% END %]"
+                >[% s.omd_version.replace('-labs-edition', '') | html %]</td>
               [% ELSIF col == "status" %]
                 <td class="align-top clickable" onclick="openModalWindowUrl('node_control.cgi?action=omd_status&modal=1&peer=[% s.peer_key | html %]');">
                   [% IF s.omd_status && s.omd_status.exists("OVERALL") %]
@@ -201,7 +202,12 @@
                   [% END %]
                 </td>
               [% ELSIF col == "os" %]
-                <td class="align-top">
+                <td
+                  class="align-top clickable"
+                  data-os="o:[% s.os_name | html %] [% s.os_version | html %]:"
+                  onclick="setTableSearchFilter('o:[% s.os_name | html %] [% s.os_version | html %]:')"
+                  title="filter by os: [% s.os_name | html %] [% s.os_version | html %]"
+                >
                   <div class="flexrow flex-nowrap gap-x-1 justify-between">
                     <span>[% s.os_name | html %] [% s.os_version | html %]</span>
                     [% IF show_os_updates %]
