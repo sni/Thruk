@@ -627,15 +627,13 @@ sub json_lock_store {
 
 =head2 json_retrieve
 
-  json_retrieve($file, $fh, [$lock_fh])
+  json_retrieve($file, [$fh], [$lock_fh])
 
 retrieve json data
 
 =cut
-
 sub json_retrieve {
     my($file, $fh, $lock_fh) = @_;
-    confess("got no filehandle") unless defined $fh;
 
     our $jsonreader;
     if(!$jsonreader) {
@@ -645,16 +643,22 @@ sub json_retrieve {
 
     my $t1 = [gettimeofday];
 
-    seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
-
-    my $data;
-    my $content;
-    eval {
-        local $/ = undef;
-        $content = scalar <$fh>;
-        $data    = $jsonreader->decode($content);
-    };
-    my $err = $@;
+    my($data, $content, $err);
+    if(!$fh) {
+        eval {
+            $content = &saferead($file);
+            $data    = $jsonreader->decode($content) if $content;
+        };
+        $err = $@;
+    } else {
+        seek($fh, 0, SEEK_SET) or die "Cannot seek ".$file.": $!\n";
+        eval {
+            local $/ = undef;
+            $content = scalar <$fh>;
+            $data    = $jsonreader->decode($content);
+        };
+        $err = $@;
+    }
     if($err) {
         # try to unlock
         flock($fh, LOCK_UN);

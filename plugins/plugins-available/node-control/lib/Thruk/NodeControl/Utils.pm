@@ -326,7 +326,7 @@ sub _ansible_get_facts {
     my($c, $peer, $refresh) = @_;
     my $file = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
     if(!$refresh && -e $file) {
-        return(Thruk::Utils::IO::json_lock_retrieve($file));
+        return(Thruk::Utils::IO::json_retrieve($file));
     }
     if(defined $refresh && !$refresh) {
         return;
