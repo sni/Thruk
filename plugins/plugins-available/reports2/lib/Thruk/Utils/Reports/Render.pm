@@ -354,6 +354,7 @@ sub get_url_with_retries {
     my $c       = $Thruk::Globals::c or die("not initialized!");
     my $retries = $c->stash->{'param'}->{'retries'} // 3;
     my $delay   = $c->stash->{'param'}->{'delay'} // 60;
+    if($retries <= 0) { $retries = 1; }
     my($res, $err);
     for my $x (1..$retries) {
         eval {
