@@ -105,6 +105,10 @@ sub cmd {
         return(_action_list($c, $config));
     }
     elsif($mode eq 'facts' || $mode eq 'runtime') {
+        # this function must be run on one cluster node only
+        if(my $msg = $c->cluster->run_cluster("once", "cmd: $mode ".join(" ",@{$commandoptions}))) {
+            return($msg, 0);
+        }
         return(_action_facts($c, $mode, $opt, $commandoptions, $global_options));
     }
     elsif($mode eq 'cleanup') {
