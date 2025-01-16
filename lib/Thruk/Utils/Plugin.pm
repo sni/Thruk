@@ -139,6 +139,7 @@ sub read_plugin_details {
             writable    => 0,
             version     => '',
             repository  => 'local',
+            depends     => '',
     };
     my $desc_file = $folder.'/description.txt';
     if(-e $desc_file) {

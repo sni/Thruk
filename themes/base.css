@@ -1054,6 +1054,14 @@ DIV.radiogroup {
   INPUT.activeDISABLED[type="radio"]:checked + label {
     @apply DISABLED
   }
+  &.red_green {
+    INPUT[type="radio"].radio_on:checked + label, INPUT[type="radio"].radio_on + label:hover {
+      @apply bg-[color:var(--badge-ok-bg)] text-[color:var(--badge-ok-fg)];
+    }
+    INPUT[type="radio"].radio_off:checked + label, INPUT[type="radio"].radio_off + label:hover {
+      @apply bg-[color:var(--badge-down-bg)] text-[color:var(--badge-down-fg)];
+    }
+  }
 }
 
 DIV.accordion {

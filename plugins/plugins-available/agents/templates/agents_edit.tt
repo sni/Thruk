@@ -130,7 +130,7 @@
         }%]
       </div>
     </div>
-    <form action="agents.cgi" method="POST" class="flexcol gap-y-0 w-full h-[calc(100%-45px)]" onsubmit="setFormBtnSpinner(this)">
+    <form action="agents.cgi" method="POST" class="flexcol gap-y-0 w-full h-[calc(100%-50px)]" onsubmit="setFormBtnSpinner(this)">
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <input type="hidden" name="old_hostname" value="[% IF agent.hostname != "new"; agent.hostname | html; END %]">
       <input type="hidden" name="old_backend" value="[% agent.peer_key | html %]">

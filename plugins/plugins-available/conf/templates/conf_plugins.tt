@@ -1,6 +1,7 @@
-﻿[% WRAPPER _conf_frame.tt %]
+﻿[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
 
-<form action="conf.cgi" method="POST" class="mt-5 flexcol 2xl:mx-auto w-fit h-[calc(100vh-275px)]">
+<form action="conf.cgi" method="POST" class="mt-5 flexcol 2xl:mx-auto w-fit h-[calc(100%-50px)]">
   <input type="hidden" name="sub" value="plugins">
   <input type="hidden" name="action" value="save">
   <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
@@ -12,19 +13,25 @@
   [% END %]
 
   <div class="card flex-grow max-h-full min-h-[600px] flexcol gap-0 overflow-hidden">
-    [% IF !readonly %]
-      <div class="head justify-center gap-3" style="flex: 0 0 40px;">
-        <button onclick="return save_plugins(this);" class="submit"><i class="uil uil-save"></i>Save Changes</button>
-        <div>Don't forget to restart Thruk after changing plugins.</div>
+    <div class="head justify-between" style="flex: 0 0 40px;">
+      <div class="w-[100px]">
+        <a href="conf.cgi" class="button header-button rounded w-[70px]" title="Go back to the configuration overview"><i class="uil uil-angle-double-left"></i>Back</a>
       </div>
-    [% END %]
+      [% IF !readonly %]
+        <div class="flexrow justify-center gap-3">
+          <button onclick="return save_plugins(this);" class="submit" id="save_button"><i class="uil uil-save"></i>Save Changes</button>
+          <div>Don't forget to restart Thruk after changing plugins.</div>
+        </div>
+      [% END %]
+      <div class="w-[100px]"></div>
+    </div>
     <div class="body flexcol gap-y-1 h-full">
       <div class="flexrow flex-nowrap" style="flex: 0 0 30px;">
         <h3 class="w-1/2 text-center">Enabled Plugins</h3>
         <h3 class="w-1/2 text-center">Available Plugins</h3>
       </div>
-      <div class="flex-grow flexrow flex-nowrap gap-0 h-[calc(100%-45px)] borderDefault divide-x">
-        <div class="overflow-y-auto w-[620px] h-[calc(100%-45px)]">
+      <div class="flex-grow flexrow flex-nowrap gap-0 h-full borderDefault divide-x">
+        <div class="overflow-y-scroll w-[620px] h-full">
           <table class="w-[600px] cellspacing-x">
             [% FOREACH name = plugins.keys.sort %]
               [% plugin = plugins.$name %]
@@ -32,7 +39,7 @@
               <tr style="height:160px;" class="hoverable">
                 <th class="px-2 align-top">
                   [% name | html %]
-                  <div class="radiogroup mt-5" style="width: 135px;">
+                  <div class="radiogroup red_green mt-5" style="width: 135px;" onchange="jQuery('#save_button').addClass('green')">
                     <input type="radio" class="radio_on" value="1" id="[% plugin.dir | html %]_on"  name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_on">On</label>
                     <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
                   </div>
@@ -43,7 +50,7 @@
             [% END %]
           </table>
         </div>
-        <div class="overflow-y-auto w-[620px] h-[calc(100%-45px)]">
+        <div class="overflow-y-scroll w-[620px] h-full">
           <table class="w-[600px] cellspacing-x">
             [% FOREACH name = plugins.keys.sort %]
               [% plugin = plugins.$name %]
@@ -51,7 +58,7 @@
               <tr style="height:160px;" class="hoverable">
                 <th class="px-2 align-top">
                   [% name | html %]
-                  <div class="radiogroup mt-5" style="width: 135px;">
+                  <div class="radiogroup red_green mt-5" style="width: 135px;" onchange="jQuery('#save_button').addClass('green')">
                     <input type="radio" class="radio_on" value="1" id="[% plugin.dir | html %]_on"  name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 1 %] checked="checked"[% END %][% IF readonly %] disabled[% END %] /><label for="[% plugin.dir | html %]_on">On</label>
                     <input type="radio" class="radio_off" value="0" id="[% plugin.dir | html %]_off" name="plugin.[% plugin.dir | html %]"[% IF plugin.enabled == 0 %] checked="checked"[% END %][% IF readonly %] disabled[% END %][% IF plugin.dir == 'conf' %] onclick="alert('Warning: Disabling this config tool also disables this plugin manager so you cannot enable it via gui again. It is still possible to create the symlink in your plugins-enabled folder by hand.')"[% END %] /><label for="[% plugin.dir | html %]_off">Off</label>
                   </div>
@@ -67,4 +74,4 @@
   </div>
 </form>
 
-[% END %]
+[% PROCESS _footer.tt %]
