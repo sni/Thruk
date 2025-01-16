@@ -3657,10 +3657,10 @@ function do_table_search(preserve_hash) {
     if(value == undefined) {
         return;
     }
-    value = value.toLowerCase();
     if(preserve_hash) {
         set_hash(value, 2);
     }
+    value = value.toLowerCase();
     jQuery.each(ids, function(nr, id) {
         var table = document.getElementById(id);
         if(table.tagName == "DIV") {
@@ -4326,7 +4326,7 @@ function get_hash(nr) {
         if(tmp[nr-1] == undefined) {
             return;
         }
-        return(tmp[nr-1].replace(/%7C/g, '|'));
+        return(decodeURIComponent(tmp[nr-1]));
     }
     return(hash);
 }
