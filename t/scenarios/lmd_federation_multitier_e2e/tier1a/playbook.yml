@@ -30,8 +30,11 @@
       owner: demo
       group: demo
 
-  - name: create symlink to agents plugin
-    shell: "ln -sfn /thruk/plugins/plugins-available/node-control /opt/omd/sites/demo/etc/thruk/plugins-enabled/node-control"
+  # might exist already because of the mounted src folder
+  - shell: rm -f /omd/sites/demo/etc/thruk/plugins-enabled/node-control
+
+  - name: enable node-control plugin
+    shell: sudo su - demo -c "thruk plugin enable node-control"
 
   - copy:
       src: "/root/1.tbp"

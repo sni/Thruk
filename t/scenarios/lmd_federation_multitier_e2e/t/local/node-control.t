@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 74;
+    plan tests => 76;
 
     use lib('t');
     require TestUtils;
@@ -24,6 +24,15 @@ TestUtils::test_command({
     like => ['/\/thruk\/script\/thruk/'],
 }) or BAIL_OUT("wrong thruk path");
 
+###########################################################
+# make sure cron file is there
+my $cronfile = 'etc/cron.d/thruk-plugin-node-control';
+ok(-e $cronfile, $cronfile." does exist");
+my $target = readlink($cronfile);
+ok($target eq '../thruk/plugins-enabled/node-control/cron', 'cron points to correct location');
+
+###########################################################
+# update facts
 for my $peer ('tier1a', 'tier2c', 'tier2e') {
     TestUtils::test_command({
         cmd    => '/usr/bin/env thruk nc facts '.$peer,
@@ -31,6 +40,7 @@ for my $peer ('tier1a', 'tier2c', 'tier2e') {
     });
 }
 
+###########################################################
 TestUtils::test_page(
     url      => 'https://localhost/demo/thruk/cgi-bin/node_control.cgi',
     like     => ['6.66-test'],
