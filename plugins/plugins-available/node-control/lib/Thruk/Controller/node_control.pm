@@ -94,7 +94,7 @@ sub index {
     }
 
     $c->stash->{omd_default_version}    = $config->{'omd_default_version'},
-    $c->stash->{omd_available_versions} = Thruk::NodeControl::Utils::get_available_omd_versions($c);
+    $c->stash->{omd_available_versions} = Thruk::NodeControl::Utils::get_available_omd_versions($c, $peers);
 
     # sort servers by section, host_name, site
     map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};

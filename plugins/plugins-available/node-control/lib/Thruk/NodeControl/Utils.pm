@@ -54,6 +54,8 @@ sub get_peers {
     my($c) = @_;
     my @peers;
     my $dups = {};
+
+    $c->stats->profile(begin => "get_peers");
     for my $peer (@{$c->db->get_local_peers()}, @{$c->db->get_http_peers(1)}, @{$c->db->get_peers_by_tags('node-control')}) {
         next if (defined $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
         next if $dups->{$peer->{'key'}}; # backend can be in both lists
@@ -65,6 +67,7 @@ sub get_peers {
     my $modules = get_addon_modules();
     for my $mod (@{$modules}) {
         if($mod->can("get_peers")) {
+            $c->stats->profile(begin => "get_peers: ".$mod);
             my $peers = $mod->get_peers($c, \@peers);
             next unless defined $peers;
             for my $peer (@{$peers}) {
@@ -73,9 +76,11 @@ sub get_peers {
                 $dups->{$peer->{'key'}} = 1;
                 push @peers, $peer;
             }
+            $c->stats->profile(end => "get_peers: ".$mod);
         }
     }
 
+    $c->stats->profile(end => "get_peers");
     return \@peers;
 }
 
@@ -461,7 +466,7 @@ sub _ansible_available_packages {
         die("unknown package manager: ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}//'none');
     }
     my @pkgs = ($pkgs =~ m/^(omd\-\S+?)(?:\s|\.x86_64|\.aarch64)/gmx);
-    @pkgs = grep(!/^(omd-labs-edition|omd-daily|.*-addons-)/mx, @pkgs); # remove meta packages
+    @pkgs = grep(!/^(omd-labs-edition|omd-daily|.*-addons-|.*-meta\.)/mx, @pkgs); # remove meta packages
     @pkgs = reverse sort @pkgs;
     @pkgs = map { my $pkg = $_; $pkg =~ s/^omd\-//gmx; $pkg; } @pkgs;
 
@@ -1265,10 +1270,10 @@ returns omd versions which can be used to update
 
 =cut
 sub get_available_omd_versions {
-    my($c) = @_;
+    my($c, $peers) = @_;
     my $config = &config($c);
 
-    my $peers = &get_peers($c);
+    $peers = &get_peers($c) unless $peers;
     my $servers = [];
     for my $peer (@{$peers}) {
         push @{$servers}, &get_server($c, $peer, $config);
