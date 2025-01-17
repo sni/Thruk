@@ -18,6 +18,7 @@ use Time::HiRes ();
 
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
+use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
 
 ##########################################################
@@ -285,7 +286,6 @@ sub check_initial_start {
     return;
 }
 
-
 ########################################
 
 =head2 check_pid
@@ -297,23 +297,8 @@ check if pidfile exists and contains a valid pid, returns zero or the actual pid
 =cut
 sub check_pid {
     my($file) = @_;
-    return 0 unless -s $file;
-    my $pid = Thruk::Utils::IO::read($file);
-    if($pid =~ m/^(\d+)\s*$/mx) {
-        $pid = $1;
-        if(! -d '/proc/.') {
-            # check pid with kill when no proc filesystem exists
-            if(kill(0, $pid)) {
-                return($pid);
-            }
-        }
-        elsif(-r '/proc/'.$pid.'/cmdline') {
-            my $cmd = Thruk::Utils::IO::read('/proc/'.$pid.'/cmdline');
-            if($cmd && $cmd =~ m/lmd/mxi) {
-                return $pid;
-            }
-        }
-    }
+    my $pid = Thruk::Utils::IO::saferead($file);
+    return $pid if($pid && Thruk::Utils::CLI::pid_exists($pid, 'lmd'));
     return 0;
 }
 

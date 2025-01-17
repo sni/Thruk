@@ -1471,6 +1471,93 @@ sub _has_available_module {
     return;
 }
 
+########################################
+
+=head2 pid_exists
+
+  pid_exists($pid, [$cmd pattern])
+
+check if pid exists and cmd matches the pattern, returns true if pid is valid
+
+=cut
+sub pid_exists {
+    my($pid, $cmdpattern) = @_;
+    if($pid =~ m/^(\d+)\s*$/mx) {
+        $pid = $1;
+        if(! -d '/proc/.') {
+            # check pid with kill when no proc filesystem exists
+            if(kill(0, $pid)) {
+                return(1);
+            }
+        }
+        elsif(-r '/proc/'.$pid.'/cmdline') {
+            my $cmd = Thruk::Utils::IO::saferead('/proc/'.$pid.'/cmdline');
+            if($cmd) {
+                if(!$cmdpattern || $cmd =~ m/$cmdpattern/mxi) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return;
+}
+
+##############################################
+
+=head2 check_lock
+
+    check_lock($file, [$key], [$pid])
+
+check lock file, returns:
+
+    - (undef, undef) if lock was set successfully
+    - ($pid, $starttime) if a valid lock exists already
+
+=cut
+sub check_lock {
+    my($file, $key, $pid) = @_;
+
+    $pid = $$ unless $pid;
+    $key = 'lock' unless $key;
+    _debug("checking lock '%s' file: %s", $key, $file);
+
+    my $prev = Thruk::Utils::IO::json_lock_retrieve($file);
+    if($prev && $prev->{$key} && $prev->{$key}->{'pid'} && pid_exists($prev->{$key}->{'pid'}, 'thruk')) {
+        return($prev->{$key}->{'pid'}, $prev->{$key}->{'start_time'});
+    }
+
+    my $data = Thruk::Utils::IO::json_lock_patch($file, { $key => { pid => $pid, start_time => Time::HiRes::time() } }, {allow_empty => 1});
+    if($data && $data->{$key} && $data->{$key}->{'pid'}) {
+        if($data->{$key}->{'pid'} eq $pid)  {
+            return;
+        }
+        return($data->{$key}->{'pid'}, $data->{$key}->{'start_time'});
+    }
+    die(sprintf("cannot set lock in file %s", $file));
+}
+
+##############################################
+
+=head2 check_lock_unlock
+
+    check_lock_unlock($file, [$key])
+
+removes lock from file.
+
+=cut
+sub check_lock_unlock {
+    my($file, $key) = @_;
+
+    $key = 'lock' unless $key;
+    _debug("removing lock file: %s", $file);
+
+    my $data = Thruk::Utils::IO::json_lock_patch($file, { $key => undef }, {allow_empty => 1});
+    if($data && scalar keys %{$data} == 0) {
+        unlink($file);
+    }
+    return;
+}
+
 ##############################################
 
 =head1 EXAMPLES
