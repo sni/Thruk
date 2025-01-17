@@ -39,6 +39,7 @@ The nodecontrol command can start node control commands.
 use warnings;
 use strict;
 use Getopt::Long ();
+use Time::HiRes ();
 
 use Thruk::Utils ();
 use Thruk::Utils::CLI ();
@@ -109,7 +110,15 @@ sub cmd {
         if(my $msg = $c->cluster->run_cluster("once", "cmd: $mode ".join(" ",@{$commandoptions}))) {
             return($msg, 0);
         }
-        return(_action_facts($c, $mode, $opt, $commandoptions, $global_options));
+        my $lock_file;
+        if($ENV{'THRUK_CRON'}) {
+            $lock_file = $c->config->{'tmp_path'}.'/node_control_lock.json';
+            my($pid, $ts) = Thruk::Utils::CLI::check_lock($lock_file, "nc_".$mode);
+            return(sprintf("update for %s already running (duration: %s) with pid: %s\n", $mode, Thruk::Utils::Filter::duration(Time::HiRes::time() - $ts, 6), $pid), 0) if $pid;
+        }
+        my($rc, $msg) = _action_facts($c, $mode, $opt, $commandoptions, $global_options);
+        Thruk::Utils::CLI::check_lock_unlock($lock_file, "nc_".$mode) if $lock_file;
+        return($rc, $msg);
     }
     elsif($mode eq 'cleanup') {
         return(_action_cleanup($c, $opt, $commandoptions, $global_options));
