@@ -3,8 +3,21 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - migrate sound files to webm
           - add test page for sound file in user preferences
+          - add new config option home_link_target
+          - fix case insensitive table search
+          - fix encoding in table search
+          - improve randomness when generating uuids
+          - migrate sound files to webm
+          - add test page for sound file in user preferences
           - Rest:
             - add peer_section attribute
+            - outages: fix extracting timeperiod
+            - outages: fix filtering by host/service query
+            - fix double encoded error messages
+          - Node-Control:
+            - prevent running multiple updates from cron in parallel
+          - Reports:
+            - fix creating grafana reports from url report
 
 3.20.2   Wed Dec 18 17:43:10 CET 2024
           - unescape escaped characters in expanded command
