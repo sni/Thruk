@@ -39,7 +39,7 @@ The nodecontrol command can start node control commands.
 use warnings;
 use strict;
 use Getopt::Long ();
-use Time::HiRes ();
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Utils ();
 use Thruk::Utils::CLI ();
@@ -183,6 +183,7 @@ sub _action_list {
 sub _action_facts {
     my($c, $mode, $opt, $commandoptions, $global_options) = @_;
 
+    my $t1  = [gettimeofday()];
     my $peers = _get_selected_peers($c, $commandoptions, $global_options);
     _scale_peers($c, $opt->{'worker'}, $peers, sub {
         my($peer_key) = @_;
@@ -206,6 +207,8 @@ sub _action_facts {
         }
     });
     $c->stats->profile(end => "_cmd_nc()");
+    my $elapsed = tv_interval($t1);
+    _info(sprintf("updating %s data finished in %s\n", $mode, Thruk::Utils::Filter::duration($elapsed, 6)));
     return("", 0);
 }
 
