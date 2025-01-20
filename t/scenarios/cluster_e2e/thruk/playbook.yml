@@ -98,4 +98,5 @@
     delay: 1
   - name: "thruk bp commit"
     shell: sudo su - demo -c "test -s /mnt/var/thruk_bp_generated.cfg || thruk bp commit"
-  - shell: sudo su - demo -c "thruk cron install"
+  - name: "thruk cron install "
+    shell: sudo su - demo -c "thruk cron install"

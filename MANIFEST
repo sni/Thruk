@@ -2774,6 +2774,7 @@ t/scenarios/backend_naemon/t/300-controller_status.t
 t/scenarios/backend_naemon/t/300-controller_tac.t
 t/scenarios/backend_naemon/t/local/010-custom_vars_default_view.t
 t/scenarios/backend_naemon/t/local/020-custom_vars_filter.t
+t/scenarios/backend_naemon/t/local/030-cron.t
 t/scenarios/backend_naemon/thruk.conf
 t/scenarios/backend_naemon/thruk_local.conf
 t/scenarios/backend_nagios4/docker-compose.yml
@@ -3065,6 +3066,7 @@ t/scenarios/rest_api/t/local/rest_case_sensitive.t
 t/scenarios/rest_api/t/local/rest_check_thruk_rest.t
 t/scenarios/rest_api/t/local/rest_commands.t
 t/scenarios/rest_api/t/local/rest_configtool.t
+t/scenarios/rest_api/t/local/rest_cron.t
 t/scenarios/rest_api/t/local/rest_csv_output.t
 t/scenarios/rest_api/t/local/rest_errors.t
 t/scenarios/rest_api/t/local/rest_logs.t
