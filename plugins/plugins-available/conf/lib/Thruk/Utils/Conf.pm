@@ -423,7 +423,11 @@ sub get_component_as_string {
         $string .= "            auth          = ".$b->{'options'}->{'auth'}."\n"          if $b->{'options'}->{'auth'};
         $string .= "            proxy         = ".$b->{'options'}->{'proxy'}."\n"         if $b->{'options'}->{'proxy'};
         $string .= "            remote_name   = ".$b->{'options'}->{'remote_name'}."\n"   if $b->{'options'}->{'remote_name'};
-        $string .= "            fallback_peer = ".$b->{'options'}->{'fallback_peer'}."\n" if $b->{'options'}->{'fallback_peer'};
+        if($b->{options}->{fallback_peer}) {
+            for my $p (@{$b->{options}->{fallback_peer}}) {
+                $string .= "            fallback_peer = ".$p."\n";
+            }
+        }
         $string .= "        </options>\n" if(defined $b->{'options'} and scalar keys %{$b->{'options'}} > 0);
         if(defined $b->{'configtool'} and scalar keys %{$b->{'configtool'}} > 0 and $b->{'type'} ne 'http') {
             $string .= "        <configtool>\n";
@@ -1213,7 +1217,7 @@ sub _get_peer_keys_without_configtool {
     &timing_breakpoint('_get_peer_keys_without_configtool');
     for my $peer (@peers) {
         next if (defined $peer->{'disabled'} && $peer->{'disabled'} == HIDDEN_LMD_PARENT);
-        for my $addr (@{$peer->peer_list()}) {
+        for my $addr (@{$peer->peer_list()}, @{$peer->peer_list_fallback()}) {
             my $prev_remote;
             if(defined $peer->{'configtool'} && defined $peer->{'configtool'}->{'remote'}) {
                 $prev_remote = delete $peer->{'configtool'}->{'remote'};

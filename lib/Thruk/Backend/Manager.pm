@@ -338,7 +338,7 @@ sub get_http_peers {
         if($peer->{'type'} eq 'http') {
             push @{$http_peers}, $peer;
         } elsif($with_fallbacks) {
-            for my $addr (@{$peer->peer_list()}) {
+            for my $addr (@{$peer->peer_list()}, @{$peer->peer_list_fallback()}) {
                 if($addr =~ m/^https?:/mx) {
                     push @{$http_peers}, $peer;
                     last;

@@ -326,7 +326,7 @@ sub do_on_peer {
     confess("no peer for key: $key, got: ".join(', ', keys %{$self->{'peers'}})) unless defined $peer;
     if($arg_hash->{'force_type'} && $arg_hash->{'force_type'} eq 'http') {
         if(lc($peer->{'type'}) ne 'http') {
-            for my $src (@{$peer->{'peer_list'}}) {
+            for my $src (@{$peer->peer_list()}, @{$peer->peer_list_fallback()}) {
                 if($src =~ m/^https?:/mx) {
                     $peer = Thruk::Backend::Manager::fork_http_peer($peer, $src);
                     last;

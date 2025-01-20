@@ -102,23 +102,27 @@ sub remotekey {
 
 =head2 peer_list
 
-return peer address list
+return peer address list (without fallbacks)
 
 =cut
 
 sub peer_list {
     my($self) = @_;
-    if($self->{'peer_list'} && scalar @{$self->{'peer_list'}} > 0) {
-        my $list = [@{$self->{'peer_list'}}]; # create clone of list
-        if($self->{'class'}->{'config'}->{'options'}->{'fallback_peer'}) {
-            push @{$list}, $self->{'class'}->{'config'}->{'options'}->{'fallback_peer'};
-        }
-        return($list);
-    }
-    elsif($self->{'peer_config'}->{'options'}->{'fallback_peer'}) {
-        return([$self->{'peer_config'}->{'options'}->{'fallback_peer'}, $self->{'addr'}]);
-    }
-    return([$self->{'addr'}]);
+    return($self->{'peer_list'});
+}
+
+##########################################################
+
+=head2 peer_list_fallback
+
+return fallback peer address list
+
+=cut
+
+sub peer_list_fallback {
+    my($self) = @_;
+    return $self->{'peer_config'}->{'options'}->{'fallback_peer'} if($self->{'peer_config'}->{'options'}->{'fallback_peer'});
+    return([]);
 }
 
 ##########################################################
@@ -192,16 +196,15 @@ sub _initialise_peer {
     my $peer_config  = $self->{'peer_config'};
     my $thruk_config = $self->{'thruk_config'};
 
-    my $logcache       = $peer_config->{'logcache'} // $thruk_config->{'logcache'};
-
     confess "missing name in peer configuration" unless defined $peer_config->{'name'};
     confess "missing type in peer configuration" unless defined $peer_config->{'type'};
 
     # parse list of peers for LMD
-    if($peer_config->{'options'}->{'peer'} && ref $peer_config->{'options'}->{'peer'} eq 'ARRAY') {
-        $self->{'peer_list'} = $peer_config->{'options'}->{'peer'};
-        $peer_config->{'options'}->{'peer'} = $peer_config->{'options'}->{'peer'}->[0];
-    }
+    $peer_config->{'options'}->{'peer'}          = Thruk::Base::list($peer_config->{'options'}->{'peer'})          if $peer_config->{'options'}->{'peer'};
+    $peer_config->{'options'}->{'fallback_peer'} = Thruk::Base::list($peer_config->{'options'}->{'fallback_peer'}) if $peer_config->{'options'}->{'fallback_peer'};
+    $self->{'peer_list'}                         = $peer_config->{'options'}->{'peer'};
+    $peer_config->{'options'}->{'peer'}          = scalar @{$self->{'peer_list'}} > 0 ? $self->{'peer_list'}->[0] : '';
+
     $self->{'name'}          = $peer_config->{'name'};
     $self->{'type'}          = $peer_config->{'type'};
     $self->{'active'}        = $peer_config->{'active'} // 1;
@@ -243,21 +246,8 @@ sub _initialise_peer {
     $self->{'class'}->{'_peer'} = $self;
     weaken($self->{'class'}->{'_peer'});
 
-    # state hosts
-    my $addr              = $self->{'addr'};
-    $self->{'local'}      = 0;
-    if($addr) {
-        if($self->{'type'} eq 'http') {
-            $addr =~ s/^http(|s):\/\///mx;
-            $addr =~ s/\/.*$//mx;
-        }
-        if($self->{'type'} eq 'livestatus') {
-            $addr =~ s/^tls:\/\///mx;
-            $addr =~ s/:.*$//mx;
-        }
-    }
-
     # log cache?
+    my $logcache = $peer_config->{'logcache'} // $thruk_config->{'logcache'};
     if($logcache && ($peer_config->{'type'} eq 'livestatus' || $peer_config->{'type'} eq 'http')) {
         if($logcache !~ m/^mysql/mxi) {
             die("no or unknown type in logcache connection: ".$logcache);
@@ -313,7 +303,7 @@ sub get_http_fallback_peer {
     $self->{'_http_fallback_peer'} = undef;
 
     # check if there is any http source set
-    for my $src (@{$self->peer_list}) {
+    for my $src (@{$self->peer_list}, @{$self->peer_list_fallback}) {
         if($src =~ m/^https?:/mx) {
             $self->{'_http_fallback_peer'} = Thruk::Backend::Manager::fork_http_peer($self, $src);
             last;

@@ -1356,6 +1356,14 @@ sub get_remote_thruk_url_path {
         }
     }
     if(!$url || $url !~ m/^https?:\/\//mx) {
+        for my $u (reverse @{$peer->peer_list_fallback()}) {
+            if($u =~ m%^https?:%mx) {
+                $url = $u;
+                last;
+            }
+        }
+    }
+    if(!$url || $url !~ m/^https?:\/\//mx) {
         return("");
     }
 
@@ -1408,6 +1416,16 @@ sub get_remote_thruk_hostname {
         }
     }
 
+    if(!$url) {
+        for my $u (reverse @{$peer->peer_list_fallback()}) {
+            next if $u =~ m%(127\.0\.0\.|localhost|::1|^/)%mx;
+            if($u =~ m%^(https?:|.*:\d+)%mx) {
+                $url = $u;
+                last;
+            }
+        }
+    }
+
     return unless $url;
 
     if($url =~ m|^(https?)://([^/]+)/([^/]+)/?|gmx) {
@@ -1452,6 +1470,15 @@ sub get_remote_thruk_site_name {
 
     if(!$url) {
         for my $u (reverse @{$peer->peer_list()}) {
+            if($u =~ m%^(https?:|/omd/sites/)%mx) {
+                $url = $u;
+                last;
+            }
+        }
+    }
+
+    if(!$url) {
+        for my $u (reverse @{$peer->peer_list_fallback()}) {
             if($u =~ m%^(https?:|/omd/sites/)%mx) {
                 $url = $u;
                 last;

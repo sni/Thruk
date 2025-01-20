@@ -445,6 +445,8 @@ sub write_lmd_config {
         $site_config .= "name           = '".$peer->peer_name()."'\n";
         $site_config .= "id             = '".$key."'\n";
         $site_config .= "source         = ['".join("', '", @{$peer->peer_list()})."']\n";
+        # fallbacks are supported starting with lmd 2.3.1
+        $site_config .= "fallback       = ['".join("', '", @{$peer->peer_list_fallback()})."']\n" if scalar @{$peer->peer_list_fallback()} > 0;
         # section is supported starting with lmd 1.1.6
         if($peer->{'section'} && $peer->{'section'} ne 'Default') {
             $site_config .= "section        = '".$peer->{'section'}."'\n";
