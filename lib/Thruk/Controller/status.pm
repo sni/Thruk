@@ -418,6 +418,7 @@ sub _process_search_request {
     if( scalar @{$servicegroups} > 0 ) {
         delete $c->req->parameters->{'host'};
         $c->req->parameters->{'servicegroup'} = $host;
+        $c->stash->{'servicegroup'} = $host;
         return ('overview');
     }
 
@@ -426,6 +427,7 @@ sub _process_search_request {
     if( scalar @{$hostgroups} > 0 ) {
         delete $c->req->parameters->{'host'};
         $c->req->parameters->{'hostgroup'} = $host;
+        $c->stash->{'hostgroup'} = $host;
         return ('overview');
     }
 
