@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 13;
+plan tests => 12;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -21,7 +21,7 @@ TestUtils::test_command({
 # check cron entries
 TestUtils::test_command({
     cmd  => '/usr/bin/env crontab -l | grep thruk',
-    like => ['/thruk report/', '/thruk nc runtime/', '/downtimetask/', '/bp all/', '/thruk maintenance/', '/cron\.log/'],
+    like => ['/thruk report/', '/downtimetask/', '/bp all/', '/thruk maintenance/', '/cron\.log/'],
 });
 
 ###########################################################

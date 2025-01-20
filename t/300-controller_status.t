@@ -95,9 +95,9 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All Unhandled Problems&hst_columns=name%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccheck_period&&svc_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Cexecution_time',
     '/thruk/cgi-bin/status.cgi?style=combined&hst_s0_hoststatustypes=4&hst_s0_servicestatustypes=31&hst_s0_hostprops=10&hst_s0_serviceprops=0&svc_s0_hoststatustypes=3&svc_s0_servicestatustypes=28&svc_s0_hostprops=10&svc_s0_serviceprops=10&svc_s0_hostprop=2&svc_s0_hostprop=8&title=All Unhandled Problems&hst_columns=name%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccheck_period&&svc_columns=host_name%2Cdescription%2Cstate%2Clast_check%2Cduration%2Ccurrent_attempt%2Cpeer_name%2Cplugin_output%2Ccomments',
 # Search
-    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host=*',
-    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host='.$hostgroup,
-    '/thruk/cgi-bin/status.cgi?status.cgi?navbarsearch=1&host='.$servicegroup,
+    '/thruk/cgi-bin/status.cgi?status.cgi&navbarsearch=1&host=*',
+    '/thruk/cgi-bin/status.cgi?status.cgi&navbarsearch=1&host='.$hostgroup,
+    '/thruk/cgi-bin/status.cgi?status.cgi&navbarsearch=1&host='.$servicegroup,
 
 # Styles
     '/thruk/cgi-bin/status.cgi?style=hostdetail&dfl_s0_hoststatustypes=15&dfl_s0_servicestatustypes=31&dfl_s0_hostprops=0&dfl_s0_serviceprops=0&dfl_s0_type=hostgroup&dfl_s0_op=%3D&dfl_s0_value='.$hostgroup,

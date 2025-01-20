@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 150;
+plan tests => 148;
 
 ###########################################################
 # test thruks script path
@@ -23,7 +23,7 @@ TestUtils::test_command({
 # check cron entries
 TestUtils::test_command({
     cmd  => '/usr/bin/env crontab -l | grep thruk',
-    like => ['/facts/', '/runtime/', '/thruk maintenance/', '/cron\.log/'],
+    like => ['/thruk maintenance/', '/cron\.log/'],
 });
 
 ###########################################################
