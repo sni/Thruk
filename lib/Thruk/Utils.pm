@@ -2183,6 +2183,7 @@ sub update_cron_file {
                 if($prev && $prev !~ m/^\#+$/mx) {
                     push @orig_cron, $prev;
                 }
+                next;
             }
             if(!$thruk_started) {
                 push @orig_cron, $line;
@@ -2202,6 +2203,7 @@ sub update_cron_file {
             }
             next if $line =~ m/^\#/mx;
             next if $line =~ m/^\s*$/mx;
+            next if $line =~ m/^THRUK_CRON=0/mx;
             next unless defined $lastsection;
             $sections->{$lastsection} = [] unless defined $sections->{$lastsection};
             push @{$sections->{$lastsection}}, $line;
@@ -2227,7 +2229,7 @@ sub update_cron_file {
         print $fh $line, "\n";
     }
 
-    if(defined $section) {
+    if(scalar keys %{$sections} > 0) {
         my $header_printed = 0;
         for my $s (sort keys %{$sections}) {
             next if scalar @{$sections->{$s}} == 0;
