@@ -71,9 +71,9 @@ BuildRequires: perl(Module::Install)
 # >=rhel7 and fedora
 %if 0%{?el7}%{?el8}%{?el9}%{?fedora}
 BuildRequires: httpd
-BuildRequires: perl(ExtUtils::Install)
-BuildRequires: perl(Digest::SHA)
+BuildRequires: perl-Digest-SHA
 BuildRequires: perl-devel
+BuildRequires: perl(ExtUtils::Install)
 Requires: httpd mod_fcgid cronie
 Requires: perl-LWP-Protocol-https
 %endif
