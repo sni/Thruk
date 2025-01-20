@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 80;
+plan tests => 88;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -16,6 +16,13 @@ TestUtils::test_command({
     cmd  => '/bin/bash -c "type thruk"',
     like => ['/\/thruk\/script\/thruk/'],
 }) or BAIL_OUT("wrong thruk path");
+
+###########################################################
+# check cron entries
+TestUtils::test_command({
+    cmd  => '/usr/bin/env crontab -l | grep thruk',
+    like => ['/heartbeat/', '/downtimetask/', '/bp all/', '/thruk maintenance/', '/cron\.log/'],
+});
 
 ###########################################################
 # thruk cluster commands
