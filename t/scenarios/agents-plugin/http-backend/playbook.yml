@@ -2,7 +2,6 @@
 - hosts: all
   roles:
     - role: common
-    - role: thruk_developer
   tasks:
   - name: "omd config change"
     shell: "omd config demo change"
@@ -24,8 +23,8 @@
       dest: "/etc/snclient/snclient_local.ini"
   - shell: "snclient &"
 
-  - name: create symlink to agents plugin
-    shell: "ln -sfn /thruk/plugins/plugins-available/agents /opt/omd/sites/demo/etc/thruk/plugins-enabled/agents"
+  - name: enable agents plugin
+    shell: "sudo su - demo -c 'thruk plugin enable agents'"
 
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
 
