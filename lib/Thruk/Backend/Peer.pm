@@ -108,7 +108,7 @@ return peer address list (without fallbacks)
 
 sub peer_list {
     my($self) = @_;
-    return($self->{'peer_list'});
+    return($self->{'peer_list'} // []);
 }
 
 ##########################################################
@@ -303,7 +303,7 @@ sub get_http_fallback_peer {
     $self->{'_http_fallback_peer'} = undef;
 
     # check if there is any http source set
-    for my $src (@{$self->peer_list}, @{$self->peer_list_fallback}) {
+    for my $src (@{$self->peer_list()}, @{$self->peer_list_fallback()}) {
         if($src =~ m/^https?:/mx) {
             $self->{'_http_fallback_peer'} = Thruk::Backend::Manager::fork_http_peer($self, $src);
             last;
