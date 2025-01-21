@@ -203,7 +203,7 @@ sub _initialise_peer {
     $peer_config->{'options'}->{'peer'}          = Thruk::Base::list($peer_config->{'options'}->{'peer'})          if $peer_config->{'options'}->{'peer'};
     $peer_config->{'options'}->{'fallback_peer'} = Thruk::Base::list($peer_config->{'options'}->{'fallback_peer'}) if $peer_config->{'options'}->{'fallback_peer'};
     $self->{'peer_list'}                         = $peer_config->{'options'}->{'peer'};
-    $peer_config->{'options'}->{'peer'}          = scalar @{$self->{'peer_list'}} > 0 ? $self->{'peer_list'}->[0] : '';
+    $peer_config->{'options'}->{'peer'}          = ($self->{'peer_list'} && scalar @{$self->{'peer_list'}} > 0) ? $self->{'peer_list'}->[0] : '';
 
     $self->{'name'}          = $peer_config->{'name'};
     $self->{'type'}          = $peer_config->{'type'};
