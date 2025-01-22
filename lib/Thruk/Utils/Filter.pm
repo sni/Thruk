@@ -128,6 +128,7 @@ sub duration {
     my $hours   = 0;
     my $minutes = 0;
     my $seconds = 0;
+    my $millis  = 0;
     if($options == 4 || $options == 5 || $options == 6) {
         if($duration >= (365*86400)) {
             $years     = int($duration/(365*86400));
@@ -148,21 +149,29 @@ sub duration {
         $minutes  = int($duration/60);
         $duration = $duration%60;
     }
-    $seconds = CORE::sprintf("%d", $duration);
+    if($duration > 0) {
+        $millis  = int($duration*1000)%1000;
+        $seconds = int($duration);
+    }
 
     if($options == 0) {
+        $seconds  = CORE::sprintf("%d", $duration);
         return($minus.$hours."h ".$minutes."m ".$seconds."s");
     }
     elsif($options == 1) {
+        $seconds  = CORE::sprintf("%d", $duration);
         return($minus.$days."d ".$hours."h ".$minutes."m ".$seconds."s");
     }
     elsif($options == 2) {
+        $seconds  = CORE::sprintf("%d", $duration);
         return($minus.$minutes."min ".$seconds."sec");
     }
     elsif($options == 3) {
+        $seconds  = CORE::sprintf("%d", $duration);
         return(CORE::sprintf("%s%dm %02ds", $minus, $minutes, $seconds));
     }
     elsif($options == 4) {
+        $seconds  = CORE::sprintf("%d", $duration);
         my @res;
         if($years   > 0) { push @res, $years."y"; }
         if($days    > 0) { push @res, $days."d"; }
@@ -173,6 +182,7 @@ sub duration {
         return($minus.join(" ", @res));
     }
     elsif($options == 5) {
+        $seconds  = CORE::sprintf("%d", $duration);
         my @res;
         if($years   > 0) { push @res, $years."year"._plural_s($years); }
         if($days    > 0) { push @res, $days."day"._plural_s($days); }
@@ -188,7 +198,9 @@ sub duration {
         if($days    > 0) { push @res, $days."d"; }
         if($hours   > 0) { push @res, $hours."h"; }
         if($minutes > 0) { push @res, $minutes."m"; }
-        if($seconds > 0) { push @res, $seconds."s"; }
+        if($seconds < 10 && $seconds >= 1 && $millis > 0) { push @res, sprintf("%.1fs", $duration); }
+        elsif($seconds > 0) { push @res, $seconds."s"; }
+        if($millis  > 0 && scalar @res == 0) { push @res, $millis."ms"; }
         if(scalar @res > 2) { @res = splice(@res, 0, 2); }
         if(scalar @res == 0) { push @res, "0s"; }
         return($minus.join(" ", @res));
