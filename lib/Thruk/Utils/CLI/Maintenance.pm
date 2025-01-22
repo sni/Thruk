@@ -28,9 +28,12 @@ The maintenance command performs regular maintenance jobs like
 
 use warnings;
 use strict;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Utils::CLI ();
 use Thruk::Utils::CookieAuth ();
 use Thruk::Utils::External ();
+use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
@@ -49,6 +52,7 @@ our $skip_backends = 1;
 =cut
 sub cmd {
     my($c, $action) = @_;
+    my $t1  = [gettimeofday()];
     $c->stats->profile(begin => "_cmd_maintenance($action)");
 
     if(!$c->check_user_roles('authorized_for_admin')) {
@@ -56,8 +60,13 @@ sub cmd {
     }
 
     # sleep random number of seconds to avoid cluster conflicts with already removed sessions
+    my $lock_file;
     if($ENV{'THRUK_CRON'}) {
         sleep(int(rand(10)));
+
+        $lock_file = $c->config->{'tmp_path'}.'/maintenance_lock.json';
+        my($pid, $ts) = Thruk::Utils::CLI::check_lock($lock_file, "maintenance");
+        return(sprintf("maintenance already running (duration: %s) with pid: %s\n", Thruk::Utils::Filter::duration(Time::HiRes::time() - $ts, 6), $pid), 0) if $pid;
     }
 
     _info("running maintenance jobs:");
@@ -76,7 +85,11 @@ sub cmd {
     _info("  - %-20s: removed %5d / %5d old puppeteer folders", "reports", $removed, $total);
 
     $c->stats->profile(end => "_cmd_maintenance($action)");
-    return("maintenance complete\n", 0);
+
+    Thruk::Utils::CLI::check_lock_unlock($lock_file, "maintenance") if $lock_file;
+
+    _info(sprintf("maintenance completed in %s\n", Thruk::Utils::Filter::duration(tv_interval($t1), 6)));
+    return("", 0);
 }
 
 ##############################################
