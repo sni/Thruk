@@ -207,8 +207,7 @@ sub _action_facts {
         }
     });
     $c->stats->profile(end => "_cmd_nc()");
-    my $elapsed = tv_interval($t1);
-    _info(sprintf("updating %s data finished in %s\n", $mode, Thruk::Utils::Filter::duration($elapsed, 6)));
+    _info(sprintf("updating %s data finished in %s\n", $mode, Thruk::Utils::Filter::duration(tv_interval($t1), 6)));
     return("", 0);
 }
 
