@@ -142,9 +142,9 @@ sub index {
         }
 
         # add remote files
-        if(scalar @{$c->db->get_http_peers()} > 0) {
+        if(scalar @{$c->db->get_http_peers(1)} > 0) {
             my $f = { name => 'remote', 'dirs' => {}, 'files' => {} };
-            for my $peer (@{$c->db->get_http_peers()}) {
+            for my $peer (@{$c->db->get_http_peers(1)}) {
                 $f->{'dirs'}->{$peer->{'name'}} = { 'dirs' => {}, 'files' => {}, peer => $peer->{'key'} };
             }
             push @{$folders}, $f;

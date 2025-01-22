@@ -1290,9 +1290,14 @@ sub proxifiy_url {
     }
     my $peer_key = ref $obj eq 'HASH' ? $obj->{'peer_key'} : $obj;
     my $peer     = $c->db->get_peer_by_key($peer_key);
-    return($url) unless $peer;
+    if(!$peer) {
+        # might be a not yet be populated federated backend
+        Thruk::Action::AddDefaults::add_defaults($c);
+        $peer = $c->db->get_peer_by_key($peer_key);
+        return($url) unless $peer;
+    }
     if($peer->{'type'} ne 'http') {
-        return($url);
+        return($url) unless $peer->get_http_fallback_peer();
     }
 
     my $proxy_prefix = $c->stash->{'url_prefix'}.'cgi-bin/proxy.cgi/'.$peer_key;

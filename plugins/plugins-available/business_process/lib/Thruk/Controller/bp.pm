@@ -537,7 +537,7 @@ sub _bp_start_page {
 
     # add remote business processes
     $c->stash->{'has_remote_bps'} = 0;
-    if(scalar @{$c->db->get_http_peers()} > 0) {
+    if(scalar @{$c->db->get_http_peers(1)} > 0) {
         $c->stash->{'has_remote_bps'} = 1;
         if($type eq 'remote' || $type eq 'all') {
             $bps = _add_remote_bps($c, $bps, $local_bps);
