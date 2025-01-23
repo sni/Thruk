@@ -9,7 +9,7 @@
 <div class="card z-50 fixed bottom-0 right-0 m-2 mr-64 min-w-fit">
   <div class="body p-1 font-semibold textBody">
     <span>file: [% c.config.conf_retention_file %]</span>
-    <span class="border-l borderDefault pl-1 mr-1">mtime: [% date_format(c, c.config.conf_retention.9) %]</span>
+    <span class="border-l borderDefault pl-1 mr-1">[% IF c.config.defined("conf_retention") && c.config.conf_retention.size >= 9 %]mtime: [% date_format(c, c.config.conf_retention.9); ELSE %]file does not exist yet.[% END %]</span>
   </div>
 </div>
 [% END %]
