@@ -1,0 +1,11 @@
+{
+  "name": "thruk-theme",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "autoprefixer": "^10.4.20",
+    "n": "^10.1.0",
+    "postcss": "^8.5.1",
+    "postcss-import": "<16.0.0",
+    "tailwindcss": "<4.0.0"
+  }
+}
