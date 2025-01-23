@@ -4,6 +4,7 @@
 #
 use warnings;
 use strict;
+use Cwd qw/abs_path/;
 use English qw(-no_match_vars);
 use Test::More;
 
@@ -57,9 +58,13 @@ if(scalar @ARGV > 0) {
     }
 }
 else {
-    my $dirs = [ 'lib', glob("plugins/plugins-*/*/lib") ];
-    my @files = Perl::Critic::Utils::all_perl_files(@{$dirs});
-    plan( tests => scalar @files);
+    my $dirs = [ 'lib', glob("plugins/plugins-available/*/lib") ];
+    my $uniq = {};
+    for my $d (@{$dirs}) {
+        $uniq->{abs_path($d)} = 1;
+    }
+    my @files = Perl::Critic::Utils::all_perl_files(sort keys %{$uniq});
+    plan(tests => scalar @files);
     for my $file (sort @files) {
         my $hashsum = Thruk::Utils::Crypt::hexdigest($extrahash.Thruk::Utils::IO::read($file));
         if($cache->{$file} and $cache->{$file} eq $hashsum) {
