@@ -644,7 +644,9 @@ sub job_page {
 
     if(!$show_output) {
         # try to directly serve the request if it takes less than 3 seconds
-        $is_running = wait_for_job($c, $job, 3) if $is_running;
+        if(!defined $c->req->parameters->{'initwait'} || $c->req->parameters->{'initwait'} > 0) {
+            $is_running = wait_for_job($c, $job, $c->req->parameters->{'initwait'} // 3) if $is_running;
+        }
     }
 
     # job still running?
@@ -966,7 +968,11 @@ sub do_parent_stuff {
 
     $c->stash->{'job_id'} = $id;
     if(!$conf->{'background'}) {
-        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$id);
+        my $append = "";
+        if(defined $conf->{'initwait'}) {
+            $append = '&initwait='.$conf->{'initwait'};
+        }
+        return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$id.$append);
     }
     return $id;
 }

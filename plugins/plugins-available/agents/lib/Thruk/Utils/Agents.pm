@@ -10,7 +10,6 @@ use Monitoring::Config::Object ();
 use Thruk::Controller::conf ();
 use Thruk::Utils ();
 use Thruk::Utils::Conf ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

@@ -23,7 +23,6 @@ use MIME::Base64;
 use Thruk::Utils ();
 use Thruk::Utils::Avail ();
 use Thruk::Utils::CLI ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 $Thruk::Utils::Reports::Render::locale = {};

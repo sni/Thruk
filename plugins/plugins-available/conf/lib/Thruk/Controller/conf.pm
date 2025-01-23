@@ -798,7 +798,7 @@ sub _process_plugins_page {
 ##########################################################
 # create the backends config page
 sub _process_backends_page {
-    my( $c ) = @_;
+    my($c) = @_;
 
     my $file = $c->config->{'Thruk::Plugin::ConfigTool'}->{'thruk'};
     return unless $file;
@@ -823,69 +823,8 @@ sub _process_backends_page {
             Thruk::Utils::set_message( $c, 'fail_message', 'file is readonly' );
             return $c->redirect_to('conf.cgi?sub=backends');
         }
-
-        my $numbers = [];
-        for my $key (sort keys %{$c->req->parameters}) {
-            if($key =~ m/^name(\d+)/mx) {
-                push @{$numbers}, $1;
-            }
-        }
-        my $backends = {};
-        my $has_new = 0;
-        for my $x (sort { $a <=> $b } @{$numbers}) {
-            my $backend = {
-                'name'    => $c->req->parameters->{'name'.$x},
-                'type'    => $c->req->parameters->{'type'.$x},
-                'id'      => $c->req->parameters->{'id'.$x},
-                'hidden'  => defined $c->req->parameters->{'hidden'.$x} ? $c->req->parameters->{'hidden'.$x} : 0,
-                'section' => $c->req->parameters->{'section'.$x},
-                'active'  => $c->req->parameters->{'active'.$x} || 0,
-                'options' => {},
-            };
-            $backend->{'options'}->{'peer'}         = $c->req->parameters->{'peer'.$x}        if $c->req->parameters->{'peer'.$x};
-            $backend->{'options'}->{'auth'}         = $c->req->parameters->{'auth'.$x}        if $c->req->parameters->{'auth'.$x};
-            $backend->{'options'}->{'proxy'}        = $c->req->parameters->{'proxy'.$x}       if $c->req->parameters->{'proxy'.$x};
-            $backend->{'options'}->{'remote_name'}  = $c->req->parameters->{'remote_name'.$x} if $c->req->parameters->{'remote_name'.$x};
-            $x++;
-            $backend->{'name'} = 'backend '.$x if(!$backend->{'name'} && $backend->{'options'}->{'peer'});
-            next unless $backend->{'name'};
-            delete $backend->{'id'} if $backend->{'id'} eq '';
-
-            $backend->{'options'}->{'peer'} = Thruk::Base::list($backend->{'options'}->{'peer'});
-
-            for my $p (@{$backend->{'options'}->{'peer'}}) {
-                if($backend->{'type'} eq 'livestatus' and $p =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
-                    $p .= ':6557';
-                }
-            }
-
-            # that's the default anyway
-            delete $backend->{'active'} if $backend->{'active'};
-
-            # add values from existing backend config
-            my $savefile = $file;
-            if(defined $backend->{'id'}) {
-                my $peer = $c->db->get_peer_by_key($backend->{'id'});
-                $backend->{'options'}->{'resource_file'} = $peer->{'resource_file'} if defined $peer->{'resource_file'};
-                $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
-                $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
-                $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
-                $backend->{'logcache_fetchlogs_command'} = $peer->{'peer_config'}->{'logcache_fetchlogs_command'} if defined $peer->{'peer_config'}->{'logcache_fetchlogs_command'};
-                $backend->{'authoritive'} = $peer->{'peer_config'}->{'authoritive'};
-                $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
-            }
-            $has_new = 1 if $x == 1;
-            $savefile =~ s|/thruk\.conf$|/thruk_local.conf|gmx;
-            $backends->{$savefile} = [] unless $backends->{$savefile};
-            push @{$backends->{$savefile}}, $backend;
-        }
-        # put new one at the end
-        if($has_new) { push(@{$backends->{$file}}, shift(@{$backends->{$file}})) }
-        for my $f (sort keys %{$backends}) {
-            my $string = Thruk::Utils::Conf::get_component_as_string($backends->{$f});
-            Thruk::Utils::Conf::replace_block($f, $string, '<Component\s+Thruk::Backend>', '<\/Component>\s*');
-        }
-        Thruk::Utils::set_message( $c, 'success_message', 'Backends changed successfully.' );
+        _write_backends_to_thruk_local($c, $file, $c->req->parameters);
+        Thruk::Utils::set_message( $c, 'success_message', 'Backends saved successfully.' );
         return Thruk::Utils::restart_later($c, $c->stash->{url_prefix}.'cgi-bin/conf.cgi?sub=backends');
     }
     if($c->stash->{action} eq 'check_con') {
@@ -2853,6 +2792,74 @@ sub _get_non_config_tool_references {
     }
 
     return($other_refs);
+}
+
+##########################################################
+sub _write_backends_to_thruk_local {
+    my($c, $file, $params) = @_;
+    my $numbers = [];
+    for my $key (sort keys %{$params}) {
+        if($key =~ m/^name(\d+)/mx) {
+            push @{$numbers}, $1;
+        }
+    }
+    my $backends = {};
+    my $has_new = 0;
+    for my $x (sort { $a <=> $b } @{$numbers}) {
+        my $backend = {
+            'name'    => $params->{'name'.$x},
+            'type'    => $params->{'type'.$x},
+            'id'      => $params->{'id'.$x},
+            'hidden'  => defined $params->{'hidden'.$x} ? $params->{'hidden'.$x} : 0,
+            'section' => $params->{'section'.$x},
+            'active'  => $params->{'active'.$x} || 0,
+            'options' => {},
+        };
+        $backend->{'options'}->{'peer'}         = $params->{'peer'.$x}        if $params->{'peer'.$x};
+        $backend->{'options'}->{'auth'}         = $params->{'auth'.$x}        if $params->{'auth'.$x};
+        $backend->{'options'}->{'proxy'}        = $params->{'proxy'.$x}       if $params->{'proxy'.$x};
+        $backend->{'options'}->{'remote_name'}  = $params->{'remote_name'.$x} if $params->{'remote_name'.$x};
+        $x++;
+        $backend->{'name'} = 'backend '.$x if(!$backend->{'name'} && $backend->{'options'}->{'peer'});
+        next unless $backend->{'name'};
+        delete $backend->{'id'} if $backend->{'id'} eq '';
+
+        $backend->{'options'}->{'peer'} = Thruk::Base::list($backend->{'options'}->{'peer'});
+
+        for my $p (@{$backend->{'options'}->{'peer'}}) {
+            if($backend->{'type'} eq 'livestatus' and $p =~ m/^\d+\.\d+\.\d+\.\d+$/mx) {
+                $p .= ':6557';
+            }
+        }
+
+        # that's the default anyway
+        delete $backend->{'active'} if $backend->{'active'};
+
+        # add values from existing backend config
+        my $savefile = $file;
+        if(defined $backend->{'id'}) {
+            my $peer = $c->db->get_peer_by_key($backend->{'id'});
+            $backend->{'options'}->{'resource_file'} = $peer->{'resource_file'} if defined $peer->{'resource_file'};
+            $backend->{'options'}->{'fallback_peer'} = $peer->{'config'}->{'options'}->{'fallback_peer'} if defined $peer->{'config'}->{'options'}->{'fallback_peer'};
+            $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
+            $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
+            $backend->{'logcache_fetchlogs_command'} = $peer->{'peer_config'}->{'logcache_fetchlogs_command'} if defined $peer->{'peer_config'}->{'logcache_fetchlogs_command'};
+            $backend->{'authoritive'} = $peer->{'peer_config'}->{'authoritive'};
+            $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
+        }
+        $has_new = 1 if $x == 1;
+        $savefile =~ s|/thruk\.conf$|/thruk_local.conf|gmx;
+        $backends->{$savefile} = [] unless $backends->{$savefile};
+        push @{$backends->{$savefile}}, $backend;
+    }
+    # put new one at the end
+    if($has_new) { push(@{$backends->{$file}}, shift(@{$backends->{$file}})) }
+    for my $f (sort keys %{$backends}) {
+        my $string = Thruk::Utils::Conf::get_component_as_string($backends->{$f});
+        Thruk::Utils::Conf::replace_block($f, $string, '<Component\s+Thruk::Backend>', '<\/Component>\s*');
+    }
+
+    return;
 }
 
 ##########################################################

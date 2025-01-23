@@ -24,6 +24,7 @@ use Thruk::Base qw/:compat/;
 use Thruk::Constants ':backend_handling';
 use Thruk::Utils::DateTime ();
 use Thruk::Utils::Encode ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
@@ -2519,24 +2520,39 @@ restart fcgi process and redirects to given page
 
 sub restart_later {
     my($c, $redirect) = @_;
-    if(Thruk::Base->mode eq 'FASTCGI') {
+    my($cmd, $msg);
+    if($ENV{'OMD_ROOT'}) {
+        $cmd = 'omd reload apache';
+        $msg = 'Restarting OMD Site Apache...';
+    }
+    elsif(Thruk::Base->mode eq 'FASTCGI') {
         my $pidfile  = $c->config->{'tmp_path'}.'/thruk.pid';
+        my @pids;
         if(-f $pidfile) {
             for my $pid (Thruk::Utils::IO::read_as_list($pidfile)) {
                 next unless($pid and $pid =~ m/^\d+$/mx);
-                system("sleep 1 && kill -HUP $pid &");
+                push @pids, $pid;
             }
         } else {
-            my $pid = $$;
-            system("sleep 1 && kill -HUP $pid &");
+            push @pids, $$;
         }
-        Thruk::Utils::append_message($c, ' Thruk has been restarted.');
-        return $c->redirect_to($redirect);
-    } else {
+        if(scalar @pids > 0) {
+            $cmd = "kill -HUP ".join(" ", @pids);
+            $msg = 'Restarting Thruk...';
+        }
+    }
+
+    if(!$cmd) {
         Thruk::Utils::append_message($c, ' Changes take effect after Restart.');
         return $c->redirect_to($redirect);
     }
-    return;
+
+    return(Thruk::Utils::External::cmd($c, {
+        'cmd'        => "sleep 1 ; ".$cmd."; sleep 1",
+        'forward'    => $redirect,
+        'initwait'   => 0,
+        'message'    => $msg,
+    }));
 }
 
 

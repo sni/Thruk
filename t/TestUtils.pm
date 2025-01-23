@@ -1081,6 +1081,8 @@ sub bail_out_req {
     diag("\n######################################################\n");
     diag("request diagnostics:");
     diag("error: '".(ref $msg ? Dumper($msg) : $msg)."'\n");
+    my $time = Thruk::Utils::Log::time_prefix(); chop($time);
+    diag("date:  '".$time."'\n");
     diag("request:\n");
     diag($res->request->as_string());
     diag("\n\nresponse:\n");

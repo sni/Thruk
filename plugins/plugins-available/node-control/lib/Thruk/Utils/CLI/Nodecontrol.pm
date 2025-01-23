@@ -43,7 +43,6 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Utils ();
 use Thruk::Utils::CLI ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################

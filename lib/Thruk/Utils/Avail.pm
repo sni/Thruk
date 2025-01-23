@@ -20,7 +20,6 @@ use POSIX ();
 use Monitoring::Availability ();
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
