@@ -13,6 +13,7 @@
 [% PROCESS _message.tt %]
 [% USE date %]
 
+<div id='tooltip' class="card absolute opacity-90 p-1 z-50" style="display: none;"></div>
 <div class="flexrow justify-between mb-5">
   <div class="w-44">
     <a class="button w-32" href="omd.cgi?action=top&folder=[% folder | uri %]">back to overview</a>
@@ -32,7 +33,6 @@
         <div class="textHINTsoft">click on graph to show process list</div>
       </div>
       <div class="body">
-        <div id='tooltip'></div>
         <div id="load_graph"    style="height: 180px; width: 750px;"></div>
         <div id="cpu_graph"     style="height: 180px; width: 750px;"></div>
         <div id="mem_graph"     style="height: 180px; width: 750px;"></div>
@@ -331,8 +331,11 @@ jQuery().ready(function() {
                 if(e == '#pcpu_graph')    { tooltip = _getTooltipFromSeries(d, pcpu_series,    item.dataIndex,  "%", true, 1 )};
                 if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, pmem_series,    item.dataIndex,  "%", true, 1 )};
                 if(e == '#gearman_graph') { tooltip = _getTooltipFromSeries(d, gearman_series, item.dataIndex                )};
+                var main = jQuery("MAIN").first();
+                var x = Number(pos.pageX) + Number(main.scrollLeft()) - 30;
+                var y = Number(pos.pageY) + Number(main.scrollTop())  - 60;
                 jQuery("#tooltip").html(tooltip)
-                                  .css({top: item.pageY+5, left: item.pageX+5})
+                                  .css({top: y, left: x})
                                   .fadeIn(200);
                 if(!croshair_locked) {
                   updateDetailsTable(item.dataIndex);
@@ -543,7 +546,7 @@ function _getTooltipFromSeries(date, series, index, unit, skipEmpty, toFixed) {
                 tooltip += "<tr><td></td>";
             }
             tooltip += "<td class='var'>"+s.label + ":</td>";
-            tooltip += "<td class='val'>"+val+(unit ? unit : '')+"</td></tr>";
+            tooltip += "<td class='val'>"+_ifNotNull(val, unit)+"</td></tr>";
         }
     });
     tooltip += "</table>";
@@ -578,6 +581,7 @@ function _reapply_table_sorter() {
 }
 
 function _ifNotNull(num, unit) {
+    if(!unit) { unit = ""; }
     if(num != null) {
         return(num+unit);
     }
