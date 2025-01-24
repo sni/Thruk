@@ -449,6 +449,8 @@ exit 0
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/editor
 %{_datadir}/%{name}/plugins/plugins-available/node-control
 %config %{_sysconfdir}/%{name}/plugins/plugins-available/node-control
+%{_datadir}/%{name}/plugins/plugins-available/omd
+%config %{_sysconfdir}/%{name}/plugins/plugins-available/omd
 %config(noreplace) %{_sysconfdir}/thruk/themes
 %config(noreplace) %{_sysconfdir}/thruk/menu_local.conf
 %config(noreplace) %{_sysconfdir}/thruk/usercontent/
