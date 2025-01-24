@@ -1132,12 +1132,12 @@ sub split_perfdata {
 
         # format is described here https://github.com/flackem/check_multi/blob/next/doc/configuration/performance.md
         # in short, labels can be separated by double colons ::
-        # try ip address prefix first, ex. as returned by checl_icmp (would break category detection otherwise)
+        # try ip address prefix first, ex. as returned by check_icmp (would break category detection otherwise)
         if($key =~ m/^(
                         (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) # ip v4
                        |
                         ([a-f0-9:]{3,24}) # simple ip v6
-                    )(.*?)$/mix) {
+                    )(rta|rtmin|rtamax|pl)$/mix) {
             $last_parent = $1;
             $key = $4;
             $has_parents = 1;
