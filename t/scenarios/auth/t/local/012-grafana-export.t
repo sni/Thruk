@@ -40,7 +40,7 @@ TestUtils::test_command({
 # wait till histou/influx is ready
 TestUtils::test_command({
     cmd     => $curl.' "http://127.0.0.1/demo/histou/index.php?host=test&service=Ping&annotations=true&callback=jQuery36108434547110946526_1676536465838"',
-    waitfor => 'test\ \-\ Ping\ \-\ check_ping\ \-\ pl',
+    waitfor => 'test\ \-\ Ping\ \-\ pl|test\ \-\ Ping\ \-\ check_ping\ \-\ pl|test\ Ping\ check_ping\ pl',
     maxwait => 120, # grafana might need some time to get ready
 });
 
