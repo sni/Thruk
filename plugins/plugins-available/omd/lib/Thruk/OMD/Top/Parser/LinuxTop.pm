@@ -127,7 +127,7 @@ sub top_graph_details {
         while(1) {
             my $file = $files[$x];
             $file =~ m/\/(\d+)\./mxo;
-            if(defined $1) {
+            if(!defined $1) {
                 $x++;
                 next;
             } else {
