@@ -65,7 +65,12 @@ if command -v tmux >/dev/null 2>&1; then
             if [ $X -gt 120 ]; then
                 # print output of tmux session
                 tmux -f /dev/null capture-pane -p -t $session:$window
-                echo "[ERROR] update failed, ssh into $HOSTNAME and run 'tmux attach -t $session:$window' to manually investigate"
+                echo "[ERROR] update timed out, ssh into $HOSTNAME and"
+                echo "[ERROR] run 'tmux attach -t $session:$window' to manually investigate"
+
+                # at least try to start apache again
+                omd start apache
+
                 exit 1
             fi
         done
@@ -100,8 +105,13 @@ if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
 fi
 
 if command -v tmux >/dev/null 2>&1; then
-    echo "*** [ERROR] update failed, ssh into $HOSTNAME and run 'tmux attach -t $session:$window' to manually investigate"
+    echo "*** [ERROR] update failed, ssh into $HOSTNAME and"
+    echo "*** [ERROR] run 'tmux attach -t $session:$window' to manually investigate"
 else
     echo "*** [ERROR] update failed"
 fi
+
+# at least try to start apache again
+omd start apache
+
 exit 1
