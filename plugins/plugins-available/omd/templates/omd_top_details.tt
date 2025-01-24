@@ -126,15 +126,7 @@
 </div>
 
 <script type="text/javascript">
-<!--
-function _trim_number(num) {
-    // reduce precision for numbers like: 0.6000000000000001
-    var str = ""+num;
-    if(str.match(/^\d\..*0+1$/)) {
-        num = Number(str.replace(/^(\d\.\d).*0+1$/, "$1"));
-    }
-    return(num);
-}
+
 var truncated = [% IF truncated %]true[% ELSE%]false[% END %];
 var plots     = {};
 var croshair_locked     = false;
@@ -194,8 +186,8 @@ jQuery().ready(function() {
         xaxis: load_series.length > 0 ? standard_xaxis : labeled_xaxis,
         yaxes: [{
                    min: 0,
-                   max: max_or_default(100, cpu_series),
-                   tickFormatter: function(val, axis) { return(val < axis.max ? val : "%"); },
+                   max: _max_or_default(100, cpu_series),
+                   tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : "%"); },
                    labelWidth: labelWidth
         }],
         crosshair: standard_crosshair,
@@ -216,7 +208,7 @@ jQuery().ready(function() {
         xaxis: standard_xaxis,
         yaxes: [{
                    min: 0,
-                   tickFormatter: function(val, axis) { return(val < axis.max ? val : "MB"); },
+                   tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : "MB"); },
                    labelWidth: labelWidth
         }],
         crosshair: standard_crosshair,
@@ -238,7 +230,7 @@ jQuery().ready(function() {
         xaxis: standard_xaxis,
         yaxes: [{
                    min: 0,
-                   tickFormatter: function(val, axis) { return(val < axis.max ? val : "MB"); },
+                   tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : "MB"); },
                    labelWidth: labelWidth
         }],
         crosshair: standard_crosshair,
@@ -261,8 +253,8 @@ jQuery().ready(function() {
         xaxis: standard_xaxis,
         yaxes: [{
                    min: 0,
-                   max: max_or_default(100, pcpu_series),
-                   tickFormatter: function(val, axis) { return(val < axis.max ? val : "CPU %"); },
+                   max: _max_or_default(100, pcpu_series),
+                   tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : "CPU %"); },
                    labelWidth: labelWidth
         }],
         crosshair: standard_crosshair,
@@ -284,8 +276,8 @@ jQuery().ready(function() {
         xaxis: standard_xaxis,
         yaxes: [{
                    min: 0,
-                   max: max_or_default(100, pmem_series),
-                   tickFormatter: function(val, axis) { return(val < axis.max ? val : "MEM %"); },
+                   max: _max_or_default(100, pmem_series),
+                   tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : "MEM %"); },
                    labelWidth: labelWidth
         }],
         crosshair: standard_crosshair,
@@ -306,7 +298,7 @@ jQuery().ready(function() {
         xaxis: standard_xaxis,
         yaxes: [{
                    min: 0,
-                   //tickFormatter: function(val, axis) { return(val < axis.max ? val : ""); },
+                   //tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : ""); },
                    labelWidth: labelWidth
         }],
         crosshair: standard_crosshair,
@@ -332,13 +324,13 @@ jQuery().ready(function() {
             if (item) {
                 var d = new Date(item.datapoint[0]).toLocaleString();
                 var tooltip;
-                if(e == '#load_graph')    { tooltip = getTooltipFromSeries(d, load_series,    item.dataIndex                )};
-                if(e == '#cpu_graph')     { tooltip = getTooltipFromSeries(d, cpu_series,     item.dataIndex,  "%"          )};
-                if(e == '#mem_graph')     { tooltip = getTooltipFromSeries(d, mem_series,     item.dataIndex, "MB"          )};
-                if(e == '#swap_graph')    { tooltip = getTooltipFromSeries(d, swap_series,    item.dataIndex, "MB"          )};
-                if(e == '#pcpu_graph')    { tooltip = getTooltipFromSeries(d, pcpu_series,    item.dataIndex,  "%", true, 1 )};
-                if(e == '#pmem_graph')    { tooltip = getTooltipFromSeries(d, pmem_series,    item.dataIndex,  "%", true, 1 )};
-                if(e == '#gearman_graph') { tooltip = getTooltipFromSeries(d, gearman_series, item.dataIndex                )};
+                if(e == '#load_graph')    { tooltip = _getTooltipFromSeries(d, load_series,    item.dataIndex                )};
+                if(e == '#cpu_graph')     { tooltip = _getTooltipFromSeries(d, cpu_series,     item.dataIndex,  "%"          )};
+                if(e == '#mem_graph')     { tooltip = _getTooltipFromSeries(d, mem_series,     item.dataIndex, "MB"          )};
+                if(e == '#swap_graph')    { tooltip = _getTooltipFromSeries(d, swap_series,    item.dataIndex, "MB"          )};
+                if(e == '#pcpu_graph')    { tooltip = _getTooltipFromSeries(d, pcpu_series,    item.dataIndex,  "%", true, 1 )};
+                if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, pmem_series,    item.dataIndex,  "%", true, 1 )};
+                if(e == '#gearman_graph') { tooltip = _getTooltipFromSeries(d, gearman_series, item.dataIndex                )};
                 jQuery("#tooltip").html(tooltip)
                                   .css({top: item.pageY+5, left: item.pageX+5})
                                   .fadeIn(200);
@@ -530,6 +522,7 @@ function fetchTopDataDo() {
                 jQuery('#raw_top_div').css({'display': 'inherit'});
                 jQuery('#raw_top').trigger("update");
                 jQuery('#filename').html(data.file);
+                _reapply_table_sorter();
             } else {
                 jQuery('#raw_top').find("tr:gt(0)").remove();
                 jQuery('#raw_top_div').css({'display': 'none'});
@@ -538,7 +531,7 @@ function fetchTopDataDo() {
     });
 }
 
-function getTooltipFromSeries(date, series, index, unit, skipEmpty, toFixed) {
+function _getTooltipFromSeries(date, series, index, unit, skipEmpty, toFixed) {
     var tooltip = "<table class='tooltip'><tr><td class='date'>"+date+"</td>";
     var x = 0;
     jQuery.each(series, function(i, s) {
@@ -557,7 +550,7 @@ function getTooltipFromSeries(date, series, index, unit, skipEmpty, toFixed) {
     return(tooltip);
 }
 
-function max_or_default(fallback, series) {
+function _max_or_default(fallback, series) {
     var max = fallback;
     jQuery.each(series, function(_, s) {
         jQuery.each(s.data, function(_, d) {
@@ -567,7 +560,23 @@ function max_or_default(fallback, series) {
     return(max);
 }
 
--->
+function _trim_number(num) {
+    // reduce precision for numbers like: 0.6000000000000001
+    var str = ""+num;
+    if(str.match(/^\d\..*0+1$/)) {
+        num = Number(str.replace(/^(\d\.\d).*0+1$/, "$1"));
+    }
+    return(num);
+}
+
+function _reapply_table_sorter() {
+    var table = document.getElementById('raw_top');
+    if(table) {
+        table.dataset["search"] = "";
+    }
+    jQuery("#table_search_input").focus();
+}
+
 </script>
 
 [% PROCESS _footer.tt %]
