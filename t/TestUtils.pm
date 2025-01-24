@@ -771,6 +771,7 @@ sub test_command {
             alarm(15);
             $expr = $waitfor;
             my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, $!);
+            $test->{'test_cmd'} = $t;
             eval {
                 local $SIG{ALRM} = sub { die "timeout on cmd: ".$test->{'cmd'}."\n" };
                 $t->run(args => $arg, stdin => $test->{'stdin'});
@@ -1114,8 +1115,8 @@ sub bail_out_cmd {
     diag("error:  '".(ref $msg ? Dumper($msg) : $msg)."'\n");
     my $cmd = $test->{'test_cmd'};
     diag("cmd:    '".$test->{'cmd'}."' failed\n");
-    diag("stdout: '".($cmd->stdout // '')."'\n");
-    diag("stderr: '".($cmd->stderr // '')."'\n");
+    diag("stdout: '".($cmd->stdout // '')."'\n") if $cmd;
+    diag("stderr: '".($cmd->stderr // '')."'\n") if $cmd;
     diag("exit:   '".($test->{'exit'} // '(none)')."'\n");
 
     diag(Carp::longmess("started here:"));
