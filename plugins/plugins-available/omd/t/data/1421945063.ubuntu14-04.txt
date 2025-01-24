@@ -1,0 +1,11 @@
+top - 13:41:23 up 111 days, 22 min, 23 users,  load average: 0.26, 0.35, 0.40
+Tasks: 404 total,   2 running, 401 sleeping,   0 stopped,   1 zombie
+%Cpu(s):  3.3 us,  1.3 sy,  0.0 ni, 94.7 id,  0.6 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem:   8166688 total,  7598684 used,   568004 free,    21828 buffers
+KiB Swap: 19803132 total,   803780 used, 18999352 free.   568548 cached Mem
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+18570 sven      20   0 2397964 521700  21056 S  24.4  6.4   1858:53 komodo
+ 2531 sven      20   0  479288  18056   2368 S  12.2  0.2  59:43.32 plugin-containe
+27800 root      20   0   32304   1708   1060 R  12.2  0.0   0:00.02 top
+

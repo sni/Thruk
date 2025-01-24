@@ -1,0 +1,72 @@
+TABLE {
+    width: auto !important;
+}
+
+#tooltip {
+    position: absolute;
+    display: none;
+    border: 1px solid #fdd;
+    padding: 2px;
+    background-color: #fee;
+    opacity: 0.80;
+    z-index: 100;
+}
+
+table.tooltip {
+    border-collapse: collapse;
+}
+
+table.tooltip .var {
+    font-weight: bold;
+    border-left: 1px solid grey;
+    padding-left: 5px;
+}
+
+table.tooltip .val {
+    text-align: right;
+    font-weight: bold;
+}
+
+table.tooltip .date {
+    padding-right: 5px;
+}
+
+#raw_top TD {
+    white-space: nowrap;
+    text-align: center;
+}
+#raw_top TH:nth-child(12), #raw_top TD:nth-child(12) {
+    text-align: left;
+}
+#raw_top TD:nth-child(1) {
+    text-align: right;
+}
+
+
+/* tables */
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+    padding: 4px;
+    padding: 2px;
+}
+table.tablesorter thead tr .header {
+    background-image: url(bg.gif);
+    background-repeat: no-repeat;
+    background-position: right -5px center;
+    cursor: pointer;
+    padding-left: 2px;
+    padding-right: 10px;
+}
+table.tablesorter tbody td {
+    padding: 0 1px;
+    line-height: 14px;
+    vertical-align: top;
+}
+table.tablesorter thead tr .headerSortUp {
+    background-image: url(asc.gif);
+}
+table.tablesorter thead tr .headerSortDown {
+    background-image: url(desc.gif);
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+    background-color: #8dbdd8;
+}

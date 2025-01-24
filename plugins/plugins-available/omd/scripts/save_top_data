@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ "$OMD_ROOT" = "" ]; then
+  exit 1
+fi
+
+set -e
+
+KEEP_FILES=10080     # keep last 7 days
+FOLDER=$OMD_ROOT/var/top
+
+mkdir -p $OMD_ROOT/var/top
+cd $FOLDER || exit 1
+
+export LD_LIBRARY_PATH="$OMD_ROOT/local/lib:$OMD_ROOT/lib"
+export LC_ALL=C
+
+# save top data
+FILE="$(date +%s).log"
+export COLUMNS=5000
+set +e
+gearman_top -b        > $FILE
+top -c -b -n 2 -d 30 >> $FILE
+gearman_top -b       >> $FILE
+sed -i -e 's/\ *$//g'   $FILE
+gzip -9 $FILE
+
+# remove too old files
+ls -1tr *.log.gz *.log 2>/dev/null | head -n -${KEEP_FILES} | xargs -r rm
+
+# update index
+LC_ALL=C zgrep -H -F -m 1 'load average:' ${FILE}.gz 2>/dev/null >> .index
+
+# keep last lines from index
+tail -n ${KEEP_FILES} .index > .index.new
+mv .index.new .index

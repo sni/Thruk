@@ -1,0 +1,2 @@
+# save top data every minute
+* * * * * $OMD_ROOT/etc/thruk/plugins-enabled/omd/scripts/save_top_data >/dev/null 2>&1

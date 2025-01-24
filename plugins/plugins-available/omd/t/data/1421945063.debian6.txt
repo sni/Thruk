@@ -1,0 +1,10 @@
+top - 13:34:28 up 227 days, 22:05,  2 users,  load average: 3.68, 3.34, 2.87
+Tasks: 149 total,   2 running, 147 sleeping,   0 stopped,   0 zombie
+Cpu(s):  3.6%us,  3.1%sy,  0.0%ni, 90.1%id,  2.9%wa,  0.1%hi,  0.2%si,  0.0%st
+Mem:   1026752k total,  1010732k used,    16020k free,     2716k buffers
+Swap:  2350072k total,    87980k used,  2262092k free,   497788k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND
+ 7020 build     20   0  4228  596  400 R   93  0.1   0:02.36 gzip
+ 7003 build     20   0 33288 3884 2080 S   10  0.4   0:00.18 apt-ftparchive
+    1 root      20   0  8356   96   60 S    0  0.0   2:37.13 init

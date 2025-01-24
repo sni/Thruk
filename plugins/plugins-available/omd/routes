@@ -1,0 +1,19 @@
+##########################################################
+
+=head2 add_routes
+
+page: /thruk/cgi-bin/omd.cgi
+
+=cut
+
+$routes->{'/thruk/cgi-bin/omd.cgi'} = 'Thruk::Controller::omd::index';
+
+# add new menu item
+Thruk::Utils::Menu::insert_item('System', {
+                                    'href'  => '/thruk/cgi-bin/omd.cgi',
+                                    'name'  => 'OMD Top',
+                                    'roles' => [qw/authorized_for_configuration_information
+                                                   authorized_for_system_commands/],
+});
+# enable omd features if this plugin is loaded
+$app->config->{'use_feature_omd'} = 1;

@@ -20,7 +20,6 @@ BEGIN {
 my $BIN = defined $ENV{'THRUK_BIN'} ? $ENV{'THRUK_BIN'} : './script/thruk';
 
 my $plugins = [
-    { name => 'omd',          'tarball' => 'https://github.com/sni/thruk-plugin-omd/archive/refs/heads/master.tar.gz' },
     { name => 'pansnaps',     'tarball' => 'https://github.com/ConSol/thruk-plugin-pansnaps/archive/refs/heads/master.tar.gz' },
     { name => 'woshsh',       'tarball' => 'https://github.com/sni/thruk-plugin-woshsh/archive/refs/heads/master.tar.gz' },
 ];

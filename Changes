@@ -18,6 +18,8 @@ next:
             - prevent running multiple updates from cron in parallel
           - Reports:
             - fix creating grafana reports from url report
+          - OMD-Top:
+            - added as core module
 
 3.20.2   Wed Dec 18 17:43:10 CET 2024
           - unescape escaped characters in expanded command

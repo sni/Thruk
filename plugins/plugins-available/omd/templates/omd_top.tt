@@ -1,0 +1,143 @@
+﻿[% PROCESS _header.tt
+    js           => [ "vendor/flot-d7c58b5/jquery.flot.js",
+                      "vendor/flot-d7c58b5/jquery.flot.time.js",
+                      "plugins/${plugin}/vendor/jquery.flot.selection.js",
+                      "plugins/${plugin}/vendor/jquery.flot.stack.js",
+                      "plugins/${plugin}/vendor/jquery.flot.crosshair.js",
+                    ],
+    css          => [ "plugins/${plugin}/style.css", ],
+%]
+[% PROCESS _message.tt %]
+[% USE date %]
+
+<div class="flexrow justify-between mb-5">
+  <div class="w-44"></div>
+  <div>
+    <h1>Top Reporting Overview</h1>
+  </div>
+  <div class="w-44">
+    [% IF folders.size > 1 %]
+      <form method="GET" action="omd.cgi">
+        <div class="card">
+          <div class="head">
+            <h3>Folders</h3>
+          </div>
+          <table class="body cellspacing">
+            <tr>
+              <td>Data Source</td>
+              <td>
+                <select name='folder'>
+                  [% FOREACH f = folders %]
+                  <option value="[% f.dir | html %]"[% IF f.dir == folder %] selected[% END %]>[% f.display %]</option>
+                  [% END %]
+                </select>
+              </td>
+              <td>
+                <input type='submit' value='Update'>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </form>
+    [% END %]
+  </div>
+</div>
+
+
+[% IF folders.size == 0 %]
+  <div class="textHINT pt-10 text-center">
+    <b>No Input Folders:</b>
+    Make sure you have some input folders defined and at least one of them contains data.
+    <br>
+    <a class="link" href="https://github.com/sni/thruk-plugin-omd" target="_blank"><i class="uil uil-external-link-alt"></i>Read projects documentation.</a>
+  </div>
+[% ELSE %]
+  <div id='tooltip'></div>
+  <div class="card">
+    <div class="head">
+      <h3>Overview Graph</h3>
+    </div>
+    <div class="body">
+      <div id="load_graph" style="height: 200px; width: 1000px;"></div>
+      <div style="text-align: center; width: 1000px; margin-top: 15px;">select a range to display details</div>
+    </div>
+  </div>
+
+<script type="text/javascript">
+<!--
+jQuery().ready(function() {
+    standard_xaxis = { mode: "time",
+                  timezone: "browser",
+                  labelHeight: 0,
+                  labelWidth: 0,
+                  tickFormatter: function() { return(""); }
+    };
+    var standard_grid = {
+        hoverable: true,
+        backgroundColor: "#F0F0ED"
+    };
+    standard_selection = {
+        mode: "x"
+    };
+    standard_legend = {
+        position: 'nw',
+        margin: [10, 40]
+    };
+    standard_crosshair = { mode: "x" };
+
+    /* load graph */
+    var load_options = {
+        xaxis: { mode: "time",
+             timezone: "browser"
+        },
+        yaxes: [{
+                   min: 0,
+                   tickFormatter: function(val, axis) { return(val < axis.max ? val : "Load"); }
+        }],
+        crosshair: standard_crosshair,
+        grid:      standard_grid,
+        selection: standard_selection,
+        legend:    standard_legend
+    };
+    var load_series = [% encode_json_obj(load_series) %];
+    var load_plot   = jQuery.plot('#load_graph', load_series, load_options);
+    load_plot.draw();
+
+    /* add zooming and hover */
+    jQuery('#load_graph').bind("plothover", function (event, pos, item) {
+        if (item) {
+            var date    = new Date(item.datapoint[0]).toLocaleString();
+            var tooltip = getTooltipFromSeries(date, load_series, item.dataIndex);
+            jQuery("#tooltip").html(tooltip)
+                              .css({top: item.pageY+5, left: item.pageX+5})
+                              .fadeIn(200);
+        } else {
+            jQuery("#tooltip").stop(true).hide();
+        }
+    });
+
+    /* enable zooming */
+    jQuery('#load_graph').bind("plotselected", function (event, ranges) {
+        if(ranges == null) { return; }
+        window.location = 'omd.cgi?action=top_details&t1='+Math.floor(ranges.xaxis.from/1000)+'&t2='+Math.ceil(ranges.xaxis.to/1000)+'&folder=[% folder %]';
+    });
+});
+
+function getTooltipFromSeries(date, series, index, unit, skipEmpty, toFixed) {
+    var labels = [];
+    jQuery.each(series, function(_, s) {
+        if(!skipEmpty || s.data[index][1] != 0) {
+            var val = s.data[index][1];
+            if(toFixed != undefined) { val = Number(val).toFixed(toFixed); }
+            labels.push(s.label + ": " + val+(unit ? unit : ''));
+        }
+    });
+    var tooltip = date + ": "+labels.join(", ");
+    return(tooltip);
+}
+
+-->
+</script>
+[% END %]
+
+[% PROCESS _footer.tt %]
