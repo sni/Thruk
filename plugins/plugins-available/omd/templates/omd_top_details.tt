@@ -462,9 +462,9 @@ function updateDetailsTable(index, fetch) {
     if(plots['mem']) {
         jQuery('#mem').html(plots['mem'].getData()[0].data[index][1]+"MB");
         if(plots['mem'].getData().length >= 4) {
-            jQuery('#mem_used').html(plots['mem'].getData()[1].data[index][1]+"MB");
-            jQuery('#buffers').html(plots['mem'].getData()[2].data[index][1]+"MB");
-            jQuery('#cached').html(plots['mem'].getData()[3].data[index][1]+"MB");
+            jQuery('#mem_used').html(_ifNotNull(plots['mem'].getData()[1].data[index][1], "MB"));
+            jQuery('#buffers').html(_ifNotNull(plots['mem'].getData()[2].data[index][1], "MB"));
+            jQuery('#cached').html(_ifNotNull(plots['mem'].getData()[3].data[index][1], "MB"));
         }
     }
 
@@ -575,6 +575,13 @@ function _reapply_table_sorter() {
         table.dataset["search"] = "";
     }
     jQuery("#table_search_input").focus();
+}
+
+function _ifNotNull(num, unit) {
+    if(num != null) {
+        return(num+unit);
+    }
+    return("");
 }
 
 </script>
