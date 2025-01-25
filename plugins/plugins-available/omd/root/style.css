@@ -21,6 +21,15 @@ table.tooltip .date {
     padding-right: 5px;
 }
 
+#raw_top {
+    background-color: inherit !important;
+    color: inherit !important;
+}
+
+#raw_top TD, #raw_top TH {
+    background-color: inherit !important;
+    color: inherit !important;
+}
 #raw_top TD {
     white-space: nowrap;
     text-align: center;
@@ -30,4 +39,8 @@ table.tooltip .date {
 }
 #raw_top TD:nth-child(1) {
     text-align: right;
+}
+
+.axis_x, .axis_y {
+    color: var(--text-body) !important;
 }

@@ -1,6 +1,7 @@
 ﻿[% PROCESS _header.tt
     js           => [ "vendor/flot-d7c58b5/jquery.flot.js",
                       "vendor/flot-d7c58b5/jquery.flot.time.js",
+                      "plugins/${plugin}/omd_top.js",
                       "plugins/${plugin}/vendor/jquery.flot.selection.js",
                       "plugins/${plugin}/vendor/jquery.flot.stack.js",
                       "plugins/${plugin}/vendor/jquery.flot.crosshair.js",
@@ -10,6 +11,7 @@
 [% PROCESS _message.tt %]
 [% USE date %]
 
+<div id='tooltip' class="card absolute opacity-90 p-1 z-50" style="display: none;"></div>
 <div class="flexrow justify-between mb-5">
   <div class="w-44"></div>
   <div>
@@ -64,7 +66,6 @@
   </div>
 
 <script type="text/javascript">
-<!--
 jQuery().ready(function() {
     standard_xaxis = { mode: "time",
                   timezone: "browser",
@@ -107,9 +108,12 @@ jQuery().ready(function() {
     jQuery('#load_graph').bind("plothover", function (event, pos, item) {
         if (item) {
             var date    = new Date(item.datapoint[0]).toLocaleString();
-            var tooltip = getTooltipFromSeries(date, load_series, item.dataIndex);
+            var tooltip = _getTooltipFromSeries(date, load_series, item.dataIndex);
+            var main = jQuery("MAIN").first();
+            var x = Number(pos.pageX) + Number(main.scrollLeft()) - 30;
+            var y = Number(pos.pageY) + Number(main.scrollTop())  - 60;
             jQuery("#tooltip").html(tooltip)
-                              .css({top: item.pageY+5, left: item.pageX+5})
+                              .css({top: y, left: x})
                               .fadeIn(200);
         } else {
             jQuery("#tooltip").stop(true).hide();
@@ -123,20 +127,6 @@ jQuery().ready(function() {
     });
 });
 
-function getTooltipFromSeries(date, series, index, unit, skipEmpty, toFixed) {
-    var labels = [];
-    jQuery.each(series, function(_, s) {
-        if(!skipEmpty || s.data[index][1] != 0) {
-            var val = s.data[index][1];
-            if(toFixed != undefined) { val = Number(val).toFixed(toFixed); }
-            labels.push(s.label + ": " + val+(unit ? unit : ''));
-        }
-    });
-    var tooltip = date + ": "+labels.join(", ");
-    return(tooltip);
-}
-
--->
 </script>
 [% END %]
 
