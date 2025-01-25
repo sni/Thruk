@@ -49,8 +49,7 @@ if(-e 'root/thruk/cache/thruk-'.$fileversion.'.js') {
 
 my @panorama_files;
 $newest = 0;
-require Thruk::Utils::Panorama;
-for my $file (@{$config->{'all_in_one_javascript_panorama'}}, @{Thruk::Utils::Panorama::get_static_panorama_files({plugin_path => 'plugins/'})}) {
+for my $file (@{$config->{'all_in_one_javascript_panorama'}}, @{Thruk::Config::get_static_panorama_files({plugin_path => 'plugins/'})}) {
     my @s;
     if($file =~ m/^plugins\//mx) {
         my $tmp = $file;

@@ -46,28 +46,6 @@ our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 ##########################################################
 
-=head2 get_static_panorama_files
-
-    get_static_panorama_files($config)
-
-return all static js files required for panorama
-
-=cut
-sub get_static_panorama_files {
-    my($config) = @_;
-    my @files;
-    for my $file (sort glob($config->{'plugin_path'}.'/plugins-enabled/panorama/root/js/*.js')) {
-        next if $file =~ m|track_timers|mx;
-        next if $file =~ m|panorama_js_functions|mx;
-        $file =~ s|^.*/root/js/|plugins/panorama/js/|gmx;
-        push @files, $file;
-    }
-    unshift(@files, 'plugins/panorama/js/panorama_js_functions.js');
-    return(\@files);
-}
-
-##########################################################
-
 =head2 clean_old_dashboards
 
     clean_old_dashboards($c)

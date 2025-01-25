@@ -59,7 +59,7 @@ sub index {
     $c->stash->{errorDetails} .= sprintf("Dashboard: %s\n", $c->req->parameters->{'current_tab'}) if $c->req->parameters->{'current_tab'};
 
     # add some functions
-    $c->stash->{'get_static_panorama_files'} = \&Thruk::Utils::Panorama::get_static_panorama_files;
+    $c->stash->{'get_static_panorama_files'} = \&Thruk::Config::get_static_panorama_files;
 
     $c->stash->{title}             = 'Thruk Panorama';
     $c->stash->{'skip_navigation'} = 1;

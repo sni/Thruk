@@ -57,7 +57,7 @@ js_eval_ok($filename) && unlink($filename);
 #################################################
 # read static js files
 use_ok('Thruk::Utils::Panorama');
-for my $file (@{Thruk::Utils::Panorama::get_static_panorama_files($config)}) {
+for my $file (@{Thruk::Config::get_static_panorama_files($config)}) {
     $file =~ s|plugins/panorama/|plugins/plugins-available/panorama/root/|gmx;
     ok($file, $file);
     js_eval_ok($file) or BAIL_OUT("failed to load ".$file);
