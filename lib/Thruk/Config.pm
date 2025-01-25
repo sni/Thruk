@@ -859,8 +859,7 @@ sub get_toolkit_config {
     };
 
     # export filter functions
-    require Class::Inspector;
-    for my $s (@{Class::Inspector->functions('Thruk::Utils::Filter')}) {
+    for my $s (@{get_functions_for_class('Thruk::Utils::Filter')}) {
         $view_tt_settings->{'PRE_DEFINE'}->{$s} = \&{'Thruk::Utils::Filter::'.$s};
     }
 
@@ -1546,6 +1545,24 @@ sub get_static_panorama_files {
     }
     unshift(@files, 'plugins/panorama/js/panorama_js_functions.js');
     return(\@files);
+}
+
+##############################################
+sub get_functions_for_class {
+    my($classname) = @_;
+
+    ## no critic
+    no strict 'refs';
+    ## use critic
+
+    # adopted from https://metacpan.org/dist/Class-Inspector/source/lib/Class/Inspector.pm#L147
+    my $RE_IDENTIFIER = qr/\A[^\W\d]\w*\z/s;
+    my @functions = sort grep { /$RE_IDENTIFIER/o }
+        grep { defined &{"${classname}::$_"} }
+        grep { !/^_/o } # hide functions starting with _
+        keys %{"${classname}::"};
+
+    return(\@functions);
 }
 
 ###################################################

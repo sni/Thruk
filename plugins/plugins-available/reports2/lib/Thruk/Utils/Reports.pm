@@ -13,7 +13,6 @@ Utilities Collection for Reporting
 use warnings;
 use strict;
 use Carp;
-use Class::Inspector;
 use Cwd qw/abs_path/;
 use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8 encode);
@@ -1805,7 +1804,7 @@ sub _initialize_report_templates {
     apply_report_parameters($c, $c->req->parameters, $options->{'params'});
 
     # set some render helper
-    for my $s (@{Class::Inspector->functions('Thruk::Utils::Reports::Render')}) {
+    for my $s (@{Thruk::Config::get_functions_for_class('Thruk::Utils::Reports::Render')}) {
         $c->stash->{$s} = \&{'Thruk::Utils::Reports::Render::'.$s};
     }
     # set custom render helper
@@ -1813,7 +1812,7 @@ sub _initialize_report_templates {
     eval {
         require Thruk::Utils::Reports::CustomRender;
         Thruk::Utils::Reports::CustomRender->import;
-        $custom = Class::Inspector->functions('Thruk::Utils::Reports::CustomRender');
+        $custom = Thruk::Config::get_functions_for_class('Thruk::Utils::Reports::CustomRender');
     };
     # show errors if module was found
     if($@ and $@ !~ m|Can\'t\ locate\ Thruk/Utils/Reports/CustomRender\.pm\ in|mx) {

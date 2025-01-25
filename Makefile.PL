@@ -21,7 +21,6 @@ requires 'Plack'                                  => 1.0046;# required by Thruk
 requires 'Plack::Util'                            => 0;     # required by Thruk
 requires 'FCGI'                                   => 0;     # required by Thruk
 requires 'Cpanel::JSON::XS'                       => 0;     # required by Thruk::View::JSON
-requires 'Class::Inspector'                       => 0;     # required by Thruk::Config
 requires 'HTTP::Response'                         => 0;     # required by Thruk::UserAgent
 requires 'HTTP::Request'                          => 6.12;  # required by Thruk::Utils::CLI, versions before cannot handle delete or patch requests
 requires 'HTTP::Request::Common'                  => 0;     # required by Thruk::UserAgent

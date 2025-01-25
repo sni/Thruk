@@ -15,11 +15,11 @@ use strict;
 use Carp qw/confess cluck carp/;
 use Cpanel::JSON::XS ();
 use Data::Dumper ();
-use Date::Calc qw/Localtime Today/;
-use Encode qw/decode_utf8/;
+use Date::Calc ();
+use Encode ();
 use POSIX ();
-use Scalar::Util qw/looks_like_number/;
-use URI::Escape qw/uri_escape/;
+use Scalar::Util ();
+use URI::Escape ();
 
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
@@ -267,14 +267,14 @@ sub date_format {
         @today = @{$c->stash->{'today'}};
     }
     else {
-        @today = Today();
+        @today = Date::Calc::Today();
         $c->stash->{'today'} = \@today;
     }
     my($t_year,$t_month,$t_day) = @today;
 
     my($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst);
     eval {
-        ($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst) = Localtime($timestamp);
+        ($year,$month,$day, $hour,$min,$sec,$doy,$dow,$dst) = Date::Calc::Localtime($timestamp);
     };
     if($@) {
         _warn("date_format($timestamp) failed: $@");
@@ -494,7 +494,7 @@ returns encoded string for use in url args
 sub as_url_arg {
     my($str) = @_;
     $str =~ s/&amp;/&/gmx;
-    $str = uri_escape($str);
+    $str = URI::Escape::uri_escape($str);
     return $str;
 }
 
@@ -654,7 +654,7 @@ sub get_action_menu {
                 $c->stash->{'checked_action_menus'}->{$menu} = { err => $err };
                 return($c->stash->{'checked_action_menus'}->{$menu});
             }
-            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = decode_utf8(Thruk::Utils::IO::read($sourcefile));
+            $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = Encode::decode_utf8(Thruk::Utils::IO::read($sourcefile));
         } else {
             $c->stash->{'checked_action_menus'}->{$menu}->{'data'} = $c->config->{'action_menu_items'}->{$menu};
         }
@@ -741,7 +741,7 @@ returns json encoded object
 
 =cut
 sub encode_json_obj {
-    return decode_utf8(_escape_tags_js(Cpanel::JSON::XS::encode_json($_[0]))) if $_[1];
+    return Encode::decode_utf8(_escape_tags_js(Cpanel::JSON::XS::encode_json($_[0]))) if $_[1];
     return _escape_tags_js(Cpanel::JSON::XS::encode_json($_[0]));
 }
 
@@ -1162,7 +1162,7 @@ sub split_perfdata {
                 'orig'      => $orig,
             };
             for my $key (qw/value min max warn crit/) {
-                $entry->{$key} = 0+$entry->{$key} if looks_like_number($entry->{$key});
+                $entry->{$key} = 0+$entry->{$key} if Scalar::Util::looks_like_number($entry->{$key});
             }
             push @{$data}, $entry;
         }
