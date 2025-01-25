@@ -1548,6 +1548,14 @@ sub get_static_panorama_files {
 }
 
 ##############################################
+
+=head2 get_functions_for_class
+
+    get_functions_for_class($classname)
+
+returns all function names for a class
+
+=cut
 sub get_functions_for_class {
     my($classname) = @_;
 
@@ -1556,8 +1564,8 @@ sub get_functions_for_class {
     ## use critic
 
     # adopted from https://metacpan.org/dist/Class-Inspector/source/lib/Class/Inspector.pm#L147
-    my $RE_IDENTIFIER = qr/\A[^\W\d]\w*\z/s;
-    my @functions = sort grep { /$RE_IDENTIFIER/o }
+    my $RE_IDENTIFIER = qr/\A[^\W\d]\w*\z/mxs;
+    my @functions = sort grep { /$RE_IDENTIFIER/mxo }
         grep { defined &{"${classname}::$_"} }
         keys %{"${classname}::"};
 
