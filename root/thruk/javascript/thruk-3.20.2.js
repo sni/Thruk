@@ -1178,8 +1178,10 @@ function switchTheme(sel) {
 function applyTheme(theme) {
     if(theme.match(/dark/i)) {
         jQuery("BODY").addClass("dark");
+        jQuery("HTML").addClass("dark");
     } else {
         jQuery("BODY").removeClass("dark");
+        jQuery("HTML").removeClass("dark");
     }
     jQuery("LINK.maintheme").attr("href", url_prefix+"themes/"+theme+"/stylesheets/"+theme+".css");
     jQuery("IMG").each(function() {
