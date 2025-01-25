@@ -51,17 +51,17 @@
     <b>No Input Folders:</b>
     Make sure you have some input folders defined and at least one of them contains data.
     <br>
-    <a class="link" href="https://github.com/sni/thruk-plugin-omd" target="_blank"><i class="uil uil-external-link-alt"></i>Read projects documentation.</a>
+    <a class="link" href="https://thruk.org/documentation/plugins/omd/" target="_blank"><i class="uil uil-external-link-alt"></i>Read projects documentation.</a>
   </div>
 [% ELSE %]
   <div id='tooltip'></div>
-  <div class="card">
-    <div class="head">
+  <div class="card w-full max-w-7xl">
+    <div class="head justify-between">
       <h3>Overview Graph</h3>
+      <div class="textHINTsoft">select a range to display details</div>
     </div>
     <div class="body">
-      <div id="load_graph" style="height: 200px; width: 1000px;"></div>
-      <div style="text-align: center; width: 1000px; margin-top: 15px;">select a range to display details</div>
+      <div id="load_graph" class="h-96 w-full min-w-[400px]"></div>
     </div>
   </div>
 
@@ -75,7 +75,7 @@ jQuery().ready(function() {
     };
     var standard_grid = {
         hoverable: true,
-        backgroundColor: "#F0F0ED"
+        backgroundColor: _backgroundColor()
     };
     standard_selection = {
         mode: "x"

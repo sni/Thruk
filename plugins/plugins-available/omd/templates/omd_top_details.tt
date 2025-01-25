@@ -40,7 +40,7 @@
         <div id="swap_graph"    style="height: 180px; width: 750px;"></div>
         <div id="pcpu_graph"    style="height: 260px; width: 750px;"></div>
         <div id="pmem_graph"    style="height: 260px; width: 750px;"></div>
-        <div id="gearman_graph" style="height: 260px; width: 750px;"></div>
+        <div id="gearman_graph" style="height: 180px; width: 750px;"></div>
       </div>
     </div>
   </div>
@@ -148,7 +148,7 @@ jQuery().ready(function() {
     var standard_grid = {
         hoverable: true,
         clickable: true,
-        backgroundColor: "#F0F0ED"
+        backgroundColor: _backgroundColor()
     };
     standard_selection = {
         mode: "x"

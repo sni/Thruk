@@ -213,9 +213,14 @@ sub top_graph_details {
     my $proc_found = {};
     my $data       = _extract_top_data($c, \@file_list, undef, $pattern, $proc_found, $truncated, $pid);
 
+    my $totalColor = "#000000";
+    if($c->stash->{'theme'} =~ m/dark/mi) {
+        $totalColor = "#ddd";
+    }
+
     # create series to draw
     my $mem_series = [
-        { label => "memory total",  data =>  [], color => "#000000"  },
+        { label => "memory total",  data =>  [], color => $totalColor  },
         { label => "memory used",   data =>  [], stack => undef, lines => { fill => 1 } },
         { label => "buffers",       data =>  [], stack => 1, lines => { fill => 1 } },
         { label => "cached",        data =>  [], stack => 1, lines => { fill => 1 } },
@@ -235,7 +240,7 @@ sub top_graph_details {
         { label => "load 15", data =>  [] },
     ];
     my $swap_series = [
-        { label => "swap total",  color => "#000000", data =>  [] },
+        { label => "swap total",  color => $totalColor, data =>  [] },
         { label => "swap used",   color => "#edc240", data =>  [], lines => { fill => 1 } },
     ];
     my $gearman_series = [

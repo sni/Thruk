@@ -41,6 +41,6 @@ table.tooltip .date {
     text-align: right;
 }
 
-.axis_x, .axis_y {
+.axis_x, .axis_y, .legendLabel {
     color: var(--text-body) !important;
 }

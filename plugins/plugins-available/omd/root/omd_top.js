@@ -163,3 +163,11 @@ function _ifNotNull(num, unit) {
     }
     return("");
 }
+
+function _backgroundColor() {
+    var backgroundColor = "#F0F0ED";
+    if(jQuery("HTML").hasClass("dark")) {
+        backgroundColor = "#333";
+    }
+    return(backgroundColor);
+}
