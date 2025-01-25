@@ -54,7 +54,6 @@
     <a class="link" href="https://thruk.org/documentation/plugins/omd/" target="_blank"><i class="uil uil-external-link-alt"></i>Read projects documentation.</a>
   </div>
 [% ELSE %]
-  <div id='tooltip'></div>
   <div class="card w-full max-w-7xl">
     <div class="head justify-between">
       <h3>Overview Graph</h3>
@@ -77,10 +76,6 @@ jQuery().ready(function() {
         hoverable: true,
         backgroundColor: _backgroundColor()
     };
-    standard_selection = {
-        mode: "x"
-    };
-    standard_crosshair = { mode: "x" };
 
     /* load graph */
     var load_options = {
@@ -106,8 +101,8 @@ jQuery().ready(function() {
             var date    = new Date(item.datapoint[0]).toLocaleString();
             var tooltip = _getTooltipFromSeries(date, load_series, item.dataIndex);
             var main = jQuery("MAIN").first();
-            var x = Number(pos.pageX) + Number(main.scrollLeft()) - 30;
-            var y = Number(pos.pageY) + Number(main.scrollTop())  - 60;
+            var x = Number(pos.pageX) + Number(main.scrollLeft()) + 10;
+            var y = Number(pos.pageY) + Number(main.scrollTop())  - 50;
             jQuery("#tooltip").html(tooltip)
                               .css({top: y, left: x})
                               .fadeIn(200);

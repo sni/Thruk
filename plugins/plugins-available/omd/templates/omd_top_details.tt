@@ -150,10 +150,6 @@ jQuery().ready(function() {
         clickable: true,
         backgroundColor: _backgroundColor()
     };
-    standard_selection = {
-        mode: "x"
-    };
-    standard_crosshair = { mode: "x" };
 
     /* load graph */
     var load_options = {
@@ -329,8 +325,8 @@ jQuery().ready(function() {
                 if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, pmem_series,    item.dataIndex,  "%", true, 1 )};
                 if(e == '#gearman_graph') { tooltip = _getTooltipFromSeries(d, gearman_series, item.dataIndex                )};
                 var main = jQuery("MAIN").first();
-                var x = Number(pos.pageX) + Number(main.scrollLeft()) - 30;
-                var y = Number(pos.pageY) + Number(main.scrollTop())  - 60;
+                var x = Number(pos.pageX) + Number(main.scrollLeft()) + 10;
+                var y = Number(pos.pageY) + Number(main.scrollTop())  - 50;
                 jQuery("#tooltip").html(tooltip)
                                   .css({top: y, left: x})
                                   .fadeIn(200);

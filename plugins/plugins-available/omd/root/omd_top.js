@@ -2,6 +2,10 @@ var standard_legend = {
     position: 'nw',
     margin: [10, 20]
 };
+var standard_selection = {
+    mode: "x"
+};
+var standard_crosshair = { mode: "x" };
 
 function zoomOut(plot) {
     jQuery.each(plot.getXAxes(), function(_, axis) {
@@ -119,8 +123,8 @@ function _getTooltipFromSeries(date, series, index, unit, skipEmpty, toFixed) {
     var tooltip = "<table class='tooltip'><tr><td class='date'>"+date+"</td>";
     var x = 0;
     jQuery.each(series, function(i, s) {
-        x++;
         if(!skipEmpty || s.data[index][1] != 0) {
+            x++;
             var val = s.data[index][1];
             if(toFixed != undefined) { val = Number(val).toFixed(toFixed); }
             if(x > 1) {
