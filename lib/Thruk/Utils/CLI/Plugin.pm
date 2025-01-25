@@ -126,11 +126,14 @@ sub _get_plugin_list_header {
 ##############################################
 sub _get_plugin_list_entry {
     my($plugin) = @_;
+    my $descr = $plugin->{'description'};
+    $descr =~ s=<br>=\n=gmx;
+    $descr = (split(/\n/mx, $descr))[0];
     my $output = sprintf("%-8s %-20s %-15s %-40s\n",
                        $plugin->{'enabled'} ? 'E' : ($plugin->{'installed'} ? ' I' : ''),
                        $plugin->{'dir'},
                        ($plugin->{'version'} || 'core'),
-                       (split(/\n/mx, $plugin->{'description'}))[0],
+                       $descr,
                     );
     return($output);
 }
