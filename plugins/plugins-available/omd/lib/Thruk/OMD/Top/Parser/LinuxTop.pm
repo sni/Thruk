@@ -337,7 +337,8 @@ sub _extract_top_data {
     $c->stats->profile(begin => "_extract_top_data") if $c;
 
     my($pid, $wtr, $rdr, @lines);
-    $pid = open3($wtr, $rdr, $rdr, 'zcat', @{$files});
+    my $cmd = 'for f in '.join(" ", @{$files}).'; do echo "FILE:$f"; gzip -dc "$f"; done';
+    $pid = open3($wtr, $rdr, $rdr, 'sh', '-c', $cmd);
     CORE::close($wtr);
 
     $files->[0] =~ m/\/(\d+)\./mxo;
@@ -352,17 +353,24 @@ sub _extract_top_data {
     my $gearman_started = 0;
     my $skip_this_one   = 0;
     my $result          = {};
-    my($cur, $gearman);
+    my($cur, $gearman,$curfile);
     my $last_hour = $startdate[2];
     my $last_min  = -1;
     my $last_line;
+    my $lineNum = 0;
     eval {
         while(my $line = <$rdr>) {
+            $lineNum++;
             $last_line = $line;
             $line =~ s/^\s+//mxo; # way faster than calling trim millions of times
             $line =~ s/\s+$//mxo;
 
-            if($line =~ m/^top\s+\-\s+(\d+):(\d+):(\d+)\s+up.*?average:\s*([\.\d]+),\s*([\.\d]+),\s*([\.\d]+)/mxo) {
+            if($line =~ m/^FILE:(.*)$/mxo) {
+                $curfile = $1;
+                $lineNum = 0;
+                next;
+            }
+            elsif($line =~ m/^top\s+\-\s+(\d+):(\d+):(\d+)\s+up.*?average:\s*([\.\d]+),\s*([\.\d]+),\s*([\.\d]+)/mxo) {
                 if($cur) { $result->{$cur->{time}} = $cur; }
                 $cur = { procs => {} };
                 $cur->{'raw'} = [] if $with_raw;
@@ -502,8 +510,10 @@ sub _extract_top_data {
             }
         }
     };
-    if($@) {
-        die("error around timestamp ".($cur ? $cur->{time} : 'unknown')." in line: ".$last_line."\n".$@);
+    my $err = $@;
+    if($err) {
+        die("error in file ".$curfile." line ".$lineNum." ".$err."\nline: ".$last_line) if $curfile;
+        die("error around timestamp ".($cur ? $cur->{time} : 'unknown')." in line: ".$last_line."\n".$err);
     }
     if($gearman && $cur) {
         $cur->{gearman} = $gearman;
