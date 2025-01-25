@@ -153,9 +153,15 @@ my $uname = `uname -s`; chomp($uname);
 ##################################
 # patch our makefile
 print `./script/thruk_patch_makefile.pl`;
+if($? != 0) {
+  die("failed to patch makefile");
+}
 
 # create combined javascript/css files
 print `./script/thruk_create_combined_static_content.pl`;
+if($? != 0) {
+  die("failed to create cached js/css files");
+}
 print "created cached js/css files\n";
 
 print `test -f themes/themes-available/Light/stylesheets/Light.css || make themes`;
