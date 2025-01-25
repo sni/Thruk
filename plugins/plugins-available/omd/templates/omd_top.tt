@@ -98,7 +98,7 @@ jQuery().ready(function() {
     /* add zooming and hover */
     jQuery('#load_graph').bind("plothover", function (event, pos, item) {
         if (item) {
-            var date    = new Date(item.datapoint[0]).toLocaleString();
+            var date    = _dateString(item.datapoint[0]);
             var tooltip = _getTooltipFromSeries(date, load_series, item.dataIndex);
             var main = jQuery("MAIN").first();
             var x = Number(pos.pageX) + Number(main.scrollLeft()) + 10;

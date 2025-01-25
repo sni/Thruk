@@ -30,7 +30,7 @@ function updateDetailsTable(index, fetch) {
     jQuery.each(plots, function(name, plot) { keys.push(name); });
     var timestamp = plots[keys[0]].getData()[0].data[index][0];
     var date = new Date(timestamp);
-    jQuery('#time').html(date.toLocaleString());
+    jQuery('#time').html(_dateString(timestamp));
 
     if(plots['load']) {
         jQuery('#load1').html(plots['load'].getData()[0].data[index][1]);
@@ -179,4 +179,8 @@ function _backgroundColor() {
         backgroundColor = "#333";
     }
     return(backgroundColor);
+}
+
+function _dateString(ts) {
+    return((new Date(ts)).strftime("%Y-%m-%d %H:%M:%S"));
 }

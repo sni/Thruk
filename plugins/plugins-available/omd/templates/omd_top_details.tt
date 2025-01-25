@@ -315,7 +315,7 @@ jQuery().ready(function() {
         /* graph hover */
         jQuery(e).bind("plothover", function (event, pos, item) {
             if (item) {
-                var d = new Date(item.datapoint[0]).toLocaleString();
+                var d = _dateString(item.datapoint[0]);
                 var tooltip;
                 if(e == '#load_graph')    { tooltip = _getTooltipFromSeries(d, load_series,    item.dataIndex                )};
                 if(e == '#cpu_graph')     { tooltip = _getTooltipFromSeries(d, cpu_series,     item.dataIndex,  "%"          )};
