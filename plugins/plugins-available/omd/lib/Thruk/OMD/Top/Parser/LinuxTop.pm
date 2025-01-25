@@ -220,8 +220,8 @@ sub top_graph_details {
 
     # create series to draw
     my $mem_series = [
-        { label => "memory total",  data =>  [], color => $totalColor  },
-        { label => "memory used",   data =>  [], stack => undef, lines => { fill => 1 } },
+        { label => "memory total",  data =>  [], stack => undef, color => $totalColor  },
+        { label => "memory used",   data =>  [], stack => 1, lines => { fill => 1 } },
         { label => "buffers",       data =>  [], stack => 1, lines => { fill => 1 } },
         { label => "cached",        data =>  [], stack => 1, lines => { fill => 1 } },
     ];
