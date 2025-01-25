@@ -36,7 +36,7 @@ If you are not using OMD, you will have to do some manual steps:
    /etc/thruk/thruk.conf into your thruk_local.conf in order to make
    some local adjustments.
  - copy the Thruk BP Templates from either
-   https://github.com/sni/Thruk/blob/master/support/thruk_templates.cfg[github]
+   https://github.com/sni/thruk/blob/master/support/thruk_templates.cfg[github]
    or /usr/share/thruk/thruk_templates.cfg into your naemon conf.d
    folder, ex .:/etc/naemon/conf.d/thruk_bp_templates.cfg
  - add default contacts or contactgroups to Thruk BP Host Template (thruk-bp-template)
@@ -66,7 +66,7 @@ all selected nodes will be created as Service objects.
 
 To make that work, you will need 2 files:
 
- - Thruk BP Templates (see an https://github.com/sni/Thruk/blob/master/support/thruk_templates.cfg[example on github])
+ - Thruk BP Templates (see an https://github.com/sni/thruk/blob/master/support/thruk_templates.cfg[example on github])
  - Thruk BP Objects
 
 Both file locations can be changed in your 'thruk_local.conf'. The templates file is
@@ -104,7 +104,7 @@ configuration like:
 </Component>
 ------
 
-The Icinga 2 template file can be optained from https://github.com/sni/Thruk/blob/master/support/thruk_templates_icinga2.conf[github].
+The Icinga 2 template file can be optained from https://github.com/sni/thruk/blob/master/support/thruk_templates_icinga2.conf[github].
 Make sure Thruk is able to write to the `/etc/icinga2/conf.d/thruk_bp.conf` file.
 
 

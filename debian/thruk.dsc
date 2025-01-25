@@ -5,9 +5,9 @@ Architecture: any
 Version:
 Maintainer: Thruk Development Team <devel@thruk.org>
 Homepage: http://www.thruk.org
-Bugs: https://github.com/sni/Thruk/issues
-Vcs-Browser: https://github.com/sni/Thruk
-Vcs-Git: git://github.com/sni/Thruk.git
+Bugs: https://github.com/sni/thruk/issues
+Vcs-Browser: https://github.com/sni/thruk
+Vcs-Git: git://github.com/sni/thruk.git
 Build-Depends: debhelper (>= 7), libthruk (>=2.44.2), lsb-release, apache2, perl, libmodule-install-perl, npm
 Files:
    00000000000000000000000000000000 0000 thruk_1.0.0.orig.tar.gz

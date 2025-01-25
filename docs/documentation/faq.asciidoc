@@ -187,7 +187,7 @@ the url will set a custom title
 {% include note.ad text="activated by default since v2.0" %}
 In order to use the form or cookie based authentication like demo.thruk.org does,
 you have to do two small changes in your apache configuration.
-Get https://github.com/sni/Thruk/blob/master/support/thruk_cookie_auth.example[thruk_cookie_auth.example]
+Get https://github.com/sni/thruk/blob/master/support/thruk_cookie_auth.example[thruk_cookie_auth.example]
 and put everything except the RewriteLock into the virtualhost of your choice.
 The RewriteLock must be outside any virtualhost. After that, restart the apache.
 
@@ -290,7 +290,7 @@ a perl file or template.
 === Install Test Environment from Source
  1. First get a fresh copy of the sources:
 
-  /tmp %> git clone git://github.com/sni/Thruk.git
+  /tmp %> git clone git://github.com/sni/thruk.git
 
  2. Create a .author file which prevents some caching mechanisms.
 
@@ -396,7 +396,7 @@ More information about link:http://en.wikipedia.org/wiki/Cross-site_request_forg
 === Error: TypeError: $.browser is undefined
 
 Assuming you are using the ssi file to display PNP4Nagios popups, you have to update
-the ssi files to the latest from link:https://github.com/sni/Thruk/tree/master/ssi[Thruks examples].
+the ssi files to the latest from link:https://github.com/sni/thruk/tree/master/ssi[Thruks examples].
 
 The cluetip jquery plugin used in this popups does not work with the latest jQuery release
 from Thruk, so Thruk now ships a own updated copy for this javascript library.

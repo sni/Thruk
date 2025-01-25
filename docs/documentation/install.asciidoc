@@ -201,7 +201,7 @@ not recommended and makes your connection as secure as without tls.
 
 A full configuration example is here assuming an omd installation with a site named `demo`:
 
-Fetch makecert.sh from https://github.com/sni/Thruk/blob/master/support/makecert.sh
+Fetch makecert.sh from https://github.com/sni/thruk/blob/master/support/makecert.sh
 -------
   %> ./makecert.sh remote_host your@email.com
 -------

@@ -144,4 +144,4 @@ to a client without exposing data belonging to other clients?"
 
 Containers, coupled with livestatus backends can solve this problem. Additionally, you can export
 a given dashboard as a PNG file to display on a web page:
-https://github.com/sni/Thruk/blob/master/support/panorama2img
+https://github.com/sni/thruk/blob/master/support/panorama2img

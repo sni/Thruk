@@ -29,7 +29,7 @@ Complete documentation is online at <http://www.thruk.org/documentation/>
 
 BUGS
 ----
-Please report bugs to <https://github.com/sni/Thruk/issues>
+Please report bugs to <https://github.com/sni/thruk/issues>
 
 
 AUTHOR
@@ -39,7 +39,7 @@ Written by Sven Nierlein, <sven.nierlein@consol.de>
 
 RESOURCES
 ---------
-GitHub: <https://github.com/sni/Thruk/>
+GitHub: <https://github.com/sni/thruk/>
 
 Main web site: <http://www.thruk.org>
 
@@ -48,4 +48,3 @@ COPYING
 -------
 Copyright \(C) 2009-present Sven Nierlein. Free use of this software is
 granted under the terms of the GNU General Public License (GPL).
-

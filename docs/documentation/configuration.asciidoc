@@ -1356,7 +1356,7 @@ will just work. No need to disabled `escape_html` just to show some links.
 ex.:
 
   short_link = |INC(\d+)|[$1](https://tickets.company.com/ticket/$1)|
-  short_link = |GH#(\d+)|[Issue $1](https://github.com/sni/Thruk/issues/$1)|
+  short_link = |GH#(\d+)|[Issue $1](https://github.com/sni/thruk/issues/$1)|
 
 Replaces the string "INC12345" with the link:
 
@@ -1364,7 +1364,7 @@ Replaces the string "INC12345" with the link:
 
 Replaces the string "GH#123" with the link:
 
-  <a href="https://github.com/sni/Thruk/issues/123">123</a>
+  <a href="https://github.com/sni/thruk/issues/123">123</a>
 
 
 === copy_paste_link

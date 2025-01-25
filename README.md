@@ -21,8 +21,8 @@ Support
 
   * Ask a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/thruk)
   * Mailing list on [Google Groups](https://groups.google.com/group/thruk).
-  * File a Bug in [GitHub Issues](https://github.com/sni/Thruk/issues).
-  * Report a Security Advisory [GitHub Security](https://github.com/sni/Thruk/security).
+  * File a Bug in [GitHub Issues](https://github.com/sni/thruk/issues).
+  * Report a Security Advisory [GitHub Security](https://github.com/sni/thruk/security).
   * Chat with developers on [IRC Libera #thruk](irc://irc.libera.chat/thruk) ([Webchat](https://web.libera.chat/?nick=Guest?#thruk)).
 
 
@@ -51,12 +51,12 @@ Main Features / Advantages
 
 ### Contributions
 
-Thanks to all the amazing [community contributors for sending PRs](https://github.com/sni/Thruk/graphs/contributors) and keeping this project updated. :heart:
+Thanks to all the amazing [community contributors for sending PRs](https://github.com/sni/thruk/graphs/contributors) and keeping this project updated. :heart:
 
 If you have an idea or some kind of improvement, you are welcome to contribute and participate in the Project, feel free to send your PR.
 
 <p align="center">
-<a href="https://github.com/sni/Thruk/graphs/contributors">
+<a href="https://github.com/sni/thruk/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=sni/Thruk&max=500">
 </a>
 </p>

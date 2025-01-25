@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-This is an open source project and professional support is available from 
+This is an open source project and professional support is available from
 
 - https://www.consol.com/product-solutions/open-source-monitoring/
 
@@ -12,5 +12,5 @@ Besides that always the last stable release is supported but response is limited
 
 Please report securtiy related issues here:
 
-- https://github.com/sni/Thruk/security
+- https://github.com/sni/thruk/security
 - or by email at security (at) thruk.org

@@ -73,7 +73,7 @@ LoadModule fcgid_module /usr/lib/apache2/modules/mod_fcgid.so
 [TIP]
 .Example
 Another more complicated example can be found on github:
-https://github.com/sni/Thruk/blob/master/support/apache_fcgid.conf[apache_fcgid.conf].
+https://github.com/sni/thruk/blob/master/support/apache_fcgid.conf[apache_fcgid.conf].
 This file is used for the official Thruk packages.
 
 

@@ -59,7 +59,7 @@ You now have all required modules in `/tmp/thruk_libs/local-lib/dest`.
 
 -------
     %> cd /tmp
-    %> git clone https://github.com/sni/Thruk.git
+    %> git clone https://github.com/sni/thruk.git
     %> cd /tmp/Thruk
     %> ./configure
     %> make

@@ -590,7 +590,7 @@ $(function() {
             if (item) {
                 var date = new Date(item.datapoint[0]).toLocaleString();
                 var tooltip = "<table class='thruktooltip'><tr><td class='date' colspan=2>"+date+" ("+commits[item.datapoint[0]].tag+")</td><tr>";
-                tooltip += "<tr><td class='date' colspan=2><a href='https://github.com/sni/Thruk/commit/"+commits[item.datapoint[0]].hash+"' target='_blank'>"+commits[item.datapoint[0]].msg+"</td></tr>";
+                tooltip += "<tr><td class='date' colspan=2><a href='https://github.com/sni/thruk/commit/"+commits[item.datapoint[0]].hash+"' target='_blank'>"+commits[item.datapoint[0]].msg+"</td></tr>";
                 tooltip += "<td class='var'>Load:</td>";
                 tooltip += "<td class='val'>"+(dataSets['startup'][2]['data'][item.dataIndex][1])+"</td></tr>";
 

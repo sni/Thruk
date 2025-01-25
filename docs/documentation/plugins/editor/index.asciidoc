@@ -81,7 +81,7 @@ above or by putting the edit sections in a Group block like:
 ### Syntax Highlighting
 
 Available syntax highlighting modes are listed as mode-* files in
-https://github.com/sni/Thruk/tree/master/root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict
+https://github.com/sni/thruk/tree/master/root/thruk/vendor/ace-builds-1.4.12/src-min-noconflict
 
 Common syntax modes are:
 
