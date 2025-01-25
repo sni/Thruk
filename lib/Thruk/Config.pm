@@ -1559,7 +1559,6 @@ sub get_functions_for_class {
     my $RE_IDENTIFIER = qr/\A[^\W\d]\w*\z/s;
     my @functions = sort grep { /$RE_IDENTIFIER/o }
         grep { defined &{"${classname}::$_"} }
-        grep { !/^_/o } # hide functions starting with _
         keys %{"${classname}::"};
 
     return(\@functions);
