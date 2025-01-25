@@ -208,7 +208,27 @@ A detailed documention is available on the link:plugins/node-control/[node-contr
 ++++
 
 
+OMD
+~~~
 
+----
+ Author:      Sven Nierlein
+ Description: OMD Specific Addons
+ Download:    This plugin is builtin and shipped with Thruk
+----
+
+The omd plugin saves `top` and `gearman_top` data every minute
+for the last week for debuging purposes. It then draws nice
+usage graphs with a drill down functionality. For every
+point in the last week the complete top data can be fetched,
+sorted and filtered.
+
+A detailed documention is available on the link:plugins/omd/[omd plugin] page.
+
+++++
+<a title="omd" rel="lightbox[plugins]" href="plugins/omd1.png"><img src="plugins/omd1.png" alt="omd addons " width="30%" height="30%" /></a>
+<br style="clear: both;">
+++++
 
 
 Panorama
@@ -298,28 +318,6 @@ for the coshsh configuration generator.
 
 ++++
 <a title="woshsh" rel="lightbox[plugins]" href="plugins/woshsh1.png"><img src="plugins/woshsh1.png" alt="woshsh plugin" width="30%" height="30%" /></a>
-<br style="clear: both;">
-++++
-
-
-
-OMD
-~~~
-
-----
- Author:      Sven Nierlein
- Description: OMD Specific Addons
- Download:    https://github.com/sni/thruk-plugin-omd
-----
-
-The omd plugin saves `top` and `gearman_top` data every minute
-for the last week for debuging purposes. It then draws nice
-usage graphs with a drill down functionality. For every
-point in the last week the complete top data can be fetched,
-sorted and filtered.
-
-++++
-<a title="omd" rel="lightbox[plugins]" href="plugins/omd1.png"><img src="plugins/omd1.png" alt="omd addons " width="30%" height="30%" /></a>
 <br style="clear: both;">
 ++++
 
