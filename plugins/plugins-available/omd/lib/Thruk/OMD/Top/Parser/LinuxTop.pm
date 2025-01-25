@@ -222,8 +222,8 @@ sub top_graph_details {
     my $mem_series = [
         { label => "memory total",  data =>  [], stack => undef, color => $totalColor  },
         { label => "memory used",   data =>  [], stack => 1, lines => { fill => 1 } },
-        { label => "buffers",       data =>  [], stack => 1, lines => { fill => 1 } },
-        { label => "cached",        data =>  [], stack => 1, lines => { fill => 1 } },
+        #{ label => "buffers",       data =>  [], stack => 1, lines => { fill => 1 } },
+        #{ label => "cached",        data =>  [], stack => 1, lines => { fill => 1 } },
     ];
     my $cpu_series = [
         { label => "user",      data =>  [], stack => 1, lines => { fill => 1 } },
@@ -259,8 +259,8 @@ sub top_graph_details {
         my $d       = $data->{$time};
         push @{$mem_series->[0]->{'data'}}, [$js_time, $d->{mem}];
         push @{$mem_series->[1]->{'data'}}, [$js_time, $d->{mem_used}];
-        push @{$mem_series->[2]->{'data'}}, [$js_time, $d->{buffers}];
-        push @{$mem_series->[3]->{'data'}}, [$js_time, $d->{cached}];
+        #push @{$mem_series->[2]->{'data'}}, [$js_time, $d->{buffers}];
+        #push @{$mem_series->[3]->{'data'}}, [$js_time, $d->{cached}];
 
         push @{$swap_series->[0]->{'data'}}, [$js_time, $d->{swap}];
         push @{$swap_series->[1]->{'data'}}, [$js_time, $d->{swap_used}];
@@ -542,8 +542,8 @@ sub _normalize_mem {
 sub _get_pattern {
     my($c) = @_;
     my $pattern = [];
-    if($c && $c->config->{'omd_top'}) {
-        for my $regex (@{$c->config->{'omd_top'}}) {
+    if($c && $c->stash->{'omd_top_pattern'}) {
+        for my $regex (@{$c->stash->{'omd_top_pattern'}}) {
             my($k,$p) = split(/\s*=\s*/mx, $regex, 2);
             &Thruk::Base::trim_whitespace($p);
             &Thruk::Base::trim_whitespace($k);
