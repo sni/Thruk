@@ -23,6 +23,10 @@ sub check_templates {
     return if($filter && $file !~ m%$filter%mx);
     my $content = Thruk::Utils::IO::read($file);
 
+    # remove links
+    $content =~ s/"https?:\/\/.*?"//sgmx;
+    $content =~ s/'https?:\/\/.*?'//sgmx;
+
     my $failed = 0;
     while($content =~ m%plugins/[\w_\-]+/%sgmx) {
         my $tag = substr($content, $-[0], $+[0]-$-[0]);
