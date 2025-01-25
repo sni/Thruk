@@ -80,10 +80,6 @@ jQuery().ready(function() {
     standard_selection = {
         mode: "x"
     };
-    standard_legend = {
-        position: 'nw',
-        margin: [10, 40]
-    };
     standard_crosshair = { mode: "x" };
 
     /* load graph */

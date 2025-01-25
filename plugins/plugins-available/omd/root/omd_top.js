@@ -1,3 +1,8 @@
+var standard_legend = {
+    position: 'nw',
+    margin: [10, 20]
+};
+
 function zoomOut(plot) {
     jQuery.each(plot.getXAxes(), function(_, axis) {
         var opts = axis.options;
