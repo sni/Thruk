@@ -84,7 +84,7 @@ sub _install {
     $c->cluster->run_cluster("others", "cmd: cron install");
     local $ENV{'THRUK_SKIP_CLUSTER'} = 1; # skip further subsequent cluster calls
 
-    local $ENV{'THRUK_SKIP_CRON_RELOAD'} = 1; # skip reloading crontab multiple times
+    local $ENV{'THRUK_SKIP_CRON_RELOAD'} = 1 if $ENV{'OMD_SITE'}; # skip reloading crontab multiple times
 
     Thruk::Utils::update_cron_file_maintenance($c);
     _debug("maintenance cron installed");
@@ -123,7 +123,7 @@ sub _uninstall {
     my($c) = @_;
     $c->stats->profile(begin => "_cmd_uninstallcron()");
     Thruk::Utils::switch_realuser($c);
-    Thruk::Utils::update_cron_file($c);
+    Thruk::Utils::update_cron_file($c, undef, undef, 1);
     $c->stats->profile(end => "_cmd_uninstallcron()");
     return "cron entries removed\n";
 }

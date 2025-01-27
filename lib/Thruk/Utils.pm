@@ -2161,14 +2161,14 @@ sub expand_duration {
 
 =head2 update_cron_file
 
-  update_cron_file($c, $section, $entries)
+  update_cron_file($c, $section, $entries, $remove)
 
 write crontab section
 
 =cut
 
 sub update_cron_file {
-    my($c, $section, $entries) = @_;
+    my($c, $section, $entries, $remove) = @_;
 
     if(!$c->config->{'cron_file'}) {
         set_message($c, 'fail_message', 'no \'cron_file\' set, check your settings!');
@@ -2204,6 +2204,7 @@ sub update_cron_file {
     my @orig_cron;
     my $thruk_started = 0;
     if(-e $c->config->{'cron_file'}) {
+        _debug("reading old cron entries from %s", $c->config->{'cron_file'});
         my @lines = Thruk::Utils::IO::read_as_list($c->config->{'cron_file'});
         my $lastsection;
         for(my $x = 0; $x < scalar @lines; $x++) {
@@ -2241,9 +2242,12 @@ sub update_cron_file {
             $sections->{$lastsection} = [] unless defined $sections->{$lastsection};
             push @{$sections->{$lastsection}}, $line;
         }
+        _debug("read %d other lines and %d sections from existing cron file %s", scalar @orig_cron, scalar keys %{$sections}, $c->config->{'cron_file'});
+    } else {
+        _debug("not reading old cron entries from %s, file does not exist yet", $c->config->{'cron_file'});
     }
 
-    # write out new file
+    # update this section
     if(defined $section) {
         delete $sections->{$section};
         my $user = '';
@@ -2257,12 +2261,14 @@ sub update_cron_file {
         }
     }
 
+    # write out new merged crontab
     open($fh, '>', $c->config->{'cron_file'}) or die('cannot write '.$c->config->{'cron_file'}.': '.$!);
     for my $line (@orig_cron) {
         print $fh $line, "\n";
     }
 
-    if(scalar keys %{$sections} > 0) {
+    if(scalar keys %{$sections} > 0 && !$remove) {
+        _debug("cron: writing sections: %s into %s", join(", ", sort keys %{$sections}), $c->config->{'cron_file'});
         my $header_printed = 0;
         for my $s (sort keys %{$sections}) {
             next if scalar @{$sections->{$s}} == 0;
