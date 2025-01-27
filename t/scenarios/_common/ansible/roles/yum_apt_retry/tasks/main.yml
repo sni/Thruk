@@ -1,15 +1,16 @@
 ---
 - name: "package yum/apt retry installer: {{ package | join(' ') }} {{ rpm | join(' ') }} {{ deb | join(' ') }}"
   shell: |
-      set -x
-      allfound=1
-      for file in {{ creates | join(' ') }}; do
-        if ! test -e $file; then
-          allfound=0
+      if [ "{{ creates | join(' ') }}" != "" ]; then
+        allfound=1
+        for file in {{ creates | join(' ') }}; do
+          if ! test -e $file; then
+            allfound=0
+          fi
+        done
+        if [ $allfound -eq 1 ]; then
+          exit 0
         fi
-      done
-      if [ $allfound -eq 1 ]; then
-        exit 0
       fi
       if test -f /usr/bin/apt; then
         apt-get install -y {{ package | join(' ') }} {{ deb | join(' ') }}
