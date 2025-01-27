@@ -230,7 +230,7 @@ citest:
 		TEST_MYSQL="mysql://root:root@localhost:3306/test" \
 		PERL_DL_NONLAZY=1 \
 		PERL5LIB=.:$$PERL5LIB \
-		$(MAKE) test
+		$(MAKE) timedtest
 
 timedtest:
 	for file in $(TEST_FILES); do \
