@@ -4,6 +4,8 @@
   vars:
     package:
       - tmux
+    creates:
+      - /usr/bin/tmux
 - name: add sudo permissions
   lineinfile:
     path: /etc/sudoers

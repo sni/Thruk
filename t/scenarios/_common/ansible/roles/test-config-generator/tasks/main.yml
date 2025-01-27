@@ -7,6 +7,11 @@
       - perl-ExtUtils-Install
       - perl-File-Which
       - perl-IPC-Cmd
+    creates:
+      - /usr/share/doc/perl-ExtUtils-Manifest
+      - /usr/share/doc/perl-ExtUtils-Install
+      - /usr/share/doc/perl-File-Which
+      - /usr/share/doc/perl-IPC-Cmd
 
 - name: "install Monitoring::Generator::TestConfig"
   shell: "sudo su - {{ site }} -c 'cpanm -n Monitoring::Generator::TestConfig'"

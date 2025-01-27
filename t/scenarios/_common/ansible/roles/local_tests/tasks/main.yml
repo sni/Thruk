@@ -1,4 +1,4 @@
-- name: "yum install local test perl depdendencies"
+- name: "yum install local test perl dependencies"
   include_role:
     name: yum_apt_retry
   vars:
@@ -9,6 +9,12 @@
       - perl-Test-Harness
       - perl-ExtUtils-Manifest
       - perl-ExtUtils-Install
+    creates:
+      - /usr/bin/unbuffer
+      - /usr/bin/diff
+      - /usr/share/doc/perl-Test-Harness
+      - /usr/share/doc/perl-ExtUtils-Manifest
+      - /usr/share/doc/perl-ExtUtils-Install
 - lineinfile:
     path: /etc/locale.conf
     regexp: '^LANG='

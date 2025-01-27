@@ -1,15 +1,31 @@
 ---
-- name: "package yum/apt retry installer: {{ package }} {{ rpm | join(' ') }} {{ deb | join(' ') }}"
+- name: "package yum/apt retry installer: {{ package | join(' ') }} {{ rpm | join(' ') }} {{ deb | join(' ') }}"
   shell: |
+      set -x
+      allfound=1
+      for file in {{ creates | join(' ') }}; do
+        if ! test -e $file; then
+          allfound=0
+        fi
+      done
+      if [ $allfound -eq 1 ]; then
+        exit 0
+      fi
       if test -f /usr/bin/apt; then
         apt-get install -y {{ package | join(' ') }} {{ deb | join(' ') }}
       else
         yum install -y {{ package | join(' ') }} {{ rpm | join(' ') }}
       fi
+      for file in {{ creates | join(' ') }}; do
+        if ! test -e $file; then
+          echo "file $file not found after pkg installation"
+          exit 1
+        fi
+      done
   register: install_result
   ignore_errors: yes
   failed_when: install_result.rc != 0
-  retries: "{{ retries | default(3) }}"
+  retries: "{{ retries | default(5) }}"
   delay: "{{ delay | default(30) }}"
   until: install_result is succeeded
 

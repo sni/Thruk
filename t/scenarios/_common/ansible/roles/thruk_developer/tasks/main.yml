@@ -10,6 +10,11 @@
       - git
     package:
       - make
+    creates:
+      - /usr/share/doc/perl-ExtUtils-Manifest
+      - /usr/share/doc/perl-ExtUtils-Install
+      - /usr/bin/git
+      - /usr/bin/make
 
 - stat: path=/usr/lib/locale/en_US.utf8
   register: locale_path
