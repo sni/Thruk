@@ -1499,6 +1499,7 @@ lists connected sites. Only available if LMD (`use_lmd`) is enabled.
 |federation_key                    |            |          | contains the real peer key if using federation
 |federation_name                   |            |          | contains the real name if using federation
 |federation_type                   |            |          | contains the real backend type if using federation
+|federation_version                |            |          | contains the real backend version if using federation
 |idling                            |            |          | flag if the connection is in idle mode
 |key                               |            |          | primary id of this site
 |last_error                        | time       |          | last error message
@@ -1979,6 +1980,7 @@ lists configured backends
 |federation_key                    |            |          | contains the real peer key if using federation
 |federation_name                   |            |          | contains the real name if using federation
 |federation_type                   |            |          | contains the real backend type if using federation
+|federation_version                |            |          | contains the real backend version if using federation
 |id                                |            |          | id for this backend
 |last_error                        | time       |          | error message if backend is not connected
 |localtime                         | time       |          | current local unix timestamp of thruk host

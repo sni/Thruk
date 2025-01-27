@@ -7,6 +7,7 @@ use Scalar::Util qw/weaken/;
 
 use Thruk::Backend::Manager ();
 use Thruk::Base ();
+use Thruk::Config 'noautoload';
 
 ## no lint
 use Thruk::Backend::Provider::Livestatus ();

@@ -1632,6 +1632,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "contains the real backend version if using federation",
+     "name": "federation_version",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "flag if the connection is in idle mode",
      "name": "idling",
      "type": "",
@@ -2792,6 +2798,12 @@ __DATA__
     {
      "description": "contains the real backend type if using federation",
      "name": "federation_type",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "contains the real backend version if using federation",
+     "name": "federation_version",
      "type": "",
      "unit": ""
     },
