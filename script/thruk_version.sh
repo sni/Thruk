@@ -91,14 +91,6 @@ if [ "$FILEVERSION" != "$OLDFILEVERSION" ]; then
     if [ -e root/thruk/cache/thruk-${OLDFILEVERSION}.js ]; then
         mv root/thruk/cache/thruk-${OLDFILEVERSION}.js root/thruk/cache/thruk-$FILEVERSION.js
     fi
-    for theme in Thruk Thruk2; do
-        if [ -e root/thruk/cache/${theme}-${OLDFILEVERSION}.css ]; then
-            mv root/thruk/cache/${theme}-${OLDFILEVERSION}.css root/thruk/cache/${theme}-${FILEVERSION}.css
-        fi
-        if [ -e root/thruk/cache/${theme}-noframes-${OLDFILEVERSION}.css ]; then
-            mv root/thruk/cache/${theme}-noframes-${OLDFILEVERSION}.css root/thruk/cache/${theme}-noframes-${FILEVERSION}.css
-        fi
-    done
     if [ -e root/thruk/cache/thruk-panorama-${OLDFILEVERSION}.js ]; then
         mv root/thruk/cache/thruk-panorama-${OLDFILEVERSION}.js root/thruk/cache/thruk-panorama-${FILEVERSION}.js
     fi
