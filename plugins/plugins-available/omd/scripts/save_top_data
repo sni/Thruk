@@ -17,6 +17,9 @@ export LC_ALL=C
 
 # save top data
 FILE="$(date +%s).log"
+if [ -e $FILE ]; then
+  exit
+fi
 export COLUMNS=5000
 set +e
 gearman_top -b        > $FILE
