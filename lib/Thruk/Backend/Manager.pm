@@ -1711,7 +1711,10 @@ sub _do_on_peers {
             }
             if($res && ($res->{'configtool'} || ($res->{'thruk'} && $res->{'thruk'}->{'configtool'}))) {
                 my $peer = $self->get_peer_by_key($key);
-                $peer->{'thrukextras'} = $res->{'thruk'} if $res->{'thruk'};
+                if($res->{'thruk'}) {
+                    $peer->{'thrukextras'} = $res->{'thruk'};
+                    $peer->{'version'} = $peer->{'thrukextras'}->{'thruk_version'} if $peer->{'thrukextras'}->{'thruk_version'};
+                }
                 if($res->{'remote_peer_key'}) { # set from HTTP.pm
                     $peer->{'remotekey'} = $res->{'remote_peer_key'};
                 }

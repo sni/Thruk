@@ -821,7 +821,7 @@ sub cmd {
 ## use critic
     my($cmd, $options) = @_;
 
-    # REMOVE AFTER: 01.01.2027
+    # REMOVE AFTER: 01.01.2028
     if(scalar @_ > 2 || ref $options ne 'HASH') {
        return(_cmd_old(@_));
     }
@@ -991,7 +991,7 @@ sub cmd {
 ########################################
 sub _cmd_old {
     my($cmd, $stdin, $print_prefix, $detached, $no_decode, $timeout, $no_touch_signals) = @_;
-    # REMOVE AFTER: 01.01.2027
+    # REMOVE AFTER: 01.01.2028
     # backwards compatible options (remove blessed import when removing this...)
     if($cmd && ref $cmd && blessed($cmd) && $cmd->isa("Thruk::Context")) {
         shift @_;

@@ -332,7 +332,7 @@ sub get_sites {
             peer_key peer_name key name addr status bytes_send bytes_received queries
             last_error last_update last_online response_time idling last_query
             parent section lmd_last_cache_update
-            federation_key federation_name federation_addr federation_type
+            federation_key federation_name federation_addr federation_type federation_version
         /];
         if(defined $options{'extra_columns'}) {
             push @{$options{'columns'}}, @{$options{'extra_columns'}};

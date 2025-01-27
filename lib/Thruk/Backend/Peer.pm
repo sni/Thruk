@@ -208,6 +208,7 @@ sub _initialise_peer {
     $self->{'name'}          = $peer_config->{'name'};
     $self->{'type'}          = $peer_config->{'type'};
     $self->{'active'}        = $peer_config->{'active'} // 1;
+    $self->{'version'}       = Thruk::Config::get_thruk_version();
     $self->{'hidden'}        = defined $peer_config->{'hidden'} ? $peer_config->{'hidden'} : 0;
     $self->{'display'}       = defined $peer_config->{'display'} ? $peer_config->{'display'} : 1;
     $self->{'groups'}        = $peer_config->{'groups'};
@@ -342,8 +343,19 @@ sub cmd {
             my $comm = [$cmd];
             # setting env requires Thruk <= 3.20
             my $v_num = $self->get_remote_thruk_version($c);
+            # get lowest thruk version in chain
+            for(my $x = 0; $x < scalar @{$self->{'fed_info'}->{'type'}}; $x++) {
+                my $type = $self->{'fed_info'}->{'type'}->[$x];
+                my $vers = $self->{'fed_info'}->{'version'}->[$x] // 0;
+                next if $type ne 'http';
+                if(Thruk::Utils::version_compare($v_num, $vers)) {
+                    $v_num = $vers;
+                }
+            }
             if($v_num && Thruk::Utils::version_compare($v_num, '3.19.20240920')) {
                 $comm = [$cmd, { env => $env }];
+            } else {
+                $comm = ['Thruk::Context', $comm];
             }
             my $options = {
                 'action'      => 'raw',
@@ -395,6 +407,8 @@ sub cmd {
             my $v_num = $self->get_remote_thruk_version($c);
             if($v_num && Thruk::Utils::version_compare($v_num, '3.19.20240920')) {
                 $comm = [$cmd, { env => $env }];
+            } else {
+                $comm = ['Thruk::Context', $cmd];
             }
             ($rc, $out) = @{$self->{'class'}->request("Thruk::Utils::IO::cmd", $comm, { timeout => 120 })};
         }

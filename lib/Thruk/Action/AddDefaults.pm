@@ -1424,10 +1424,11 @@ sub check_federation_peers {
             my $subpeer = Thruk::Backend::Peer->new($subpeerconfig, $c->config, {});
             $subpeer->{'federation'} = $parent->{'key'};
             $subpeer->{'fed_info'} = {
-                key        => [$parent->{'key'}, @{Thruk::Base::list($row->{'federation_key'})}],
-                name       => [$parent->{'name'}, @{Thruk::Base::list($row->{'federation_name'})}],
-                addr       => [$parent->{'addr'}, @{Thruk::Base::list($row->{'federation_addr'})}],
-                type       => [$parent->{'type'}, @{Thruk::Base::list($row->{'federation_type'})}],
+                key        => [$parent->{'key'},     @{Thruk::Base::list($row->{'federation_key'})}],
+                name       => [$parent->{'name'},    @{Thruk::Base::list($row->{'federation_name'})}],
+                addr       => [$parent->{'addr'},    @{Thruk::Base::list($row->{'federation_addr'})}],
+                type       => [$parent->{'type'},    @{Thruk::Base::list($row->{'federation_type'})}],
+                version    => [$parent->{'version'}, @{Thruk::Base::list($row->{'federation_version'})}],
             };
             # inherit disabled configtool from parent
             if($parent->{'peer_config'}->{'configtool'}->{'disable'}) {

@@ -2132,19 +2132,20 @@ sub _rest_get_sites {
         my $peer = $c->db->get_peer_by_key($key);
         $error = '' if($error && $error eq 'OK');
         push @{$data}, {
-            addr             => $addr,
-            id               => $key,
-            name             => $c->stash->{'backend_detail'}->{$key}->{'name'},
-            section          => $c->stash->{'backend_detail'}->{$key}->{'section'},
-            type             => $c->stash->{'backend_detail'}->{$key}->{'type'},
-            status           => $error ? 1 : 0,
-            last_error       => $error,
-            connected        => $error ? 0 : 1,
-            federation_key   => $peer->{'fed_info'}->{'key'}  || [ $peer->{'key'} ],
-            federation_name  => $peer->{'fed_info'}->{'name'} || [ $peer->{'name'} ],
-            federation_addr  => $peer->{'fed_info'}->{'addr'} || [ $peer->{'addr'} ],
-            federation_type  => $peer->{'fed_info'}->{'type'} || [ $peer->{'type'} ],
-            localtime        => $time,
+            addr                => $addr,
+            id                  => $key,
+            name                => $c->stash->{'backend_detail'}->{$key}->{'name'},
+            section             => $c->stash->{'backend_detail'}->{$key}->{'section'},
+            type                => $c->stash->{'backend_detail'}->{$key}->{'type'},
+            status              => $error ? 1 : 0,
+            last_error          => $error,
+            connected           => $error ? 0 : 1,
+            federation_key      => $peer->{'fed_info'}->{'key'}     || [ $peer->{'key'} ],
+            federation_name     => $peer->{'fed_info'}->{'name'}    || [ $peer->{'name'} ],
+            federation_addr     => $peer->{'fed_info'}->{'addr'}    || [ $peer->{'addr'} ],
+            federation_type     => $peer->{'fed_info'}->{'type'}    || [ $peer->{'type'} ],
+            federation_version  => $peer->{'fed_info'}->{'version'} || [ $peer->{'version'} ],
+            localtime           => $time,
         };
     }
     return($data);
