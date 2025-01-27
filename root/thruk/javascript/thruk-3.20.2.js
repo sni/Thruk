@@ -10575,3 +10575,12 @@ function applyRowStripes(el) {
         });
     }
 }
+
+// return mouse position relative to main panel
+function mouseRelativePosition() {
+    var main    = jQuery("MAIN").first();
+    var mainPos = main.position();
+    var posX    = mouseX + main.scrollLeft() - mainPos.left;
+    var posY    = mouseY + main.scrollTop()  - mainPos.top;
+    return([posX, posY]);
+}

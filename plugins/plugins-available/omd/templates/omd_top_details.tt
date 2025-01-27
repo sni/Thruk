@@ -317,18 +317,18 @@ jQuery().ready(function() {
             if (item) {
                 var d = _dateString(item.datapoint[0]);
                 var tooltip;
+                var offsetY = 0;
                 if(e == '#load_graph')    { tooltip = _getTooltipFromSeries(d, load_series,    item.dataIndex                )};
                 if(e == '#cpu_graph')     { tooltip = _getTooltipFromSeries(d, cpu_series,     item.dataIndex,  "%"          )};
                 if(e == '#mem_graph')     { tooltip = _getTooltipFromSeries(d, mem_series,     item.dataIndex, "MB"          )};
                 if(e == '#swap_graph')    { tooltip = _getTooltipFromSeries(d, swap_series,    item.dataIndex, "MB"          )};
                 if(e == '#pcpu_graph')    { tooltip = _getTooltipFromSeries(d, pcpu_series,    item.dataIndex,  "%", true, 1 )};
-                if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, pmem_series,    item.dataIndex,  "%", true, 1 )};
-                if(e == '#gearman_graph') { tooltip = _getTooltipFromSeries(d, gearman_series, item.dataIndex                )};
-                var main = jQuery("MAIN").first();
-                var x = Number(pos.pageX) + Number(main.scrollLeft()) + 10;
-                var y = Number(pos.pageY) + Number(main.scrollTop())  - 50;
+                if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, pmem_series,    item.dataIndex,  "%", true, 1 ); offsetY = 100; };
+                if(e == '#gearman_graph') { tooltip = _getTooltipFromSeries(d, gearman_series, item.dataIndex                ); offsetY = 100; };
+                // place next to mouse position
+                var pos = mouseRelativePosition();
                 jQuery("#tooltip").html(tooltip)
-                                  .css({top: y, left: x})
+                                  .css({left: pos[0] + 10, top: pos[1] - offsetY})
                                   .fadeIn(200);
                 if(!croshair_locked) {
                   updateDetailsTable(item.dataIndex);

@@ -100,11 +100,10 @@ jQuery().ready(function() {
         if (item) {
             var date    = _dateString(item.datapoint[0]);
             var tooltip = _getTooltipFromSeries(date, load_series, item.dataIndex);
-            var main = jQuery("MAIN").first();
-            var x = Number(pos.pageX) + Number(main.scrollLeft()) + 10;
-            var y = Number(pos.pageY) + Number(main.scrollTop())  - 50;
+            // place next to mouse position
+            var pos = mouseRelativePosition();
             jQuery("#tooltip").html(tooltip)
-                              .css({top: y, left: x})
+                              .css({left: pos[0] + 10, top: pos[1]})
                               .fadeIn(200);
         } else {
             jQuery("#tooltip").stop(true).hide();
