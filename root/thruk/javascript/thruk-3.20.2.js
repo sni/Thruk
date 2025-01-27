@@ -3990,6 +3990,7 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
     }
 
     var head = jQuery('#'+divid).parents('.card').find("DIV.head");
+    var foot = jQuery('#'+divid).parents('.card').find("DIV.footer");
     head.find(".js-ok").addClass("hidden");
     head.find(".js-nok").addClass("hidden");
     head.find(".js-warn").addClass("hidden");
@@ -4039,10 +4040,13 @@ function showJobOutputPopupUpdate(jobid, peerid, divid, data) {
         if(data['rc'] == 0) {
             if(text.match(/\[(ERROR|WARNING|WARN)\]/)) {
                 head.find(".js-warn").removeClass("hidden");
+                foot.find(".js-close").removeClass("OK");
             } else {
                 head.find(".js-ok").removeClass("hidden");
+                foot.find(".js-close").addClass("OK");
             }
         } else {
+            foot.find(".js-close").removeClass("OK");
             head.find(".js-nok").removeClass("hidden");
             jQuery('#'+divid).addClass("textALERT");
         }

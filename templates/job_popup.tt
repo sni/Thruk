@@ -19,7 +19,7 @@
       [% END %]
     </div>
   <div class='footer'>
-    <button class='w-24 mx-auto' onclick='return(closeModalWindow());' title="job will continue in background">Close</button>
+    <button class='w-24 mx-auto js-close' onclick='return(closeModalWindow());' title="job will continue in background">Close</button>
   </div>
 </div>
 
