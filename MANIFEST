@@ -428,8 +428,8 @@ plugins/plugins-available/omd/description.txt
 plugins/plugins-available/omd/lib/Thruk/Controller/omd.pm
 plugins/plugins-available/omd/lib/Thruk/OMD/Top/Parser/LinuxTop.pm
 plugins/plugins-available/omd/preview.png
-plugins/plugins-available/omd/root/omd_top.js
-plugins/plugins-available/omd/root/style.css
+plugins/plugins-available/omd/root/omd_top-3.20.2.css
+plugins/plugins-available/omd/root/omd_top-3.20.2.js
 plugins/plugins-available/omd/root/vendor/jquery.flot.crosshair.js
 plugins/plugins-available/omd/root/vendor/jquery.flot.selection.js
 plugins/plugins-available/omd/root/vendor/jquery.flot.stack.js

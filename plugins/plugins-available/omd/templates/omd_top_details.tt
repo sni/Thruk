@@ -1,13 +1,13 @@
 ﻿[% PROCESS _header.tt
     js           => [ "vendor/flot-d7c58b5/jquery.flot.js",
                       "vendor/flot-d7c58b5/jquery.flot.time.js",
-                      "plugins/${plugin}/omd_top.js",
+                      "plugins/${plugin}/omd_top-${fileversion}.js",
                       "plugins/${plugin}/vendor/jquery.flot.selection.js",
                       "plugins/${plugin}/vendor/jquery.flot.stack.js",
                       "plugins/${plugin}/vendor/jquery.flot.crosshair.js",
                       "plugins/${plugin}/vendor/jquery.tablesorter.min.js",
                     ],
-    css          => [ "plugins/${plugin}/style.css",
+    css          => [ "plugins/${plugin}/omd_top-${fileversion}.css",
                       "plugins/${plugin}/vendor/theme.default.min.css",
                     ],
 %]
