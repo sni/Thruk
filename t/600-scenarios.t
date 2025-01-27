@@ -28,12 +28,14 @@ my $make      = $ENV{'MAKE'} || 'make';
 my $scenarios = [map($_ =~ s/\/\.$//gmx && $_, split/\n/mx, `ls -1d t/scenarios/*/.`)];
 my $config    = Thruk::Config::get_config();
 
-for my $dir (@{$scenarios}) {
-    next if $filter && $filter ne $dir;
-    next if $dir =~ m/\/_/mx;
-    chdir($dir);
-    _run($dir, "clean");
-    chdir($pwd);
+if(`docker ps -q 2>&1 | wc -l` > 0) {
+    for my $dir (@{$scenarios}) {
+        next if $filter && $filter ne $dir;
+        next if $dir =~ m/\/_/mx;
+        chdir($dir);
+        _run($dir, "clean");
+        chdir($pwd);
+    }
 }
 
 for my $dir (@{$scenarios}) {
