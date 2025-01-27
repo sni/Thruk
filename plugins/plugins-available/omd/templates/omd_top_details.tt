@@ -128,6 +128,7 @@
 
 <script type="text/javascript">
 
+var omd_top_folder = '[% folder | uri %]';
 var truncated = [% IF truncated %]true[% ELSE%]false[% END %];
 var plots     = {};
 var croshair_locked     = false;
