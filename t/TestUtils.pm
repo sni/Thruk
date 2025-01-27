@@ -770,7 +770,7 @@ sub test_command {
         while($now <= $end) {
             alarm(15);
             $expr = $waitfor;
-            my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, $!);
+            my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, -1, $!);
             $test->{'test_cmd'} = $t;
             eval {
                 local $SIG{ALRM} = sub { die "timeout on cmd: ".$test->{'cmd'}."\n" };
@@ -797,11 +797,11 @@ sub test_command {
         }
         if(!$found) {
             fail("content ".$expr." did not occur within ".$duration." seconds");
-            bail_out_cmd($test, "waitfor failed");
+            bail_out_cmd($test, -1, "waitfor failed");
         }
     }
 
-    my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, $!);
+    my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, -1, $!);
     $test->{'test_cmd'} = $t;
 
     alarm(300);
@@ -821,20 +821,20 @@ sub test_command {
     # exit code?
     $test->{'exit'} = 0 unless exists $test->{'exit'};
     if(defined $test->{'exit'} and $test->{'exit'} != -1) {
-        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) || do { bail_out_cmd($test, "command failed with rc: ".$rc, 2); $return = 0 };
+        ok($rc == $test->{'exit'}, "exit code: ".$rc." == ".$test->{'exit'}) || do { bail_out_cmd($test, $rc, "command failed with rc: ".$rc, 2); $return = 0 };
     }
 
     # matches on stdout?
     if(defined $test->{'like'}) {
         for my $expr (ref $test->{'like'} eq 'ARRAY' ? @{$test->{'like'}} : $test->{'like'} ) {
-            like($stdout, $expr, "stdout like ".Thruk::Utils::Encode::encode_utf8($expr)) || do { bail_out_cmd($test, "content like failed", 2); $return = 0 };
+            like($stdout, $expr, "stdout like ".Thruk::Utils::Encode::encode_utf8($expr)) || do { bail_out_cmd($test, $rc, "content like failed", 2); $return = 0 };
         }
     }
 
     # unlike matches on stdout?
     if(defined $test->{'unlike'}) {
         for my $expr (ref $test->{'unlike'} eq 'ARRAY' ? @{$test->{'unlike'}} : $test->{'unlike'} ) {
-            unlike($stdout, $expr, "stdout unlike ".$expr) || do { bail_out_cmd($test, "content unlike failed", 2); $return = 0 };
+            unlike($stdout, $expr, "stdout unlike ".$expr) || do { bail_out_cmd($test, $rc, "content unlike failed", 2); $return = 0 };
         }
     }
 
@@ -842,7 +842,7 @@ sub test_command {
     $test->{'errlike'} = '/^\s*$/' unless exists $test->{'errlike'};
     if(defined $test->{'errlike'}) {
         for my $expr (@{_list($test->{'errlike'})}) {
-            like($stderr, $expr, "stderr like ".$expr) || do { bail_out_cmd($test, "content errlike failed", 2); $return = 0 };
+            like($stderr, $expr, "stderr like ".$expr) || do { bail_out_cmd($test, $rc, "content errlike failed", 2); $return = 0 };
         }
     }
 
@@ -1104,7 +1104,7 @@ sub bail_out_req {
 
 =cut
 sub bail_out_cmd {
-    my($test, $msg, $die) = @_;
+    my($test, $rc, $msg, $die) = @_;
     $die = 0 if $ENV{'THRUK_TEST_BAIL_OUT'};
 
     # command provides diag callback
@@ -1117,7 +1117,7 @@ sub bail_out_cmd {
     diag("cmd:    '".$test->{'cmd'}."' failed\n");
     diag("stdout: '".($cmd->stdout // '')."'\n") if $cmd;
     diag("stderr: '".($cmd->stderr // '')."'\n") if $cmd;
-    diag("exit:   '".($test->{'exit'} // '(none)')."'\n");
+    diag("exit:   '".($rc // '(none)')."'\n");
 
     diag(Carp::longmess("started here:"));
     diag("\n######################################################\n");
