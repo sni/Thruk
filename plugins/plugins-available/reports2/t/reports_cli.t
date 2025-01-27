@@ -85,7 +85,7 @@ my $test_pdf_reports = [{
         'params.js'             => 'no',
         'params.css'            => 'yes',
         'params.pdf'            => 'no',
-        'params.theme'          => 'Thruk2',
+        'params.theme'          => 'Light',
         'mail.like'             => [ @mail_like, '/status.html/' ],
         'mail.unlike'           => [ '/<script/', '/report.pdf/' ],
     }, {
