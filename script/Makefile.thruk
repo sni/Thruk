@@ -228,6 +228,8 @@ citest:
 	TEST_AUTHOR=1 \
 		THRUK_AUTHOR=1 \
 		TEST_MYSQL="mysql://root:root@localhost:3306/test" \
+  		THRUK_TEST_MODULES_CACHE="/tmp/thruk_test_modules_cache" \
+  		THRUK_CRITIC_CACHE_FILE="/tmp/thruk_critic_cache_file" \
 		PERL_DL_NONLAZY=1 \
 		PERL5LIB=.:$$PERL5LIB \
 		$(MAKE) timedtest
