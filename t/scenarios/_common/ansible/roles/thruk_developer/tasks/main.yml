@@ -11,8 +11,8 @@
     package:
       - make
     creates:
-      - /usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm
-      - "/usr/share/perl5/vendor_perl/ExtUtils/Install.pm,/usr/share/perl5/ExtUtils/Install.pm"
+      - "/usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm,/usr/share/perl/*/ExtUtils/Manifest.pm"
+      - "/usr/share/perl5/vendor_perl/ExtUtils/Install.pm,/usr/share/perl5/ExtUtils/Install.pm,/usr/share/perl/*/ExtUtils/Install.pm"
       - /usr/bin/git
       - /usr/bin/make
 
