@@ -115,11 +115,16 @@ sub index {
 
     my $parser = _parser($c);
     my $action = $c->req->parameters->{'action'} || '';
+
+    if($action eq 'top_data') {
+        return $parser->top_graph_data($c);
+    }
+
+    # remaining actions might take a bit longer
+    return if Thruk::Utils::External::render_page_in_background($c);
+
     if($action eq 'top_details') {
         return $parser->top_graph_details($c);
-    }
-    elsif($action eq 'top_data') {
-        return $parser->top_graph_data($c);
     }
 
     return $parser->top_graph($c);
