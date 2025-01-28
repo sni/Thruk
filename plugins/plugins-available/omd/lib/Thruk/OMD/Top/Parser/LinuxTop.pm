@@ -335,10 +335,10 @@ sub _extract_top_data {
     my($c, $files, $with_raw, $pattern, $proc_found, $first_one_only, $filter) = @_;
 
     $c->stats->profile(begin => "_extract_top_data") if $c;
+    $c->stats->profile(comment => sprintf("parsing %d files", scalar(@{$files}))) if $c;
 
     my($pid, $wtr, $rdr, @lines);
-    my $cmd = 'for f in '.join(" ", @{$files}).'; do echo "FILE:$f"; gzip -dc "$f"; done';
-    $pid = open3($wtr, $rdr, $rdr, 'sh', '-c', $cmd);
+    $pid = open3($wtr, $rdr, $rdr, 'zcat', @{$files});
     CORE::close($wtr);
 
     $files->[0] =~ m/\/(\d+)\./mxo;
@@ -478,7 +478,7 @@ sub _extract_top_data {
                 next if $proc[0] !~ m/^\d+/mx;
                 my $key = 'other';
                 for my $p (@{$pattern}) {
-                    if($line =~ m|$p->[0]|mx) {
+                    if($line =~ m|$p->[0]|mxo) {
                         $key = $p->[1];
                         last;
                     }
