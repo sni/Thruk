@@ -40,6 +40,6 @@ jobs:
             ${{ env.THRUK_CRITIC_CACHE_FILE }}
           key: thruk-test-cache
       - name: make cache files writable
-        run: chown -R naemon: ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :
+        run: "chown -R naemon: ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :"
       - name: make citest
         run: timeout -v 90m sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && make citest'
