@@ -4159,11 +4159,12 @@ function fade(id, duration, remove) {
         return true;
     }
     var el = id;
+console.log(el);
     if(!is_object(el)) {
         el = document.getElementById(el);
     }
     if(!el) { return; }
-    if(el.style.display == "none") { return; }
+    if(jQuery(el).css("display") == "none") { return; }
     duration = duration || 500;
     jQuery(el).css({
         visibility: "hidden",
