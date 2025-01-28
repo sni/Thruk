@@ -4,7 +4,7 @@
       if [ "{{ creates | join(' ') }}" != "" ]; then
         allfound=1
         for file in {{ creates | join(' ') }}; do
-          if ! test -e $file; then
+          if [ $(ls -l1 $(echo $file | tr , ' ') 2>/dev/null | wc -l) -eq 0 ]; then
             allfound=0
           fi
         done
@@ -18,7 +18,7 @@
         yum install -y {{ package | join(' ') }} {{ rpm | join(' ') }}
       fi
       for file in {{ creates | join(' ') }}; do
-        if ! test -e $file; then
+        if [ $(ls -l1 $(echo $file | tr , ' ') 2>/dev/null | wc -l) -eq 0 ]; then
           echo "file $file not found after pkg installation"
           exit 1
         fi

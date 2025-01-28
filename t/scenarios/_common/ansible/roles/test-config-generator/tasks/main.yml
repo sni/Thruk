@@ -8,10 +8,10 @@
       - perl-File-Which
       - perl-IPC-Cmd
     creates:
-      - /usr/share/doc/perl-ExtUtils-Manifest
-      - /usr/share/doc/perl-ExtUtils-Install
-      - /usr/share/doc/perl-File-Which
-      - /usr/share/doc/perl-IPC-Cmd
+      - /usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm
+      - "/usr/share/perl5/vendor_perl/ExtUtils/Install.pm,/usr/share/perl5/ExtUtils/Install.pm"
+      - /usr/share/perl5/vendor_perl/File/Which.pm
+      - /usr/share/perl5/vendor_perl/IPC/Cmd.pm
 
 - name: "install Monitoring::Generator::TestConfig"
   shell: "sudo su - {{ site }} -c 'cpanm -n Monitoring::Generator::TestConfig'"
