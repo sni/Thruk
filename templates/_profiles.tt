@@ -1,23 +1,25 @@
 ﻿[% USE date %]
-<div class="flexrow flex-nowrap gap-3" id="[% id %]">
-  <div class="w-60 actionbox border-r borderDefault overflow-hidden" [% IF profiles.size <= 1 %]style="display: none;"[% END %]>
+<div class="h-full flexrow flex-nowrap gap-3" id="[% id %]">
+  <div class="w-60 border-r borderDefault overflow-hidden" [% IF profiles.size <= 1 %]style="display: none;"[% END %]>
     <nav class="inline-flex -space-x-px h-7">
-      <a class="pager rounded-md flex items-center font-medium justify-center px-1.5 min-w-[2rem]" onclick="show_list(-1, '#[% id %] DIV.profiles', '#[% id %] DIV.prof_head');"><i class="uil uil-angle-left  contents text-lg"></i></a>
-      <a class="pager rounded-md flex items-center font-medium justify-center px-1.5 min-w-[2rem]" onclick="show_list( 1, '#[% id %] DIV.profiles', '#[% id %] DIV.prof_head');"><i class="uil uil-angle-right contents text-lg"></i></a>
+      <a class="pager rounded-md flex items-center font-medium justify-center px-1.5 min-w-[2rem]" onclick="show_list(-1, '#[% id %] DIV.profiles', '#[% id %] DIV.js-prof-head');"><i class="uil uil-angle-left  contents text-lg"></i></a>
+      <a class="pager rounded-md flex items-center font-medium justify-center px-1.5 min-w-[2rem]" onclick="show_list( 1, '#[% id %] DIV.profiles', '#[% id %] DIV.js-prof-head');"><i class="uil uil-angle-right contents text-lg"></i></a>
     </nav>
-    [% FOREACH p = profiles %]
-      <div class="prof_head [% IF loop.first %]active[% END %]">
-        <a class="flex font-mono" href="#" onclick="show_list('#[% loop.index %]', '#[% id %] DIV.profiles', '#[% id %] DIV.prof_head'); return false;">
-          <div class="relative w-24 h-5">
-            [% IF p.defined("total_perc") %]
-              <div style="width: [% sprintf("%.0f", p.total_perc) %]%;" class="WARNING opacity-50 absolute top-0 left-0 h-5"></div>
-            [% END %]
-            <span class="absolute top-0 left-0">[% date_format(c, p.time, "%H:%M:%S.%MILLI") %]</span>
-          </div>
-          <div class="ml-2 text-ellipsis overflow-hidden w-32" title="[% p.name | html %]">[% p.name | html %]</div>
-        </a>
-      </div>
-    [% END %]
+    <div class="actionbox max-h-full overflow-y-auto">
+      [% FOREACH p = profiles %]
+        <div class="js-prof-head [% IF loop.first %]active[% END %]">
+          <a class="flex font-mono" href="#" onclick="show_list('#[% loop.index %]', '#[% id %] DIV.profiles', '#[% id %] DIV.js-prof-head'); return false;">
+            <div class="relative w-24 h-5">
+              [% IF p.defined("total_perc") %]
+                <div style="width: [% sprintf("%.0f", p.total_perc) %]%;" class="WARNING opacity-50 absolute top-0 left-0 h-5"></div>
+              [% END %]
+              <span class="absolute top-0 left-0">[% date_format(c, p.time, "%H:%M:%S.%MILLI") %]</span>
+            </div>
+            <div class="ml-2 text-ellipsis overflow-hidden w-32" title="[% p.name | html %]">[% p.name | html %]</div>
+          </a>
+        </div>
+      [% END %]
+    </div>
   </div>
   <div class="grow min-w-[600px] min-h-[400px] overflow-y-auto w-[820px]">
     [% FOREACH p = profiles %]
@@ -50,12 +52,12 @@
       jQuery(document).on('keyup', function(evt) {
         if(evt.keyCode == 39) { // right
           if((jQuery("#[% id %]").hasClass("card") && jQuery("#[% id %]").css("display") != "none") || (jQuery("#[% id %]").parentsUntil('.card').css("display") != "none")) {
-            show_list(1, '#[% id %] DIV.profiles', '#[% id %] DIV.prof_head');
+            show_list(1, '#[% id %] DIV.profiles', '#[% id %] DIV.js-prof-head');
           }
         }
         if(evt.keyCode == 37) { // left
           if(jQuery("#[% id %]").parents('.card').css("display") != "none") {
-            show_list(-1, '#[% id %] DIV.profiles', '#[% id %] DIV.prof_head');
+            show_list(-1, '#[% id %] DIV.profiles', '#[% id %] DIV.js-prof-head');
           }
         }
       });
