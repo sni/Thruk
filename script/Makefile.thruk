@@ -233,7 +233,7 @@ citest:
   		THRUK_CRITIC_CACHE_FILE="/tmp/thruk_critic_cache_file" \
 		PERL_DL_NONLAZY=1 \
 		PERL5LIB=.:$$PERL5LIB \
-		$(MAKE) timedtest
+		$(MAKE) test
 
 timedtest:
 	for file in $(TEST_FILES); do \
