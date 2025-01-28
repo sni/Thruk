@@ -20,6 +20,8 @@
       for file in {{ creates | join(' ') }}; do
         if [ $(ls -l1 $(echo $file | tr , ' ') 2>/dev/null | wc -l) -eq 0 ]; then
           echo "file $file not found after pkg installation"
+          yum clean all >/dev/null 2>&1 || :
+          apt update    >/dev/null 2>&1 || :
           exit 1
         fi
       done

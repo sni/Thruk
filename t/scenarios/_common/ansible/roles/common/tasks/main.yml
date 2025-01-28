@@ -1,7 +1,3 @@
-- name: "yum clean all"
-  shell: "yum clean all || :"
-- name: "apt update"
-  shell: "apt update || :"
 - name: "switch centos 7 to vault.centos.org"
   shell: |
     sed -i -e 's%mirror.centos.org%vault.centos.org%g' /etc/yum.repos.d/CentOS-Base.repo
@@ -11,8 +7,10 @@
 
 - name: "run set_admin_password"
   shell: "! test -x /omd/sites/{{site}}/bin/set_admin_password || sudo su - {{ site }} -c 'set_admin_password omd'"
+
 - name: "stop site"
-  shell: "omd stop {{ site }}"
+  shell: "ps -fu {{ site }} >/dev/null || omd stop {{ site }}"
+
 - name: "check if xinetd file exists"
   stat:
     path: /opt/omd/sites/{{ site }}/etc/naemon/xinetd.conf
@@ -23,6 +21,7 @@
     line: "    cps         = 10000 3"
     regexp: '^\s*cps'
   when: xinetd_livestatus.stat.exists == true
+
 - name: "check if naemon.cfg file exists"
   stat:
     path: /opt/omd/sites/{{ site }}/etc/naemon/naemon.cfg
@@ -33,22 +32,26 @@
     line: "check_workers=2"
     regexp: '^check_workers='
   when: naemon_conf.stat.exists == true
+
 - name: increase slow_page_log_threshold
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/etc/thruk/thruk_local.d/test_adjustments.conf
     line: "slow_page_log_threshold = 35"
     regexp: '^slow_page_log_threshold'
     create: true
+
 - name: lower max fcgi processes
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/02_fcgid.conf
     line: "MaxProcessCount 5"
     regexp: '^MaxProcessCount'
+
 - name: increase max requests
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/02_fcgid.conf
     line: "MaxRequestsPerProcess 100000"
     regexp: '^MaxRequestsPerProcess'
+
 - name: lower max fcgi processes for thruk
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/etc/apache/conf.d/thruk.conf

@@ -5,7 +5,7 @@
     - role: thruk_developer
     - role: local_tests
   tasks:
-  - name: "yum install libreoffix"
+  - name: "yum install libreoffice"
     include_role:
       name: yum_apt_retry
     vars:
@@ -34,4 +34,3 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
       owner: demo
       group: demo
-

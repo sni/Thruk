@@ -1,11 +1,11 @@
-- stat: path=/usr/bin/passwd
-  register: passwd_path
-- package:
-    name:
+- name: "install passwd"
+  include_role:
+    name: yum_apt_retry
+  vars:
+    package:
       - passwd
-    state: present
-  # hack because ansibles takes over 10seconds, even if it does not install anything
-  when: not passwd_path.stat.exists
+    creates:
+      - /usr/bin/passwd
 - shell: sudo su - {{ site }} -c "mkdir -p .ssh && chmod 700 .ssh && ssh-keygen -t ed25519 -f .ssh/id_ed25519 -N '' && cp .ssh/id_ed25519.pub .ssh/authorized_keys && chmod 600 .ssh/authorized_keys"
 - name: create .ssh/config
   copy:
