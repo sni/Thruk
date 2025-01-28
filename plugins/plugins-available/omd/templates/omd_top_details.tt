@@ -414,6 +414,9 @@ jQuery().ready(function() {
         });
     });
    jQuery('#raw_top').tablesorter({ sortList: [[8,1]] }); // sort by cpu (column 8) in descending order (1)
+
+   // fill details
+   updateDetailsTable(0);
 });
 
 </script>
