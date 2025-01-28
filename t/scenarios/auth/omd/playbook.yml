@@ -5,7 +5,7 @@
     - role: local_tests
     - role: thruk_developer
   tasks:
-  - name: "install nagios4 / livestatus build dependencies"
+  - name: "install tesseract"
     include_role:
       name: yum_apt_retry
     vars:

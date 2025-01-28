@@ -2601,8 +2601,6 @@ t/perlcriticrc
 t/scenarios/_common/ansible/install_role.sh
 t/scenarios/_common/ansible/roles/common/tasks/main.yml
 t/scenarios/_common/ansible/roles/common/vars/main.yml
-t/scenarios/_common/ansible/roles/grafana_node_puppeteer/tasks/main.yml
-t/scenarios/_common/ansible/roles/grafana_node_puppeteer/vars/main.yml
 t/scenarios/_common/ansible/roles/local_tests/files/local_test.sh
 t/scenarios/_common/ansible/roles/local_tests/tasks/main.yml
 t/scenarios/_common/ansible/roles/naemon_debug_log/tasks/main.yml
