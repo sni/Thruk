@@ -8,7 +8,7 @@
       - perl-File-Which
       - perl-IPC-Cmd
     creates:
-      - /usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm
+      - "/usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm,/usr/share/perl/*/ExtUtils/Manifest.pm"
       - "/usr/share/perl5/vendor_perl/ExtUtils/Install.pm,/usr/share/perl5/ExtUtils/Install.pm"
       - /usr/share/perl5/vendor_perl/File/Which.pm
       - /usr/share/perl5/vendor_perl/IPC/Cmd.pm

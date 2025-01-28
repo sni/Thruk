@@ -13,7 +13,7 @@
       - /usr/bin/unbuffer
       - /usr/bin/diff
       - /usr/share/perl5/vendor_perl/Test/Harness.pm
-      - /usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm
+      - "/usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm,/usr/share/perl/*/ExtUtils/Manifest.pm"
       - "/usr/share/perl5/vendor_perl/ExtUtils/Install.pm,/usr/share/perl5/ExtUtils/Install.pm"
 - lineinfile:
     path: /etc/locale.conf
