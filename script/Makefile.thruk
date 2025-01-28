@@ -1,5 +1,6 @@
 ### THRUK
 
+SHELL=bash
 SED=sed
 DAILYVERSION=$(shell ./get_version)
 DAILYVERSIONFILES=$(shell ./get_version | tr -d '-' | tr ' ' '-')
@@ -242,8 +243,14 @@ timedtest:
 			printf "% 8s \n" "FAILED"; \
 			printf "%s\n" "$$output"; \
 		else \
+			first=$$(echo "$$output" | head -n 1); \
 			time=$$(echo "$$output" | tail -n1); \
-			printf "% 8ss\n" $$time; \
+			printf "% 8ss" "$$time"; \
+			if [[ "$$first" =~ skipped|SKIP ]]; then \
+				first=$$(echo "$$first" | sed -e 's/.*\.\.\ //'); \
+				printf "  %s" "$$first"; \
+			fi; \
+			printf "\n"; \
 		fi; \
 	done
 
