@@ -98,7 +98,7 @@ sub top_graph_details {
 
     if($pid) {
         $pattern = [
-            [$pid, "Pid: $pid"],
+            [qr/^$pid\s+/mx, "Pid: $pid"],
         ];
     }
 
@@ -485,9 +485,9 @@ sub _extract_top_data {
                 next if $filter && $filter != $proc[0];
                 next if $proc[0] !~ m/^\d+/mx;
                 my $key = 'other';
-                for my $p (@{$pattern}) {
-                    if($line =~ m|$p->[0]|mxo) {
-                        $key = $p->[1];
+                for (@{$pattern}) {
+                    if($line =~ $_->[0]) {
+                        $key = $_->[1];
                         last;
                     }
                 }
@@ -497,14 +497,14 @@ sub _extract_top_data {
                 $procs->{cpu}  += $proc[8];
                 my $virt;
                 if($proc[4] =~ m/^[\d\.]+$/mxo) {
-                    $virt += int($proc[4]/1024); # inline is much faster than million function calls
+                    $virt += int($proc[4]/1024);
                 } else {
                     $virt += &_normalize_mem($proc[4]);
                 }
                 $procs->{virt} += $virt;
                 my $res;
                 if($proc[5] =~ m/^[\d\.]+$/mxo) {
-                    $res += int($proc[5]/1024); # inline is much faster than million function calls
+                    $res += int($proc[5]/1024);
                 } else {
                     $res += &_normalize_mem($proc[5]);
                 }
@@ -562,10 +562,10 @@ sub _get_pattern {
     my $pattern = [];
     if($c && $c->stash->{'omd_top_pattern'}) {
         for my $regex (@{$c->stash->{'omd_top_pattern'}}) {
-            my($k,$p) = split(/\s*=\s*/mx, $regex, 2);
+            my($p,$k) = split(/\s*=\s*/mx, $regex, 2);
             &Thruk::Base::trim_whitespace($p);
             &Thruk::Base::trim_whitespace($k);
-            push @{$pattern}, [$k,$p];
+            push @{$pattern}, [qr/$p/mx, $k];
         }
     }
     return($pattern);
