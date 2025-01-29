@@ -99,7 +99,7 @@ jQuery().ready(function() {
     jQuery('#load_graph').bind("plothover", function (event, pos, item) {
         if (item) {
             var date    = _dateString(item.datapoint[0]);
-            var tooltip = _getTooltipFromSeries(date, load_series, item.dataIndex);
+            var tooltip = _getTooltipFromSeries(date, load_plot, item.dataIndex);
             // place next to mouse position
             var pos = mouseRelativePosition();
             jQuery("#tooltip").html(tooltip)

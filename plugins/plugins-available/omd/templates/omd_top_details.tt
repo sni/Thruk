@@ -319,13 +319,13 @@ jQuery().ready(function() {
                 var d = _dateString(item.datapoint[0]);
                 var tooltip;
                 var offsetY = 0;
-                if(e == '#load_graph')    { tooltip = _getTooltipFromSeries(d, load_series,    item.dataIndex                )};
-                if(e == '#cpu_graph')     { tooltip = _getTooltipFromSeries(d, cpu_series,     item.dataIndex,  "%"          )};
-                if(e == '#mem_graph')     { tooltip = _getTooltipFromSeries(d, mem_series,     item.dataIndex, "MB"          )};
-                if(e == '#swap_graph')    { tooltip = _getTooltipFromSeries(d, swap_series,    item.dataIndex, "MB"          )};
-                if(e == '#pcpu_graph')    { tooltip = _getTooltipFromSeries(d, pcpu_series,    item.dataIndex,  "%", true, 1 )};
-                if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, pmem_series,    item.dataIndex,  "%", true, 1 ); offsetY = 100; };
-                if(e == '#gearman_graph') { tooltip = _getTooltipFromSeries(d, gearman_series, item.dataIndex                ); offsetY = 100; };
+                if(e == '#load_graph')    { tooltip = _getTooltipFromSeries(d, plots.load,    item.dataIndex                )};
+                if(e == '#cpu_graph')     { tooltip = _getTooltipFromSeries(d, plots.cpu,     item.dataIndex,  "%"          )};
+                if(e == '#mem_graph')     { tooltip = _getTooltipFromSeries(d, plots.mem,     item.dataIndex, "MB"          )};
+                if(e == '#swap_graph')    { tooltip = _getTooltipFromSeries(d, plots.swap,    item.dataIndex, "MB"          )};
+                if(e == '#pcpu_graph')    { tooltip = _getTooltipFromSeries(d, plots.pcpu,    item.dataIndex,  "%", true, 1 )};
+                if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, plots.pmem,    item.dataIndex,  "%", true, 1 ); offsetY = 100; };
+                if(e == '#gearman_graph') { tooltip = _getTooltipFromSeries(d, plots.gearman, item.dataIndex                ); offsetY = 100; };
                 // place next to mouse position
                 var pos = mouseRelativePosition();
                 jQuery("#tooltip").html(tooltip)

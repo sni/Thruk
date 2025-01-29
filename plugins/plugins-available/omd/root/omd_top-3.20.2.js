@@ -119,19 +119,22 @@ function fetchTopDataDo() {
     });
 }
 
-function _getTooltipFromSeries(date, series, index, unit, skipEmpty, toFixed) {
-    var tooltip = "<table class='tooltip'><tr><td class='date'>"+date+"</td>";
+function _getTooltipFromSeries(date, plot, index, unit, skipEmpty, toFixed) {
+    var tooltip = "<table class='tooltip body'><tr><td class='date'>"+date+"</td>";
     var x = 0;
+    var series = plot.getData();
     jQuery.each(series, function(i, s) {
         if(!skipEmpty || s.data[index][1] != 0) {
             x++;
-            var val = s.data[index][1];
+            var color = s.color;
+            var val   = s.data[index][1];
             if(toFixed != undefined) { val = Number(val).toFixed(toFixed); }
             if(x > 1) {
                 tooltip += "<tr><td></td>";
             }
-            tooltip += "<td class='var'>"+s.label + ":</td>";
-            tooltip += "<td class='val'>"+_ifNotNull(val, unit)+"</td></tr>";
+            tooltip += "<td class='border-l px-1 borderDark'><div class='w-3 h-3' style='background-color:"+color+";'></div></td>";
+            tooltip += "<td class=''>"+s.label + ":</td>";
+            tooltip += "<td class=''>"+_ifNotNull(val, unit)+"</td></tr>";
         }
     });
     tooltip += "</table>";

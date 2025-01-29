@@ -1,24 +1,9 @@
-TABLE {
+DIV.legend TABLE {
     width: auto !important;
 }
 
-table.tooltip {
-    border-collapse: collapse;
-}
-
-table.tooltip .var {
-    font-weight: bold;
-    border-left: 1px solid grey;
-    padding-left: 5px;
-}
-
-table.tooltip .val {
-    text-align: right;
-    font-weight: bold;
-}
-
-table.tooltip .date {
-    padding-right: 5px;
+TD.legendColorBox > DIV {
+    border: none !important;
 }
 
 #raw_top {
