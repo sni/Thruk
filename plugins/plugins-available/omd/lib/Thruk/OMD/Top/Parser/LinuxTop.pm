@@ -58,9 +58,13 @@ sub top_graph {
 
     my $index = $self->_update_index($c);
 
+    my $now = time();
     for my $line (@{$index}) {
         if(my @m = $line =~ m/(\d+)\.log.*?:\s*top\s+\-\s+(\d+):(\d+):(\d+)\s+up.*?average:\s*([\.\d]+),\s*([\.\d]+),\s*([\.\d]+)/gmxo) {
             my($time,$hour,$min,$sec,$l1,$l5,$l15) = (@m);
+            if($time > $now + 3600) {
+                next;
+            }
             $time = (($time - $time%60) + $sec)*1000;
             push @{$load_series->[0]->{'data'}}, [$time, $l1];
             push @{$load_series->[1]->{'data'}}, [$time, $l5];
@@ -98,7 +102,7 @@ sub top_graph_details {
         ];
     }
 
-    # get all files which are matching the timeframe
+    # get all files which are matching the time frame
     my $truncated  = 0;
     my $files_read = 0;
     my @file_list;
@@ -123,7 +127,7 @@ sub top_graph_details {
         }
 
         my $x = $start;
-        # find first occurance of pid
+        # find first occurrence of pid
         while(1) {
             my $file = $files[$x];
             $file =~ m/\/(\d+)\./mxo;
@@ -183,11 +187,15 @@ sub top_graph_details {
         $c->stash->{'t2'} = $t2;
     }
 
+    my $now = time();
     for my $file (@files) {
         $file =~ m/\/(\d+)\./mxo;
         if(defined $1) {
             my $time = $1;
             if($time < $t1 || $time > $t2) {
+                next;
+            }
+            if($time > $now + 3600) {
                 next;
             }
             push @file_list, $file;
