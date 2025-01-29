@@ -84,7 +84,7 @@ jQuery().ready(function() {
         },
         yaxes: [{
                    min: 0,
-                   tickFormatter: function(val, axis) { return(val < axis.max ? val : "Load"); }
+                   tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : "Load"); }
         }],
         crosshair: standard_crosshair,
         grid:      standard_grid,

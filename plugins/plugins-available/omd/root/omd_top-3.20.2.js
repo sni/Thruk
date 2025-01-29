@@ -151,8 +151,8 @@ function _max_or_default(fallback, series) {
 function _trim_number(num) {
     // reduce precision for numbers like: 0.6000000000000001
     var str = ""+num;
-    if(str.match(/^\d\..*0+1$/)) {
-        num = Number(str.replace(/^(\d\.\d).*0+1$/, "$1"));
+    if(str.match(/^\d\..*00000+\d$/)) {
+        num = Number(str.replace(/^(\d\.\d).*00000+\d$/, "$1"));
     }
     return(num);
 }
