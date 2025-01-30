@@ -349,7 +349,7 @@ sub cmd {
                 my $type = $self->{'fed_info'}->{'type'}->[$x];
                 my $vers = $self->{'fed_info'}->{'version'}->[$x] // 0;
                 next if $type ne 'http';
-                if(Thruk::Utils::version_compare($v_num, $vers)) {
+                if(Thruk::Utils::version_compare(($v_num//0), $vers)) {
                     $v_num = $vers;
                 }
             }
