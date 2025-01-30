@@ -1442,6 +1442,18 @@ sub _die_connection_error {
         die($http_err);
     }
 
+    if(($http_err//'') =~ m/\Qinternal error: admin privileges required\E/mx) {
+        $http_err = "admin privileges required\n".$http_err;
+        die($http_err."\nssh failed: ".$ssh_err) if $ssh_err;
+        die($http_err);
+    }
+
+    if(($http_err//'') =~ m/\Q403: Forbidden\E/mx) {
+        $http_err = "403: Forbidden\n".$http_err;
+        die($http_err."\nssh failed: ".$ssh_err) if $ssh_err;
+        die($http_err);
+    }
+
     die("http(s) and ssh connection failed\nhttp(s):\n".$http_err."\n\nssh:\n".$ssh_err) if($http_err && $ssh_err);
     die("http(s) connection failed\n".$http_err) if $http_err;
     die("ssh connection failed\n".$ssh_err) if $ssh_err;
