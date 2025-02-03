@@ -6,10 +6,18 @@
 #
 
 ###########################################################
-# node version to use
-USE_NODE=16
-PUPPETEER_VERSION=21.11.0 # the last one with node 16 support
+# node versions to use
+USE_NODE=20
+PUPPETEER_VERSION=latest
 
+# rhel 7 / centos 7 only supports node 16
+if [ $(grep -E 'CentOS Linux release 7|Red Hat Enterprise Linux Server release 7' /etc/redhat-release 2>/dev/null | wc -l) -gt 0 ]; then
+  USE_NODE=16
+  PUPPETEER_VERSION=21.11.0 # the last one with node 16 support
+  echo "rhel7 / centos 7 detected, falling back to node $USE_NODE with puppeteer $PUPPETEER_VERSION"
+fi
+
+##########################################################
 # target folder
 DEST=$1
 if [ -z "$DEST" ]; then
@@ -17,13 +25,14 @@ if [ -z "$DEST" ]; then
 fi
 
 NPM="npm"
+NPMOPTS="--no-audit --progress=false"
 INSTALL_NODE=0
 
 ###########################################################
 # check requirements
 ARCH=$(uname -m)
 if [ $ARCH != "x86_64" -a $ARCH != "aarch64" ]; then
-    echo "ERROR: automatic puppeteer installation is only supported on arm64 and aarch64, you have: $(uname -m)"
+    echo "ERROR: automatic puppeteer installation is only supported on arm64 and aarch64, this is: $ARCH"
     exit 1
 fi
 
@@ -66,17 +75,17 @@ mkdir -p node_modules
 
 if [ $INSTALL_NODE = "1" ]; then
     test -f $DEST/package.json || echo "{}" > $DEST/package.json
-    npm i n
+    npm i $NPMOPTS n
     ./node_modules/.bin/n $USE_NODE
     NPM="./node_modules/.bin/n exec $USE_NODE npm"
 fi
 
 export PATH=$DEST/node/bin:$PATH
-$NPM i progress puppeteer@$PUPPETEER_VERSION
+$NPM i $NPMOPTS progress puppeteer@$PUPPETEER_VERSION
 
 if [ $INSTALL_NODE = "1" ]; then
     # install again, somehow previous module install removes it
-    npm i n
+    npm i $NPMOPTS n
     ./node_modules/.bin/n $USE_NODE
 fi
 

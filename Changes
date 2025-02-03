@@ -18,6 +18,7 @@ next:
             - prevent running multiple updates from cron in parallel
           - Reports:
             - fix creating grafana reports from url report
+            - use latest in puppeteer installer
           - OMD-Top:
             - added as core module
 
