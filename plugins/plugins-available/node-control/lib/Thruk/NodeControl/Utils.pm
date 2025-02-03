@@ -993,8 +993,59 @@ sub _remote_cmd {
     _debug("remote cmd failed, trying ssh fallback: %s", $err) if $err;
 
     $cmd =~ s/"/\\"/gmx;
-    my $fullcmd = "ansible all -i "._sitename($server->{'omd_site'})."\@$host_name, -m shell -a \"".$cmd."\"";
+
+    if(!$background_options && !$env && $peer->{'peer_config'}->{'options'}->{'host_name'}) {
+        return(_ssh_cmd($c, $peer, $cmd, $err));
+    }
+
+    my $fullcmd = "ansible all -i "._sitename($peer, $server)."\@$host_name, -m shell -a \"".$cmd."\"";
     return(_ansible_cmd($c, $peer, $fullcmd, $background_options, $err));
+}
+
+##########################################################
+# run cmd via ssh
+sub _ssh_cmd {
+    my($c, $peer, $cmd, $http_err) = @_;
+
+    _debug2("_ssh_cmd: %s", $cmd);
+
+    my $config      = config($c);
+    my $server      = get_server($c, $peer, $config);
+    my $host_name   = $peer->{'peer_config'}->{'options'}->{'host_name'};
+    my $user_name   = _sitename($peer, $server);
+    my $ssh_options = $config->{'ssh_options'};
+
+    my $fullcmd = sprintf('ssh %s "%s@%s" "%s"', $ssh_options, $user_name, $host_name, $cmd);
+
+    my($rc, $out) = Thruk::Utils::IO::cmd($fullcmd, { timeout => 60 });
+    if($rc eq '255') {
+        _die_connection_error($peer, $http_err, ($out || "ssh connection failed"));
+    }
+    ($rc, $out) = _convert_ansible_script_result($rc, $out);
+    $peer->{'ssh_ok'} = 1;
+    return($rc, $out);
+}
+
+##########################################################
+# upload file by scp
+sub _scp_cmd {
+    my($c, $peer, $src, $target) = @_;
+
+    _debug2("_scp: %s -> %s", $src, $target);
+
+    my $config      = config($c);
+    my $server      = get_server($c, $peer, $config);
+    my $host_name   = $peer->{'peer_config'}->{'options'}->{'host_name'};
+    my $user_name   = _sitename($peer, $server);
+    my $scp_options = $config->{'scp_options'};
+
+    my $fullcmd = sprintf('scp %s "%s" "%s@%s:%s"', $scp_options, $src, $user_name, $host_name, $target);
+
+    my($rc, $out) = Thruk::Utils::IO::cmd($fullcmd, { timeout => 60 });
+    if($rc eq '0') {
+        $peer->{'ssh_ok'} = 1;
+    }
+    return($rc, $out);
 }
 
 ##########################################################
@@ -1056,10 +1107,15 @@ sub _remote_script {
             CORE::close($fh);
             $localscript = $file;
         }
-        my $cmd = "ansible all -i "._sitename($server->{'omd_site'})."\@$host_name, -m copy -a \"src=".$localscript." dest=".$tmpscript." mode=0700\"";
-        my($rc, $out) = _ansible_cmd($c, $peer, $cmd, undef, $err);
-        if($script_append_data) {
-            unlink($localscript);
+        my($rc, $out);
+        if($peer->{'peer_config'}->{'options'}->{'host_name'}) {
+            ($rc, $out) = _scp_cmd($c, $peer, $localscript, $tmpscript);
+        } else {
+            my $cmd = "ansible all -i "._sitename($peer, $server)."\@$host_name, -m copy -a \"src=".$localscript." dest=".$tmpscript." mode=0700\"";
+            ($rc, $out) = _ansible_cmd($c, $peer, $cmd, undef, $err);
+            if($script_append_data) {
+                unlink($localscript);
+            }
         }
         if($rc != 0) {
             die($out);
@@ -1067,7 +1123,17 @@ sub _remote_script {
         return(_remote_cmd($c, $peer, 'bash '.$tmpscript.$args, $background_options, $env));
     }
 
-    my $fullcmd = "ansible all -i "._sitename($server->{'omd_site'})."\@$host_name, -m script -a \"".$script.$args."\"";
+
+    if(!$background_options && !$args && $peer->{'peer_config'}->{'options'}->{'host_name'}) {
+        my $tmpscript = "./var/tmp/".Thruk::Base::basename($script);
+        my($rc, $out) = _scp_cmd($c, $peer, $script, $tmpscript);
+        if($rc != 0) {
+            die($out);
+        }
+        return(_ssh_cmd($c, $peer, 'bash '.$tmpscript, $err));
+    }
+
+    my $fullcmd = "ansible all -i "._sitename($peer, $server)."\@$host_name, -m script -a \"".$script.$args."\"";
     return(_ansible_cmd($c, $peer, $fullcmd, $background_options, $err));
 }
 
@@ -1208,6 +1274,8 @@ sub config {
         'pkg_cleanup'             => 1,
         'skip_confirms'           => 0,
         'parallel_tasks'          => 3,
+        'ssh_options'             => '-o BatchMode=yes -o LogLevel=INFO -n -T',
+        'scp_options'             => '-B',
         'omd_update_script'       => undef, # set fallback later to avoid race conditions if updated started on the host machine as well
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',
         'cmd_yum_pkg_install'     => 'sudo -n yum install -y %PKG',
@@ -1500,8 +1568,8 @@ sub get_addon_modules {
 
 ##########################################################
 sub _sitename {
-    my($site) = @_;
-    return($site || $ENV{'OMD_SITE'} || $ENV{'USER'} || 'nobody');
+    my($peer, $server) = @_;
+    return($peer->{'peer_config'}->{'options'}->{'site_name'} // $server->{'omd_site'} || $ENV{'OMD_SITE'} || $ENV{'USER'} || 'nobody');
 }
 
 ##########################################################
