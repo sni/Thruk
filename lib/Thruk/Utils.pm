@@ -3708,9 +3708,7 @@ sub dump_params {
     my $dump = ref $params ? Dumper($params) : $params;
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
     $dump    = Thruk::Base::clean_credentials_from_string($dump);
-    if($max_length && $max_length > 3 && length($dump) > $max_length) {
-        $dump    = substr($dump, 0, ($max_length-3)).'...';
-    }
+    $dump    = Thruk::Base::shorten($dump, $max_length);
     $dump    =~ s%;$%%gmx;
     return($dump);
 }
