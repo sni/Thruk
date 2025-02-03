@@ -25,6 +25,7 @@ jobs:
       - name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+      - uses: abbbi/github-actions-tune@v1
       - name: ./.ci/prepare_machine.sh
         run: timeout -v 15m sudo bash -x ./.ci/prepare_machine.sh
       - name: ./.ci/install_deps.sh
