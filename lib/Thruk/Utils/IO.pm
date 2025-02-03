@@ -972,8 +972,14 @@ sub cmd {
     } else {
         $rc = $rc>>8;
     }
-    _debug( "rc:     ". $rc )     if $c;
-    _debug( "output: ". $output ) if $c;
+    if($c) {
+        _debug( "rc:     ". $rc );
+        if(Thruk::Base::verbose() > 1) {
+            _debug( "output: ". $output );
+        } else {
+            _debug( "output: ".Thruk::Base::shorten($output, 300));
+        }
+    }
     &timing_breakpoint('IO::cmd done');
     $c->stats->profile(end => "IO::cmd") if $c;
 

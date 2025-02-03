@@ -483,6 +483,28 @@ sub clean_credentials_from_string {
 
 ##############################################
 
+=head2 shorten
+
+    shorten($string, $max_length)
+
+returns string shortened to max length.
+
+=cut
+sub shorten {
+    my($str, $max_length) = @_;
+
+    $max_length = 3 if $max_length < 3;
+    if(length($str) < $max_length) {
+        return($str);
+    }
+
+    $str = substr($str, 0, ($max_length-3)).'...';
+
+    return($str);
+}
+
+##############################################
+
 =head2 basename
 
     basename($path)
