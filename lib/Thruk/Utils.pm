@@ -1888,13 +1888,9 @@ sub absolute_url {
         $host        =~ s/\/$//mx;      # remove last /
         $fullpath    =~ s/\?.*$//mx;
         $fullpath    =~ s/^\///mx;
-        my($path,$file) = ('', '');
+        my $path     = '';
         if($fullpath =~ m/^(.+)\/(.*)$/mx) {
             $path = $1;
-            $file = $2;
-        }
-        else {
-            $file = $fullpath;
         }
         $path =~ s/^\///mx; # remove first /
 

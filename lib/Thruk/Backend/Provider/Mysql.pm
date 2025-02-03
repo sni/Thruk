@@ -1514,7 +1514,6 @@ sub _check_lock {
 
     # check if there is already a update / import running
     my $skip          = 0;
-    my $cache_version = 1;
     eval {
         $dbh->do('LOCK TABLES `'.$prefix.'_status` READ') unless $c->config->{'logcache_pxc_strict_mode'};
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
@@ -1523,10 +1522,6 @@ sub _check_lock {
                 _info("WARNING: logcache update already running with pid ".$pids[0]);
                 $skip = 1;
             }
-        }
-        my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 4 LIMIT 1')};
-        if(scalar @versions > 0 and $versions[0]) {
-            $cache_version = $versions[0];
         }
     };
     $dbh->do('UNLOCK TABLES') unless $c->config->{'logcache_pxc_strict_mode'};
