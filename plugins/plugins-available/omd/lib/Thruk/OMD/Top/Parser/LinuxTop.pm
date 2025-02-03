@@ -345,6 +345,9 @@ sub _extract_top_data {
     $c->stats->profile(begin => "_extract_top_data") if $c;
     $c->stats->profile(comment => sprintf("parsing %d files", scalar(@{$files}))) if $c;
 
+    my $result          = {};
+    return $result if scalar @{$files} == 0;
+
     my($pid, $wtr, $rdr, @lines);
     $pid = open3($wtr, $rdr, $rdr, 'zcat', @{$files});
     CORE::close($wtr);
@@ -360,7 +363,6 @@ sub _extract_top_data {
     my $proc_started    = 0;
     my $gearman_started = 0;
     my $skip_this_one   = 0;
-    my $result          = {};
     my($cur, $gearman,$curfile);
     my $last_hour = $startdate[2];
     my $last_min  = -1;
