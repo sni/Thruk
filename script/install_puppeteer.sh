@@ -54,7 +54,7 @@ fi
 
 if [ $NODE_VERSION -lt $USE_NODE ]; then
     export N_PREFIX=$DEST/node
-    echo "system node version $(node -v) too old, installing $USE_NODE into $N_PREFIX"
+    echo "system node version $(node -v) too old, installing v${USE_NODE} into ${N_PREFIX}"
     INSTALL_NODE=1
 fi
 
@@ -95,11 +95,14 @@ if [ -n "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" ]; then
     echo ""
     echo "puppeteer successfully installed in $DEST"
     exit 0
+else
+    export PUPPETEER_CACHE_DIR=$DEST/chromium/
+    npx puppeteer browsers install chrome
 fi
 
 if [ $(ls -1 $DEST/chromium/chrome/*/chrome-*/chrome 2>/dev/null | wc -l) -eq 0 ]; then
     echo ""
-    echo "puppeteer failed to  install"
+    echo "puppeteer failed to  install (cannot find chrome in $DEST/chromium)"
     exit 1
 fi
 
