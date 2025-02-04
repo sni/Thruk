@@ -214,7 +214,7 @@ is($cmd->{'line_expanded'}, '/tmp/check_test -H '.$hosts->[0]->{'name'}.' -p "**
 # test obfuscation (from host macro)
 $c->{'config'}->{'expand_user_macros'} = ["ALL"];
 $cmd = $b->expand_command(
-    'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_REGEXP'], 'custom_variable_values' => ['pa.*ord']))},
+    'host'    => {(%{$hosts->[0]}, ('custom_variable_names' => ['OBFUSCATE_REGEXP'], 'custom_variable_values' => ['pas+.*ord']))},
     'command' => {
         'name' => 'check_test',
         'line' => '$USER1$/check_test -H $HOSTNAME$ -p "password"',
