@@ -1,10 +1,10 @@
 ﻿[% PROCESS _header.tt
     js           => [ "vendor/flot-d7c58b5/jquery.flot.js",
                       "vendor/flot-d7c58b5/jquery.flot.time.js",
+                      "vendor/flot-d7c58b5/jquery.flot.selection.js",
+                      "vendor/flot-d7c58b5/jquery.flot.stack.js",
+                      "vendor/flot-d7c58b5/jquery.flot.crosshair.js",
                       "plugins/${plugin}/omd_top-${fileversion}.js",
-                      "plugins/${plugin}/vendor/jquery.flot.selection.js",
-                      "plugins/${plugin}/vendor/jquery.flot.stack.js",
-                      "plugins/${plugin}/vendor/jquery.flot.crosshair.js",
                     ],
     css          => [ "plugins/${plugin}/omd_top-${fileversion}.css", ],
 %]
@@ -47,11 +47,13 @@
 
 
 [% IF folders.size == 0 %]
-  <div class="textHINT pt-10 text-center">
-    <b>No Input Folders:</b>
-    Make sure you have some input folders defined and at least one of them contains data.
-    <br>
-    <a class="link" href="https://thruk.org/documentation/plugins/omd/" target="_blank"><i class="uil uil-external-link-alt"></i>Read projects documentation.</a>
+  <div class="card orangel alert">
+    <div class="head">No Input Folders:</div>
+    <div class="body">
+      Make sure you have some input folders defined and at least one of them contains data.<br>
+      If you just enabled this plugin, wait one minute till...<br>
+      <a class="link" href="https://thruk.org/documentation/plugins/omd/" target="_blank"><i class="uil uil-external-link-alt"></i>Read projects documentation.</a>
+    </div>
   </div>
 [% ELSE %]
   <div class="card w-full max-w-7xl">
