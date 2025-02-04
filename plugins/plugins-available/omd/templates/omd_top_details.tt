@@ -117,7 +117,7 @@
             <th>%Cpu</th>
             <th>%Mem</th>
             <th>Time+</th>
-            <th>Command</th>
+            <th class="w-full">Command</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -133,6 +133,8 @@ var truncated = [% IF truncated %]true[% ELSE%]false[% END %];
 var plots     = {};
 var croshair_locked     = false;
 var croshair_skip_click = false;
+var hasPidFilter = [% IF c.req.parameters.defined("pid") %]true[% ELSE %]false[% END %];
+
 jQuery().ready(function() {
     var labelWidth = 40;
     standard_xaxis = { mode: "time",
@@ -247,7 +249,7 @@ jQuery().ready(function() {
         xaxis: standard_xaxis,
         yaxes: [{
                    min: 0,
-                   max: _max_or_default(100, pcpu_series),
+                   max: hasPidFilter ? null : _max_or_default(100, pcpu_series),
                    tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : "CPU %"); },
                    labelWidth: labelWidth
         }],
@@ -270,7 +272,7 @@ jQuery().ready(function() {
         xaxis: standard_xaxis,
         yaxes: [{
                    min: 0,
-                   max: _max_or_default(100, pmem_series),
+                   max: hasPidFilter ? null : _max_or_default(100, pmem_series),
                    tickFormatter: function(val, axis) { return(val < axis.max ? _trim_number(val) : "MEM %"); },
                    labelWidth: labelWidth
         }],
@@ -323,8 +325,8 @@ jQuery().ready(function() {
                 if(e == '#cpu_graph')     { tooltip = _getTooltipFromSeries(d, plots.cpu,     item.dataIndex,  "%"          )};
                 if(e == '#mem_graph')     { tooltip = _getTooltipFromSeries(d, plots.mem,     item.dataIndex, "MB"          )};
                 if(e == '#swap_graph')    { tooltip = _getTooltipFromSeries(d, plots.swap,    item.dataIndex, "MB"          )};
-                if(e == '#pcpu_graph')    { tooltip = _getTooltipFromSeries(d, plots.pcpu,    item.dataIndex,  "%", true, 1 )};
-                if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, plots.pmem,    item.dataIndex,  "%", true, 1 ); offsetY = 100; };
+                if(e == '#pcpu_graph')    { tooltip = _getTooltipFromSeries(d, plots.pcpu,    item.dataIndex,  "%", !hasPidFilter, 1 )};
+                if(e == '#pmem_graph')    { tooltip = _getTooltipFromSeries(d, plots.pmem,    item.dataIndex,  "%", !hasPidFilter, 1 ); offsetY = 100; };
                 if(e == '#gearman_graph') { tooltip = _getTooltipFromSeries(d, plots.gearman, item.dataIndex                ); offsetY = 100; };
                 // place next to mouse position
                 var pos = mouseRelativePosition();

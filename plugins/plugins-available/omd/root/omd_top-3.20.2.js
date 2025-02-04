@@ -87,7 +87,6 @@ function fetchTopDataDo() {
         url: url_prefix + 'cgi-bin/omd.cgi?action=top_data&time='+Math.floor(updateDetailsTableTimestamp/1000)+"&folder="+omd_top_folder,
         type: 'POST',
         success: function(data) {
-            removeParams['pid'] = true;
             var uri = 'omd.cgi?action=top_details&folder='+omd_top_folder+'&expand=1&time='+Math.floor(updateDetailsTableTimestamp/1000);
             if(data && data.raw) {
                 jQuery('#raw_top').find("tr:gt(0)").remove();
