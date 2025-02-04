@@ -72,7 +72,6 @@ apt-get -y install \
     libcrypt-rijndael-perl \
     libconfig-general-perl \
     libwww-mechanize-perl \
-    chromium-browser \
     npm \
 
 apt-get -y install naemon-core naemon-livestatus
@@ -94,8 +93,6 @@ fi
 mysql -e "create database IF NOT EXISTS test;" -uroot -proot
 
 chown -R naemon: .
-
-ln -sfn /usr/bin/chromium-browser /usr/bin/chromium
 
 # free some disk space again
 apt-get clean
