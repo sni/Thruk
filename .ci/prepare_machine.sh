@@ -4,6 +4,13 @@ set -ex
 
 export DEBIAN_FRONTEND="noninteractive"
 apt-get -y update
+
+apt-get -y update
+apt-get -y install apt-transport-https curl
+sh -c "echo 'deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] http://download.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./' >> /etc/apt/sources.list"
+curl -s -o /etc/apt/trusted.gpg.d/naemon.asc "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg"
+apt-get -y update
+
 apt-get -y install \
     debhelper \
     lsb-release \
@@ -68,9 +75,6 @@ apt-get -y install \
     chromium-browser \
     npm \
 
-echo "deb http://labs.consol.de/repo/stable/ubuntu $(lsb_release -cs) main" >> /etc/apt/sources.list
-wget -q "http://labs.consol.de/repo/stable/RPM-GPG-KEY" -O - | apt-key add -
-apt-get -y update
 apt-get -y install naemon-core naemon-livestatus
 chsh -s /bin/bash naemon
 ! grep docker /etc/group >/dev/null || gpasswd -a naemon docker
@@ -80,7 +84,7 @@ touch /etc/naemon/conf.d/thruk_bp_generated.cfg
 chmod 666 /etc/naemon/conf.d/thruk_bp_generated.cfg
 chmod 777 /var/cache/naemon/checkresults
 if [ -e support/thruk_templates.cfg ]; then
-    ln -sfn $(realpath support/thruk_templates.cfg) /etc/naemon/conf.d/thruk_templates.cfg
+    install -m 644 support/thruk_templates.cfg /etc/naemon/conf.d/thruk_templates.cfg
 else
     :
 fi
@@ -90,6 +94,8 @@ fi
 mysql -e "create database IF NOT EXISTS test;" -uroot -proot
 
 chown -R naemon: .
+
+ln -sfn /usr/bin/chromium-browser /usr/bin/chromium
 
 # free some disk space again
 apt-get clean
