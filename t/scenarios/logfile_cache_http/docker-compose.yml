@@ -14,13 +14,11 @@ services:
         - ../../../:/thruk:ro
         - .:/test:ro
   db:
-     image: mysql:5
-     restart: always
+     image: mariadb:11
      environment:
-        MYSQL_ROOT_PASSWORD: thruk
-        MYSQL_DATABASE: thruk
-        MYSQL_USER: thruk
-        MYSQL_PASSWORD: thruk
+        MARIADB_ROOT_PASSWORD: thruk
+        MARIADB_DATABASE: thruk
+        MARIADB_USER: thruk
+        MARIADB_PASSWORD: thruk
      ports:
         - "127.0.0.3:63306:3306"
-
