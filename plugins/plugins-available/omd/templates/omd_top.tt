@@ -13,32 +13,27 @@
 
 <div id='tooltip' class="card absolute opacity-90 p-1 z-50" style="display: none;"></div>
 <div class="flexrow justify-between mb-5">
-  <div class="w-44"></div>
+  <div class="w-[300px]"></div>
   <div>
     <h1>Top Reporting Overview</h1>
   </div>
-  <div class="w-44">
+  <div class="w-[300px]">
     [% IF folders.size > 1 %]
       <form method="GET" action="omd.cgi">
         <div class="card">
-          <div class="head">
-            <h3>Folders</h3>
-          </div>
-          <table class="body cellspacing">
-            <tr>
-              <td>Data Source</td>
-              <td>
-                <select name='folder'>
-                  [% FOREACH f = folders %]
+          <div class="body flexrow flex-nowrap gap-x-1">
+            <div class="content-center"><h3>Folder</h3></div>
+            <div>
+              <select name='folder'>
+                [% FOREACH f = folders %]
                   <option value="[% f.dir | html %]"[% IF f.dir == folder %] selected[% END %]>[% f.display %]</option>
-                  [% END %]
-                </select>
-              </td>
-              <td>
-                <input type='submit' value='Update'>
-              </td>
-            </tr>
-          </table>
+                [% END %]
+              </select>
+            </div>
+            <div>
+              <input type='submit' value='Change'>
+            </div>
+          </div>
         </div>
       </form>
     [% END %]
@@ -47,12 +42,12 @@
 
 
 [% IF folders.size == 0 %]
-  <div class="card orangel alert">
-    <div class="head">No Input Folders:</div>
+  <div class="card orange alert w-[600px] relative mx-auto">
+    <div class="head"><h3>No Input Folders</h3></div>
     <div class="body">
       Make sure you have some input folders defined and at least one of them contains data.<br>
       If you just enabled this plugin, wait one minute till...<br>
-      <a class="link" href="https://thruk.org/documentation/plugins/omd/" target="_blank"><i class="uil uil-external-link-alt"></i>Read projects documentation.</a>
+      <a class="link" href="https://thruk.org/documentation/plugins/omd/" target="_blank"><i class="uil uil-external-link-alt"></i>Read plugin documentation.</a>
     </div>
   </div>
 [% ELSE %]
