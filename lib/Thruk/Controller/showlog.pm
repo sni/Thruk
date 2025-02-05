@@ -52,17 +52,6 @@ sub index {
     push @{$filter}, { time => { '>=' => $start }};
     push @{$filter}, { time => { '<'  => $end }};
 
-    # host filter
-    $host = '' if $host eq 'all';
-    if($host ne '') {
-        push @{$filter}, { host_name => $host };
-    }
-
-    # service filter
-    if($service ne 'all' && ($service ne '' || $host ne '')) {
-        push @{$filter}, { service_description => $service };
-    }
-
     # type filter
     my $typefilter = $type eq '' ? [] : _get_log_type_filter($type);
 
@@ -125,7 +114,7 @@ sub index {
         push @{$filter}, {
                 -or => [
                         { -and => [
-                            { host_name           => $host || '.*' },
+                            $host ? { host_name   => $host } : undef,
                             { service_description => $service},
                         ]},
                         $c->config->{'logcache'} ? {} : { -and => [
