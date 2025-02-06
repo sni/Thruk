@@ -59,7 +59,7 @@ sub top_graph {
     my $index = $self->_update_index($c);
 
     my $now = time();
-    for my $line (@{$index}) {
+    for my $line (sort @{$index}) {
         if(my @m = $line =~ m/(\d+)\.log.*?:\s*top\s+\-\s+(\d+):(\d+):(\d+)\s+up.*?average:\s*([\.\d]+),\s*([\.\d]+),\s*([\.\d]+)/gmxo) {
             my($time,$hour,$min,$sec,$l1,$l5,$l15) = (@m);
             if($time > $now + 3600) {
